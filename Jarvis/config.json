@@ -1,0 +1,34 @@
+{
+    "Local_storage": {
+        "LUNA_Modules_defined_Vocabulary": [],
+        "home_location": "",
+        "keys_to_distribute": [
+            "users",
+            "rooms",
+            "server_name",
+            "system_name",
+            "activation_phrase",
+            "home_location",
+            "LUNA_Modules_defined_Vocabulary",
+            "LUNA_telegram_allowed_id_table",
+            "LUNA_telegram_name_to_id_table",
+            "LUNA_telegram_id_to_name_table"
+        ],
+        "LUNA_telegram_name_to_id_table": {},
+        "users": {},
+        "LUNA_telegram_id_to_name_table": {},
+        "LUNA_telegram_allowed_id_table": {},
+        "rejected_telegram_messages": [],
+        "module_storage": {
+            "phillips_hue":{
+                "Bridge-IP": ""
+            }
+	    }
+    },
+    "telegram_key": "",
+    "Server_name": "SERVER",
+    "telegram": true,
+    "use_interface": false,
+    "voice": "male",
+    "Network_Key": ""
+}
