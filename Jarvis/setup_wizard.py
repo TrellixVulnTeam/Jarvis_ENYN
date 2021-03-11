@@ -40,10 +40,10 @@ class FirstStart:
         self.Audio.say(text)
 
     def listen(self):
-        input = self.Audio.recognize_input
+        input = self.Audio.recognize_input()
         while input == "Audio konnte nicht aufgenommen werden":
             self.say("Leider habe ich das nicht verstanden, bitte wiederhole deine Eingabe:")
-            input = self.Audio.recognize_input
+            input = self.Audio.recognize_input()
         return input
 
     def ask_with_answer(self, text):
