@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 from threading import Thread
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -36,7 +37,7 @@ class Text_to_Speech:
         opt.add_argument("no-default-browser-check")
         opt.add_argument("no-first-run")
         opt.add_experimental_option("prefs", chrome_prefs)
-        self.driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver', chrome_options=opt)
+        self.driver = webdriver.Chrome(str(Path(__file__).parent) + "/chromedriver", chrome_options=opt)
         self.driver.get(URL)
         self.text_area = self.driver.find_element_by_id('voicetext')
         self.play_button = self.driver.find_element_by_id('vorlesenbutton')
