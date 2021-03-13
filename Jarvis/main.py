@@ -302,12 +302,9 @@ class Modulewrapper:
     def asynchronous_say(self, text, output='auto'):
         pass
 
-    def play_music(self, buffer, youtube=False, next=False, to_open=False, is_bytes=False):
-        if youtube:
-            self.Audio_Output.play_music(buffer, next)
-        if to_open:
-            buffer = buffer.read()
-        self.Audio_Output.play_music(buffer, next)
+    def play_music(self, url=False, announce=False, next=False):
+        # simply forward information
+        self.Audio_Output.music_player.play(url=url, next=next, announce=announce)
 
     def play(self, path=None, audiofile=None, priority=None, output='auto'):
         # toDo: change
@@ -496,7 +493,7 @@ if __name__ == "__main__":
 
     System_name = config_data['System_name']
     Server_name = config_data['Server_name']
-    Home_location = config_data["Home_location"]
+    Home_location = config_data["Local_storage"]["home_location"]
     Local_storage = config_data['Local_storage']
     Local_storage['LUNA_PATH'] = absPath
     Audio_Input = AudioInput()
@@ -517,7 +514,6 @@ if __name__ == "__main__":
     time.sleep(0.75)
 
     Log.write('', '--------- FERTIG ---------\n\n', show=True)
-    #print("say that started")
     Luna.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
 
     # Starting the main-loop
