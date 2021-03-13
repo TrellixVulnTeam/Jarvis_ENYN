@@ -1,5 +1,4 @@
 import time
-from pathlib import Path
 from threading import Thread
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -37,7 +36,7 @@ class Text_to_Speech:
         opt.add_argument("no-default-browser-check")
         opt.add_argument("no-first-run")
         opt.add_experimental_option("prefs", chrome_prefs)
-        self.driver = webdriver.Chrome(str(Path(__file__).parent) + "/chromedriver", chrome_options=opt)
+        self.driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver', chrome_options=opt)
         self.driver.get(URL)
         self.text_area = self.driver.find_element_by_id('voicetext')
         self.play_button = self.driver.find_element_by_id('vorlesenbutton')
@@ -53,15 +52,13 @@ class Text_to_Speech:
         self.play_audio()
         # wait until the text was said
         while not self.play_button.get_attribute('value') == "Read":
-            time.sleep(0.5)
+            time.sleep(0.1)
         self.is_reading = False
-        self.clear_text_area()
 
     def push_text(self, text):
-        self.text_area.send_keys(text)
-
-    def clear_text_area(self):
-        self.text_area.send_keys(Keys.CONTROL + 'a')
+        script = "var element = arguments[0], txt = arguments[1]; element.value = txt; element.dispatchEvent(new Event('change'));"
+        print(script)
+        self.driver.execute_script(script, self.text_area, text)
 
     def select_voice(self, gender):
         voice = ''
