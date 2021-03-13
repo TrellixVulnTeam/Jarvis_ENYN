@@ -3,17 +3,16 @@ import time
 import traceback
 from datetime import datetime
 from threading import Thread
+
 import requests
 import vlc
-from selenium import webdriver
+import pafy
 
 from tts import Text_to_Speech
 import speech_recognition as sr
 import pyaudio
 import pvporcupine
 from pygame import mixer as audio
-from pyvirtualdisplay import Display
-import webbrowser as web
 
 
 class AudioInput:
@@ -27,7 +26,6 @@ class AudioInput:
             # terminate noise
             self.speech_engine.adjust_for_ambient_noise(source)
         self.luna = None
-        # change the alsa-error-prints back to the default
 
     def start(self):
         # starts the hotword detection
@@ -131,6 +129,7 @@ class AudioOutput:
         # mixer0: notification, mixer1: music
         self.mixer = []
 
+        self.music_player = MusicPlayer(self)
         # audio.pre_init(44100, -16, 1, 512)
         audio.init()
         self.tts = Text_to_Speech()
@@ -163,8 +162,7 @@ class AudioOutput:
                     if type(self.music[0]) == type("string"):
                         topic = self.music[0]
                         self.music.pop(0)
-                        self.music_browser.open_topic_on_youtube(topic)
-                        print(self.music)
+                        self.music_player.play(by_name=topic)
                     else:
                         track = audio.Sound(self.music[0])
                         audio.Channel(2).play(track)
@@ -180,7 +178,6 @@ class AudioOutput:
     def say(self, text):
         # Forwards the given text to the text-to-speech function and waits
         # until the announcement has ended.
-        # self.audioinput.detector.stopped = True # Kleiner Hack: Diese supercoole Zeile sorgt dafür, dass die Hotworderkennung nicht mithört xD
         if text == '' or text == None:
             text = 'Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr.'
         self.notification.append(text)
@@ -227,30 +224,119 @@ class AudioOutput:
 
 
 class MusicPlayer:
-    def __init__(self):
-        Instance = vlc.Instance()
-        self.player = Instance.media_player_new()
-        self.vlc_instance = vlc.Instance()
 
-    def play(self):
-        self.player.play()
+    """
+    -------------------------
+    Music-Player:
+    -------------------------
+    """
 
-    def add(self, url, next=False):
-        media = self.vlc_instance.media_new(url)
+    def __init__(self, Audio_Output):
+        self.music_thread = None
+        self.playlist = []
+        self.instance = vlc.Instance()
+        self.player = self.instance.media_player_new()
+        self.Audio_Output = Audio_Output
+        self.player_alive = True
+        self.is_playing = False
+        self.stopped = False
+        self.paused = False
+        self.skip = False
+
+    def start(self):
+        self.music_thread = Thread(target=self.run)
+        self.music_thread.daemon = True
+        self.music_thread.start()
+        return self
+
+    def run(self):
+        self.player = self.instance.media_player_new()
+        while self.playlist == []:
+            # wait until song is loaded in playlist
+            time.sleep(0.2)
+        time.sleep(2)
+        while self.playlist != []:
+            self.player.set_media(self.playlist[0])
+            self.player.play()
+            self.playlist.pop(0)
+            # wait a second so that the player values are correct
+            time.sleep(2)
+            while self.player.is_playing() or self.paused:
+                # while song is played
+                if self.skip:
+                    # if skip is True, the next medium is loaded, skip is set to False and then by ending the
+                    # loop the old video is stopped and in the next step the next one is loaded
+                    self.skip = False
+                    break
+                time.sleep(2)
+
+        self.is_playing = False
+        self.player.stop()
+
+    def play(self, by_name=False, url=False, path=False, next=False, announce=False):
+        if not self.is_playing and not self.paused:
+            self.is_playing = True
+            self.start()
+        if not by_name == False:
+            _url = 'https://www.youtube.com/results?q=' + str(by_name)
+            count = 0
+            data = str(requests.get(_url).content).split('"')
+            for i in data:
+                count += 1
+                if i == 'WEB_PAGE_TYPE_WATCH':
+                    break
+            print(data)
+            if data[count - 5] == "/results":
+                #toDo: find new video
+                raise Exception("No video found.")
+            _url = "https://www.youtube.com" + data[count - 5]
+            video = pafy.new(_url)
+            best = video.getbest()
+            media = self.instance.media_new(best.url)
+        elif not url == False:
+            media = self.instance.media_new(url)
+        elif not path == False:
+            media = self.instance.media_new(path)
+        else:
+            return
+
+        if announce:
+            title = media.get_title()
+            text = "Alles klar. Ich spiele für dich " + title
+            #toDo: Adio_Output.tts(...)
+            pass
+
         media.get_mrl()
-        self.player.add(media)
+        if next:
+            self.playlist.insert(0, media)
+        else:
+            self.playlist.append(media)
+
+    def next(self):
+        self.skip = True
 
     def clear(self):
-        self.player.clear()
+        self.is_playing = False
+        self.playlist.clear()
+        self.player.stop()
 
     def pause(self):
+        # when the player is paused, it is still playing in the sense of is_playing. Therefore the value of
+        # is_playing remains at True
+        self.paused = True
         self.player.pause()
 
     def resume(self):
-        self.player.resume()
+        self.paused = False
+        self.player.play()
+
+    def set_volume(self, volume):
+        self.player.audio_set_volume(volume)
 
     def stop(self):
+        self.is_playing = False
         self.player.stop()
 
-    def next(self):
-        self.player.next()
+    def stop_player(self):
+        self.is_playing = False
+        self.player_alive = False
