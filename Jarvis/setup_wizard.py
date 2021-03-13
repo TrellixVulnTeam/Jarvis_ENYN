@@ -20,6 +20,7 @@ class FirstStart:
 
         self.Audio = InstallationAudio()
         self.telegram = False
+        time.sleep(2)
         self.run()
 
     def run(self):
@@ -40,13 +41,14 @@ class FirstStart:
         self.Audio.say(text)
 
     def listen(self):
-        input = self.Audio.recognize_input()
-        while input == "Audio konnte nicht aufgenommen werden":
+        _input = self.Audio.recognize_input()
+        while _input == "Audio konnte nicht aufgenommen werden":
             self.say("Leider habe ich das nicht verstanden, bitte wiederhole deine Eingabe:")
-            input = self.Audio.recognize_input()
-        return input
+            _input = self.Audio.recognize_input()
+        return _input
 
     def ask_with_answer(self, text):
+        print("ask with answer: ", text)
         self.say(text)
         return self.listen()
 
@@ -57,9 +59,22 @@ class FirstStart:
                 return True
         return False
 
+    def add_user(self):
+        user_name = self.ask_with_answer("Zunächst einmal, wie heißt du?")
+        user_age = self.ask_with_answer("Wie alt bist du?")
+        user = {
+            "name": user_name,
+            "age": user_age
+        }
+        self.config_data["user"] = user_name
+        self.config_data["Local_storage"]["users"][user_name] = user
+
     def set_home_location(self):
-        self.config_data["Local_storage"]["home_location"] = self.ask_with_answer("Wo wohnst du?")
-        print("[INFO] Place of residence fixed: ", self.config_data["Home_location"])
+        home_location = self.ask_with_answer("Wo wohnst du?")
+        if home_location.startswith("in "):
+            home_location.replace("in ", "")
+        self.config_data["Local_storage"]["home_location"] = home_location
+        print("[INFO] Place of residence fixed: ", self.config_data["Local_storage"]["home_location"])
 
     def set_voice_gender(self):
         gender = "female"
@@ -73,7 +88,7 @@ class FirstStart:
     def set_phillips_hue(self):
         use_phillip_hue = True if self.is_desired(self.ask_with_answer("Besitzt du ein Phillips Hue System und möchtest es über Jarvis steuern?")) else False
         if use_phillip_hue:
-            self.say("Alles klar. Bitte such die Bridge IP heraus. Diese findest du in der Phillips Hue App. Ich gebe "
+            self.say("Alles klar. Bitte such die Bridch EI PI heraus. Diese findest du in der Phillips Hue App. Ich gebe "
                      "dir 30 Sekunden Zeit und spiel dann ein Signalton ab. Bitte sag danach die IP laut und "
                      "deutlich. Die Punkte müssen auch genannt werden.")
             time.sleep(30)
@@ -86,7 +101,7 @@ class FirstStart:
 
     def set_telegram(self):
         use_telegram = self.ask_with_answer(
-            "Möchtest du Telegram verwenden? Bedenke, dass für die Sicherheit des Messengers niccht gesorgt ist.")
+            "Möchtest du Telegram verwenden? Bedenke, dass für die Sicherheit des Messengers nicht gesorgt ist.")
         if self.is_desired(use_telegram):
             now = self.ask_with_answer(
                 "Alles klar. Möchtest du den benötigten Schlüssel jetzt diktieren oder später selber eingeben")
@@ -131,6 +146,7 @@ class InstallationAudio:
         audio.init()
 
     def recognize_input(self):
+        #self.play_bling_sound()
         try:
             with sr.Microphone(device_index=None) as source:
                 audio = self.speech_engine.listen(source, timeout=5, phrase_time_limit=5)
@@ -164,9 +180,6 @@ def install_packeges():
     subprocess.run("sudo pip3 install SpeechRecognition PyVirtualDisplay selenium")
 
 if __name__ == "__main__":
-
-
-
     installation = FirstStart()
     installation.run()
 
