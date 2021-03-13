@@ -66,7 +66,7 @@ class FirstStart:
             "name": user_name,
             "age": user_age
         }
-        self.config_data["user"] = user_name
+        self.config_data["Local_storage"]["user"] = user_name
         self.config_data["Local_storage"]["users"][user_name] = user
 
     def set_home_location(self):

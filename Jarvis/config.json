@@ -23,10 +23,13 @@
             "phillips_hue":{
                 "Bridge-IP": ""
             }
-	    }
+	    },
+        "user": ""
     },
+
     "telegram_key": "",
     "Server_name": "SERVER",
+    "System_name": "",
     "telegram": true,
     "use_interface": false,
     "voice": "male",
