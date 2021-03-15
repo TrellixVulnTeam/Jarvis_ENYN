@@ -29,7 +29,7 @@ def isValid(text):
 def handle(text, luna, profile):
     text = text.lower()
     now = datetime.datetime.now()
-    wochentag = datetime.datetime.today().weekday()
+    # wochentag = datetime.datetime.today().weekday()
     time = now.hour
     if ' uhr ' in text or 'spät' in text:
         luna.say('Es ist ' + get_time(now))
@@ -371,7 +371,7 @@ def get_time(i):
     elif minute == 55:
         ausgabe = 'fünf vor ' + naechste_stunde
     else:
-        ausgabe = stunde + ' Uhr ' + minute
+        ausgabe = stunde + ':' + minute
     return ausgabe
 
 

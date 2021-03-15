@@ -28,6 +28,8 @@ class Modules:
         self.continuous_stopped = False
         self.continuous_threads_running = 0
 
+        self.last_call = ""
+
         self.load_modules()
 
     def load_modules(self):
@@ -265,9 +267,9 @@ class Logging:
                 if last_logentry['conv_id'] == logentry['conv_id']:
                     spaces = ''
             else:
-                if not last_logentry['conv_id'] == logentry[
-                    'conv_id']:  # conversation_id will be original_command at the beginning, but in wise
-                                 # foresight I renamed it already...
+                if not last_logentry['conv_id'] == logentry['conv_id']:
+                    # conversation_id will be original_command at the beginning, but in wise
+                    # foresight I renamed it already...
                     spaces = '\n'
                 if last_logentry['conv_id'] == 'HW_DETECTED':
                     spaces = ''
@@ -286,13 +288,17 @@ class Modulewrapper:
         self.Audio_Output = Luna.Audio_Output
         self.Audio_Input = Luna.Audio_Input
 
+        self.telegram_data = data
+        self.telegram_call = True if data is not None else False
+        self.telegram = Luna.telegram
+
         self.core = Luna
         self.Analyzer = Luna.Analyzer
         self.local_storage = Luna.local_storage
         self.server_name = Luna.server_name
         self.system_name = Luna.system_name
         self.path = Luna.path
-        #self.user = self.core.local_storage["users"]["Jakob"]
+        self.user = self.local_storage["users"][self.local_storage["user"]]
 
     def say(self, text, output='auto'):
         text = self.correct_output_automate(text)
@@ -302,37 +308,25 @@ class Modulewrapper:
     def asynchronous_say(self, text, output='auto'):
         pass
 
+    def play(self, path=None, audiofile=None):
+        if path != None:
+            with open(path, "rb") as wavfile:
+                input_wav = wavfile.read()
+        if audiofile != None:
+            with open(audiofile, "rb"):
+                input_wav = wavfile.read()
+        data = io.BytesIO(input_wav)
+        self.Audio_Output.play_notification(data)
+
     def play_music(self, url=False, announce=False, next=False):
         # simply forward information
         self.Audio_Output.music_player.play(url=url, next=next, announce=announce)
 
-    def play(self, path=None, audiofile=None, priority=None, output='auto'):
-        # toDo: change
-        # see if a path was specified
-        if path is not None:
-            # Yes? Then load the file to the path
-            audiofile = wave.open(path, 'rb')
-
-        chunk = 4096
-        frame_rate = audiofile.getframerate()
-        channels = audiofile.getnchannels()
-
-        format = {'format': 8,
-                  'channels': channels,
-                  'rate': frame_rate,
-                  'chunk': chunk}
-
-        wav_data = audiofile.readframes(chunk)
-        audio_buffer = []
-        while wav_data:
-            audio_buffer.append(wav_data)
-            wav_data = audiofile.readframes(chunk)
-        audio_buffer.append('Endederdurchsage')
-        self.Audio_Output.playback_audio_format = format
-        self.Audio_Output.play_notification(audio_buffer)
-
-    def listen(self):
-        return self.Audio_Input.recognize_input(listen=True)
+    def listen(self, telegram=False):
+        if telegram:
+            return
+        else:
+            return self.Audio_Input.recognize_input(listen=True)
 
     def recognize(self, audio_file):
         return self.Audio_Input.recognize_file(audio_file)
@@ -437,6 +431,7 @@ class LUNA:
         self.Modules = Modules
         self.Log = Log
         self.Analyzer = Analyzer
+        self.telegram = None
 
         self.Audio_Input = Audio_Input
         self.Audio_Output = Audio_Output

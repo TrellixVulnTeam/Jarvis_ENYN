@@ -15,6 +15,8 @@ def isValid(text):
     text = text.lower()
     if ('phobie' in text or 'ängste' in text or 'angst' in text) and ('welche' in text or 'was' in text or 'erzähl' in text or 'sag' in text):
             return True
+    elif 'danke' in text or 'thx' in text or 'thanks' in text:
+        return True
     elif 'wie' in text:
         if 'heißt' in text:
             return True
@@ -140,7 +142,9 @@ def handle(text, luna, profile):
     text = text.lower()    
     if 'wie' in text and 'heißt' in text and 'du' in text:
         sys_name = luna.system_name
-        luna.say('Ich heiße {}, aber eigentlich bin ich Luna').format(luna.sys_name)
+        luna.say('Ich bin {}, ein Sprachassistent, der auf Datenschutz achtet.').format(luna.sys_name)
+    elif 'danke' in text or 'thx' in text or 'thanks' in text:
+        luna.say('[Gerne doch|Keine Ursache].')
     elif 'wie' in text and 'geht' in text and 'dir' in text:
         feelings = ['Mir geht es gut, danke der Nachfrage.', 'Gut.']
         luna.say(random.choice(feelings))

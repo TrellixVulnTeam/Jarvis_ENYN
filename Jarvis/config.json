@@ -4,7 +4,6 @@
         "home_location": "",
         "keys_to_distribute": [
             "users",
-            "rooms",
             "server_name",
             "system_name",
             "activation_phrase",
