@@ -147,7 +147,6 @@ class AudioOutput:
         audio.init()
         self.tts = Text_to_Speech()
         self.tts.start('male')
-        self.tts.start('male')
 
     def start(self):
         ot = Thread(target=self.run)

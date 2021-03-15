@@ -600,6 +600,20 @@ if __name__ == "__main__":
     Audio_Output.start()
     time.sleep(0.75)
 
+    if config_data['telegram']:
+        Log.write('', '', show=True)
+        Log.write('INFO', 'Starte Telegram...', show=True)
+        if config_data['telegram_key'] == '':
+            Log.write('ERROR', 'Kein Telegram-Bot-Token angegeben!', show=True)
+        else:
+            from resources.telegram import TelegramInterface
+
+            Luna.telegram = TelegramInterface(config_data['telegram_key'], Luna)
+            Luna.telegram.start()
+            tgt = Thread(target=Luna.telegram_thread)
+            tgt.daemon = True
+            tgt.start()
+
     Log.write('', '--------- FERTIG ---------\n\n', show=True)
     Luna.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
 

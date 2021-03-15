@@ -2,7 +2,7 @@
   "version": "0.1",
   "new changes": "First version of Jarvis. Implementation of the audio driver, speech module, server, modules and much more",
   "shellcommands for update": [
-    "sudo pip3 install pywhatkit"
+    "sudo pip3 install pywhatkit pafy youtube-dl"
   ],
   "last versions": {
   }

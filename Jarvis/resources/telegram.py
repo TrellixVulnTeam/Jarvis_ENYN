@@ -1,12 +1,9 @@
 from telepot import Bot
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-from resources.stt import Speech_to_Text
-from resources.tts import Text_to_Speech
+from resources.telegram_stt import Speech_to_Text
 from telepot.loop import MessageLoop
 from tempfile import mkstemp
-from pprint import pprint
 from io import BytesIO
-
 import subprocess
 import telepot
 import wave
