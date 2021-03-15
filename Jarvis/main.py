@@ -283,7 +283,7 @@ class Modulewrapper:
     def __init__(self, text, analysis, data):
         self.text = text
         self.analysis = analysis
-        self.telegram_data = data
+
         self.telegram_call = False
         self.Audio_Output = Luna.Audio_Output
         self.Audio_Input = Luna.Audio_Input
@@ -301,14 +301,28 @@ class Modulewrapper:
         self.user = self.local_storage["users"][self.local_storage["user"]]
 
     def say(self, text, output='auto'):
-        text = self.correct_output_automate(text)
-        print('\n--{}:-- {}'.format(self.system_name.upper(), text))
-        self.Audio_Output.say(text)
+        text = self.speechVariation(text)
+        if output == 'auto':
+            if 'telegram' in output.lower():
+                self.telegram_say(text)
+            else:
+                text = self.correct_output_automate(text)
+                print('\n--{}:-- {}'.format(self.system_name.upper(), text))
+                self.Audio_Output.say(text)
+
+    def telegram_say(self, text):
+        try:
+            self.telegram.say(text, self.local_storage['TIANE_telegram_name_to_id_table'][self.user])
+        except KeyError:
+            Log.write('WARNING',
+                      'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben wurde'.format(
+                          text, self.user), show=True)
+        return
 
     def asynchronous_say(self, text, output='auto'):
         pass
 
-    def play(self, path=None, audiofile=None):
+    def play(self, path=None, audiofile=None, next=False, notification=False):
         if path != None:
             with open(path, "rb") as wavfile:
                 input_wav = wavfile.read()
@@ -316,7 +330,10 @@ class Modulewrapper:
             with open(audiofile, "rb"):
                 input_wav = wavfile.read()
         data = io.BytesIO(input_wav)
-        self.Audio_Output.play_notification(data)
+        if notification:
+            self.Audio_Output.play_notification(data, next)
+        else:
+            self.Audio_Output.play_playback(data, next)
 
     def play_music(self, url=False, announce=False, next=False):
         # simply forward information
@@ -324,9 +341,18 @@ class Modulewrapper:
 
     def listen(self, telegram=False):
         if telegram:
-            return
+            return self.telegram_listen()
         else:
             return self.Audio_Input.recognize_input(listen=True)
+
+    def telegram_listen(self):
+        # Dem Telegram-Thread Bescheid sagen, dass man auf eine Antwort wartet,
+        # aber erst, wenn kein anderer mehr wartet
+        while True:
+            if not self.user in self.telegram_queued_users:
+                self.telegram_queued_users.append(self.user)
+                break
+            time.sleep(0.03)
 
     def recognize(self, audio_file):
         return self.Audio_Input.recognize_file(audio_file)
@@ -388,6 +414,28 @@ class Modulewrapper:
     def stopp_hotword_detection(self):
         self.Audio_Input.stop()
 
+    def speechVariation(self, input):
+        """
+        This function is the counterpiece to the batchGen-function. It compiles the same
+        sentence-format as given there but it only picks one random variant and directly
+        pushes it into tiane. It returns the generated sentence.
+        """
+        if not isinstance(input, str):
+            parse = random.choice(input)
+        else:
+            parse = input
+        while "[" in parse and "]" in parse:
+            t_a = time.time()
+            sp0 = parse.split("[", 1)
+            front = sp0[0]
+            sp1 = sp0[1].split("]", 1)
+            middle = sp1[0].split("|", 1)
+            end = sp1[1]
+            t_b = time.time()
+            parse = front + random.choice(middle) + end
+        return parse
+
+
 class Modulewrapper_continuous:
     # The same class for continuous_modules. The peculiarity: The say- and listen-functions
     # are missing (so exactly what the module wrapper was actually there for xD), because continuous_-
@@ -397,7 +445,7 @@ class Modulewrapper_continuous:
         self.intervall_time = intervalltime
         self.last_call = 0
         self.counter = 0
-
+        self.telegram = Luna.telegram
         self.core = Luna
         self.Analyzer = Luna.Analyzer
         self.audio_Input = Luna.Audio_Input
@@ -432,6 +480,8 @@ class LUNA:
         self.Log = Log
         self.Analyzer = Analyzer
         self.telegram = None
+        self.telegram_queued_users = []  # These users are waiting for a response
+        self.telegram_queue_output = {}
 
         self.Audio_Input = Audio_Input
         self.Audio_Output = Audio_Output
@@ -441,6 +491,48 @@ class LUNA:
         self.server_name = Server_name
         self.system_name = System_name
         self.path = Local_storage['LUNA_PATH']
+
+    def telegram_thread(self):
+        # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.
+        while True:
+            for msg in self.telegram.messages.copy():
+                # Load the user name from the corresponding table
+                try:
+                    user = self.local_storage['telegram_allowed_id_table'][msg['from']['id']]
+                except KeyError:
+                    # Messages from strangers will not be tolerated. They are nevertheless stored.
+                    self.local_storage['rejected_telegram_messages'].append(msg)
+                    try:
+                        Log.write('WARNING',
+                                  'Nachricht von unbekanntem Telegram-Nutzer {} ({}). Zugriff verweigert.'.format(
+                                      msg['from']['username'], msg['from']['id']), conv_id=msg['text'], show=True)
+                    except KeyError:
+                        Log.write('WARNING',
+                                  'Nachricht von unbekanntem Telegram-Nutzer ({}). Zugriff verweigert.'.format(
+                                      msg['from']['id']), conv_id=msg['text'], show=True)
+                    self.telegram.say(
+                        'Entschuldigung, aber ich darf leider zur Zeit nicht mit Fremden reden.',
+                        msg['from']['id'], msg['text'])
+                    self.telegram.messages.remove(msg)
+                    continue
+
+                response = True
+                # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
+                if msg['text'].lower().startswith(self.local_storage['activation_phrase'].lower()):
+                    response = self.route_query_modules(text=msg['text'], direct=True, origin_room='Telegram',
+                                                        data=msg)
+                # Message is not a request at all, but a response (or a module expects such a response)
+                elif user in self.telegram_queued_users:
+                    self.telegram_queue_output[user] = msg
+                # Message is a normal request
+                else:
+                    response = self.route_query_modules(text=msg['text'], direct=True, origin_room='Telegram',
+                                                        data=msg)
+                if response == False:
+                    self.telegram.say('Das habe ich leider nicht verstanden.',
+                                      self.local_storage['telegram_name_to_id_table'][user], msg['text'])
+                self.telegram.messages.remove(msg)
+            time.sleep(0.5)
 
     def hotword_detected(self, text):
         if text == "Audio could not be recorded":
@@ -468,7 +560,7 @@ class LUNA:
         with open(DETECT_DONG, "rb") as wavfile:
             input_wav = wavfile.read()
         data = io.BytesIO(input_wav)
-        self.Audio_Output.play_notification(data)
+        self.Audio_Output.play_notification(data, next=True)
 
 """def clear_momory():
     while True:

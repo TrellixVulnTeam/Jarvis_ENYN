@@ -37,7 +37,7 @@ class TelegramInterface:
                             conv_id=conv_id, show=True)
         self.bot.sendMessage(uid, text, parse_mode='HTML')
 
-    def sendAudio(self, audio_file, uid, conv_id):
+    def sendAudio(self, audio_file, uid):
         _, voice_filename = mkstemp(prefix='voice-', suffix='.wav')
         _, converted_audio_filename = mkstemp(prefix='converted-audio-', suffix='.oga')
         wavformat = audio_file['format']

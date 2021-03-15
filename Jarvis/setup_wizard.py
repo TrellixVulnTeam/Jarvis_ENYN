@@ -26,6 +26,7 @@ class FirstStart:
     def run(self):
         self.say(
             "Hallo, ich bin Jarvis dein neuer Sprachassistent. Ich werde jetzt zusammen mit dir die Einrichtung durchführen")
+        self.add_user()
         self.set_voice_gender()
         self.set_home_location()
         self.set_telegram()
@@ -113,8 +114,8 @@ class FirstStart:
                 while True:
                     try:
                         self.Audio.play_bling_sound()
-                        telegram_number = self.listen()
-                        self.config_data["telegram_key"] = int(telegram_number)
+                        token = self.listen()
+                        self.set_telegram_tokens(self.config_data["Local_storage"]["user"], token)
                         print("[INFO] Telegram Key fixed: ", self.config_data["telegram_key"])
                         break
                     except:
@@ -126,6 +127,11 @@ class FirstStart:
         else:
             self.say("Alles klar. Telegram wird nicht eingerichtet.")
             print("[INFO] Telegram not wanted.")
+
+    def set_telegram_tokens(self, name, token):
+        self.config_data["Local_storage"]["telegram_allowed_id_table"].append(token)
+        self.config_data["Local_storage"]["telegram_name_to_id_table"][name] = token
+        self.config_data["Local_storage"]["telegram_id_to_name_table"][token] = name
 
     def set_Network_Key(self):
         key = Random.get_random_bytes(32)
