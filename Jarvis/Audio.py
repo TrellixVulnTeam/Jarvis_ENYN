@@ -16,6 +16,12 @@ from pygame import mixer as audio
 
 
 class AudioInput:
+    """
+    -------------------------
+    AudioInput:
+        - responsible for the whole audio input
+    -------------------------
+    """
     def __init__(self):
         self.stopped = False
         # load microphone
@@ -114,6 +120,13 @@ class AudioInput:
 
 
 class AudioOutput:
+    """
+    -------------------------
+    AudioOutput:
+        - responsible for the "normal" audio output
+        - don´t use it for playing musik (this is the task of the "MusicPlayer" class)
+    -------------------------
+    """
     def __init__(self):
         # The channel are splittet on the buffers:
         # Channel(0): notification
@@ -188,13 +201,13 @@ class AudioOutput:
         else:
             self.music.append(name)
 
-    def play_playback(self, buff, next=False):
+    def play_playback(self, buff, next):
         if not next:
             self.playback.append(buff)
         else:
             self.playback.insert(0, buff)
 
-    def play_notification(self, buff, next=False):
+    def play_notification(self, buff, next):
         if not next:
             self.notification.append(buff)
         else:
@@ -224,10 +237,13 @@ class AudioOutput:
 
 
 class MusicPlayer:
-
     """
     -------------------------
     Music-Player:
+        - responsible for any music playback
+        - can search a given topic on youtube (also bands or music genres) and then stream them
+        - in no case to use for notifications or similar audio like e.g. for playing the news
+          in the "tagesthemen" module
     -------------------------
     """
 
