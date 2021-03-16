@@ -1,5 +1,4 @@
 import traceback
-from module_skills import skills
 
 # Priorität gesetzt, da ansonsten manchmal das modul reload_modules.py aufgerufen wurde.
 PRIORITY = 2
@@ -141,18 +140,18 @@ def get_aussage_gemeinsam(text, luna):
 
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()
     text = text.replace('setze', ('setz'))
 
     if 'setz' in text or 'schreib' in text or 'füg' in text:
         item = get_item(text, luna)
-        own_list = False
+        einkaufsliste = None
         # anschließend wird unterscheidet, ob die eigene oder gemeinsame Einkaufsliste benötigt wird
         if 'einkaufsliste' not in luna.local_storage.keys():
             luna.local_storage['einkaufsliste'] = []
             einkaufsliste = luna.local_storage['einkaufsliste']
-        if einkaufsliste:
+        if einkaufsliste != None:
             # Nur wenn die Einkaufsliste schon vorhanden ist...
             double_items = get_double_items(item, einkaufsliste, luna)
             if double_items:
@@ -216,7 +215,7 @@ def handle(text, luna, profile):
         aussage = get_aussage_gemeinsam(text, luna)
         # wenn man den Befehl über Telegram aufruft, macht die schick-Funktion mehr Sinn
         if luna.telegram_call:
-            handle('schick einkaufsliste', luna, profile)
+            handle('schick einkaufsliste', luna, skills)
         else:
             if aussage != '':
                 ausgabe = 'Auf der Liste steht für dich {}.'.format(aussage)

@@ -1,8 +1,8 @@
 from telepot import Bot
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-from resources.telegram_stt import Speech_to_Text
 from telepot.loop import MessageLoop
 from tempfile import mkstemp
+import speech_recognition as sr
 from io import BytesIO
 import subprocess
 import telepot
@@ -18,20 +18,18 @@ class TelegramInterface:
         self.token = token
         self.luna = luna
 
-        self.stt = Speech_to_Text([])
-
         self.bot = telepot.Bot(token)
         self.bot.getMe()
+        self.recognizer = sr.Recognizer()
 
         self.messages = []
 
-    def say(self, text, uid, conv_id):
+    def say(self, text, uid):
         try:
             user = self.luna.local_storage['LUNA_telegram_id_to_name_table'][uid]
         except:
             user = uid
-        self.luna.Log.write('ACTION', '--{}--@{} (Telegram): {}'.format(self.luna.system_name.upper(), user, text),
-                            conv_id=conv_id, show=True)
+        self.luna.Log.write('ACTION', '--{}--@{} (Telegram): {}'.format(self.luna.system_name.upper(), user, text), show=True)
         self.bot.sendMessage(uid, text, parse_mode='HTML')
 
     def sendAudio(self, audio_file, uid):
@@ -80,7 +78,7 @@ class TelegramInterface:
                        '-codec:a', 'pcm_s16le',
                        converted_audio_filename]
                 subprocess.call(cmd, shell=False)
-                msg['text'] = self.stt.recognize(converted_audio_filename)
+                msg['text'] = self.recognize(converted_audio_filename)
                 with open(voice_filename, 'rb') as file:
                     msg['content'] = file.read()
                 # self.bot.sendMessage(chat_id, msg['text'])
@@ -112,6 +110,24 @@ class TelegramInterface:
 
         MessageLoop(self.bot, {'chat': on_chat_message, 'callback_query': on_callback_query}).run_as_thread()
 
+    def recognize(self, audio_file_path):
+        # Diese Funktion kann durch eine beliebige Spracherkennungsfunktion ersetzt werden, die eine Audiodatei annimmt und den erkannten
+        # Text ausgibt. Die library speech_recognition bietet dafür übrigens noch einige andere gute Beispiele :)
+        with sr.AudioFile(audio_file_path) as source:
+            audio = self.recognizer.record(source)  # read the entire audio file
+        # recognize speech using Google Speech Recognition
+        try:
+            # for testing purposes, we're just using the default API key
+            # to use another API key, use `self.recognizer.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # instead of `self.recognizer.recognize_google(audio)`
+            text = self.recognizer.recognize_google(audio,language='de-DE')
+        except sr.UnknownValueError:
+            text = "TIMEOUT_OR_INVALID"
+        except sr.RequestError as e:
+            text = "TIMEOUT_OR_INVALID"
+        except:
+            text = "TIMEOUT_OR_INVALID"
+        return text
 
 def main():
     tgi = TelegramInterface()

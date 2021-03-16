@@ -12,7 +12,7 @@ import pkgutil
 from pathlib import Path
 from threading import Thread
 import traceback
-from modules.module_skills import skills
+from module_skills import skills
 import gc
 import io
 
@@ -27,8 +27,6 @@ class Modules:
 
         self.continuous_stopped = False
         self.continuous_threads_running = 0
-
-        self.last_call = ""
 
         self.load_modules()
 
@@ -67,12 +65,14 @@ class Modules:
         modules.sort(key=lambda mod: mod.PRIORITY if hasattr(mod, 'PRIORITY') else 0, reverse=True)
         return modules
 
-    def query_threaded(self, name, text, direct=False):
+    def query_threaded(self, name, text, direct, messenger=False):
         mod_skill = skills()
         if text == None:
+            # generate a random text
             text = random.randint(0, 1000000000)
             analysis = {}
         else:
+            # else there is a valid text -> analyze
             try:
                 analysis = Luna.Analyzer.analyze(str(text))
             except:
@@ -83,7 +83,7 @@ class Modules:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, mod_skill)
+                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
@@ -94,8 +94,8 @@ class Modules:
             for module in self.modules:
                 try:
                     if module.isValid(text):
-                        Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, mod_skill)
-                        mt = Thread(target=self.run_threaded_module, args=(text,module, mod_skill))
+                        Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger)
+                        mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                         mt.daemon = True
                         mt.start()
                         return True
@@ -115,44 +115,44 @@ class Modules:
             print('[INFO] -- (None present)')
         return
 
-    def start_module(self, text=None, name=None):
-        self.query_threaded(name, text, direct=True)
-        """if text == None:
+    def start_module(self, text=None, name=None, direct=True, messenger=False):
+        self.query_threaded(name, text, direct, messenger=messenger)
+        mod_skill = skills()
+        analysis = {}
+        if text == None:
             text = random.randint(0,1000000000)
-            analysis = {}
         else:
             Log.write('ACTION', '{}'.format(text), conv_id=str(text), show=True)
             try:
                 analysis = Luna.Analyzer.analyze(str(text))
-                Log.write('ACTION', 'Analyse: ' + str(analysis), conv_id=str(text), show=True)
+                Log.write('ACTION', 'Analysis: ' + str(analysis), conv_id=str(text), show=True)
             except:
                 traceback.print_exc()
-                Log.write('ERROR', 'Satzanalyse fehlgeschlagen!', conv_id=str(text), show=True)
+                Log.write('ERROR', 'Sentence analysis failed!', conv_id=str(text), show=True)
 
         if name is not None:
-            print("Name not none")
             for module in self.modules:
                 if module.__name__ == name:
-                    Log.write('ACTION', '--Modul {} direkt aufgerufen (Parameter: {})--'.format(name, text), conv_id=str(text), show=True)
-                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, [])
+                    Log.write('ACTION', '--Modul {} was called directly (Parameter: {})--'.format(name, text), conv_id=str(text), show=True)
+                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger)
         else:
             try:
                 analysis = Luna.Analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
-                print('[ERROR] Satzanalyse fehlgeschlagen!')
+                print('[ERROR] Sentence analysis failed!')
                 analysis = {}
         for module in self.modules:
             try:
                 if module.isValid(text):
-                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, data=None)
-                    mt = Thread(target=self.run_threaded_module, args=(text, module,))
+                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger=messenger)
+                    mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
             except:
                 traceback.print_exc()
-                print('[ERROR] Modul {} konnte nicht abgefragt werden!'.format(module.__name__))
-        return False"""
+                print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
+        return False
 
     def run_threaded_module(self, text, module, mod_skill):
         try:
@@ -165,7 +165,7 @@ class Modules:
             del Luna.active_modules[str(text)]
             return
 
-    def run_module(self, text, modulewrapper):
+    def run_module(self, text, modulewrapper, mod_skill):
         for module in self.modules:
             if module.isValid(text):
                 module.handle(text, modulewrapper, )
@@ -280,17 +280,19 @@ class Logging:
         return textline
 
 class Modulewrapper:
-    def __init__(self, text, analysis, data):
+    def __init__(self, text, analysis, messenger):
         self.text = text
         self.analysis = analysis
 
-        self.telegram_call = False
+        self.telegram_call = messenger
         self.Audio_Output = Luna.Audio_Output
         self.Audio_Input = Luna.Audio_Input
 
-        self.telegram_data = data
-        self.telegram_call = True if data is not None else False
+        self.telegram_call = messenger
         self.telegram = Luna.telegram
+
+        self.room = "telegram" if messenger else "raum"
+        self.messenger = messenger
 
         self.core = Luna
         self.Analyzer = Luna.Analyzer
@@ -303,7 +305,7 @@ class Modulewrapper:
     def say(self, text, output='auto'):
         text = self.speechVariation(text)
         if output == 'auto':
-            if 'telegram' in output.lower():
+            if 'telegram' in output.lower() or self.messenger:
                 self.telegram_say(text)
             else:
                 text = self.correct_output_automate(text)
@@ -312,15 +314,12 @@ class Modulewrapper:
 
     def telegram_say(self, text):
         try:
-            self.telegram.say(text, self.local_storage['TIANE_telegram_name_to_id_table'][self.user])
+            self.telegram.say(text, self.local_storage["telegram_name_to_id_table"][self.user["name"]])
         except KeyError:
             Log.write('WARNING',
                       'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben wurde'.format(
                           text, self.user), show=True)
         return
-
-    def asynchronous_say(self, text, output='auto'):
-        pass
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
         if path != None:
@@ -341,18 +340,9 @@ class Modulewrapper:
 
     def listen(self, telegram=False):
         if telegram:
-            return self.telegram_listen()
+            return self.core.telegram_listen(self.user)
         else:
             return self.Audio_Input.recognize_input(listen=True)
-
-    def telegram_listen(self):
-        # Dem Telegram-Thread Bescheid sagen, dass man auf eine Antwort wartet,
-        # aber erst, wenn kein anderer mehr wartet
-        while True:
-            if not self.user in self.telegram_queued_users:
-                self.telegram_queued_users.append(self.user)
-                break
-            time.sleep(0.03)
 
     def recognize(self, audio_file):
         return self.Audio_Input.recognize_file(audio_file)
@@ -458,7 +448,7 @@ class Modulewrapper_continuous:
     def start_module(self, name=None, text=None):
         Modules.start_module(text=text, name=name)
 
-    def start_module_and_confirm(self, user=None, name=None, text=None):
+    def start_module_and_confirm(self, name=None, text=None):
         return Luna.start_module(name, text)
 
     def module_storage(self, module_name=None):
@@ -483,6 +473,8 @@ class LUNA:
         self.telegram_queued_users = []  # These users are waiting for a response
         self.telegram_queue_output = {}
 
+        self.users = Users()
+
         self.Audio_Input = Audio_Input
         self.Audio_Output = Audio_Output
 
@@ -498,14 +490,14 @@ class LUNA:
             for msg in self.telegram.messages.copy():
                 # Load the user name from the corresponding table
                 try:
-                    user = self.local_storage['telegram_allowed_id_table'][msg['from']['id']]
+                    user = msg['from']['first_name']
                 except KeyError:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
                     self.local_storage['rejected_telegram_messages'].append(msg)
                     try:
                         Log.write('WARNING',
                                   'Nachricht von unbekanntem Telegram-Nutzer {} ({}). Zugriff verweigert.'.format(
-                                      msg['from']['username'], msg['from']['id']), conv_id=msg['text'], show=True)
+                                      msg['from']['first_name'], msg['from']['id']), conv_id=msg['text'], show=True)
                     except KeyError:
                         Log.write('WARNING',
                                   'Nachricht von unbekanntem Telegram-Nutzer ({}). Zugriff verweigert.'.format(
@@ -518,21 +510,27 @@ class LUNA:
 
                 response = True
                 # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
-                if msg['text'].lower().startswith(self.local_storage['activation_phrase'].lower()):
-                    response = self.route_query_modules(text=msg['text'], direct=True, origin_room='Telegram',
-                                                        data=msg)
+                if msg['text'].lower().startswith("Jarvis"):
+                    response = Modules.start_module(text=msg['text'], messenger=True, direct=False)
                 # Message is not a request at all, but a response (or a module expects such a response)
                 elif user in self.telegram_queued_users:
                     self.telegram_queue_output[user] = msg
                 # Message is a normal request
                 else:
-                    response = self.route_query_modules(text=msg['text'], direct=True, origin_room='Telegram',
-                                                        data=msg)
+                    response = Modules.start_module(text=msg['text'], messenger=True, direct=False)
                 if response == False:
-                    self.telegram.say('Das habe ich leider nicht verstanden.',
-                                      self.local_storage['telegram_name_to_id_table'][user], msg['text'])
+                    self.telegram.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user))
                 self.telegram.messages.remove(msg)
             time.sleep(0.5)
+
+    def telegram_listen(self, user):
+        # Tell the Telegram thread that you are waiting for a reply,
+        # But only when no one else is waiting
+        while True:
+            if not user in self.telegram_queued_users:
+                self.telegram_queued_users.append(user)
+                break
+            time.sleep(0.03)
 
     def hotword_detected(self, text):
         if text == "Audio could not be recorded":
@@ -548,7 +546,7 @@ class LUNA:
             Modules.start_module(text)
 
     def start_module(self, text, name):
-        Modules.query_threaded(name, text)
+        Modules.query_threaded(name, text, direct=True)
 
     def play_bling_sound(self):
         # The name was deliberately chosen with regard to further reactions (such as lights, etc.)
@@ -561,6 +559,58 @@ class LUNA:
             input_wav = wavfile.read()
         data = io.BytesIO(input_wav)
         self.Audio_Output.play_notification(data, next=True)
+
+
+class Users:
+    def __init__(self):
+        self.users = []
+        self.load_users()
+
+    def get_user_list(self):
+        return self.users
+
+    def load_users(self):
+        # Load users separately from the users folder
+        Log.write('', '---------- USERS ---------', show=True)
+        location = os.path.join(absPath, 'users')
+        subdirs = os.listdir(location)
+        try:
+            subdirs.remove("README.txt")
+            subdirs.remove("README.md")
+        except ValueError:
+            pass
+        # We will now go through the individual subfolders of server/users to set up the users.
+        # users. The subfolders conveniently have the names of the users.
+        for username in subdirs:
+            userpath = os.path.join(location, username)
+            self.add_user(userpath)
+            Log.write('INFO', 'Nutzer {} geladen'.format(username), show=True)
+
+    def add_user(self, path):
+        with open(path + "/data.json") as user_file:
+            user_data = json.load(config_file)
+        with open(path + ("/resources/user_storage.json")) as user_storage_file:
+            user_storage = json.load(user_storage_file)
+        user_data["user_storage"] = user_storage
+        self.users.append(user_data)
+
+    def get_user_by_name(self, name):
+        for user in self.users:
+            if user["name"] == name:
+                return user
+        return None
+
+    def get_user_by_id(self, id):
+        for user in self.users:
+            if user["id"] == id:
+                return user
+        return None
+
+    def get_user_by_telegram_id(self, t_id):
+        for user in self.users:
+            if user["telegram_id"] == t_id:
+                return user
+        return None
 
 """def clear_momory():
     while True:

@@ -1,0 +1,17 @@
+{
+  "User_Info": {
+      "name": "Jakob",
+      "first_name": "Jakob",
+      "last_name": "Priesner",
+      "date_of_birth": {
+        "year": 2002,
+        "month": 9,
+        "day": 5
+      },
+      "role": "ADMIN",
+      "uid": 0,
+      "telegram_id": 0,
+      "wecker_ton": "standart.wav",
+      "wartende_benachrichtigungen": []
+  }
+}
