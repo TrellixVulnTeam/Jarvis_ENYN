@@ -129,7 +129,7 @@ class TelegramInterface:
             text = "TIMEOUT_OR_INVALID"
         return text
 
-def main():
+"""def main():
     tgi = TelegramInterface()
     tgi.start()
     while True:
@@ -140,4 +140,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()"""

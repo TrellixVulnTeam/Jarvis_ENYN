@@ -57,7 +57,6 @@ class Text_to_Speech:
 
     def push_text(self, text):
         script = "var element = arguments[0], txt = arguments[1]; element.value = txt; element.dispatchEvent(new Event('change'));"
-        print(script)
         self.driver.execute_script(script, self.text_area, text)
 
     def select_voice(self, gender):

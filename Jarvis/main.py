@@ -4,7 +4,6 @@ import random
 import time
 import datetime
 import urllib
-import wave
 from urllib.request import Request, urlopen
 from Audio import AudioOutput, AudioInput
 from analyze import Sentence_Analyzer
@@ -13,7 +12,6 @@ from pathlib import Path
 from threading import Thread
 import traceback
 from module_skills import skills
-import gc
 import io
 
 class Modules:
@@ -116,7 +114,7 @@ class Modules:
         return
 
     def start_module(self, text=None, name=None, direct=True, messenger=False):
-        self.query_threaded(name, text, direct, messenger=messenger)
+        #self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = skills()
         analysis = {}
         if text == None:
@@ -162,7 +160,10 @@ class Modules:
             print('[ERROR] Runtime error in module {}. The module was terminated.\n'.format(module.__name__))
             Luna.active_modules[str(text)].say('Entschuldige, es gab ein Problem mit dem Modul {}.'.format(module.__name__))
         finally:
-            del Luna.active_modules[str(text)]
+            try:
+                del Luna.active_modules[str(text)]
+            except:
+                pass
             return
 
     def run_module(self, text, modulewrapper, mod_skill):
@@ -199,7 +200,6 @@ class Modules:
             Local_storage['module_counter'] += 1
             time.sleep(0.01)
         self.continuous_threads_running -= 1
-
 
     def stop_continuous(self):
         # Stops the thread in which the continuous_modules are executed at the end of the run.
@@ -300,7 +300,7 @@ class Modulewrapper:
         self.server_name = Luna.server_name
         self.system_name = Luna.system_name
         self.path = Luna.path
-        self.user = self.local_storage["users"][self.local_storage["user"]]
+        self.user = self.local_storage['user']
 
     def say(self, text, output='auto'):
         text = self.speechVariation(text)
@@ -314,11 +314,11 @@ class Modulewrapper:
 
     def telegram_say(self, text):
         try:
-            self.telegram.say(text, self.local_storage["telegram_name_to_id_table"][self.user["name"]])
+            self.telegram.say(text, Luna.users.get_user_by_name(self.user)['telegram_id'])
         except KeyError:
             Log.write('WARNING',
-                      'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben wurde'.format(
-                          text, self.user), show=True)
+                      'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben '
+                      'wurde'.format(text, self.user), show=True)
         return
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
@@ -508,7 +508,9 @@ class LUNA:
                     self.telegram.messages.remove(msg)
                     continue
 
-                response = True
+                # no pictures available
+                #if msg['type'] == "photo":
+                #    self.telegram.say('Leider kann ich noch nichts mit Bildern anfangen.', self.users.get_user_by_name(user))
                 # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
                 if msg['text'].lower().startswith("Jarvis"):
                     response = Modules.start_module(text=msg['text'], messenger=True, direct=False)
@@ -517,9 +519,10 @@ class LUNA:
                     self.telegram_queue_output[user] = msg
                 # Message is a normal request
                 else:
-                    response = Modules.start_module(text=msg['text'], messenger=True, direct=False)
-                if response == False:
-                    self.telegram.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user))
+                    Modules.start_module(text=msg['text'], messenger=True, direct=False)
+                """if response == False:
+                    self.telegram.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['telegram_id'])
+                self.telegram.messages.remove(msg)"""
                 self.telegram.messages.remove(msg)
             time.sleep(0.5)
 
@@ -582,13 +585,14 @@ class Users:
         # We will now go through the individual subfolders of server/users to set up the users.
         # users. The subfolders conveniently have the names of the users.
         for username in subdirs:
-            userpath = os.path.join(location, username)
-            self.add_user(userpath)
-            Log.write('INFO', 'Nutzer {} geladen'.format(username), show=True)
+            if not username == 'README.txt' and not username == 'README.md':
+                userpath = os.path.join(location, username)
+                self.add_user(userpath)
+                Log.write('INFO', 'Nutzer {} geladen'.format(username), show=True)
 
     def add_user(self, path):
         with open(path + "/data.json") as user_file:
-            user_data = json.load(config_file)
+            user_data = json.load(user_file)["User_Info"]
         with open(path + ("/resources/user_storage.json")) as user_storage_file:
             user_storage = json.load(user_storage_file)
         user_data["user_storage"] = user_storage
@@ -596,7 +600,7 @@ class Users:
 
     def get_user_by_name(self, name):
         for user in self.users:
-            if user["name"] == name:
+            if user['first_name'] == name:
                 return user
         return None
 
@@ -636,13 +640,13 @@ if __name__ == "__main__":
     Audio_Input = AudioInput()
     # clear unnececary warnings
     os.system('clear')
-    print("\n\n\n\n\n\n")
     Modules = Modules(Local_storage)
     Analyzer = Sentence_Analyzer()
     Audio_Output = AudioOutput()
     Luna = LUNA(Local_storage)
     Luna.local_storage['LUNA_starttime'] = time.time()
     Audio_Input.set_luna(Luna)
+    print("\n\n\n\n\n\n")
     time.sleep(2)
     # -----------Starting-----------#
     Modules.start_continuous()
@@ -665,6 +669,7 @@ if __name__ == "__main__":
             tgt.start()
 
     Log.write('', '--------- FERTIG ---------\n\n', show=True)
+    time.sleep(3)
     Luna.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
 
     # Starting the main-loop
