@@ -14,6 +14,7 @@ import traceback
 from module_skills import skills
 import io
 
+
 class Modules:
     def __init__(self, local_storage):
         self.local_storage = local_storage
@@ -38,7 +39,7 @@ class Modules:
         if self.continuous_modules == []:
             print('[INFO] -- (None present)')
 
-    def get_modules(self, directory, continuous = False):
+    def get_modules(self, directory, continuous=False):
         dirname = os.path.dirname(os.path.abspath(__file__))
         locations = [os.path.join(dirname, directory)]
         modules = []
@@ -54,7 +55,7 @@ class Modules:
                 print('[WARNING] Modul {} is incorrect and was skipped!'.format(name))
                 continue
             else:
-                if continuous == True:
+                if continuous:
                     print('[INFO] Continuous module {} loaded'.format(name))
                     modules.append(mod)
                 else:
@@ -63,7 +64,7 @@ class Modules:
         modules.sort(key=lambda mod: mod.PRIORITY if hasattr(mod, 'PRIORITY') else 0, reverse=True)
         return modules
 
-    def query_threaded(self, name, text, direct, messenger=False):
+    def query_threaded(self, name, text, user, direct, messenger=False):
         mod_skill = skills()
         if text == None:
             # generate a random text
@@ -81,7 +82,7 @@ class Modules:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger)
+                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
@@ -92,7 +93,7 @@ class Modules:
             for module in self.modules:
                 try:
                     if module.isValid(text):
-                        Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger)
+                        Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
                         mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                         mt.daemon = True
                         mt.start()
@@ -113,12 +114,12 @@ class Modules:
             print('[INFO] -- (None present)')
         return
 
-    def start_module(self, text=None, name=None, direct=True, messenger=False):
-        #self.query_threaded(name, text, direct, messenger=messenger)
+    def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
+        # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = skills()
         analysis = {}
         if text == None:
-            text = random.randint(0,1000000000)
+            text = str(random.randint(0, 1000000000))
         else:
             Log.write('ACTION', '{}'.format(text), conv_id=str(text), show=True)
             try:
@@ -131,8 +132,12 @@ class Modules:
         if name is not None:
             for module in self.modules:
                 if module.__name__ == name:
-                    Log.write('ACTION', '--Modul {} was called directly (Parameter: {})--'.format(name, text), conv_id=str(text), show=True)
-                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger)
+                    Log.write('ACTION', '--Modul {} was called directly (Parameter: {})--'.format(name, text),
+                              conv_id=str(text), show=True)
+                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
+                    mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
+                    mt.daemon = True
+                    mt.start()
         else:
             try:
                 analysis = Luna.Analyzer.analyze(str(text))
@@ -140,25 +145,27 @@ class Modules:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')
                 analysis = {}
-        for module in self.modules:
-            try:
-                if module.isValid(text):
-                    Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger=messenger)
-                    mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
-                    mt.daemon = True
-                    mt.start()
-            except:
-                traceback.print_exc()
-                print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
+            for module in self.modules:
+                try:
+                    if module.isValid(text):
+                        Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
+                        mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
+                        mt.daemon = True
+                        mt.start()
+                except:
+                    traceback.print_exc()
+                    print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
         return False
 
-    def run_threaded_module(self, text, module, mod_skill):
+    @staticmethod
+    def run_threaded_module(text, module, mod_skill):
         try:
             module.handle(text, Luna.active_modules[str(text)], mod_skill)
         except:
             traceback.print_exc()
             print('[ERROR] Runtime error in module {}. The module was terminated.\n'.format(module.__name__))
-            Luna.active_modules[str(text)].say('Entschuldige, es gab ein Problem mit dem Modul {}.'.format(module.__name__))
+            Luna.active_modules[str(text)].say(
+                'Entschuldige, es gab ein Problem mit dem Modul {}.'.format(module.__name__))
         finally:
             try:
                 del Luna.active_modules[str(text)]
@@ -188,13 +195,16 @@ class Modules:
         Local_storage['module_counter'] = 0
         while not self.continuous_stopped:
             for module in self.continuous_modules:
-                if time.time() - Luna.continuous_modules[module.__name__].last_call >= Luna.continuous_modules[module.__name__].intervall_time:
+                if time.time() - Luna.continuous_modules[module.__name__].last_call >= Luna.continuous_modules[
+                    module.__name__].intervall_time:
                     Luna.continuous_modules[module.__name__].last_call = time.time()
                     try:
                         module.run(Luna.continuous_modules[module.__name__], Luna.local_storage)
                     except:
                         traceback.print_exc()
-                        print('[ERROR] Runtime-Error in Continuous-Module {}. The module is no longer executed.\n'.format(module.__name__))
+                        print(
+                            '[ERROR] Runtime-Error in Continuous-Module {}. The module is no longer executed.\n'.format(
+                                module.__name__))
                         del Luna.continuous_modules[module.__name__]
                         self.continuous_modules.remove(module)
             Local_storage['module_counter'] += 1
@@ -223,11 +233,13 @@ class Modules:
                     continue
             # clean up
             Luna.continuous_modules = {}
-            if no_stopped_modules == True:
+            if no_stopped_modules:
                 Log.write('INFO', '-- (None to finish)', show=True)
         return
 
-    #toDo: run
+    # toDo: run
+
+
 class Logging:
     def __init__(self):
         self.log = []
@@ -279,8 +291,9 @@ class Logging:
             textline = logentry['content']
         return textline
 
+
 class Modulewrapper:
-    def __init__(self, text, analysis, messenger):
+    def __init__(self, text, analysis, messenger, user):
         self.text = text
         self.analysis = analysis
 
@@ -300,7 +313,7 @@ class Modulewrapper:
         self.server_name = Luna.server_name
         self.system_name = Luna.system_name
         self.path = Luna.path
-        self.user = self.local_storage['user']
+        self.user = user
 
     def say(self, text, output='auto'):
         text = self.speechVariation(text)
@@ -325,7 +338,7 @@ class Modulewrapper:
         if path != None:
             with open(path, "rb") as wavfile:
                 input_wav = wavfile.read()
-        if audiofile != None:
+        if audiofile is not None:
             with open(audiofile, "rb"):
                 input_wav = wavfile.read()
         data = io.BytesIO(input_wav)
@@ -347,19 +360,23 @@ class Modulewrapper:
     def recognize(self, audio_file):
         return self.Audio_Input.recognize_file(audio_file)
 
-    def words_in_text(self, words, text):
+    @staticmethod
+    def words_in_text(words, text):
         for word in words:
             if word not in text:
                 return False
         return True
 
-    def start_module(self, name, text):
-        Luna.start_module(text, name)
+    @staticmethod
+    def start_module(name, text, user):
+        Luna.start_module(text, name, user)
 
-    def start_module_and_confirm(self, name=None, text=None):
-        return Luna.start_module(text, name)
+    @staticmethod
+    def start_module_and_confirm(name=None, text=None, user=None):
+        return Luna.start_module(text, name, user)
 
-    def module_storage(self, module_name=None):
+    @staticmethod
+    def module_storage(module_name=None):
         module_storage = Luna.local_storage.get("module_storage")
         if module_name is None:
             return module_storage
@@ -367,11 +384,12 @@ class Modulewrapper:
         else:
             return module_storage[module_name]
 
-    def translate(self, text, targetLang='de'):
+    @staticmethod
+    def translate(text, target_lang='de'):
         try:
             request = Request(
                 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + urllib.parse.quote(
-                    targetLang) + '&dt=t&q=' + urllib.parse.quote(
+                    target_lang) + '&dt=t&q=' + urllib.parse.quote(
                     text))
             response = urlopen(request)
             answer = json.loads(response.read())
@@ -391,10 +409,8 @@ class Modulewrapper:
         # so that correct_output doesn't have to be called every time and corrected manually
         # must be corrected
         if self.telegram_call:
-            text = text.replace(' Uhr ', '')
+            pass
         else:
-            #text = text.replace('Tiffany', 'Tiffanie')
-            #text = text.replace('Timer', 'Teimer')
             text = text.replace('Entschuldige', 'Tut mir leid')
         return text
 
@@ -445,22 +461,25 @@ class Modulewrapper_continuous:
         self.system_name = Luna.system_name
         self.path = Luna.path
 
-    def start_module(self, name=None, text=None):
-        Modules.start_module(text=text, name=name)
+    def start_module(self, name=None, text=None, user=None):
+        # user prediction is not implemented yet, therefore here the workaround
+        # user = self.local_storage['user']
+        print("start module with text {", text ,"}")
+        Modules.start_module(text=text, user=user, name=name)
 
-    def start_module_and_confirm(self, name=None, text=None):
-        return Luna.start_module(name, text)
+    def start_module_and_confirm(self, name=None, text=None, user=None):
+        return Luna.start_module(name, text, user)
 
     def module_storage(self, module_name=None):
-            module_storage = Luna.local_storage.get("module_storage")
-            if module_name is None:
-                return module_storage
-            # I am now just so free and lazy and assume that a module name is passed from a module that actually exists.
-            else:
-                return module_storage[module_name]
+        module_storage = Luna.local_storage.get("module_storage")
+        if module_name is None:
+            return module_storage
+        # I am now just so free and lazy and assume that a module name is passed from a module that actually exists.
+        else:
+            return module_storage[module_name]
 
     def translate(self, ttext, targetLang='de'):
-        return Modulewrapper.translate(ttext, targetLang)
+        return Modulewrapper.translate(targetLang)
 
 
 class LUNA:
@@ -509,17 +528,17 @@ class LUNA:
                     continue
 
                 # no pictures available
-                #if msg['type'] == "photo":
+                # if msg['type'] == "photo":
                 #    self.telegram.say('Leider kann ich noch nichts mit Bildern anfangen.', self.users.get_user_by_name(user))
                 # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
                 if msg['text'].lower().startswith("Jarvis"):
-                    response = Modules.start_module(text=msg['text'], messenger=True, direct=False)
+                    response = Modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
                 # Message is not a request at all, but a response (or a module expects such a response)
                 elif user in self.telegram_queued_users:
                     self.telegram_queue_output[user] = msg
                 # Message is a normal request
                 else:
-                    Modules.start_module(text=msg['text'], messenger=True, direct=False)
+                    Modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
                 """if response == False:
                     self.telegram.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['telegram_id'])
                 self.telegram.messages.remove(msg)"""
@@ -546,10 +565,13 @@ class LUNA:
         elif text == "wrong assistant!":
             Audio_Output.say("Geh mir nicht fremd!")
         else:
-            Modules.start_module(text)
+            user = self.users.get_user_by_name(self.local_storage["user"])
+            Modules.start_module(text=str(text), user=user)
 
-    def start_module(self, text, name):
-        Modules.query_threaded(name, text, direct=True)
+    def start_module(self, text, name, user):
+        # user prediction is not implemented yet, therefore here the workaround
+        user = self.local_storage['user']
+        Modules.query_threaded(name, text, user, direct=False)
 
     def play_bling_sound(self):
         # The name was deliberately chosen with regard to further reactions (such as lights, etc.)
@@ -615,6 +637,7 @@ class Users:
             if user["telegram_id"] == t_id:
                 return user
         return None
+
 
 """def clear_momory():
     while True:

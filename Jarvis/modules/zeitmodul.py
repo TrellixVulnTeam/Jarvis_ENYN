@@ -1,5 +1,4 @@
 from time import sleep
-from module_skills import skills
 import datetime
 
 SECURE = True
@@ -26,7 +25,7 @@ def isValid(text):
         return True
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()
     now = datetime.datetime.now()
     # wochentag = datetime.datetime.today().weekday()
@@ -91,16 +90,16 @@ def handle(text, luna, profile):
         else:
             luna.say('Okay, dann wünsche ich dir eine gute Nacht.')
     elif 'timer' in text:
-        timer(text, luna)
+        timer(text, luna, skills)
     elif 'stoppuhr' in text:
-        stopwatch(text, luna)
+        stopwatch(text, luna, skills)
     elif 'counter' in text:
         countdown(text, luna)
     else:
         luna.say('Aaahhh, das sind zu viele Möglichkeiten mit Zeiten umzugehen. Bitte versuche es erneut.')
 
 
-def timer(text, luna):
+def timer(text, luna, skills):
     if 'start' in text:
         luna.say('Sicher, dass du nicht die Stoppuhr meinst?')
         luna.say('Soll ich für dich eine Stoppuhr starten?')
@@ -109,9 +108,9 @@ def timer(text, luna):
             luna.say('Okay, soll ich eine Stoppuhr nur für dich oder für alle starten?')
             response = luna.listen()
             if 'mich' in response or 'meine' in response:
-                stopwatch('starte meine stoppuhr', luna)
+                stopwatch('starte meine stoppuhr', luna, skills)
             else:
-                stopwatch('starte die stoppuhr', luna)
+                stopwatch('starte die stoppuhr', luna, skills)
         else:
             luna.say('Okay. Dann mach ich nichts.')
 
@@ -126,7 +125,7 @@ def timer(text, luna):
         duration = skills.get_text_beetween(skills, 'in', text, output='String')
 
         # Zeit: Um wieviel Uhr der Timer fertig ist; Text: Antwort von Luna; Benutzer; Raum; Dauer: Wie lange der Timer gehen soll
-        E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration}
+        E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration, 'Benutzer': luna.user}
 
         # Vermeidung von Redundanz. Wird für 1 und mehrere Timer verwendet
         # Aufzählung wenn mehrere Timer
@@ -172,7 +171,7 @@ def timer(text, luna):
 
                 verbleibende_zeit = datetime.timedelta()
 
-                aussage_timer += 'Du hast einen ' + item['Dauer'] + ' mit noch etwa ' + get_time_differenz(verbleibende_zeit) + ' verbleibend.\n'
+                aussage_timer += 'Du hast einen ' + item['Dauer'] + ' mit noch etwa ' + get_time_differenz(skills, verbleibende_zeit) + ' verbleibend.\n'
 
             if len(user_timer) > 1:
                 aussage = 'Du hast ' + str(len(luna.local_storage['Timer'])) + ' Timer gestellt.\n' + aussage_timer
@@ -208,7 +207,7 @@ def timer(text, luna):
                     number = luna.listen()
                     if number <= len(user_timer):
                         timer = luna.local_storage["Timer"].remove(user_timer[int(number)-1])
-                        luna.say("Ich habe den Timer mit der Dauer "+item["Dauer"]+" gelöscht!", output='telegram')
+                        luna.say("Ich habe den Timer mit der Dauer " + item["Dauer"]+" gelöscht!", output='telegram')
                     else:
                         luna.say("Deine Eingabe war ungültig!", output='telegram')
                 else:
@@ -234,13 +233,13 @@ def timer(text, luna):
         luna.say('Leider weiß ich nicht, was ich mit dem Timer machen soll.')
 
 
-def stopwatch(text, luna):
+def stopwatch(text, luna, skills):
     if 'start' in text:
         if 'stoppuhr' in luna.local_storage.keys():
             luna.say('Es läuft bereits eine Stoppuhr. Soll ich diese erst stoppen?')
             response = luna.listen()
             if 'ja' in response:
-                luna.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(get_time(luna.local_storage['stoppuhr']), get_time_differenz(luna.local_storage['stoppuhr'])))
+                luna.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(get_time(luna.local_storage['stoppuhr']), get_time_differenz(luna.local_storage['stoppuhr'], skills)))
                 luna.local_storage['stoppuhr'] = datetime.datetime.now()
             else:
                 luna.say('Alles klar, die alte Stoppuhr läuft weiter.')
@@ -251,7 +250,7 @@ def stopwatch(text, luna):
     elif 'stopp' in text or 'beende' in text:
 
         if 'stoppuhr' in luna.local_storage.keys() and luna.local_storage['stoppuhr'] != '':
-            luna.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(get_time(datetime.datetime.now()), get_time_differenz(luna.local_storage["stoppuhr"])))
+            luna.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(get_time(datetime.datetime.now()), get_time_differenz(luna.local_storage["stoppuhr"], skills)))
             luna.local_storage['stoppuhr'] = ''
         else:
             luna.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')
@@ -288,7 +287,7 @@ def countdown(text, luna):
         luna.say('Tut mir leid, leider habe ich nicht verstanden, von wo ich herunter zählen soll')
 
 
-def get_time_differenz(start_time, time=datetime.datetime.now()):
+def get_time_differenz(start_time, skills, time=datetime.datetime.now()):
     aussage = []
     if time == None:
         dz = start_time
@@ -334,7 +333,6 @@ def get_time_differenz(start_time, time=datetime.datetime.now()):
         aussage.append('einer Sekunde')
     elif seconds > 1:
         aussage.append(str(seconds) + ' Sekunden')
-    print(skills.get_enumerate(aussage))
     return skills.get_enumerate(aussage)
 
 

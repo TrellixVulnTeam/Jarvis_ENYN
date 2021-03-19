@@ -1,13 +1,14 @@
+import random
+import re
 import struct
 import time
 import traceback
+import urllib.request
 from datetime import datetime
 from threading import Thread
-
 import requests
 import vlc
 import pafy
-
 from tts import Text_to_Speech
 import speech_recognition as sr
 import pyaudio
@@ -193,6 +194,8 @@ class AudioOutput:
         if text == '' or text == None:
             text = 'Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr.'
         self.notification.append(text)
+        while text in self.notification:
+            time.sleep(0.2)
 
     def play_music(self, name, next=False):
         if next:
@@ -233,6 +236,7 @@ class AudioOutput:
     def stop(self):
         self.tts.stop()
         audio.stop()
+        self.music_player.stop()
 
 
 class MusicPlayer:
@@ -288,43 +292,50 @@ class MusicPlayer:
         self.is_playing = False
         self.player.stop()
 
-    def play(self, by_name=False, url=False, path=False, next=False, announce=False):
+    def play(self, by_name=None, url=False, path=False, next=False, now=False, playlist=False, announce=False):
         if not self.is_playing and not self.paused:
             self.is_playing = True
             self.start()
-        if not by_name == False:
-            _url = 'https://www.youtube.com/results?q=' + str(by_name)
-            count = 0
-            data = str(requests.get(_url).content).split('"')
-            for i in data:
-                count += 1
-                if i == 'WEB_PAGE_TYPE_WATCH':
+        media = None
+        if playlist:
+            self.add_playlist(url, by_name, next)
+        elif not by_name == None:
+            _url = 'https://www.youtube.com/results?search_query=' + str("brings")
+            html = urllib.request.urlopen(_url)
+            video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+            while(True):
+                video = pafy.new(random.choice(video_ids))
+                duration = str(video.duration).split(":")
+                if int(duration[0]) == 0 and int(duration[1]) < 10:
                     break
-            print(data)
-            if data[count - 5] == "/results":
-                #toDo: find new video
-                raise Exception("No video found.")
-            _url = "https://www.youtube.com" + data[count - 5]
-            video = pafy.new(_url)
+                else:
+                    continue
             best = video.getbest()
+            print(best.url)
             media = self.instance.media_new(best.url)
+
         elif not url == False:
             media = self.instance.media_new(url)
         elif not path == False:
             media = self.instance.media_new(path)
         else:
             return
-
-        if announce:
-            title = media.get_title()
-            text = "Alles klar. Ich spiele für dich " + title
-            #toDo: Adio_Output.tts(...)
-            pass
-
-        media.get_mrl()
+        if media != None:
+            media.get_mrl()
         if next:
             self.playlist.insert(0, media)
+        elif now:
+            self.playlist.insert(0, media)
+            self.next()
         else:
+            self.playlist.append(media)
+
+    def add_playlist(self, url, by_name, next):
+        playlist_ = pafy.get_playlist2(url)
+        for item in playlist_:
+            best = item.getbest()
+            media = self.instance.media_new(item)
+            media.get_mrl()
             self.playlist.append(media)
 
     def next(self):

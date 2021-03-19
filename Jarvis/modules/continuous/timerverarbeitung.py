@@ -17,6 +17,3 @@ def run(luna, profile):
                 luna.start_module(user=benutzer, name='timerausgabe', text=dic)
                 timer.remove(item)
                 luna.local_storage['Timer'] = timer
-
-
-#hat geklappt
