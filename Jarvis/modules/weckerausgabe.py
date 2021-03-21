@@ -1,8 +1,6 @@
 import os
 
-SECURE = True # Damit es von fortlaufenden module naufgerufen werden kann
-
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     ton = text.get('Ton')
     path = luna.path + "/modules/resources/clock_sounds/" + ton
     

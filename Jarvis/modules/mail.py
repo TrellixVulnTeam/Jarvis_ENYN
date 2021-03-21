@@ -11,7 +11,7 @@ def isValid(text):
     return False
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.strip()
     if text.lower().startswith("mail ") or text.lower().startswith('e-mail ') or text.lower().startswith('email ') or text.lower().startswith('e mail '):
         subject = text[5:]

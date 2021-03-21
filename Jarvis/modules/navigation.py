@@ -20,7 +20,7 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, local_storage):
+def handle(text, luna, skills):
     text = text.lower()
     length = len(text)
 

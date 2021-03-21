@@ -9,7 +9,7 @@ def reload_own(luna):
     luna.core.Modules.load_modules()
     luna.core.Modules.start_continuous()
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     #luna.say('Okay, warte einen Moment')
     reload_own(luna)
     print('--------- FERTIG ---------\n\n')

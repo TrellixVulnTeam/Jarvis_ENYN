@@ -1,8 +1,6 @@
 import random
 
-SECURE = False
-
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     user = luna.user
     '''farewells = ['Auf wiedersehen, {}!',
                  'Bis bald {}',
@@ -15,7 +13,7 @@ def handle(text, luna, profile):
     luna.say(farewell)
 
     # Erst den User aus allen Räumen entfernen...
-    for raum in profile['rooms'].values():
+    for raum in luna.local_storage['rooms'].values():
         try:
             if user in raum['users']:
                 raum['users'].remove(user)
@@ -27,10 +25,10 @@ def handle(text, luna, profile):
             raum.users.remove(user)
     # ...Und den Raum aus dem User!
     try:
-        if not profile['users'][user]['telegram_id'] == 0:
-            profile['users'][user]['room'] = 'Telegram'
+        if not luna.local_storage['users'][user]['telegram_id'] == 0:
+            luna.local_storage['users'][user]['room'] = 'Telegram'
         else:
-            profile['users'][user]['room'] = ''
+            luna.local_storage['users'][user]['room'] = ''
     except:
         pass
 

@@ -12,7 +12,7 @@ def isValid(text):
 		return True
 	
 	
-def handle(text, luna, profile):
+def handle(text, luna, skills):
 	luna.say("Wilkommen in dem Modul, um einen Fehler zu senden. Wenn du nicht mehr weiter machen möchtest, dann sag einfach 'abbruch'.")
 	luna.say("Bitte nenn deinen Namen.")
 	name = luna.listen()

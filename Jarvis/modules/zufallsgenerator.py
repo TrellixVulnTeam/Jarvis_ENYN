@@ -68,7 +68,7 @@ def output(txt, luna):
         output = str(random.randint(1,100))
     return output
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     ausgabe = output(text, luna).strip()
     if (ausgabe.startswith('-')):
         ausgabe = 'minus ' + ausgabe[1:]
@@ -88,11 +88,3 @@ def isValid(text):
         return True
     elif 'grade' in text and 'ungerade' in text:
         return True
-
-class Luna:
-   
-    def say(self, text):
-        print (text)
-    def listen(self):
-        neuertext = input()
-        return neuertext

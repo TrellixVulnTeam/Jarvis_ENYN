@@ -182,7 +182,7 @@ def isValid(text):
         (('fussball' in text or 'fußball' in text) and ('weltmeisterschaft' in text or ' wm ' in text or 'europameisterschaft' in text or 'europa meisterschaft' in text or ' em ' in text)) or \
         'champions league' in text
 
-def handle(text, luna, profile):
+def handle(text, luna, skill):
     rang, liga, verein = getMatch(text)
 
     if liga is None:

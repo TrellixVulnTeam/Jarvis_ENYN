@@ -43,7 +43,7 @@ def getnum(str):
     }
     return map.get(str.lower(), str)
 
-def handle(text, luna, profile):
+def handle(text, luna, skill):
     luna.say('Dann leg mal los.')
     body = []
     text = luna.listen().strip()

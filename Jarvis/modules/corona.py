@@ -11,8 +11,7 @@ def isValid(text):
         return False
     
 
-
-def handle(txt, luna, profile):
+def handle(txt, luna, skill):
     day_map = {
         1: 'ersten',
         2: 'zweiten',

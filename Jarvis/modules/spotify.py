@@ -4,8 +4,6 @@ import json
 import re
 
 
-SECURE = False
-
 def isValid(text):
     text = text.lower()
 
@@ -16,7 +14,7 @@ def isValid(text):
 
     return False
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()
     length = len(text)
 

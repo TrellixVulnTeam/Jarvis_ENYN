@@ -1,8 +1,6 @@
 import random
 
-SECURE = True
-
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     '''
     if luna.user is not None:
         if not luna.user == 'Unknown':

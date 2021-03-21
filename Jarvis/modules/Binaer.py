@@ -15,7 +15,7 @@ def isValid(text):
         return False
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skill):
     decNumber = getNumber(text)
     if decNumber != 'UNDO':
         luna.say('Die Zahl ' + decNumber + ' ist ' + binary(int(decNumber)) + ' in dem Binären.')

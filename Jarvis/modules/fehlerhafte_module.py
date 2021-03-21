@@ -6,16 +6,14 @@ def isValid(text):
 	elif 'module' in text and 'funktionieren' in text and 'nicht' in text:
 		return True
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
 	faulty_list = []
 	for module in luna.local_storage['modules'].values():
 		if module['status'] == 'error':
 			faulty_list.append(module['name'])
-	print(faulty_list)
 	if len(faulty_list) == 0:
 		luna.say('Alle Module konnten korrekt geladen werden.')
 	else:
-		luna.say('Folgende Module konnten nicht geladen werden: ')
-		luna.say(luna.enumerate(faulty_list))
+		luna.say('Folgende Module konnten nicht geladen werden: ' + luna.enumerate(faulty_list))
 	
 

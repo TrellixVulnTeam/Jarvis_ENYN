@@ -75,7 +75,7 @@ def sayAsync(luna, text):
         luna.end_Conversation()
         luna.start_module(name="justsaysomethin", text=text)
     except AttributeError:
-        print("ASYNC>" + text)
+        pass
 
 
 """
@@ -102,27 +102,27 @@ class MainBlock(object):
     def interactive(self):
         startRaw = input("Bitte geben Sie Ihren Startbahnhof ein: ")
         self.start = TrainStation(startRaw)
-        print("Folgender Startbahnhof wurde ausgefäwhlt:", self.start.name, '\n')
+        #print("Folgender Startbahnhof wurde ausgefäwhlt:", self.start.name, '\n')
         endRaw = input("Bitte geben Sie Ihren Zielbahnhof ein:  ")
         self.end = TrainStation(endRaw)
-        print("Folgender Zielbahnhof wurde ausgewählt:", self.end.name, '\n')
+        #print("Folgender Zielbahnhof wurde ausgewählt:", self.end.name, '\n')
         types = input("Nah oder Fernverkehr? (N/V)")
-        print("\nDie Verbindungen werden berechnet.")
+        #print("\nDie Verbindungen werden berechnet.")
         if types == "N":
             self.getConnections("0011111111")
         else:
             self.getConnections("1111111111")
-        print("\nEs wurden " + str(len(self.data.connections)) + " Verbindungen gefunden:\n")
+        #print("\nEs wurden " + str(len(self.data.connections)) + " Verbindungen gefunden:\n")
         count = 0
         for connection in self.data.connections:
             count += 1
-            print('VERBINDUNG', count, str(connection.price))
-            for train in connection.trainList:
-                print('  ', train.startTime, "+" + str(train.startDelay), train.startStation, '\t', train.startTrack)
-                print('   |', str(train.duration) + 'min')
-                print('   ->', train.endTime, train.endStation, '\t', train.endTrack)
-                print('     (', train.trainNumber, ')')
-            print('\n')
+            #print('VERBINDUNG', count, str(connection.price))
+            #for train in connection.trainList:
+                #print('  ', train.startTime, "+" + str(train.startDelay), train.startStation, '\t', train.startTrack)
+                #print('   |', str(train.duration) + 'min')
+                #print('   ->', train.endTime, train.endStation, '\t', train.endTrack)
+                #print('     (', train.trainNumber, ')')
+            #print('\n')
 
     def getConnections(self, trafficType="1111111111"):
         self.data = ConnectionGroup(self.time, self.start.id, self.end.id)
@@ -513,7 +513,7 @@ def refineTime(timeRaw, mainTime):
 
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skill):
     text = text.lower().replace("ß", "ss")
     ziel = None
     try:
@@ -641,7 +641,7 @@ def handle(text, luna, profile):
                             ct += 1
                     # startTrainNameNumber = " ".join(t.trainNumber.split(" ")[1]).strip()
                     # startTrainNameNumber = "  ".join(startTrainNameNumber.split())
-                    print(startTrainNameNumber)
+                    #print(startTrainNameNumber)
 
                     startTrainNamePronoun = "Er" if "dein" in startTrainName else "Sie"
 
@@ -682,7 +682,7 @@ def handle(text, luna, profile):
                 luna.say(speechVariation("[Okay|keine Ursache]"))
     except IndexError as e:
         luna.say(speechVariation("[ooh je|ups], irgend[et|]was ist da [schiefgegangen|nicht nach plan gelaufen]. Wie wäre es, wenn du es einfach [später|noch einmal] versuchst?"))
-        print(e)
+        #print(e)
         traceback.print_exc()
 
 def isValid(text):

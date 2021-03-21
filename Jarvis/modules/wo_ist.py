@@ -6,11 +6,11 @@ def isValid(text):
     if 'wo ' in text and 'ist' in text:
         return True
         
-def handle(text, luna, local_storage):
+def handle(text, luna, skills):
     for user in luna.userlist:
         if user.lower() in text.lower():
             try:
-                room = local_storage['users'][user]['room']
+                room = luna.local_storage['users'][user]['room']
                 luna.say('{} ist gerade im {}.'.format(user, room))
             except KeyError:
                 luna.say('Ich konnte {} gerade nicht finden'.format(user))

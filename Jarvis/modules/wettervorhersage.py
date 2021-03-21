@@ -6,7 +6,6 @@ import ast
 import re
 
 
-
 def get_weather(place):
     place = place.lower()
     w = ''
@@ -68,7 +67,7 @@ def zeitabfrage(dic):
     return time
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     now = datetime.datetime.now()
     o = luna.analysis['town']
     if o == None:

@@ -6,9 +6,6 @@ Mit diesem Modul kann man sich Nachrichten per Telegram zuschicken lassen.
 Dazu sagt man "Sende <text> an mein Smartphone" oder "Smartphone Nachricht <text>".
 '''
 
-SECURE = False # Nicht SECURE, da Nachrichten an Telegram bei einer Verbindung per WebSocket
-               # nicht speziell behandelt werden. Deshalb macht das keinen Sinn.
-
 def isValid(text):
     text = text.lower()
     if 'smartphone' in text and ('nachricht' in text or 'sende' in text):
@@ -31,7 +28,7 @@ def get_aussage_gemeinsam():
     aussage = aussage + ' und ' + liste[len(liste)]
     return aussage
 
-def handle(text, luna, local_storage):
+def handle(text, luna, skills):
     text = text.lower()
     length = len(text)
     

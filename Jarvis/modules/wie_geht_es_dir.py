@@ -7,7 +7,7 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     answers = ['Danke, gut!',
                'Mir gehts gut, {}.'.format(luna.user),
                'Alles gut, {}.'.format(luna.user)]

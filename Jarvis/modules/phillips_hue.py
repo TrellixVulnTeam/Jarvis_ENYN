@@ -24,7 +24,7 @@ def isValid(text):
             return True
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     room = "Zimmer"
 
     text.replace('.', '')
@@ -60,7 +60,6 @@ def handle(text, luna, profile):
 
     room_lights = bridge.get_group(room, 'lights')
     if room_lights == None:
-        print("room was None")
         room = room.capitalize()
         room_lights = bridge.get_group(room, 'lights')
 
@@ -114,13 +113,11 @@ def Wrapper(bridge, lights, text, luna):
 
 
 def light_on(bridge, lights):
-    # print(lights)
     bridge.set_light(lights, 'on', True)
     bridge.set_light(lights, 'bri', 254)
 
 
 def light_off(bridge, lights):
-    # print(lights)
     bridge.set_light(lights, 'on', False)
 
 
@@ -202,7 +199,6 @@ def get_lights(luna, text):
     lights = ['FALSE']
     for item in light_names:
         if item.lower() in text.lower():
-            print("---> licht gefunden")
             lights.append(item)
     return lights
 

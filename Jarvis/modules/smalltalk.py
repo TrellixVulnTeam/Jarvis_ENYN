@@ -138,7 +138,7 @@ def isValid(text):
         return True
    
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()    
     if 'wie' in text and 'heißt' in text and 'du' in text:
         sys_name = luna.system_name
@@ -367,8 +367,7 @@ def handle(text, luna, profile):
         if 'ja' in response or 'sehr gerne' in response:
             options = ['witz', 'fun fact', 'zungenbrecher', 'phobie', 'gedicht']
             text = 'erzähl mir einen ' + random.choice(options)
-            print(text)
-            handle(text, luna, profile)
+            handle(text, luna, skills)
         else:
             luna.say('Alles klar, vielleicht findest du ja eine Beschäftigung.')
 

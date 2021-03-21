@@ -2,7 +2,6 @@ import traceback
 
 # Priorität gesetzt, da ansonsten manchmal das modul reload_modules.py aufgerufen wurde.
 PRIORITY = 2
-SECURE = True
 
 
 def isValid(text):
@@ -24,7 +23,7 @@ def isValid(text):
         return False
         
 
-def get_item(text, luna):
+def get_item(luna, skills):
     text = luna.text
     # Man könnte meinen, dass text.lower() hier sinnvoller wäre, allerdings würden dann die Namen
     # der Items, die auf die Liste gesetzt werden sollen auch in Kleinbuchstaben gespeichert werden
@@ -131,7 +130,7 @@ def get_item(text, luna):
         item = skills.assamble_array(skills, item)
     return item
 
-def get_aussage_gemeinsam(text, luna):
+def get_aussage_gemeinsam(text, luna, skills):
     aussage = ''
     if 'einkaufsliste' in luna.local_storage.keys():
         einkaufsliste = luna.local_storage.get('einkaufsliste')
@@ -145,7 +144,7 @@ def handle(text, luna, skills):
     text = text.replace('setze', ('setz'))
 
     if 'setz' in text or 'schreib' in text or 'füg' in text:
-        item = get_item(text, luna)
+        item = get_item(luna, skills)
         einkaufsliste = None
         # anschließend wird unterscheidet, ob die eigene oder gemeinsame Einkaufsliste benötigt wird
         if 'einkaufsliste' not in luna.local_storage.keys():
@@ -153,7 +152,7 @@ def handle(text, luna, skills):
             einkaufsliste = luna.local_storage['einkaufsliste']
         if einkaufsliste != None:
             # Nur wenn die Einkaufsliste schon vorhanden ist...
-            double_items = get_double_items(item, einkaufsliste, luna)
+            double_items = get_double_items(item, einkaufsliste)
             if double_items:
                 # Es gibt Dopplungen! Das darf nicht sein...
                 # Wir fragen mal nach, ob die Dopplungen gewollt sind, oder eher nicht
@@ -169,7 +168,7 @@ def handle(text, luna, skills):
                 response = luna.listen()
                 # Vlt möchte der User ja nur bestimmte Dopplungen behalten...
                 if 'nur' in text and 'nicht' in text:
-                    item.remove(get_item(skills.get_text_beetween(skills, 'nur', text, end_word='nicht', output='String')))
+                    item.remove(get_item(luna, skills))
                 # Oder halt alle...
                 elif 'ja' in response or 'gerne' in response or 'bitte' in response:
                     for i in item:
@@ -212,7 +211,7 @@ def handle(text, luna, skills):
 
     elif 'auf' in text and 'steht' in text and 'was' in text:
         # hier wäre die Unterscheidung zwischen eigener/gemeinsamer Unterscheidung vorab einfach nur unnötig, daher lassen wir das
-        aussage = get_aussage_gemeinsam(text, luna)
+        aussage = get_aussage_gemeinsam(text, luna, skills)
         # wenn man den Befehl über Telegram aufruft, macht die schick-Funktion mehr Sinn
         if luna.telegram_call:
             handle('schick einkaufsliste', luna, skills)
@@ -232,13 +231,13 @@ def handle(text, luna, skills):
             i = 'gemeinsame'
 
         text = "schick {} einkaufsliste".format(i)
-        handle(text, luna, profile)
+        handle(text, luna, skills)
         text = "leere {} einkaufsliste".format(i)
-        handle(text, luna, profile)
+        handle(text, luna, skills)
 
     elif 'lösch' in text and ('aus' in text or 'von' in text) and 'einkaufsliste' in text:
         # einzelne items sollen auch gelöscht werden können
-        items = get_item(text, luna)
+        items = get_item(luna, skills)
         own_list = False
         if 'einkaufsliste' not in luna.local_storage.keys():
             luna.local_storage['einkaufsliste'] = []

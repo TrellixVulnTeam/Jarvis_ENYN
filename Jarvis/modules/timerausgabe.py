@@ -1,10 +1,8 @@
 import os
 import time
 
-SECURE = True  # Damit es von fortlaufenden module naufgerufen werden kann
 
-
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     duration = text.get('Dauer')
     print("handle - Funktion \n\n\n\n\n\n")
     luna.say("Dein Timer von {} ist abgelaufen!".format(duration))

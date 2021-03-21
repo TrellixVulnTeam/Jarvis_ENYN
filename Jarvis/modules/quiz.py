@@ -20,7 +20,7 @@ ALPHABET = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
 def isValid(text):
     return False
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()
     AUDIO_PFAD = luna.path + "/modules/resources/Quiz/Audio"
     with open(luna.path + "/modules/resources/Quiz/questions.json", 'r') as question_file:
@@ -150,7 +150,7 @@ def handle(text, luna, profile):
                             break
                         else:
                             user_response = item["Antwortmoeglichkeiten"][i].lower()
-                            print(f"GEFUNDEN --> {user_response}\n")
+                            #print(f"GEFUNDEN --> {user_response}\n")
                             valid = True
                             break
                 if len(user_response) > 0:

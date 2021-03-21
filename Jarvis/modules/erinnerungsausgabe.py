@@ -1,6 +1,5 @@
-SECURE = True # Damit es von fortlaufenden module naufgerufen werden kann
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     luna.say(text)
 
 def isValid(txt):

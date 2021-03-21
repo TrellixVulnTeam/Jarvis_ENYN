@@ -50,7 +50,7 @@ denomintorMap = {
     '12tel': '12',
 }
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()
     match = termFinder.match(text)
     if (match is None):
@@ -126,8 +126,6 @@ def handle(text, luna, profile):
             match = bruchFinder.match(text)
         else:
             match = None
-
-    print(text)
 
     try:
         result = eval(text)

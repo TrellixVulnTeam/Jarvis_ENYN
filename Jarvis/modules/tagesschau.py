@@ -20,12 +20,11 @@ def isValid(text):
     if ('sage' in text or 'erzähl' in text or 'erzähle' in text or 'sprich' in text) and 'nachrichten' in text:
         return True
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
 
     DOWNLOAD_PATH = Path(luna.path + "/modules/resources")
     try:
         DOWNLOAD_PATH = Path(luna.path + "/modules/resources")
-        print(f"Hole Video-URL von {TAGESSCHAU_URL} ...")
         url = get_audio_url()
         path = download_audio(url, DOWNLOAD_PATH)
 

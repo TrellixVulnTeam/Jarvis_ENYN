@@ -11,7 +11,7 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, local_storage):
+def handle(text, luna, skills):
 
     ################################################################################ 
     # Wann (nächster Start)

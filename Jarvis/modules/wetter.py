@@ -5,8 +5,6 @@ import urllib.parse
 import ast
 import re
 
-SECURE = True
-
 def get_weather(place):
     place = place.lower()
     w = ''
@@ -59,7 +57,7 @@ def get_temperature(pl):
     return t
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     o = luna.analysis['town']
     if o == 'None':
         luna.say('Für welchen Ort möchtest du das Wetter erfahren?')

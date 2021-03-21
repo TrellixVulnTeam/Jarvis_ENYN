@@ -9,7 +9,7 @@ def isValid(text):
         return True
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()
     if 'wann' in text and ('nächste' in text or 'wieder' in text):
         year = datetime.date.today().year+1

@@ -231,7 +231,7 @@ def movetime(text):
                 except:
                     nosuccess = True
     if not nosuccess:
-        m = M(n,k)
+        m = M(n, k)
         years = int(m/(3600*24*365))
         remaining = m-years *3600*24*365
         months = int(remaining/(3600*24*(365/12)))
@@ -331,7 +331,7 @@ def moves(text):
         ret = "Ich konnte leider keine Zugzahl ermitteln"
     return ret, not nosuccess
 
-def handle(txt, luna, profile):
+def handle(txt, luna, skills):
     '''
     tt = txt.replace('?', (''))
     tt = tt.replace('!', (''))

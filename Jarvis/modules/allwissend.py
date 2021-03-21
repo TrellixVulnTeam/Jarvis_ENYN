@@ -30,7 +30,7 @@ def isValid(text):
         return False
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower().replace("ß", "ss")
     try:
         if "über" in text:

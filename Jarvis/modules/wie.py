@@ -27,7 +27,7 @@ def isValid(text):
     return ret
 
 
-def handle(text, luna, local_storage):
+def handle(text, luna, skills):
     text = text.lower()
     if 'wie kann ich jemand' in text:
         for entry in data:

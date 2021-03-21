@@ -1,10 +1,9 @@
-SECURE = False
 
 def isValid(text):
 	if 'hotworddetection' in text:
 		return True
 	
-def handle(text, luna, profile):
+def handle(text, luna, skills):
 	room = luna.analyze["room"]
 	if room is None:
 		room = luna.room_name

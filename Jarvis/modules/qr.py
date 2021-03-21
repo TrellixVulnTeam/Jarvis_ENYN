@@ -11,7 +11,7 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
 
     luna.say('Was möchtest du in den qr-code schreiben?')
 
@@ -22,17 +22,3 @@ def handle(text, luna, profile):
     else:
         url = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={urllib.parse.quote(antwort)}"
         luna.say(url)
-
-class Luna:
-    def __init__(self):
-        pass
-
-    def say(self,text):
-        print(text)
-
-    def listen(self):
-        input()
-
-if __name__ == "__main__":
-    luna = Luna()
-    handle("", luna, "")

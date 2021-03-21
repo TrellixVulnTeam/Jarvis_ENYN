@@ -16,7 +16,7 @@ def isValid(text):
                 return True
     return False
 
-def handle(text, luna, local_storage):
+def handle(text, luna, skills):
     # Wenn es ein direkter aufruf von wo_ist.py ist, muss der prefix
     # entfernt werden.
     if (text.startswith('§DIRECTCALL_FROM_WO_IST§')):
@@ -39,7 +39,6 @@ def handle(text, luna, local_storage):
         request = Request('https://nominatim.openstreetmap.org/search?q=' + quote(ort) + '&format=json&addressdetails=1&extratags=1&namedetails=1&accept-language=de-DE&dedupe=1')
         response = urlopen(request)
         answer = json.loads(response.read())
-        print('DER ORT IST {}'.format(ort))
         if (len(answer) == 0):
             luna.say('Diesen Ort kenne ich nicht. Wenn du weißt, wo er liegt, hilf mir doch und trage ihn auf Open Street Map ein.')
         else:

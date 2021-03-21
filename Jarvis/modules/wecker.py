@@ -1,14 +1,11 @@
 import datetime
 
-SECURE = True
-
-
 def isValid(text):
     text = text.lower()
     if 'weck ' in text or 'wecke' in text:
         return True
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     text = text.lower()
     time = luna.analysis["time"]
     minute = str(time['minute']) if time['minute'] != 0 else ''

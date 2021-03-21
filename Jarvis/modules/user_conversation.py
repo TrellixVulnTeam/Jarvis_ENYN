@@ -2,8 +2,6 @@
 import datetime
 import random
 
-SECURE = False # Verstößt gegen Punkt 5
-
 def get_inhalt(txt, luna):
     inhalt = ''
     start_index = 0
@@ -127,7 +125,7 @@ def get_antwort(text, luna):
         inhalt = inhalt.replace(' dich', ( 'mich'))
         antwort = 'Alles klar, ich sage ' + nutzer + ', dass ' + inhalt
     return antwort
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     aufruf = get_aufruf(text, luna)
     antwort = get_antwort(text, luna)
     if antwort == 'Ich konnte leider keinen entsprechenden Nutzer finden.':

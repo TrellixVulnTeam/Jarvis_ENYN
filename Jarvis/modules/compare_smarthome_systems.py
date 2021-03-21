@@ -1,7 +1,5 @@
 import random
 
-SECURE = True
-
 def get_ausgabe(txt, luna):
     output = ''
     output_zwei = ''
@@ -129,7 +127,7 @@ def get_ausgabe(txt, luna):
     return ausgabe
 
 
-def handle(text, luna, profile):
+def handle(text, luna, skill):
     ausgabe = get_ausgabe(text, luna)
     output = ausgabe.get('output')
     output_zwei = ausgabe.get('output_zwei')

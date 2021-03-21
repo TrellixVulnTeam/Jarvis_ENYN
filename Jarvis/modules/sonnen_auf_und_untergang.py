@@ -13,6 +13,7 @@ Der Ortsname wird via Nominatim von OpenStreetMap zu Koordinaten übersetzt,
 die genaue Berechnung erfolgt dann offline.
 """
 
+
 def batchGen(batch):
     """
     With the batchGen-function you can generate fuzzed compare-strings
@@ -39,6 +40,7 @@ def batchGen(batch):
                 batch.append(rebuild)
     return outlist
 
+
 def batchMatch(batch, match):
     t = False
     if isinstance(batch, str):
@@ -47,6 +49,7 @@ def batchMatch(batch, match):
         if piece.lower() in match.lower():
             t = True
     return t
+
 
 def speechVariation(input):
     """
@@ -59,13 +62,14 @@ def speechVariation(input):
     else:
         parse = input
     while "[" in parse and "]" in parse:
-        sp0 = parse.split("[",1)
+        sp0 = parse.split("[", 1)
         front = sp0[0]
-        sp1 = sp0[1].split("]",1)
-        middle = sp1[0].split("|",1)
+        sp1 = sp0[1].split("]", 1)
+        middle = sp1[0].split("|", 1)
         end = sp1[1]
         parse = front + random.choice(middle) + end
     return parse
+
 
 def sayAsync(luna, text):
     try:
@@ -91,33 +95,31 @@ class sunsetTimes(object):
         """
         lat = math.radians(lat_d)
         lon = math.radians(lon_d)
-        frac_year = ((math.pi*2)/(365))*(day_of_year-1) #radians
-        eq_time = 229.18*(0.000075+(0.001868*math.cos(frac_year))\
-        -(0.032077*math.sin(frac_year))-(0.014615*math.cos(2*frac_year))\
-        -(0.040849*math.sin(2*frac_year))) #minutes
-        decl = 0.006918-(0.399912*math.cos(frac_year))+(0.070257*math.sin(frac_year))\
-        -(0.006758*math.cos(2*frac_year))+(0.000907*math.sin(2*frac_year))\
-        -(0.002697*math.cos(3*frac_year))+(0.00148*math.sin(3*frac_year)) #radians
-        hour_angle = math.degrees(math.acos(\
-        math.cos(math.radians(90.833))/(math.cos(lat)*math.cos(decl))\
-        -(math.tan(lat)*math.tan(decl)))) #degrees
+        frac_year = ((math.pi * 2) / (365)) * (day_of_year - 1)  # radians
+        eq_time = 229.18 * (0.000075 + (0.001868 * math.cos(frac_year)) - (0.032077 * math.sin(frac_year)) - (0.014615 * math.cos(2 * frac_year)) - (0.040849 * math.sin(2 * frac_year)))  # minutes
+        decl = 0.006918 - (0.399912 * math.cos(frac_year)) + (0.070257 * math.sin(frac_year)) \
+               - (0.006758 * math.cos(2 * frac_year)) + (0.000907 * math.sin(2 * frac_year)) \
+               - (0.002697 * math.cos(3 * frac_year)) + (0.00148 * math.sin(3 * frac_year))  # radians
+        hour_angle = math.degrees(math.acos(
+            math.cos(math.radians(90.833)) / (math.cos(lat) * math.cos(decl))
+            - (math.tan(lat) * math.tan(decl))))  # degrees
 
         times = self.utc_times(lon_d, hour_angle, eq_time)
-        self.converted = ((times[0]+time_zone*60), (times[1]+time_zone*60))
+        self.converted = ((times[0] + time_zone * 60), (times[1] + time_zone * 60))
 
     def utc_times(self, lon, hour_angle, eq_time):
-    	"""returns utc sunrise and sunset times based on parameters"""
-    	sunrise = 720-4*(lon+hour_angle)-eq_time
-    	sunset = 720-4*(lon-hour_angle)-eq_time
-    	return (sunrise, sunset)
+        """returns utc sunrise and sunset times based on parameters"""
+        sunrise = 720 - 4 * (lon + hour_angle) - eq_time
+        sunset = 720 - 4 * (lon - hour_angle) - eq_time
+        return (sunrise, sunset)
 
     def is_leap(self, year):
-    	"""checks if the date occurs in a leap year"""
-    	year=int(year)
-    	if (year%4==0 and year%100!=0) or (year%400==0):
-    		return True
-    	else:
-    		return False
+        """checks if the date occurs in a leap year"""
+        year = int(year)
+        if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):
+            return True
+        else:
+            return False
 
 
 def handle(text, luna, profile):
@@ -141,9 +143,9 @@ def handle(text, luna, profile):
 
             if lat > 66.5 or lat < -66.5:
                 luna.say(speechVariation(
-                    "Es ist mir etwas peinlich, aber für diesen Ort kann ich " \
-                    "leider den Sonnen auf beziehungsweise Untergang nicht " \
-                    "berechnen. Dafür ist mein hinterlegter Algorithmus nicht " \
+                    "Es ist mir etwas peinlich, aber für diesen Ort kann ich "
+                    "leider den Sonnen auf beziehungsweise Untergang nicht "
+                    "berechnen. Dafür ist mein hinterlegter Algorithmus nicht "
                     "ausgelegt worden."
                 ))
             else:
@@ -151,38 +153,38 @@ def handle(text, luna, profile):
 
                 datestr = datetimeTemp.strftime("%Y%m%d")
                 day_of_year = int(datetimeTemp.strftime("%j"))
-                if day_of_year > 88 and day_of_year < 298:
+                if 88 < day_of_year < 298:
                     timezone = 2
                 else:
                     timezone = 1
                 sT = sunsetTimes(lat, lon, day_of_year, timezone)
-                sunrise, sunset  = sT.converted
+                sunrise, sunset = sT.converted
                 luna.say(speechVariation(
-                    "In {0} geht die Sonne [nach meinen Berechnungen|] um " \
-                    " {1} Uhr {2} auf und um {3} Uhr {4} wieder unter. Du " \
-                    "kannst also volle {5} Stunden und {6} Minuten " \
+                    "In {0} geht die Sonne [nach meinen Berechnungen|] um "
+                    " {1} Uhr {2} auf und um {3} Uhr {4} wieder unter. Du "
+                    "kannst also volle {5} Stunden und {6} Minuten "
                     "Tageslicht genießen.".format(
                         placeName,
-                        round(sunrise//60),
-                        round(sunrise%60),
-                        round(sunset//60),
-                        round(sunrise%60),
-                        round((sunset-sunrise)//60),
-                        round((sunset-sunrise)%60)
+                        round(sunrise // 60),
+                        round(sunrise % 60),
+                        round(sunset // 60),
+                        round(sunrise % 60),
+                        round((sunset - sunrise) // 60),
+                        round((sunset - sunrise) % 60)
                     )
                 ))
         except IndexError:
             luna.say(speechVariation(
-                "Oh je, ich konnte zu [deinem angefragten Ort|] {0} leider keine" \
-                "Position[sdaten|] finden. Vielleicht willst du es mit einer" \
+                "Oh je, ich konnte zu [deinem angefragten Ort|] {0} leider keine"
+                "Position[sdaten|] finden. Vielleicht willst du es mit einer"
                 "anderen Aussprache-Variante ausprobieren?".format(place)
             ))
     else:
         luna.say(speechVariation(
-            "Oh, ich habe gerade [Probleme|Schwierigkeiten], " \
-            "[an die Koordinaten zu kommen|die Koordinaten zu übersetzen]. " \
+            "Oh, ich habe gerade [Probleme|Schwierigkeiten], "
+            "[an die Koordinaten zu kommen|die Koordinaten zu übersetzen]. "
             "Vielleicht probierst du es einfach später nochmal[, okay|]?"
-            ))
+        ))
 
 
 def isValid(text):

@@ -1,6 +1,5 @@
 import subprocess
 
-SECURE = False # Verstößt gegen Punkt 1
 PRIORITY = -1
 
 # Nutzt das fortunes-de package verfügbar auf debian und ubuntu.
@@ -17,7 +16,7 @@ def isValid(text):
             return False
     return False
 
-def handle(text, luna, profile):
+def handle(text, luna, skills):
     try:
         fortune = subprocess.check_output("fortune", shell=True).decode('utf-8').strip().lower()
         if (fortune != ''):
