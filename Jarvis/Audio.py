@@ -128,7 +128,7 @@ class AudioOutput:
         - don´t use it for playing musik (this is the task of the "MusicPlayer" class)
     -------------------------
     """
-    def __init__(self):
+    def __init__(self, voice):
         # The channel are splittet on the buffers:
         # Channel(0): notification
         # Channel(1): music
@@ -147,7 +147,7 @@ class AudioOutput:
         # audio.pre_init(44100, -16, 1, 512)
         audio.init()
         self.tts = Text_to_Speech()
-        self.tts.start('male')
+        self.tts.start(voice)
 
     def start(self):
         ot = Thread(target=self.run)

@@ -665,7 +665,7 @@ if __name__ == "__main__":
     os.system('clear')
     Modules = Modules(Local_storage)
     Analyzer = Sentence_Analyzer()
-    Audio_Output = AudioOutput()
+    Audio_Output = AudioOutput(config_data["voice"])
     Luna = LUNA(Local_storage)
     Luna.local_storage['LUNA_starttime'] = time.time()
     Audio_Input.set_luna(Luna)
