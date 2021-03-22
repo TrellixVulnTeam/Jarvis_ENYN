@@ -6,12 +6,12 @@ import datetime
 import urllib
 from urllib.request import Request, urlopen
 from Audio import AudioOutput, AudioInput
-from analyze import Sentence_Analyzer
+from Jarvis.resources.analyze import Sentence_Analyzer
 import pkgutil
 from pathlib import Path
 from threading import Thread
 import traceback
-from module_skills import skills
+from Jarvis.resources.module_skills import skills
 import io
 
 
@@ -65,6 +65,7 @@ class Modules:
         return modules
 
     def query_threaded(self, name, text, user, direct, messenger=False):
+        print("query threaded --> messenger: ", messenger)
         mod_skill = skills()
         if text == None:
             # generate a random text
@@ -116,6 +117,7 @@ class Modules:
 
     def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
         # self.query_threaded(name, text, direct, messenger=messenger)
+        print("start module --> messenger: ", messenger)
         mod_skill = skills()
         analysis = {}
         if text == None:
@@ -297,7 +299,6 @@ class Modulewrapper:
         self.text = text
         self.analysis = analysis
 
-        self.telegram_call = messenger
         self.Audio_Output = Luna.Audio_Output
         self.Audio_Input = Luna.Audio_Input
 
@@ -318,12 +319,15 @@ class Modulewrapper:
     def say(self, text, output='auto'):
         text = self.speechVariation(text)
         if output == 'auto':
-            if 'telegram' in output.lower() or self.messenger:
-                self.telegram_say(text)
-            else:
-                text = self.correct_output_automate(text)
-                print('\n--{}:-- {}'.format(self.system_name.upper(), text))
-                self.Audio_Output.say(text)
+            print(f"telegram_call: {self.telegram_call}, telegram: {self.telegram}, messenger: {self.messenger}")
+            if self.telegram_call:
+                output = 'telegram'
+        if 'telegram' in output.lower() or self.messenger:
+            self.telegram_say(text)
+        else:
+            text = self.correct_output_automate(text)
+            print('\n--{}:-- {}'.format(self.system_name.upper(), text))
+            self.Audio_Output.say(text)
 
     def telegram_say(self, text):
         try:
@@ -532,16 +536,15 @@ class LUNA:
                 #    self.telegram.say('Leider kann ich noch nichts mit Bildern anfangen.', self.users.get_user_by_name(user))
                 # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
                 if msg['text'].lower().startswith("Jarvis"):
-                    response = Modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
+                    Modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
                 # Message is not a request at all, but a response (or a module expects such a response)
                 elif user in self.telegram_queued_users:
                     self.telegram_queue_output[user] = msg
                 # Message is a normal request
                 else:
                     Modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
-                """if response == False:
-                    self.telegram.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['telegram_id'])
-                self.telegram.messages.remove(msg)"""
+                '''if response == False:
+                    self.telegram.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['telegram_id'])'''
                 self.telegram.messages.remove(msg)
             time.sleep(0.5)
 
@@ -578,7 +581,7 @@ class LUNA:
 
         # playing Bling-Sound
         TOP_DIR = os.path.dirname(os.path.abspath(__file__))
-        DETECT_DONG = os.path.join(TOP_DIR, "resources/bling.wav")
+        DETECT_DONG = os.path.join(TOP_DIR, "resources/sounds/bling.wav")
 
         with open(DETECT_DONG, "rb") as wavfile:
             input_wav = wavfile.read()
@@ -665,7 +668,7 @@ if __name__ == "__main__":
     os.system('clear')
     Modules = Modules(Local_storage)
     Analyzer = Sentence_Analyzer()
-    Audio_Output = AudioOutput(config_data["voice"])
+    Audio_Output = AudioOutput(voice=config_data["voice"])
     Luna = LUNA(Local_storage)
     Luna.local_storage['LUNA_starttime'] = time.time()
     Audio_Input.set_luna(Luna)

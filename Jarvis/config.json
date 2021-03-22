@@ -7,10 +7,7 @@
             "server_name",
             "system_name",
             "activation_phrase",
-            "home_location",
-            "telegram_allowed_id_table",
-            "telegram_name_to_id_table",
-            "telegram_id_to_name_table"
+            "home_location"
         ],
         "LUNA_telegram_name_to_id_table": {},
         "users": {},
@@ -24,12 +21,10 @@
 	    },
         "user": ""
     },
-
     "telegram_key": "",
     "Server_name": "SERVER",
     "System_name": "",
     "telegram": true,
-    "use_interface": false,
     "voice": "male",
     "Network_Key": ""
 }

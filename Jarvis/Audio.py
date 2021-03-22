@@ -6,10 +6,9 @@ import traceback
 import urllib.request
 from datetime import datetime
 from threading import Thread
-import requests
 import vlc
 import pafy
-from tts import Text_to_Speech
+from Jarvis.resources.tts import Text_to_Speech
 import speech_recognition as sr
 import pyaudio
 import pvporcupine

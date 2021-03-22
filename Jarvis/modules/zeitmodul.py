@@ -122,7 +122,7 @@ def timer(text, luna, skills):
 
         temp_text = "Dein Timer ist abgelaufen."
 
-        duration = skills.get_text_beetween(skills, 'in', text, output='String')
+        duration = skills.get_text_beetween('in', text, output='String')
 
         # Zeit: Um wieviel Uhr der Timer fertig ist; Text: Antwort von Luna; Benutzer; Raum; Dauer: Wie lange der Timer gehen soll
         E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration, 'Benutzer': luna.user}
@@ -335,15 +335,14 @@ def get_time_differenz(start_time, skills, time=datetime.datetime.now()):
         aussage.append(str(seconds) + ' Sekunden')
     return skills.get_enumerate(aussage)
 
-
 def get_time(i):
     stunde = i.hour
     naechste_stunde = stunde + 1
     if naechste_stunde == 24:
         naechste_stunde = 0
     minute = i.minute
-    stunde = str(stunde)
-    minute = str(minute)
+    stunde = str(stunde) if stunde > 9 else '0' + str(stunde)
+    minute = str(minute) if minute > 9 else '0' + str(minute)
     if minute == 0:
         ausgabe = stunde + ' Uhr.'
     elif minute == 5:
@@ -369,7 +368,7 @@ def get_time(i):
     elif minute == 55:
         ausgabe = 'fünf vor ' + naechste_stunde
     else:
-        ausgabe = stunde + ':' + minute
+        ausgabe = stunde + ':' + minute + ' Uhr'
     return ausgabe
 
 
@@ -377,5 +376,6 @@ def get_day(i):
     now = datetime.datetime.now()
     wochentag = datetime.datetime.today().weekday()
     tage = {0: 'Montag', 1: 'Dienstag', 2: 'Mittwoch', 3: 'Donnerstag', 4: 'Freitag', 5: 'Samstag', 6: 'Sonntag'}
-    ausgabe = 'Heute ist ' + tage.get(wochentag) + ' der ' + now.day + '.' + now.month + '.'
+
+    ausgabe = 'Heute ist ' + str(tage.get(wochentag)) + ' der ' + str(now.day) + '.' + str(now.month) + '.'
     return ausgabe

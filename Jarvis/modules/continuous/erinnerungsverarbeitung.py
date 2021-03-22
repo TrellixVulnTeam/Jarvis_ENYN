@@ -15,8 +15,8 @@ def run(luna, profile):
                 ausgabe = 'Ich sollte dir Bescheid sagen, ' + output + '.'
             else:
                 ausgabe = 'Ich sollte dich ans ' + output + ' erinnern'
-            #print(now)
-            #print(zeit)
+            # print(now)
+            # print(zeit)
             differenz = zeit - now
             dic = {'Text': ausgabe, 'Benutzer': benutzer}
             if differenz.total_seconds() <= 0:
