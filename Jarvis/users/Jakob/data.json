@@ -1,12 +1,12 @@
 {
   "User_Info": {
-      "name": "Jakob",
-      "first_name": "Jakob",
-      "last_name": "Priesner",
+      "name": "",
+      "first_name": "",
+      "last_name": "",
       "date_of_birth": {
-        "year": 2002,
-        "month": 9,
-        "day": 5
+        "year": 0,
+        "month": 0,
+        "day": 0
       },
       "role": "ADMIN",
       "uid": 0,
