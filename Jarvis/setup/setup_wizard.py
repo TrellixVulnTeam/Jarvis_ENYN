@@ -13,8 +13,8 @@ from pygame import mixer as audio
 
 class FirstStart:
     def __init__(self):
-        relPath = str(Path(__file__).parent) + "/"
-        with open(relPath + "config.json", "r") as config_file:
+        self.relPath = str(Path(__file__).parent) + "/"
+        with open(self.relPath + "config.json", "r") as config_file:
             self.config_data = json.load(config_file)
 
         self.Audio = InstallationAudio()
@@ -38,6 +38,7 @@ class FirstStart:
         self.say(
             "Zum Schluss werde ich noch ein paar Dinge erledigen und anschließend automatisch starten. Das kann etwas dauern.")
         self.set_Network_Key()
+        subprocess.run(('sudo chmod 777 -R ' + self.relPath).split(' '))
 
     def say(self, text):
         self.Audio.say(text)
@@ -182,9 +183,13 @@ class InstallationAudio:
 
 
 def install_packeges():
-    # install drivers which are needed for the installation wizard
-    subprocess.run("sudo apt-get install xvfb -y".split(" "))
-    subprocess.run("sudo pip3 install SpeechRecognition PyVirtualDisplay selenium")
+    with open('../versions.json', 'r') as version_file:
+        versions = json.load(version_file)
+    for version in versions.get('last versions'):
+        for command in version.get('shellcommands for update'):
+            subprocess.run(command.split(' '))
+    for command in versions.get('shellcommands for update'):
+        subprocess.run(command.split(' '))
 
 if __name__ == "__main__":
     installation = FirstStart()

@@ -6,12 +6,12 @@ import datetime
 import urllib
 from urllib.request import Request, urlopen
 from Audio import AudioOutput, AudioInput
-from Jarvis.resources.analyze import Sentence_Analyzer
+from resources.analyze import Sentence_Analyzer
 import pkgutil
 from pathlib import Path
 from threading import Thread
 import traceback
-from Jarvis.resources.module_skills import skills
+from resources.module_skills import skills
 import io
 
 
@@ -706,7 +706,10 @@ if __name__ == "__main__":
 
     while True:
         try:
-            time.sleep(10)
+            if datetime.now().hour == 5:
+                # start updater
+                pass
+            time.sleep(3600)
         except:
             Modules.stop_continuous()
             Audio_Input.stop()
