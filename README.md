@@ -96,3 +96,4 @@ def handle(text, luna, profile):
 
 For all other core (or luna) calls, you can look into the `module wrapper` class in main.py
 
+After writing the whole readme, I noticed that all language editions are in German and therefore the English README doesn't make 100% sense anymore LOL :(
