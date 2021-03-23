@@ -62,7 +62,8 @@ If you don't have any experience with Python, it's not a big deal.  I can highly
 
 First of all, you need to consider whether you want your module to be called only on command, or to be called in a certain time interval. 1.In a certain time interval:Continuous modules run permanently in the background in Luna and are called in a fixed time interval.   This is specified in seconds.   Try to keep this time interval as long as possible, so that it is called as seldom as possible.  This may save some of the 
 needed computing power. For this you use a so called continuous _module.  The structure looks like this: 
-```INTERVALL = 2
+```
+INTERVALL = 2
 
 def run(core (in older modules luna), skills):
     .
