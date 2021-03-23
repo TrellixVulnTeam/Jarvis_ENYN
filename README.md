@@ -30,8 +30,6 @@ For all further steps, a setup wizard is currently in work, but it will take som
 
 2. Then install the applications:
 - `sudo apt-get installpython3.5-dev python3.4-dev libatlas-base-dev`.
-- Also the following if remote desktop control is desired
-    `sudo apt-get install xvfb -y`
 
 3. after that we install all the packages we work with:
 - `sudo pip3 install pywhatkit pafy youtube-dl SpeechRecognition PyVirtualDisplay selenium androidtv wikipedia googlemapsspacex_pyhtml5lib python_dateutilpytube3`
@@ -44,6 +42,13 @@ For all further steps, a setup wizard is currently in work, but it will take som
 - telegram true, if you use it, otherwise false. If you use it, you must also set the "telegram_key". You can find the setup of a telegram-bot on the internet. Just search for Bot-Father
 - if you want to use Phillips-Hue, you also have to enter the "Bridge IP" and press the button of the bridge when you call it for the first time
 
+5. Remote desktop setup(only possible with GUI)
+- `sudo apt-get install xrdp`
+
+Only if there are errors in the connection:
+- `sudo apt-get remove xrdp vnc4server tightvncserver --yes`
+- `sudo apt-get install tightvncserver --yes`
+- `sudo apt-get install xrdp –yes`
 
 ## Why a Raspberry pi
 For Jarvis, I recommend a Raspberry Pi: it is inexpensive and at the same time brings enough power.  I decided on a Raspi 4, because it is the most powerful. However, I would reconsider the purchase, since this one - unlike its predecessors - gets very warm due to the high performance and you therefore need a fan. This is at least audible when sleeping.  Therefore, if the server is not the same as the client, I would go for a Raspi 3B+.With a Raspi 4, a case must also be purchased.  Here I can recommend the following model: 
@@ -51,4 +56,23 @@ For Jarvis, I recommend a Raspberry Pi: it is inexpensive and at the same time b
 - [Case 2](https://www.amazon.de/dp/B08BKYSZS3/ref=sr_1_35?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=3AQH6GBOBVF4V&dchild=1&keywords=raspberry+pi+4+geh%C3%A4use&qid=1596056942&s=ce-de&sprefix=rasp%2Celectronics%2C186&sr=1-35)
 
 In addition, a Raspi makes sense, because it not only brings WLAN and Bluetooth, but also has the GPIO pins, to which later smart home devices can be connected.The installation of "Debian Buster" (the operating system) is very simple. I use a graphical user interface, because I work on new modules all the time and save a lot of time. I also want to make the project more or less beginner friendly, so it only makes sense to use an operating system with a GUI. To install, first download the balenaEtcher program.  Open it and select your micro SD card in the first field and the ISO file in the installation folder in the second field.   Then wait until the program has run. Then remove the SD card from the PC and insert it into the Raspi. There you perform the setup.  The question if the new updates should be installed, I would answer in the affirmative. The microphone and the box must of course also be connected.  As a box I use my anyway in the room existing sound system, as a microphone a 10€ part.  The only thing to keep in mind when buying a microphone is that it must be omni-directional. This is usually fulfilled by the so-called "conference microphones". For the speakers, I would go for a model with its own power supply, since the Raspi only provides a very limited voltage for the audio output. Note that a USB port connected to the Raspi also takes power from it, so that can also cause problems. If you are using the operating version with GUI, you can simply look if you get a lightning symbol on the top right.   If yes, then use speakers that are NOT connected to the Raspi. Also, I recommend a soundstick, such as [this one](https://www.amazon.de/gp/product/B00C7LXUDY/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1). This is due to the fact that the audio board of the Raspi has been saved and the sound via jack is therefore not so good. In addition, there is not permanently on this voltage, so that the Raspi consumes less power.  However, if a sound is played, the full power comes, which leads to a crackling sound. (NOT ALWAYS!!!)
-  
+
+## How can I develop "modules
+If you don't have any experience with Python, it's not a big deal.  I can highly recommend [this playlist](https://www.youtube.com/watch?v=dyJ dLalc7TA&list=PLNmsVeXQZj7q0ao69AIogD94oBgp3E9Zs). 
+
+First of all, you need to consider whether you want your module to be called only on command, or to be called in a certain time interval. 1.In a certain time interval:Continuous modules run permanently in the background in Luna and are called in a fixed time interval.   This is specified in seconds.   Try to keep this time interval as long as possible, so that it is called as seldom as possible.  This may save some of the 
+needed computing power. For this you use a so called continuous _module.  The structure looks like this: 
+`INTERVALL = 2
+
+def run(core (in older modules luna), skills):
+    .
+    .
+    .
+`
+Here the `INTERVALL` describes the time interval and `def run` describes the method that should be called.
+Skills represents the module_skills, which provide useful functions. You can find them in the resources folder
+
+`PRIORITY` defines the priority in which the modules are called. If this is not set, the value 0 is automatically assigned. The modules are ordered lexically in the respective priority level. Since LUNA cannot know what your module can do, the modules must decide in a first rough run whether they can do something with the text. For this the method `isValid()` is used, which returns True if this is the case. This function only checks if a keyword is included in the command or not. Your word selection should be well considered. If this is the case, the method `handle()` or `run()` is called.
+
+For all other core (or luna) calls, you can look into the `module wrapper` class in main.py
+
