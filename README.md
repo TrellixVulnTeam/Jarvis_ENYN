@@ -73,6 +73,25 @@ def run(core (in older modules luna), skills):
 Here the `INTERVALL` describes the time interval and `def run` describes the method that should be called.
 Skills represents the module_skills, which provide useful functions. You can find them in the resources folder
 
+In "normal modules":
+
+```
+PRIORITY= -1
+def isValid(text):
+    text = text.lower()
+    if ‚Example word‘ in text:
+        return True
+    elif ‚other example word‘ in text:
+        return True
+    else:
+        return False
+
+def handle(text, luna, profile):
+    .
+    .
+    .
+```
+
 `PRIORITY` defines the priority in which the modules are called. If this is not set, the value 0 is automatically assigned. The modules are ordered lexically in the respective priority level. Since LUNA cannot know what your module can do, the modules must decide in a first rough run whether they can do something with the text. For this the method `isValid()` is used, which returns True if this is the case. This function only checks if a keyword is included in the command or not. Your word selection should be well considered. If this is the case, the method `handle()` or `run()` is called.
 
 For all other core (or luna) calls, you can look into the `module wrapper` class in main.py
