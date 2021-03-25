@@ -9,14 +9,16 @@
             "activation_phrase",
             "home_location"
         ],
-        "LUNA_telegram_name_to_id_table": {},
         "users": {},
-        "LUNA_telegram_id_to_name_table": {},
         "telegram_allowed_id_table": [],
         "rejected_telegram_messages": [],
         "module_storage": {
             "phillips_hue":{
                 "Bridge-IP": ""
+            },
+            "philips-tv": {
+                "user": "",
+                "pass": ""
             }
 	    },
         "user": ""

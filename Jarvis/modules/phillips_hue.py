@@ -17,7 +17,8 @@ def isValid(text):
     colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'dunkelgrün', 'braun', 'orange',
               'warmweiß']
     if ('mach' in text or 'licht' in text) and (
-            'an' in text or 'aus' in text or 'heller' in text or 'dunkler' in text or '%' in text or 'prozent' in text):
+            'an' in text or 'aus' in text or 'heller' in text or 'dunkler' in text or '%' in text or 'prozent' in text) \
+            and not 'fernseh' in text:
         return True
     for item in colors:
         if item in text and 'licht' in text:
