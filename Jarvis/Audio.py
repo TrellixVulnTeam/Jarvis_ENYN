@@ -8,7 +8,7 @@ from datetime import datetime
 from threading import Thread
 import vlc
 import pafy
-from Jarvis.resources.tts import Text_to_Speech
+from resources.tts import Text_to_Speech
 import speech_recognition as sr
 import pyaudio
 import pvporcupine
@@ -61,7 +61,7 @@ class AudioInput:
                 self.luna.play_bling_sound()
             with sr.Microphone(device_index=None) as source:
                 # record user input
-                audio = self.speech_engine.listen(source, timeout=3, phrase_time_limit=5)
+                audio = self.speech_engine.listen(source)
                 try:
                     # translate audio to text
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
@@ -79,10 +79,9 @@ class AudioInput:
 
     def run(self):
         porcupine = None
-
         try:
             keywords = ["jarvis", "hey siri"]
-            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.4, 0.2])
+            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.3, 0.2])
             pa = pyaudio.PyAudio()
 
             audio_stream = pa.open(
@@ -92,7 +91,7 @@ class AudioInput:
                 input=True,
                 frames_per_buffer=porcupine.frame_length)
 
-            print('[INFO] Listening {')
+            print('\n[INFO] Listening {')
             for keyword in keywords:
                 print('  %s' % (keyword))
             print('}')
@@ -144,11 +143,11 @@ class AudioOutput:
 
         self.music_player = MusicPlayer(self)
         # audio.pre_init(44100, -16, 1, 512)
-        audio.init()
         self.tts = Text_to_Speech()
         self.tts.start(voice)
 
     def start(self):
+        audio.init()
         ot = Thread(target=self.run)
         ot.daemon = True
         ot.start()
@@ -180,8 +179,8 @@ class AudioOutput:
                         audio.Channel(2).play(track)
                         self.playback.pop(0)
                 if not self.playback == [] and audio.Channel(1).get_busy() == 0:
-                    track = audio.Sound(self.music[0])
-                    self.music.pop(0)
+                    track = audio.Sound(self.playback[0])
+                    self.playback.pop(0)
                     audio.Channel(1).play(track)
                 time.sleep(0.1)
             except:

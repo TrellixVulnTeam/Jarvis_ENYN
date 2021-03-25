@@ -12,12 +12,12 @@ from pygame import mixer as audio
 
 
 class FirstStart:
-    def __init__(self):
+    def __init__(self, Audio):
         self.relPath = str(Path(__file__).parent) + "/"
         with open(self.relPath + "config.json", "r") as config_file:
             self.config_data = json.load(config_file)
 
-        self.Audio = InstallationAudio()
+        self.Audio = Audio
         self.telegram = False
         time.sleep(2)
         self.run()
@@ -26,15 +26,17 @@ class FirstStart:
 
     def run(self):
         self.say(
-            "Hallo, ich bin Jarvis dein neuer Sprachassistent. Ich werde jetzt zusammen mit dir die Einrichtung durchführen")
+            "Hallo, ich bin Jarvis dein neuer Sprachassistent. Ich werde jetzt zusammen mit dir die Einrichtung durchführen.")
+        self.say("Wir beginnen mit der Einrichtung deiner Nutzerrepräsentation.")
         self.add_user()
         self.set_voice_gender()
         self.set_home_location()
         self.set_telegram()
 
-        self.say("Wir sind fast fertig. Wir richten nur noch ein paar meiner Module ein.")
+        self.say("Wir sind fast fertig. Wir richten nur noch ein paar Module ein.")
         print("\n[STEP-INFO] Switched to setting up the modules...")
         self.set_phillips_hue()
+        self.set_phillips_tv()
         self.say(
             "Zum Schluss werde ich noch ein paar Dinge erledigen und anschließend automatisch starten. Das kann etwas dauern.")
         self.set_Network_Key()
@@ -63,7 +65,7 @@ class FirstStart:
         return False
 
     def add_user(self):
-        user_name = self.ask_with_answer("Zunächst einmal, wie heißt du?")
+        user_name = self.ask_with_answer("Wie heißt du?")
         user_age = self.ask_with_answer("Wie alt bist du?")
         user = {
             "name": user_name,
@@ -130,10 +132,18 @@ class FirstStart:
             self.say("Alles klar. Telegram wird nicht eingerichtet.")
             print("[INFO] Telegram not wanted.")
 
-    def set_telegram_tokens(self, name, token):
-        self.config_data["Local_storage"]["telegram_allowed_id_table"].append(token)
-        self.config_data["Local_storage"]["telegram_name_to_id_table"][name] = token
-        self.config_data["Local_storage"]["telegram_id_to_name_table"][token] = name
+    def set_phillips_tv(self):
+        self.say("Ich weiß leider noch nicht, wie ich die Nutzung eines Phillips-Fernsehers einrichten soll. Schau "
+                 "dafür einfach mal in die Program-Dokumentation oder frag einfach Jakob.")
+        """
+        response = self.ask_with_answer('Besitzt du einen Phillips-Fernseher und möchtest diesen über mich steuern?')
+        if self.is_desired(response):
+            self.say('Okay, bitte schalte den Fernseher jetzt an. Sobald ein Code auf diesem angezeigt wird, '
+                     'sag ihn bitte sofort. Bis dahin sollte Ruhe herrschen, damit ich nicht auf Falsches reagiere.')
+            time.sleep(5)
+            subprocess.call('sudo pip3 install pycryptodome requests paho-mqtt'.split(' '))
+            subprocess.call(('python3 ' + self.relPath + 'modules/resources/pylips.py').split(' '))
+        """
 
     def set_Network_Key(self):
         key = Random.get_random_bytes(32)
@@ -192,7 +202,7 @@ def install_packeges():
         subprocess.run(command.split(' '))
 
 if __name__ == "__main__":
-    installation = FirstStart()
+    installation = FirstStart(InstallationAudio())
     installation.run()
 
     core = main

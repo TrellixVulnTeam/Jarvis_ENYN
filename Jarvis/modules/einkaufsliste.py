@@ -127,14 +127,14 @@ def get_item(luna, skills):
     duplicates_in_items = [item[i] for i in range(len(item)) if not i == item.index(item[i])]
     # anschließend werden Dopplungen, die durch die letzte Zeile entstehen könnten gelöscht
     if duplicates_in_items:
-        item = skills.assamble_array(skills, item)
+        item = skills.assamble_array(item)
     return item
 
 def get_aussage_gemeinsam(text, luna, skills):
     aussage = ''
     if 'einkaufsliste' in luna.local_storage.keys():
         einkaufsliste = luna.local_storage.get('einkaufsliste')
-        aussage = skills.get_enumerate(skills, einkaufsliste)
+        aussage = skills.get_enumerate(einkaufsliste)
     return aussage
 
 
@@ -160,11 +160,11 @@ def handle(text, luna, skills):
                 if len(double_items) > 1:
                     luna.say(
                         '{} befinden sich bereits auf der einkaufsliste. Soll ich sie dennoch auf die Einkaufsliste setzen?'.format(
-                            skills.get_enumerate(skills, double_items)))
+                            skills.get_enumerate(double_items)))
                 else:
                     luna.say(
                         '{} befindet sich bereits auf der einkaufsliste. Soll ich sie dennoch auf die Einkaufsliste setzen?'.format(
-                            skills.get_enumerate(skills, double_items)))
+                            skills.get_enumerate(double_items)))
                 response = luna.listen()
                 # Vlt möchte der User ja nur bestimmte Dopplungen behalten...
                 if 'nur' in text and 'nicht' in text:
@@ -173,7 +173,7 @@ def handle(text, luna, skills):
                 elif 'ja' in response or 'gerne' in response or 'bitte' in response:
                     for i in item:
                         einkaufsliste.append(i)
-                    neue_einkaufsliste = skills.assamble_array(skills, einkaufsliste)
+                    neue_einkaufsliste = skills.assamble_array(einkaufsliste)
                     einkaufsliste = neue_einkaufsliste
                 # Oder auch gar keine.
                 else:
@@ -185,10 +185,10 @@ def handle(text, luna, skills):
                     else:
                         for i in item:
                             einkaufsliste.append(i)
-                        neue_einkaufsliste = skills.assamble_array(skills, einkaufsliste)
+                        neue_einkaufsliste = skills.assamble_array(einkaufsliste)
                         einkaufsliste = neue_einkaufsliste
                         luna.say('Alles klar, ich habe nur {} auf die Einkaufsliste gesetzt.'.format(
-                            skills.get_enumerate(skills, item)))
+                            skills.get_enumerate(item)))
 
             else:
                 # Scheinbar gibt es keine Dopplungen, also werden einfach alle items auf die Liste gesetzt
@@ -202,10 +202,10 @@ def handle(text, luna, skills):
                 einkaufsliste.append(i)
         # Bevor wir die Einkaufsliste so abspeichern, werden wir gleich auch noch die Dopplungen in der Liste, die durch
         # das Hinzufügen gerade enstanden sind, zusammenzählen.
-        einkaufsliste = skills.assamble_array(skills, einkaufsliste)
+        einkaufsliste = skills.assamble_array(einkaufsliste)
         
         # Und noch die Liste im Local_storage, bzw. die des Nutzers aktualisieren
-        luna.say("Alles klar. Ich habe {} auf die Einkaufsliste gesetzt.".format(skills.get_enumerate(skills, item)))
+        luna.say("Alles klar. Ich habe {} auf die Einkaufsliste gesetzt.".format(skills.get_enumerate(item)))
         luna.local_storage['einkaufsliste'] = einkaufsliste
 
 
@@ -256,7 +256,7 @@ def handle(text, luna, skills):
                         'Scheinbar ist {} nicht in der Einkaufsliste vorhanden und konnte daher nicht gelöscht werden.'.format(
                             item))
                 if len(deleted) != -1:
-                    luna.say(skills.get_enumerate(skills, deleted) + ' wurde von deiner Einkaufsliste gelöscht.')
+                    luna.say(skills.get_enumerate(deleted) + ' wurde von deiner Einkaufsliste gelöscht.')
                 else:
                     luna.say(
                         'Da ist wohl was schief gelaufe. Ich konnte leider nichts aus der Einkaufsliste löschen.')
@@ -288,7 +288,7 @@ def handle(text, luna, skills):
         # in der einkaufsliste stehen, aber sollte es doch sein, hat man
         # die möglichkeit manuell einzugreifen
         luna.say('Einen Moment bitte.')
-        luna.local_storage['einkaufsliste'] = skills.assamble_array(skills, luna.local_storage['einkaufsliste'])
+        luna.local_storage['einkaufsliste'] = skills.assamble_array(luna.local_storage['einkaufsliste'])
         luna.say('Die Einkaufsliste wurde aufgeräumt!')
 
 

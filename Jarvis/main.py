@@ -65,7 +65,6 @@ class Modules:
         return modules
 
     def query_threaded(self, name, text, user, direct, messenger=False):
-        print("query threaded --> messenger: ", messenger)
         mod_skill = skills()
         if text == None:
             # generate a random text
@@ -117,7 +116,6 @@ class Modules:
 
     def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
         # self.query_threaded(name, text, direct, messenger=messenger)
-        print("start module --> messenger: ", messenger)
         mod_skill = skills()
         analysis = {}
         if text == None:
@@ -319,7 +317,6 @@ class Modulewrapper:
     def say(self, text, output='auto'):
         text = self.speechVariation(text)
         if output == 'auto':
-            print(f"telegram_call: {self.telegram_call}, telegram: {self.telegram}, messenger: {self.messenger}")
             if self.telegram_call:
                 output = 'telegram'
         if 'telegram' in output.lower() or self.messenger:
@@ -331,7 +328,7 @@ class Modulewrapper:
 
     def telegram_say(self, text):
         try:
-            self.telegram.say(text, Luna.users.get_user_by_name(self.user)['telegram_id'])
+            self.telegram.say(text, self.user['telegram_id'])
         except KeyError:
             Log.write('WARNING',
                       'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben '
@@ -340,6 +337,7 @@ class Modulewrapper:
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
         if path != None:
+            print("open Path")
             with open(path, "rb") as wavfile:
                 input_wav = wavfile.read()
         if audiofile is not None:
@@ -468,7 +466,6 @@ class Modulewrapper_continuous:
     def start_module(self, name=None, text=None, user=None):
         # user prediction is not implemented yet, therefore here the workaround
         # user = self.local_storage['user']
-        print("start module with text {", text ,"}")
         Modules.start_module(text=text, user=user, name=name)
 
     def start_module_and_confirm(self, name=None, text=None, user=None):
@@ -513,7 +510,7 @@ class LUNA:
             for msg in self.telegram.messages.copy():
                 # Load the user name from the corresponding table
                 try:
-                    user = msg['from']['first_name']
+                    user = self.users.get_user_by_name(msg['from']['first_name'])
                 except KeyError:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
                     self.local_storage['rejected_telegram_messages'].append(msg)
@@ -614,6 +611,8 @@ class Users:
                 userpath = os.path.join(location, username)
                 self.add_user(userpath)
                 Log.write('INFO', 'Nutzer {} geladen'.format(username), show=True)
+        if self.users == []:
+            Luna.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
 
     def add_user(self, path):
         with open(path + "/data.json") as user_file:
@@ -625,11 +624,11 @@ class Users:
 
     def get_user_by_name(self, name):
         for user in self.users:
-            if user['first_name'] == name:
+            if user.get('first_name').lower() == name.lower():
                 return user
         return None
 
-    def get_user_by_id(self, id):
+    def get_user_by_i(self, id):
         for user in self.users:
             if user["id"] == id:
                 return user
@@ -672,7 +671,6 @@ if __name__ == "__main__":
     Luna = LUNA(Local_storage)
     Luna.local_storage['LUNA_starttime'] = time.time()
     Audio_Input.set_luna(Luna)
-    print("\n\n\n\n\n\n")
     time.sleep(2)
     # -----------Starting-----------#
     Modules.start_continuous()
@@ -706,10 +704,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            if datetime.now().hour == 5:
-                # start updater
-                pass
-            time.sleep(3600)
+            time.sleep(10)
         except:
             Modules.stop_continuous()
             Audio_Input.stop()

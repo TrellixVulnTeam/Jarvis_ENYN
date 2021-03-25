@@ -60,13 +60,13 @@ class skills:
     def assamble_new_items(self, array1, array2):
         new_array = []
         for item in array1:
-            value1, number1 = self.get_value_number(self, item)
+            value1, number1 = self.get_value_number(item)
             try:
                 item1 = item.split(" ", 1)[1].lower()
             except:
                 item1 = item.lower()
             for field in array2:
-                value2, number2 = self.get_value_number(self, field)
+                value2, number2 = self.get_value_number(field)
                 try:
                     item2 = field.split(" ", 1)[1].lower()
                 except:
@@ -89,12 +89,12 @@ class skills:
                     else:
                         new_array.append(item1.capitalize())
                 else:
-                    if self.is_enthalten(self, item1, array2):
+                    if self.is_enthalten(item1, array2):
                         new_array.append(item1.capitalize())
-                    if self.is_enthalten(self, item2, array1):
+                    if self.is_enthalten(item2, array1):
                         new_array.append(item2.capitalize())
 
-        return self.delete_duplications(self, new_array)
+        return self.delete_duplications(new_array)
 
     def is_enthalten(self, item, array):
         item = item.lower()
