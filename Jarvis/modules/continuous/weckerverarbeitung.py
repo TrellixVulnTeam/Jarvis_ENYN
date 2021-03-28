@@ -23,8 +23,9 @@ def run(core, profile):
                 except KeyError:
                     '''Do nothing'''
                 """
-                ton = "morgen_ihr_luschen.wav"
-                dic = {'Text': ausgabe, 'Ton': ton, 'User': core.user}
+                ton = item.get('Ton')
+                user = item.get('User')
+                dic = {'Text': ausgabe, 'Ton': ton, 'User': user}
                 core.start_module(name='weckerausgabe', text=dic)
                 erinnerungen.remove(item)
                 core.local_storage['Wecker'] = erinnerungen

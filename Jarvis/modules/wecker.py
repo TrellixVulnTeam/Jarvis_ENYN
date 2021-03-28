@@ -9,6 +9,7 @@ def handle(text, core, skills):
     text = text.lower()
     time = core.analysis["time"]
     minute = str(time['minute']) if time['minute'] != 0 else ''
+    ton = core.user.get('wecker_ton')
     """
     if not 'morgens' in text and not 'früh' in text and not 'abends' in text:
         core.say("Meintest du {} Uhr {} morgens oder Abends?".format(str(time['hour']-12), minute))
@@ -22,7 +23,7 @@ def handle(text, core, skills):
             days = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag"]
             try:
                 time = core.analysis["time"]
-                wecker = {'Zeit': time, 'User': core.user}
+                wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Täglichen Wecker um {} Uhr {} gelöcht.".format(stunde, minute))
@@ -33,7 +34,7 @@ def handle(text, core, skills):
                     minute = item["Zeit"]["minute"]
                     core.say("{} Uhr {}".format(stunde, minute))
                 response = core.listen()
-                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user}
+                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user, 'Ton': ton}
                 for item in core.local_storage["regular_alarm"].keys():
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Täglichen Wecker um {} Uhr {} gelöscht.". format(wecker['Zeit']['hour'], wecker['Zeit']['minute']))
@@ -42,7 +43,7 @@ def handle(text, core, skills):
             days = ["samstag", "sonntag"]
             try:
                 time = core.analysis["time"]
-                wecker = {'Zeit': time, 'User': core.user}
+                wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Täglichen Wecker um {} Uhr {} gelöcht.".format(stunde, minute))
@@ -53,7 +54,7 @@ def handle(text, core, skills):
                     minute = item["Zeit"]["minute"]
                     core.say("{} Uhr {}".format(stunde, minute))
                 response = core.listen()
-                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user}
+                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Wecker am Wochenende um {} Uhr {} gelöscht.". format(wecker['Zeit']['hour'], wecker['Zeit']['minute']))
@@ -62,7 +63,7 @@ def handle(text, core, skills):
             days = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"]
             try:
                 time = core.analysis["time"]
-                wecker = {'Zeit': time, 'User': core.user}
+                wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Wecker unter der Woche um {} Uhr {} gelöcht.".format(stunde, minute))
@@ -73,7 +74,7 @@ def handle(text, core, skills):
                     minute = item["Zeit"]["minute"]
                     core.say("{} Uhr {}".format(stunde, minute))
                 response = core.listen()
-                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user}
+                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Wecker unter der Woche um {} Uhr {} gelöscht.".format(wecker['Zeit']['hour'], wecker['Zeit']['minute']))
@@ -85,7 +86,7 @@ def handle(text, core, skills):
                     days.remove(item)
             try:
                 time = core.analysis["time"]
-                wecker = {'Zeit': time, 'User': core.user}
+                wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Täglichen Wecker um {} Uhr {} gelöcht.".format(stunde, minute))
@@ -96,14 +97,14 @@ def handle(text, core, skills):
                     minute = item["Zeit"]["minute"]
                     core.say("{} Uhr {}".format(stunde, minute))
                 response = core.listen()
-                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user}
+                wecker = {'Zeit': core.Analyzer.analyze(response)['time'], 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Wecker unter der Woche um {} Uhr {} gelöscht.".format(wecker['Zeit']['hour'], wecker['Zeit']['minute']))
 
         else:
             if 'Wecker' in core.local_storage.keys():
-                wecker = {'Zeit': core.analysis['datetime'], 'User': core.user}
+                wecker = {'Zeit': core.analysis['datetime'], 'User': core.user, 'Ton': ton}
                 core.local_storage['Wecker'].remove(wecker)
                 core.say("Wecker gelöscht: {}, {} Uhr {}".format(get_reply(core, time), stunde, minute))
             else:
@@ -111,17 +112,17 @@ def handle(text, core, skills):
 
     else:
         if 'täglich' in text or 'jeden tag' in text or 'jeden morgen' in text or 'jeden abend' in text:
-            wecker = {'Zeit': time, 'User': core.user}
+            wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
             for item in core.local_storage["regular_alarm"].keys():
                 core.local_storage["regular_alarm"][item].append(wecker)
             core.say("Wecker gestellt für jeden Tag um {} Uhr {}.".format(stunde, minute))
         elif 'wochenende' in text:
-            wecker = {'Zeit': time, 'User': core.user}
+            wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
             core.local_storage["regular_alarm"]["samstag"].append(wecker)
             core.local_storage["regular_alarm"]["sonntag"].append(wecker)
             core.say("Wecker gestellt für jeden Samstag und Sonntag um {} Uhr {}". format(stunde, minute))
         elif 'wochentags' in text or 'unter der woche' in text:
-            wecker = {'Zeit': time, 'User': core.user}
+            wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
             core.local_storage["regular_alarm"]["montag"].append(wecker)
             core.local_storage["regular_alarm"]["dienstag"].append(wecker)
             core.local_storage["regular_alarm"]["mittwoch"].append(wecker)
@@ -129,7 +130,7 @@ def handle(text, core, skills):
             core.local_storage["regular_alarm"]["freitag"].append(wecker)
             core.say("Wecker gestellt für jeden Wochentag um {} Uhr {}.". format(stunde, minute))
         elif 'jeden' in text or 'jedem' in text:
-            wecker = {'Zeit': time, 'User': core.user}
+            wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
             days = get_text_beetween('jeden', text)
             for item in days:
                 if item.lower() in ["montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag"]:
@@ -138,12 +139,11 @@ def handle(text, core, skills):
                     days.remove(item)
             core.say("Wecker gestellt für jeden {} um {} Uhr {}.".format(get_enumerate(days), stunde, minute))
         else:
-            wecker = {'Zeit': core.analysis['datetime'], 'User': core.user}
+            wecker = {'Zeit': core.analysis['datetime'], 'User': core.user, 'Ton': ton}
             if 'Wecker' in core.local_storage.keys():
                 core.local_storage['Wecker'].append(wecker)
             else:
                 core.local_storage['Wecker'] = [wecker]
-            print(time)
             core.say("Wecker gestellt für {}, {} Uhr {}".format(get_reply(core, time), stunde, minute))
 
 def get_reply(core, time):
@@ -166,7 +166,6 @@ def get_reply(core, time):
     monate = {'01': 'Januar', '02': 'Februar', '03': 'März', '04': 'April', '05': 'Mai', '06': 'Juni',
               '07': 'Juli', '08': 'August', '09': 'September', '10': 'Oktober', '11': 'November',
               '12': 'Dezember'}
-    print(tag, now)
     if int(tag) == int(now):
         return 'heute'
     elif tag == now+1:

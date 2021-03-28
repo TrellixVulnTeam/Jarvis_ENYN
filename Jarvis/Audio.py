@@ -49,21 +49,22 @@ class AudioInput:
 
     def recognize_file(self, audio_file):
         with audio_file as source:
-            audio = self.speech_engine.record(source, offset=10)
-            text = self.speech_engine.recognize_google_cloud(audio, language="de-DE", )
+            audio = self.speech_engine.record(source)
+            text = self.speech_engine.recognize_google(audio, language="de-DE")
             return text
 
     def recognize_input(self, listen=False):
         # recognize user input through the microphone
         try:
-            if not listen:
-                # if there is no conservation, play a bling sound
-                self.luna.play_bling_sound()
             with sr.Microphone(device_index=None) as source:
                 # record user input
+                if not listen:
+                    # if there is no conservation, play a bling sound
+                    self.luna.play_bling_sound()
                 audio = self.speech_engine.listen(source)
                 try:
                     # translate audio to text
+                    self.adjusting()
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
                     print("[USER INPUT] ", text)
                 except:
@@ -81,7 +82,7 @@ class AudioInput:
         porcupine = None
         try:
             keywords = ["jarvis", "hey siri"]
-            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.3, 0.2])
+            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.45, 0.2])
             pa = pyaudio.PyAudio()
 
             audio_stream = pa.open(
@@ -91,20 +92,17 @@ class AudioInput:
                 input=True,
                 frames_per_buffer=porcupine.frame_length)
 
-            print('\n[INFO] Listening {')
-            for keyword in keywords:
-                print('  %s' % (keyword))
-            print('}')
+            print('\n[INFO] Listening {%s}' % keywords)
 
             while True:
                 pcm = audio_stream.read(porcupine.frame_length)
                 pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
                 keyword_index = porcupine.process(pcm)
                 if keyword_index >= 0:
-                    if(keyword_index > 0):
+                    if keyword_index > 0:
                         self.luna.hotword_detected("wrong assistant!")
                     else:
-                        print('[%s] Detected %s' % (str(datetime.now()), keywords[keyword_index]))
+                        print(f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
                         self.recognize_input()
 
         except MemoryError:
@@ -112,6 +110,10 @@ class AudioInput:
             self.start()
         except:
             print(f"[ERROR] {traceback.print_exc()}")
+
+    def adjusting(self):
+        with sr.Microphone(device_index=None) as source:
+            self.speech_engine.adjust_for_ambient_noise(source)
 
     def py_error_handler(self, filename, line, function, err, fmt):
         # This function suppress warnings from Alsa, which are totally useless
@@ -159,6 +161,7 @@ class AudioOutput:
                 if not self.notification == [] and audio.Channel(0).get_busy() == 0 and not self.tts.is_reading:
                     if audio.Channel(1).get_busy() == 1:
                         audio.Channel(1).set_volume(0.25)
+                        audio.Channel(2).set_volume(0.25)
                     if type(self.notification[0]) == type("string"):
                         self.tts.say(self.notification[0])
                         self.notification.pop(0)
@@ -166,9 +169,6 @@ class AudioOutput:
                         track = audio.Sound(self.notification[0])
                         self.notification.pop(0)
                         audio.Channel(0).play(track)
-                        while audio.Channel(0).get_busy() == 1:
-                            time.sleep(0.25)
-                    audio.Channel(1).set_volume(1)
                 if not self.music == [] and audio.Channel(2).get_busy() == 0:
                     if type(self.music[0]) == type("string"):
                         topic = self.music[0]
@@ -182,7 +182,10 @@ class AudioOutput:
                     track = audio.Sound(self.playback[0])
                     self.playback.pop(0)
                     audio.Channel(1).play(track)
-                time.sleep(0.1)
+                if not audio.Channel(0).get_busy() == 1:
+                    audio.Channel(1).set_volume(1)
+                    audio.Channel(2).set_volume(1)
+                time.sleep(0.3)
             except:
                 traceback.print_exc()
 
@@ -295,9 +298,9 @@ class MusicPlayer:
             self.is_playing = True
             self.start()
         media = None
-        if playlist:
-            self.add_playlist(url, by_name, next)
-        elif not by_name == None:
+        """if playlist:
+            self.add_playlist(url, by_name, next)"""
+        if not by_name == None:
             _url = 'https://www.youtube.com/results?search_query=' + str("brings")
             html = urllib.request.urlopen(_url)
             video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
@@ -309,7 +312,6 @@ class MusicPlayer:
                 else:
                     continue
             best = video.getbest()
-            print(best.url)
             media = self.instance.media_new(best.url)
 
         elif not url == False:
