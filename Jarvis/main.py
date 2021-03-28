@@ -115,6 +115,7 @@ class Modules:
         return
 
     def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
+        print(f'[ACTION] Start Module, text: "{text}"')
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = skills()
         analysis = {}
@@ -124,7 +125,7 @@ class Modules:
             Log.write('ACTION', '{}'.format(text), conv_id=str(text), show=True)
             try:
                 analysis = Luna.Analyzer.analyze(str(text))
-                Log.write('ACTION', 'Analysis: ' + str(analysis), conv_id=str(text), show=True)
+                # Log.write('ACTION', 'Analysis: ' + str(analysis), conv_id=str(text), show=True)
             except:
                 traceback.print_exc()
                 Log.write('ERROR', 'Sentence analysis failed!', conv_id=str(text), show=True)
@@ -133,7 +134,7 @@ class Modules:
             for module in self.modules:
                 if module.__name__ == name:
                     Log.write('ACTION', '--Modul {} was called directly (Parameter: {})--'.format(name, text),
-                              conv_id=str(text), show=True)
+                              conv_id=str(text), show=False)
                     Luna.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
@@ -188,7 +189,7 @@ class Modules:
                 Luna.continuous_modules[module.__name__] = self.Modulewrapper_continuous(intervalltime)
             try:
                 module.start(Luna.continuous_modules[module.__name__], Luna.local_storage)
-                Log.write('INFO', 'Modul {} started'.format(module.__name__), show=True)
+                Log.write('INFO', 'Modul {} started'.format(module.__name__), show=False)
             except:
                 # traceback.print_exc()
                 continue
@@ -337,7 +338,6 @@ class Modulewrapper:
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
         if path != None:
-            print("open Path")
             with open(path, "rb") as wavfile:
                 input_wav = wavfile.read()
         if audiofile is not None:
@@ -563,7 +563,7 @@ class LUNA:
             """
             pass
         elif text == "wrong assistant!":
-            Audio_Output.say("Geh mir nicht fremd!")
+            Audio_Output.say("Geh mir nicht fremd, du sau!")
         else:
             user = self.users.get_user_by_name(self.local_storage["user"])
             Modules.start_module(text=str(text), user=user)
@@ -679,13 +679,11 @@ if __name__ == "__main__":
     time.sleep(0.75)
 
     if config_data['telegram']:
-        Log.write('', '', show=True)
         Log.write('INFO', 'Starte Telegram...', show=True)
         if config_data['telegram_key'] == '':
             Log.write('ERROR', 'Kein Telegram-Bot-Token angegeben!', show=True)
         else:
             from resources.telegram import TelegramInterface
-
             Luna.telegram = TelegramInterface(config_data['telegram_key'], Luna)
             Luna.telegram.start()
             tgt = Thread(target=Luna.telegram_thread)

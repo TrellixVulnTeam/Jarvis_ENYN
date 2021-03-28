@@ -18,7 +18,8 @@
             },
             "philips-tv": {
                 "user": "",
-                "pass": ""
+                "pass": "",
+                "host": ""
             }
 	    },
         "user": ""
