@@ -19,7 +19,7 @@ Here I have to admit that I value performance/quality more than privacy: here I 
 For this I use "procupine", which in itself is very reliable, but in the free version you are more limited in the choice of the word itself. I have chosen "Jarvis", but this can be changed in the Audio.py in the class AudioInput(). 
 
 ## Installation
-The system consists of a Raspi (4 - but should also run on older ones), on which the operating system Debian runs. You can find enough instructions on the internet oder einen Blick auf den Punkt "Why a Raspberry pi" werfen. (A detailed justification and a recommendation for further required hardware components follows below in the README )
+The system consists of a Raspi (4 - but should also run on older ones), on which the operating system Debian runs. You can find enough instructions on the internet or have a look on "Why a Raspberry pi". (A detailed justification and a recommendation for further required hardware components follows below in the README )
 For all further steps, a setup wizard is currently in work, but it will take some time. Therefore here still in detail and manually:
 
 (P.S. all commands are executed in the shell).
