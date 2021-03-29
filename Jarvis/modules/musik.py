@@ -18,4 +18,4 @@ def handle(text, luna, skills):
     if 'nächstes' in text or 'danach' in text or 'gleich' in text:
         next = True
 
-    luna.play_music(song, announce=True, next=next)
+    luna.play_music(by_name=song, url=False, path=False, next=next, now=False, playlist=False, announce=False)

@@ -182,7 +182,7 @@ class AudioOutput:
                     track = audio.Sound(self.playback[0])
                     self.playback.pop(0)
                     audio.Channel(1).play(track)
-                if not audio.Channel(0).get_busy() == 1:
+                if not audio.Channel(0).get_busy() == 1 and audio.Channel(1).get_volume != 1 and audio.Channel(2).get_volume != 1:
                     audio.Channel(1).set_volume(1)
                     audio.Channel(2).set_volume(1)
                 time.sleep(0.3)
@@ -301,7 +301,7 @@ class MusicPlayer:
         """if playlist:
             self.add_playlist(url, by_name, next)"""
         if not by_name == None:
-            _url = 'https://www.youtube.com/results?search_query=' + str("brings")
+            _url = 'https://www.youtube.com/results?search_query=' + str(by_name)
             html = urllib.request.urlopen(_url)
             video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
             while(True):

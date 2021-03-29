@@ -115,7 +115,6 @@ class Modules:
         return
 
     def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
-        print(f'[ACTION] Start Module, text: "{text}"')
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = skills()
         analysis = {}
@@ -349,9 +348,11 @@ class Modulewrapper:
         else:
             self.Audio_Output.play_playback(data, next)
 
-    def play_music(self, url=False, announce=False, next=False):
+    def play_music(self, by_name=None, url=None, path=None, next=None, now=None, playlist=None, announce=None):
+        if by_name != None:
+            by_name = "'" + by_name + "'"
         # simply forward information
-        self.Audio_Output.music_player.play(url=url, next=next, announce=announce)
+        self.Audio_Output.music_player.play(by_name=by_name, url=url, path=path, next=next, now=now, playlist=playlist, announce=announce)
 
     def listen(self, telegram=False):
         if telegram:
@@ -679,9 +680,9 @@ if __name__ == "__main__":
     time.sleep(0.75)
 
     if config_data['telegram']:
-        Log.write('INFO', 'Starte Telegram...', show=True)
+        Log.write('INFO', 'Start Telegram...', show=True)
         if config_data['telegram_key'] == '':
-            Log.write('ERROR', 'Kein Telegram-Bot-Token angegeben!', show=True)
+            Log.write('ERROR', 'No Telegram-Bot-Token entered!', show=True)
         else:
             from resources.telegram import TelegramInterface
             Luna.telegram = TelegramInterface(config_data['telegram_key'], Luna)

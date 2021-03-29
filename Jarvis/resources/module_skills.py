@@ -141,7 +141,7 @@ class skills:
         return value, number
 
     def assamble_array(self, array):
-        print(f"Beim Start von assamble_array: {array}")
+        #print(f"Beim Start von assamble_array: {array}")
         temp_array = []
         temp_array0 = array
         for item in temp_array0:
