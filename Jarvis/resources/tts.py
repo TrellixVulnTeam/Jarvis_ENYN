@@ -73,7 +73,8 @@ class Text_to_Speech:
         self.play_button.click()
 
     def start_driver(self):
-        self.driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver', chrome_options=self.get_opt())
+        driver_Path = str(Path(__file__).parent) + '/webdriver/chromedriver'
+        self.driver = webdriver.Chrome(driver_Path, chrome_options=self.get_opt())
         self.get_website_inf()
 
     def get_website_inf(self):
@@ -106,7 +107,7 @@ class Text_to_Speech:
         opt.add_argument("--disable-webgl")
         opt.add_argument("no-default-browser-check")
         opt.add_argument("no-first-run")
-        relPath = str(Path(__file__).parent) + "/"
+        relPath = str(Path(__file__).parent) + "/webdriver/"
         opt.add_extension(relPath + "vpn.crx")
         chrome_prefs = {"profile.managed_default_content_settings.images": 2}
         opt.add_experimental_option("prefs", chrome_prefs)

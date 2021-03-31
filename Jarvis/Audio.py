@@ -84,7 +84,6 @@ class AudioInput:
             keywords = ["jarvis", "hey siri"]
             porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.45, 0.2])
             pa = pyaudio.PyAudio()
-
             audio_stream = pa.open(
                 rate=porcupine.sample_rate,
                 channels=1,
