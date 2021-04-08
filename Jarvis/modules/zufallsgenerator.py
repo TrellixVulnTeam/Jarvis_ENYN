@@ -9,7 +9,7 @@ zwischenPattern = re.compile(r'.*(von|zwischen) (-?\d+) (und|bis) (-?\d+).*', re
 bisPattern = re.compile(r'.*(bis|kleiner gleich) (-?\d+).*', re.I)
 kleinerPattern = re.compile(r'.*(unter|kleiner) (als)? (-?\d+).*', re.I)
 
-def output(txt, luna):
+def output(txt, core):
     output = ''
     text = tt.lower()
     t = str.split(text)
@@ -68,17 +68,17 @@ def output(txt, luna):
         output = str(random.randint(1,100))
     return output
 
-def handle(text, luna, skills):
-    ausgabe = output(text, luna).strip()
+def handle(text, core, skills):
+    ausgabe = output(text, core).strip()
     if (ausgabe.startswith('-')):
         ausgabe = 'minus ' + ausgabe[1:]
-    luna.say('drei')
+    core.say('drei')
     sleep(1)
-    luna.say('zwei')
+    core.say('zwei')
     sleep(1)
-    luna.say('eins')
+    core.say('eins')
     sleep(1)
-    luna.say(ausgabe)
+    core.say(ausgabe)
 
 def isValid(text):
     text = text.lower()

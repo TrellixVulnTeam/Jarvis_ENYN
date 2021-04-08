@@ -27,15 +27,15 @@ def isValid(text):
     return ret
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     if 'wie kann ich jemand' in text:
         for entry in data:
             for str in entry[0]:
                 if str.lower() in text:
-                    luna.say(random.choice(entry[1]))
+                    core.say(random.choice(entry[1]))
                     return
-        luna.say('Da kann ich dir leider nicht helfen.')
+        core.say('Da kann ich dir leider nicht helfen.')
     else:
         match = personPattern.match(text)
         if match is not None:
@@ -43,6 +43,6 @@ def handle(text, luna, skills):
             for entry in data:
                 for str in entry[0]:
                     if str.lower() in text:
-                        luna.say(random.choice(entry[2]).format(person))
+                        core.say(random.choice(entry[2]).format(person))
                         return
-        luna.say('Da kann ich dir leider nicht helfen.')
+        core.say('Da kann ich dir leider nicht helfen.')

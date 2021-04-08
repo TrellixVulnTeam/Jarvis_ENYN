@@ -15,7 +15,7 @@ def isValid(text):
 
 def get_aussage_gemeinsam():
     
-    liste = luna.local_storage.get('einkaufsliste')
+    liste = core.local_storage.get('einkaufsliste')
     i = 0
     aussage = ''
     while i < len(liste) - 1:
@@ -28,15 +28,15 @@ def get_aussage_gemeinsam():
     aussage = aussage + ' und ' + liste[len(liste)]
     return aussage
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     length = len(text)
     
     if 'einkaufsliste' in text:
         if 'gemeinsam' in text or 'gemeinsame' in text:
-            luna.say(get_aussage_gemeinsam(txt, luna), output='telegram')
+            core.say(get_aussage_gemeinsam(txt, core), output='messenger')
         else:
-            luna.say(get_aussage(txt, luna), output='telegram')
+            core.say(get_aussage(txt, core), output='messenger')
     else:
         match = re.search('^smartphone nachricht', text)
         if match != None:
@@ -56,11 +56,11 @@ def handle(text, luna, skills):
                         nachricht += ' '
 
         if nachricht != '':
-            if luna.telegram_call:
-                luna.say('Du hast folgende Nachricht an dich selbst geschrieben:')
+            if core.messenger_call:
+                core.say('Du hast folgende Nachricht an dich selbst geschrieben:')
             else:
-                luna.say("Ok, ich sende " + nachricht + " an dein Smartphone")
-                luna.say("Nachricht an dich:", output='telegram')
-            luna.say(nachricht, output='telegram')
+                core.say("Ok, ich sende " + nachricht + " an dein Smartphone")
+                core.say("Nachricht an dich:", output='messenger')
+            core.say(nachricht, output='messenger')
         else:
-            luna.say("Ich konnte deine Nachricht nicht heraus filtern")
+            core.say("Ich konnte deine Nachricht nicht heraus filtern")

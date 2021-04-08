@@ -20,7 +20,7 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     length = len(text)
 
@@ -53,4 +53,4 @@ def handle(text, luna, skills):
 
         distance = float(re.sub(",", ".", distanceTxt))
 
-    luna.say('Von '+origin+' nach '+destination+' sind es '+distanceTxt+' Kilometer. Die Fahrt dauert '+durationTxt)
+    core.say('Von '+origin+' nach '+destination+' sind es '+distanceTxt+' Kilometer. Die Fahrt dauert '+durationTxt)

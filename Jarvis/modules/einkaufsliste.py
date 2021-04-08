@@ -23,8 +23,8 @@ def isValid(text):
         return False
         
 
-def get_item(luna, skills):
-    text = luna.text
+def get_item(core, skills):
+    text = core.text
     # Man könnte meinen, dass text.lower() hier sinnvoller wäre, allerdings würden dann die Namen
     # der Items, die auf die Liste gesetzt werden sollen auch in Kleinbuchstaben gespeichert werden
     # würden. Das ganze im Nachhinein zu regeln wäre viel zu umständlich
@@ -75,10 +75,10 @@ def get_item(luna, skills):
                 index = i + 1
                 founded = True
             i += 1
-    # Wenn kein Index gefunden wurde, sagt Luna das
+    # Wenn kein Index gefunden wurde, sagt Core das
     else:
         index = -1
-        luna.say('Ich habe leider nicht verstanden, was ich auf die Liste setzen soll. ')
+        core.say('Ich habe leider nicht verstanden, was ich auf die Liste setzen soll. ')
 
     """
     Dieser Algorithmus trennt nicht die genannten Items nach dem Wort 'und', sondern filtert sie heraus. Probleme gibt es hier nur, wenn
@@ -130,26 +130,26 @@ def get_item(luna, skills):
         item = skills.assamble_array(item)
     return item
 
-def get_aussage_gemeinsam(text, luna, skills):
+def get_aussage_gemeinsam(text, core, skills):
     aussage = ''
-    if 'einkaufsliste' in luna.local_storage.keys():
-        einkaufsliste = luna.local_storage.get('einkaufsliste')
+    if 'einkaufsliste' in core.local_storage.keys():
+        einkaufsliste = core.local_storage.get('einkaufsliste')
         aussage = skills.get_enumerate(einkaufsliste)
     return aussage
 
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     text = text.replace('setze', ('setz'))
 
     if 'setz' in text or 'schreib' in text or 'füg' in text:
-        item = get_item(luna, skills)
+        item = get_item(core, skills)
         einkaufsliste = None
         # anschließend wird unterscheidet, ob die eigene oder gemeinsame Einkaufsliste benötigt wird
-        if 'einkaufsliste' not in luna.local_storage.keys():
-            luna.local_storage['einkaufsliste'] = []
-            einkaufsliste = luna.local_storage['einkaufsliste']
+        if 'einkaufsliste' not in core.local_storage.keys():
+            core.local_storage['einkaufsliste'] = []
+            einkaufsliste = core.local_storage['einkaufsliste']
         if einkaufsliste != None:
             # Nur wenn die Einkaufsliste schon vorhanden ist...
             double_items = get_double_items(item, einkaufsliste)
@@ -158,17 +158,17 @@ def handle(text, luna, skills):
                 # Wir fragen mal nach, ob die Dopplungen gewollt sind, oder eher nicht
                 # Im selben Zug passen wir nur noch die Aussage an Singular und Plural an
                 if len(double_items) > 1:
-                    luna.say(
+                    core.say(
                         '{} befinden sich bereits auf der einkaufsliste. Soll ich sie dennoch auf die Einkaufsliste setzen?'.format(
                             skills.get_enumerate(double_items)))
                 else:
-                    luna.say(
+                    core.say(
                         '{} befindet sich bereits auf der einkaufsliste. Soll ich sie dennoch auf die Einkaufsliste setzen?'.format(
                             skills.get_enumerate(double_items)))
-                response = luna.listen()
+                response = core.listen()
                 # Vlt möchte der User ja nur bestimmte Dopplungen behalten...
                 if 'nur' in text and 'nicht' in text:
-                    item.remove(get_item(luna, skills))
+                    item.remove(get_item(core, skills))
                 # Oder halt alle...
                 elif 'ja' in response or 'gerne' in response or 'bitte' in response:
                     for i in item:
@@ -180,14 +180,14 @@ def handle(text, luna, skills):
                     for i in double_items:
                         item.remove(i)
                     if not item:
-                        luna.say('Alles klar, ich setze nichts auf die Einkaufsliste.')
+                        core.say('Alles klar, ich setze nichts auf die Einkaufsliste.')
                         pass
                     else:
                         for i in item:
                             einkaufsliste.append(i)
                         neue_einkaufsliste = skills.assamble_array(einkaufsliste)
                         einkaufsliste = neue_einkaufsliste
-                        luna.say('Alles klar, ich habe nur {} auf die Einkaufsliste gesetzt.'.format(
+                        core.say('Alles klar, ich habe nur {} auf die Einkaufsliste gesetzt.'.format(
                             skills.get_enumerate(item)))
 
             else:
@@ -205,22 +205,22 @@ def handle(text, luna, skills):
         einkaufsliste = skills.assamble_array(einkaufsliste)
         
         # Und noch die Liste im Local_storage, bzw. die des Nutzers aktualisieren
-        luna.say("Alles klar. Ich habe {} auf die Einkaufsliste gesetzt.".format(skills.get_enumerate(item)))
-        luna.local_storage['einkaufsliste'] = einkaufsliste
+        core.say("Alles klar. Ich habe {} auf die Einkaufsliste gesetzt.".format(skills.get_enumerate(item)))
+        core.local_storage['einkaufsliste'] = einkaufsliste
 
 
     elif 'auf' in text and 'steht' in text and 'was' in text:
         # hier wäre die Unterscheidung zwischen eigener/gemeinsamer Unterscheidung vorab einfach nur unnötig, daher lassen wir das
-        aussage = get_aussage_gemeinsam(text, luna, skills)
+        aussage = get_aussage_gemeinsam(text, core, skills)
         # wenn man den Befehl über Telegram aufruft, macht die schick-Funktion mehr Sinn
-        if luna.telegram_call:
-            handle('schick einkaufsliste', luna, skills)
+        if core.messenger_call:
+            handle('schick einkaufsliste', core, skills)
         else:
             if aussage != '':
                 ausgabe = 'Auf der Liste steht für dich {}.'.format(aussage)
             else:
                 ausgabe = 'Für dich steht aktuell nichts auf der Einkaufsliste.'
-            luna.say(ausgabe)
+            core.say(ausgabe)
 
     elif 'schick' in text and 'einkaufsliste' in text and 'und' in text and ('lösch' in text or 'leer' in text):
         # das elif beschreibt diesen Teil eigentlich schon sehr genau
@@ -231,17 +231,17 @@ def handle(text, luna, skills):
             i = 'gemeinsame'
 
         text = "schick {} einkaufsliste".format(i)
-        handle(text, luna, skills)
+        handle(text, core, skills)
         text = "leere {} einkaufsliste".format(i)
-        handle(text, luna, skills)
+        handle(text, core, skills)
 
     elif 'lösch' in text and ('aus' in text or 'von' in text) and 'einkaufsliste' in text:
         # einzelne items sollen auch gelöscht werden können
-        items = get_item(luna, skills)
+        items = get_item(core, skills)
         own_list = False
-        if 'einkaufsliste' not in luna.local_storage.keys():
-            luna.local_storage['einkaufsliste'] = []
-            einkaufsliste = luna.local_storage['einkaufsliste']
+        if 'einkaufsliste' not in core.local_storage.keys():
+            core.local_storage['einkaufsliste'] = []
+            einkaufsliste = core.local_storage['einkaufsliste']
 
         if einkaufsliste:
             # Das selbe Procedere wie bei "setz auf die Einkaufsliste"
@@ -252,17 +252,17 @@ def handle(text, luna, skills):
                     deleted.append(item)
                 except:
                     traceback.print_exc()
-                    luna.say(
+                    core.say(
                         'Scheinbar ist {} nicht in der Einkaufsliste vorhanden und konnte daher nicht gelöscht werden.'.format(
                             item))
                 if len(deleted) != -1:
-                    luna.say(skills.get_enumerate(deleted) + ' wurde von deiner Einkaufsliste gelöscht.')
+                    core.say(skills.get_enumerate(deleted) + ' wurde von deiner Einkaufsliste gelöscht.')
                 else:
-                    luna.say(
+                    core.say(
                         'Da ist wohl was schief gelaufe. Ich konnte leider nichts aus der Einkaufsliste löschen.')
         else:
             # Wenn die Einkaufsliste leer ist, können die zu löschenden Items gar nicht in der leeren Liste sein
-            luna.say('Ich kann das leider nicht aus deiner Einkaufsliste löschen, da sie leer ist.')
+            core.say('Ich kann das leider nicht aus deiner Einkaufsliste löschen, da sie leer ist.')
 
 
     elif ('lösch' in text or 'leer' in text) and 'einkaufsliste' in text and not 'aus' in text:
@@ -271,35 +271,35 @@ def handle(text, luna, skills):
         word = 'geleert'
         if 'lösche' in text:
             word = 'gelöscht'
-        if 'einkaufsliste' in luna.local_storage:
+        if 'einkaufsliste' in core.local_storage:
             empty = []
-            luna.local_storage['einkaufsliste'] = empty
-            luna.say('Die Einkaufsliste wurde {}.'.format(word))
+            core.local_storage['einkaufsliste'] = empty
+            core.say('Die Einkaufsliste wurde {}.'.format(word))
         else:
-            luna.say('Die Einkaufliste ist schon leer.')
+            core.say('Die Einkaufliste ist schon leer.')
 
     elif 'send' in text or 'schick' in text or 'schreib' in text:
         # Hier soll die Einkaufsliste in einem ansprechenderem Design per Telegram geschickt werden
-        items = luna.local_storage.get('einkaufsliste')
-        send_to_telegram(items, luna)
+        items = core.local_storage.get('einkaufsliste')
+        send_to_messenger(items, core)
 
     elif 'räum' in text and 'auf' in text:
         # eigentlich sollte es nicht passieren, dass Sachen unordentlich
         # in der einkaufsliste stehen, aber sollte es doch sein, hat man
         # die möglichkeit manuell einzugreifen
-        luna.say('Einen Moment bitte.')
-        luna.local_storage['einkaufsliste'] = skills.assamble_array(luna.local_storage['einkaufsliste'])
-        luna.say('Die Einkaufsliste wurde aufgeräumt!')
+        core.say('Einen Moment bitte.')
+        core.local_storage['einkaufsliste'] = skills.assamble_array(core.local_storage['einkaufsliste'])
+        core.say('Die Einkaufsliste wurde aufgeräumt!')
 
 
-def send_to_telegram(items, luna):
+def send_to_messenger(items, core):
     if items == None:
         items = []
     aussage = '--- Einkaufsliste: ---\n'
     for i in items:
         aussage = aussage + '- ' + i + '\n'
     aussage += '--------------------'
-    luna.say(aussage, output='telegram')
+    core.say(aussage, output='messenger')
 
 
 def get_double_items(items, einkaufsliste):

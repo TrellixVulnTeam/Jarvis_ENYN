@@ -20,21 +20,21 @@ def isValid(text):
     if ('sage' in text or 'erzähl' in text or 'erzähle' in text or 'sprich' in text) and 'nachrichten' in text:
         return True
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
 
-    DOWNLOAD_PATH = Path(luna.path + "/modules/resources")
+    DOWNLOAD_PATH = Path(core.path + "/modules/resources")
     try:
-        DOWNLOAD_PATH = Path(luna.path + "/modules/resources")
+        DOWNLOAD_PATH = Path(core.path + "/modules/resources")
         url = get_audio_url()
         path = download_audio(url, DOWNLOAD_PATH)
 
-        sound = AudioSegment.from_mp3(luna.path + "/modules/resources" + "/tagesschau_100sec.mp3")
-        sound.export(luna.path + "/modules/resources/tagesschau_100sec.wav", format="wav")
-        #wav = wave.open(luna.path + "/modules/resources/tagesschau_100sec.wav", 'rb')
-        luna.play(path=luna.path + "/modules/resources/tagesschau_100sec.wav")
-        #text = luna.recognize(wav)
+        sound = AudioSegment.from_mp3(core.path + "/modules/resources" + "/tagesschau_100sec.mp3")
+        sound.export(core.path + "/modules/resources/tagesschau_100sec.wav", format="wav")
+        #wav = wave.open(core.path + "/modules/resources/tagesschau_100sec.wav", 'rb')
+        core.play(path=core.path + "/modules/resources/tagesschau_100sec.wav")
+        #text = core.recognize(wav)
         os.remove(path)
-        #luna.say(text)
+        #core.say(text)
 
     except Exception as e:
         print(f"Abbruch durch Fehler: {e}")

@@ -6,10 +6,10 @@ import json
 def isValid(text):
         return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     traslation_text = skills.get_text_beetween('übersetz', text, end_word='ins', output='String')
     targetLang = skills.get_text_beetween('ins', output='String')
-    luna.translate(traslation_text, targetLang=targetLang)
+    core.translate(traslation_text, targetLang=targetLang)
 
 def get_text_beetween(start_word, text, end_word='', output='array'):
     ausgabe = []

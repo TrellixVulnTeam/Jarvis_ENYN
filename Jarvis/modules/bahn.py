@@ -55,7 +55,7 @@ def speechVariation(input):
     """
     This function is the counterpiece to the batchGen-function. It compiles the same
     sentence-format as given there but it only picks one random variant and directly
-    pushes it into luna. It returns the generated sentence.
+    pushes it into core. It returns the generated sentence.
     """
     if not isinstance(input, str):
         parse = random.choice(input)
@@ -70,10 +70,10 @@ def speechVariation(input):
         parse = front + random.choice(middle) + end
     return parse
 
-def sayAsync(luna, text):
+def sayAsync(core, text):
     try:
-        luna.end_Conversation()
-        luna.start_module(name="justsaysomethin", text=text)
+        core.end_Conversation()
+        core.start_module(name="justsaysomethin", text=text)
     except AttributeError:
         pass
 
@@ -513,27 +513,27 @@ def refineTime(timeRaw, mainTime):
 
 
 
-def handle(text, luna, skill):
+def handle(text, core, skill):
     text = text.lower().replace("ß", "ss")
     ziel = None
     try:
-        start = luna.analysis["town"]
+        start = core.analysis["town"]
         if start == 'None' or start == None:
             textOut = "Ich weiß noch gar nicht, wo [wir hier gerade sind|es losgehen soll]. "
             textOut += "An welche[m Bahnhof|r Station] [willst|möchtest] du [|denn] [|gerne] [ab|los]fahren?"
-            luna.say(speechVariation(textOut))
-            start = luna.listen().strip()
+            core.say(speechVariation(textOut))
+            start = core.listen().strip()
         startB = TrainStation(start)
         if "nach " in text:
-            sayAsync(luna, speechVariation(["Mal sehen, was so auf den Schienen los ist.", "Einen Augenblick bitte."]))
+            sayAsync(core, speechVariation(["Mal sehen, was so auf den Schienen los ist.", "Einen Augenblick bitte."]))
             ziel = text.split("nach ")[1]
         if "planen" in text or "reise" in text:
-            luna.say(speechVariation([
+            core.say(speechVariation([
                 "[So,|] und wohin soll [die|deine] Reise gehen?",
                 "Was ist denn dein Reiseziel?",
                 "Wohin soll es denn gehen?"
             ]))
-            ziel = luna.listen().strip()
+            ziel = core.listen().strip()
         if "Nahverkehr" in text or "Regionalverkehr" in text:
             vehicleSelection = "0011111111"
         else:
@@ -548,15 +548,15 @@ def handle(text, luna, skill):
                 text += " Minuten ab."
             except TypeError:
                 text = "Im Moment konnte ich keine [passenden|] Abfahrten finden. [Vielleicht|Eventuell] schaust du mal im Bahn Navigator nach?"
-            luna.say(speechVariation(text))
+            core.say(speechVariation(text))
         else:
             zielB = TrainStation(ziel)
             DeltaLat = abs(startB.lat - zielB.lat) * 111.11
             DeltaLong = abs(startB.long - zielB.long) * 111.11
             airdist = round((DeltaLat**2 + DeltaLong**2)**0.5)
             # timeStamp = datetime.datetime.now()
-            if "datetime" in luna.analysis:
-                timeStamp = luna.analysis["datetime"]
+            if "datetime" in core.analysis:
+                timeStamp = core.analysis["datetime"]
             else:
                 timeStamp = datetime.datetime.now()
             bridgeText = "Gut, dann schau[|e] ich mal, was ich für [Optionen|Möglichkeiten] finde."
@@ -564,7 +564,7 @@ def handle(text, luna, skill):
                 bridgeText += " Oh, da hast du dir aber eine lange [|Reise][strecke|route] ausgesucht."
             else:
                 bridgeText += " Bitte [gedulde dich noch ein wenig|habe einen Moment Geduld]."
-            sayAsync(luna, speechVariation(bridgeText))
+            sayAsync(core, speechVariation(bridgeText))
             # check nahverkehr
             connectionGroup = ConnectionGroup(timeStamp, startB.id, zielB.id)
             connectionGroup.requestConnections(vehicleSelection)
@@ -591,10 +591,10 @@ def handle(text, luna, skill):
                 text += str(hopCount-1) + " [Zugwechsel|Umstieg]" + ("" if hopCount-1 == 1 else "n") + " ungefähr " + duration + "."
 
             text = text.replace("Hbf", "[|Hauptbahnhof]").replace("(", " ").replace(")", " ").replace("  ", " ")
-            luna.say(speechVariation(text))
+            core.say(speechVariation(text))
             text = " Soll ich dir mehr Details über die schnellste [Verbindung|Route] erzählen?"
-            luna.say(speechVariation(text))
-            instr = luna.listen()
+            core.say(speechVariation(text))
+            instr = core.listen()
             if batchMatch("[ja|ja gerne|gern|okay]", instr):
                 if len(connection.trainList) > 1:
                     text = "Okay, [aufgepasst|dann hol dir am besten einen Zettel zum mitschreiben]. "
@@ -677,11 +677,11 @@ def handle(text, luna, skill):
                     first = False
                 text += " Vorraussichtlich kommst du dann um " + t.endTime.strftime("%-H Uhr %-M ") + " an."
                 text = text.replace("Hbf", "[|Hauptbahnhof]").replace("(", " ").replace(")", " ").replace("  ", " ")
-                luna.say(speechVariation(text))
+                core.say(speechVariation(text))
             else:
-                luna.say(speechVariation("[Okay|keine Ursache]"))
+                core.say(speechVariation("[Okay|keine Ursache]"))
     except IndexError as e:
-        luna.say(speechVariation("[ooh je|ups], irgend[et|]was ist da [schiefgegangen|nicht nach plan gelaufen]. Wie wäre es, wenn du es einfach [später|noch einmal] versuchst?"))
+        core.say(speechVariation("[ooh je|ups], irgend[et|]was ist da [schiefgegangen|nicht nach plan gelaufen]. Wie wäre es, wenn du es einfach [später|noch einmal] versuchst?"))
         #print(e)
         traceback.print_exc()
 

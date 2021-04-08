@@ -11,14 +11,14 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
 
-    luna.say('Was möchtest du in den qr-code schreiben?')
+    core.say('Was möchtest du in den qr-code schreiben?')
 
     # Frage den Nutzer nach Inhalt
-    antwort = luna.listen()
+    antwort = core.listen()
     if antwort == 'TIMEOUT_OR_INVALID':
-        luna.say('Ich konnte dich leider nicht verstehen')
+        core.say('Ich konnte dich leider nicht verstehen')
     else:
         url = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={urllib.parse.quote(antwort)}"
-        luna.say(url)
+        core.say(url)

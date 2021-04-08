@@ -174,8 +174,8 @@ def get_reply(core, time):
         return 'übermorgen'
     else:
         core_output = tage.get(tag) + monate.get(monat)
-        telegram_output = tag + '. ' + monat
-        return 'den ' + core.correct_output(core_output, telegram_output)
+        messenger_output = tag + '. ' + monat
+        return 'den ' + core.correct_output(core_output, messenger_output)
 
 def get_text_beetween(start_word, text, end_word='', output='array'):
     ausgabe = []

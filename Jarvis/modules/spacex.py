@@ -11,7 +11,7 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
 
     ################################################################################ 
     # Wann (nächster Start)
@@ -25,10 +25,10 @@ def handle(text, luna, skills):
         got_launches, header = launches.get_launches()
 
 
-        if luna.telegram_call == True:
+        if core.messenger_call == True:
             return_string = ""
             return_string += f"Time (UTC): " + got_launches[-1]["launch_date_utc"] + "\n"
-            luna.say(return_string)
+            core.say(return_string)
             return
 
         else:
@@ -128,7 +128,7 @@ def handle(text, luna, skills):
             return_string = ""
             return_string += f"Der nächste Start ist am {speech_dict_date[day]} {speech_dict_date[month]} "
             return_string += f"um {speech_dict_hour[hour]} Uhr {speech_dict_minute[minute]} U T C\n"
-            luna.say(return_string)
+            core.say(return_string)
             return
 
     ################################################################################ 
@@ -146,7 +146,7 @@ def handle(text, luna, skills):
         # Get the launches
         got_launches, header = launches.get_launches()
 
-        if luna.telegram_call:
+        if core.messenger_call:
 
             return_string = ""
 
@@ -163,10 +163,10 @@ def handle(text, luna, skills):
             return_string += "\n\nLinks:\n"
             return_string += got_launches[-1]["links"]["wikipedia"] + "\n"
 
-            luna.say(return_string)
+            core.say(return_string)
             return
         else:
-            luna.say(luna.translate(got_launches[-1]["details"])) # Weil sich englisch mit der LUNA stimme nicht gut anhört
+            core.say(core.translate(got_launches[-1]["details"])) # Weil sich englisch mit der LUNA stimme nicht gut anhört
             return
 
     ################################################################################ 
@@ -180,8 +180,8 @@ def handle(text, luna, skills):
     hit_list2 = ["nächster", "next"]
     hit2 = any((hit for hit in hit_list2 if hit in text.lower()))
 
-    if not luna.telegram_call:
-        luna.say('Diese Funktion ist nur auf Telegram verfügbar.')
+    if not core.messenger_call:
+        core.say('Diese Funktion ist nur auf Telegram verfügbar.')
         retu
 
     if hit1 == True and hit2 == True:
@@ -196,5 +196,5 @@ def handle(text, luna, skills):
         for key, value in links.items():
             return_string += f"{value}\n"
 
-        luna.say(return_string)
+        core.say(return_string)
         return

@@ -331,7 +331,7 @@ def moves(text):
         ret = "Ich konnte leider keine Zugzahl ermitteln"
     return ret, not nosuccess
 
-def handle(txt, luna, skills):
+def handle(txt, core, skills):
     '''
     tt = txt.replace('?', (''))
     tt = tt.replace('!', (''))
@@ -347,20 +347,20 @@ def handle(txt, luna, skills):
     except ValueError:
         easy_e = 'x'
     if str(easy_e) != 'x':
-        luna.say('Die Lösung ist ' + str(easy_e) + '.')
+        core.say('Die Lösung ist ' + str(easy_e) + '.')
     else:
-        ergebnis = rechnen(text, luna)
+        ergebnis = rechnen(text, core)
         e = str(ergebnis)
         if '.' in e:
             e = e[:6] ##imperfect for high numbers with .!
             e = e.replace('.', (' Komma '))
         if e != ' ' and e != '':
             if e == 'Möchtest du ein Wurmloch kreieren? Etwas durch null zu teilen beschwört Dämonen!':
-                luna.say(e)
+                core.say(e)
             else:
-                luna.say('Die Lösung ist ' + e + '.')
+                core.say('Die Lösung ist ' + e + '.')
         else:
-            luna.say('Das kann ich leider nicht berechnen.')
+            core.say('Das kann ich leider nicht berechnen.')
     '''
     tt = txt.replace('?', (''))
     tt = tt.replace('!', (''))
@@ -402,9 +402,9 @@ def handle(txt, luna, skills):
                 answer, success = movetime(text)
                 break
     if success:
-        luna.say(answer)
+        core.say(answer)
     else:
-        luna.say("Das konnte ich leider nicht verstehen")
+        core.say("Das konnte ich leider nicht verstehen")
 
 def isValid(text):
     text = text.lower()

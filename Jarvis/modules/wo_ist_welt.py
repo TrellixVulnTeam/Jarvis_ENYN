@@ -16,15 +16,15 @@ def isValid(text):
                 return True
     return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     # Wenn es ein direkter aufruf von wo_ist.py ist, muss der prefix
     # entfernt werden.
     if (text.startswith('§DIRECTCALL_FROM_WO_IST§')):
         text = text[len('§DIRECTCALL_FROM_WO_IST§'):]
 
     ort = None
-    if 'town' in luna.analysis:
-        ort = luna.analysis['town']
+    if 'town' in core.analysis:
+        ort = core.analysis['town']
         if ort == '':
             ort = None
     for pattern, groupId in _PATTERNS:
@@ -34,13 +34,13 @@ def handle(text, luna, skills):
                 ort = match.group(groupId)
                 break
     if ort is None:
-        luna.say('Entschuldigung, das habe ich nicht verstanden.')
+        core.say('Entschuldigung, das habe ich nicht verstanden.')
     else:
         request = Request('https://nominatim.openstreetmap.org/search?q=' + quote(ort) + '&format=json&addressdetails=1&extratags=1&namedetails=1&accept-language=de-DE&dedupe=1')
         response = urlopen(request)
         answer = json.loads(response.read())
         if (len(answer) == 0):
-            luna.say('Diesen Ort kenne ich nicht. Wenn du weißt, wo er liegt, hilf mir doch und trage ihn auf Open Street Map ein.')
+            core.say('Diesen Ort kenne ich nicht. Wenn du weißt, wo er liegt, hilf mir doch und trage ihn auf Open Street Map ein.')
         else:
             strMap = {
                 # Format values:
@@ -94,7 +94,7 @@ def handle(text, luna, skills):
                     type = 'country'
 
                 if not type.lower() in strMap:
-                    luna.say('Da fällt mir etwas zu ein, aber es ist besser du suchst es selbst. Ich vermute mein Ergebnis ist nicht das, was du suchst.')
+                    core.say('Da fällt mir etwas zu ein, aber es ist besser du suchst es selbst. Ich vermute mein Ergebnis ist nicht das, was du suchst.')
                     return
 
                 f1 = answer['namedetails']['name']
@@ -159,6 +159,6 @@ def handle(text, luna, skills):
                 if type == 'country' and f7 != '':
                     type = 'country_with_capital'
 
-                luna.say(strMap[type.lower()].format(ort, f1, f2, f3, f4, f5, f6, f7, f8, f9))
+                core.say(strMap[type.lower()].format(ort, f1, f2, f3, f4, f5, f6, f7, f8, f9))
             except KeyError:
-                luna.say('Es ist ein Fehler aufgetreten.')
+                core.say('Es ist ein Fehler aufgetreten.')

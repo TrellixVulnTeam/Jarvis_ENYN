@@ -10,8 +10,8 @@
             "home_location"
         ],
         "users": {},
-        "telegram_allowed_id_table": [],
-        "rejected_telegram_messages": [],
+        "messenger_allowed_id_table": [],
+        "rejected_messenger_messages": [],
         "module_storage": {
             "phillips_hue":{
                 "Bridge-IP": ""
@@ -24,10 +24,10 @@
 	    },
         "user": ""
     },
-    "telegram_key": "",
+    "messenger_key": "",
     "Server_name": "SERVER",
     "System_name": "",
-    "telegram": true,
+    "messenger": true,
     "voice": "male",
     "Network_Key": ""
 }

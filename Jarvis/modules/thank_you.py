@@ -5,5 +5,5 @@ def isValid(text):
     if 'danke' in text or 'thx' in text or 'thanks' in text:
         return True
 
-def handle(text, luna, skills):
-    luna.say('[Gerne doch|Keine Ursache].')
+def handle(text, core, skills):
+    core.say('[Gerne doch|Keine Ursache].')

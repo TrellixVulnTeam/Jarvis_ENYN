@@ -8,5 +8,5 @@ def isValid (text):
 	elif 'abbrechen' in text:
 		return True
 	
-def handle (text, luna, skills):
+def handle (text, core, skills):
 	print('[ACTION] Befehl abgebrochen')

@@ -14,12 +14,12 @@ def isValid(text):
 
     return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     length = len(text)
 
     # Spotify Authentifizierung
-    cachepath = luna.local_storage["LUNA_PATH"] + "/resources/spotify/spotify-auth"
+    cachepath = core.local_storage["LUNA_PATH"] + "/resources/spotify/spotify-auth"
     token = util.prompt_for_user_token('t0g9neu8w6g4zj26drre29age',
                            'user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private user-library-read user-read-currently-playing',
                            client_id='fe766401006c403faf69ec1fe98d881c',
@@ -42,7 +42,7 @@ def handle(text, luna, skills):
             break
 
     if not activeDevice:
-        luna.say("Bitte starte Spotify auf deinem Gerät")
+        core.say("Bitte starte Spotify auf deinem Gerät")
         return
 
     # Steuerbefehle ausführen
@@ -50,7 +50,7 @@ def handle(text, luna, skills):
         # kontrolliere start / stop
         is_playing = sp.current_playback()['is_playing']
 
-        #luna.say("Verstanden")
+        #core.say("Verstanden")
 
         if is_playing:
             sp.pause_playback()
@@ -59,12 +59,12 @@ def handle(text, luna, skills):
 
     elif "nächstes lied" in text or "weiter" in text:
         # nächstes lied
-        #luna.say("Verstanden")
+        #core.say("Verstanden")
         sp.next_track()
 
     elif "vorheriges lied" in text or "zurück" in text:
         # vorheriges lied
-        #luna.say("Verstanden")
+        #core.say("Verstanden")
         sp.previous_track()
 
     elif "spotify" in text and "spiele" in text:
@@ -75,7 +75,7 @@ def handle(text, luna, skills):
                 startName = match.end() + 1
                 artistname = text[startName:length]
                 artist_uri = sp.search(artistname, limit=1, offset=0, type='artist', market=None)["artists"]["items"][0]["uri"]
-                #luna.say("Verstanden")
+                #core.say("Verstanden")
                 sp.start_playback(context_uri=artist_uri)
 
         elif "playlist" in text:
@@ -84,7 +84,7 @@ def handle(text, luna, skills):
                 startName = match.end() + 1
                 playlistname = text[startName:length]
                 playlist_uri = sp.search(playlistname, limit=1, offset=0, type='playlist', market=None)["playlists"]["items"][0]["uri"]
-                #luna.say("Verstanden")
+                #core.say("Verstanden")
                 sp.start_playback(context_uri=playlist_uri)
 
         else:
@@ -98,7 +98,7 @@ def handle(text, luna, skills):
                 trackname = text[startName:length]
                 tracks = sp.search(trackname, limit=10, offset=0, type='track', market=None)["tracks"]["items"]
 
-                #luna.say("Verstanden")
+                #core.say("Verstanden")
                 trackuris = []
                 for i in range(10):
                     trackuris.append(tracks[i]["uri"])
@@ -117,7 +117,7 @@ def handle(text, luna, skills):
 
         trackname = text[startName:startEnd]
         track_uri = sp.search(trackname, limit=1, offset=0, type='track', market=None)["tracks"]["items"][0]["uri"]
-        #luna.say("Verstanden")
+        #core.say("Verstanden")
         sp.add_to_queue(track_uri)
 
     elif "spotify" in text and ("lauter" in text or "leiser" in text):

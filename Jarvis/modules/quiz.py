@@ -20,15 +20,15 @@ ALPHABET = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
 def isValid(text):
     return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
-    AUDIO_PFAD = luna.path + "/modules/resources/Quiz/Audio"
-    with open(luna.path + "/modules/resources/Quiz/questions.json", 'r') as question_file:
+    AUDIO_PFAD = core.path + "/modules/resources/Quiz/Audio"
+    with open(core.path + "/modules/resources/Quiz/questions.json", 'r') as question_file:
         FRAGEN = json.load(question_file)
 
     richtig = 0
     insgesamt = 0
-    luna.say("Willkommen im Quiz! Wenn du keine Lust mehr hast, antworte auf eine Frage einfach mit 'Stopp' oder 'Abbruch'.")
+    core.say("Willkommen im Quiz! Wenn du keine Lust mehr hast, antworte auf eine Frage einfach mit 'Stopp' oder 'Abbruch'.")
     # Anschließend werden die richtigen Fragen "geladen"
     if 'über' in text or 'zu' in text:
         if 'allgemeinwissen' in text:
@@ -56,7 +56,7 @@ def handle(text, luna, skills):
         if item["erste_ausgabe"] == "Frage":
             # checken wir mal, ob ein Text drinnen steht
             if item["Frage"] != "":
-                luna.say(item["Frage"])
+                core.say(item["Frage"])
                 # Scheinbar gibt es einen zu sagenden Text.
                 # Wie sieht es mit der Audio aus?
                 if item["Audio"] != "":
@@ -65,13 +65,13 @@ def handle(text, luna, skills):
                     # irgendwann mal über ein Update nachdenken
                     try:
                         path = AUDIO_PFAD + item["Audio"]
-                        luna.play(pfad=path)
+                        core.play(pfad=path)
                     except:
                         # WICHTIG: Wenn die Audio wichtig für die Frage ist, aber nicht im Ordner
                         # gefunden wird, wird der Text trotzdem gesagt. Es könnte keinen Sinn ergeben,
                         # Daher sagen wir es einfach dem Nutzer und überspringen die Frage
                         # scheinbar gibt es die Audio nicht.
-                        luna.say("Leider gab es ein Problem beim Abspielen einer Audio-Datei. Daher machen wir einfach mit der nächsten Frage weiter!")
+                        core.say("Leider gab es ein Problem beim Abspielen einer Audio-Datei. Daher machen wir einfach mit der nächsten Frage weiter!")
                         fragen.remove(item)
                         # ToDO Log-Eintrag schreiben
                         continue
@@ -80,7 +80,7 @@ def handle(text, luna, skills):
                     moeglichkeiten = item["Antwortmoeglichkeiten"]
                     for i in range(len(item["Antwortmoeglichkeiten"])):
                         text = ALPHABET[i] + ": " + moeglichkeiten[i]
-                        luna.say(text)
+                        core.say(text)
             else:
                 # Man könnte natürlich noch überprüfen, ob es eine Audio
                 # gibt und diese ggf. abspielen. Aber wenn nur ein Lied
@@ -96,9 +96,9 @@ def handle(text, luna, skills):
             # erspare ich mal allen die Kommentare. Bei Unklarheiten
             # einfach in das Pardon in der Textausgabe oben nachschauen
             if item["Audio"] != "":
-                luna.play(pfad=item["Audio"])
+                core.play(pfad=item["Audio"])
                 if item["Frage"] != "":
-                    luna.say(item["Frage"])
+                    core.say(item["Frage"])
             else:
                 fragen.remove(item)
                 # ToDO Log-Eintrag schreiben
@@ -113,20 +113,20 @@ def handle(text, luna, skills):
             # ToDO Log-Eintrag schreiben
             continue
 
-        user_response = " " + luna.listen().lower() + " "
+        user_response = " " + core.listen().lower() + " "
         # Das Leerzeichen vor und hinter dem listen() wird
         # benötigt, damit später die Überprüfung einer Re-
         # aktion auf eine Antwortmöglichkeit überprüft werden kann
         if 'abbruch' in user_response or 'stopp' in user_response or ("ich" in user_response and "kein" in user_response and ("lust" in user_response or "bock" in user_response) or "spaß" in user_response):
             if insgesamt == 0:
-                luna.say("Okay, Quiz beendet.")
+                core.say("Okay, Quiz beendet.")
             elif insgesamt == 1:
                 beantwortung = "falsch"
                 if richtig == 1:
                     beantwortung = "richtig"
-                luna.say("Okay, Quiz beendet. Du hast eine Frage beantwortet, diese war {}.".format(beantwortung))
+                core.say("Okay, Quiz beendet. Du hast eine Frage beantwortet, diese war {}.".format(beantwortung))
             else:
-                luna.say("Okay, Quiz beendet. Du hast {} Fragen beantwortet, davon waren {}% richtig".format(insgesamt, round(richtig/insgesamt*100)))
+                core.say("Okay, Quiz beendet. Du hast {} Fragen beantwortet, davon waren {}% richtig".format(insgesamt, round(richtig/insgesamt*100)))
 
 
             on_going = False
@@ -145,8 +145,8 @@ def handle(text, luna, skills):
                     # "Ich glaube es ist a"
                     if " " + ALPHABET[i] + " " in user_response:
                         if i > anz_antwort-1:
-                            luna.say("Ungültige Eingabe! Versuch es nocheinmal!")
-                            user_response = " " + luna.listen().lower() + " "
+                            core.say("Ungültige Eingabe! Versuch es nocheinmal!")
+                            user_response = " " + core.listen().lower() + " "
                             break
                         else:
                             user_response = item["Antwortmoeglichkeiten"][i].lower()
@@ -156,8 +156,8 @@ def handle(text, luna, skills):
                 if len(user_response) > 0:
                     valid = True
                 else:
-                    luna.say("Bitte versuch es noch einmal.")
-                    user_response = " " + luna.listen().lower() + " "
+                    core.say("Bitte versuch es noch einmal.")
+                    user_response = " " + core.listen().lower() + " "
 
             # Es soll eine Wahrscheinlichkeit berechnet werden,
             # zu welcher die Antwort richtig ist.
@@ -201,9 +201,9 @@ def handle(text, luna, skills):
                 # auch als richtig gewertet werden, aber in den meisten deutschen Sätzen vorkommen
                 text = random.choice(["Das stimmt nicht. ", "Das ist leider falsch. ", ""])
                 text += "Die richtige Antwort lautet wie folgt: " + item["Antwort"]
-            luna.say(text)
+            core.say(text)
 
     if len(fragen) == 0:
-        luna.say("Scheinbar habe ich keine Fragen mehr zu diesem Thema.")
-        luna.say("Du hast {} Fragen beantwortet, davon waren {}% richtig".format(insgesamt, round(
+        core.say("Scheinbar habe ich keine Fragen mehr zu diesem Thema.")
+        core.say("Du hast {} Fragen beantwortet, davon waren {}% richtig".format(insgesamt, round(
             richtig / insgesamt * 100)))

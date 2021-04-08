@@ -39,7 +39,7 @@ For all further steps, a setup wizard is currently in work, but it will take som
 - "home_location"
 - "server_name"
 - "system_name"
-- telegram true, if you use it, otherwise false. If you use it, you must also set the "telegram_key". You can find the setup of a telegram-bot on the internet. Just search for Bot-Father
+- messenger true, if you use it, otherwise false. If you use it, you must also set the "messenger_key". You can find the setup of a messenger-bot on the internet. Just search for Bot-Father
 - if you want to use Phillips-Hue, you also have to enter the "Bridge IP" and press the button of the bridge when you call it for the first time
 
 5. Remote desktop setup(only possible with GUI)
@@ -60,12 +60,12 @@ In addition, a Raspi makes sense, because it not only brings WLAN and Bluetooth,
 ## How can I develop "modules
 If you don't have any experience with Python, it's not a big deal.  I can highly recommend [this playlist](https://www.youtube.com/watch?v=dyJ dLalc7TA&list=PLNmsVeXQZj7q0ao69AIogD94oBgp3E9Zs). 
 
-First of all, you need to consider whether you want your module to be called only on command, or to be called in a certain time interval. 1.In a certain time interval:Continuous modules run permanently in the background in Luna and are called in a fixed time interval.   This is specified in seconds.   Try to keep this time interval as long as possible, so that it is called as seldom as possible.  This may save some of the 
+First of all, you need to consider whether you want your module to be called only on command, or to be called in a certain time interval. 1.In a certain time interval:Continuous modules run permanently in the background in Core and are called in a fixed time interval.   This is specified in seconds.   Try to keep this time interval as long as possible, so that it is called as seldom as possible.  This may save some of the 
 needed computing power. For this you use a so called continuous _module.  The structure looks like this: 
 ```
 INTERVALL = 2
 
-def run(core (in older modules luna), skills):
+def run(core (in older modules core), skills):
     .
     .
     .
@@ -86,7 +86,7 @@ def isValid(text):
     else:
         return False
 
-def handle(text, luna, profile):
+def handle(text, core, profile):
     .
     .
     .
@@ -94,6 +94,6 @@ def handle(text, luna, profile):
 
 `PRIORITY` defines the priority in which the modules are called. If this is not set, the value 0 is automatically assigned. The modules are ordered lexically in the respective priority level. Since LUNA cannot know what your module can do, the modules must decide in a first rough run whether they can do something with the text. For this the method `isValid()` is used, which returns True if this is the case. This function only checks if a keyword is included in the command or not. Your word selection should be well considered. If this is the case, the method `handle()` or `run()` is called.
 
-For all other core (or luna) calls, you can look into the `module wrapper` class in main.py
+For all other core (or core) calls, you can look into the `module wrapper` class in main.py
 
 After writing the whole readme, I noticed that all language editions are in German and therefore the English README doesn't make 100% sense anymore LOL :(

@@ -11,7 +11,7 @@ def isValid(text):
         return False
     
 
-def handle(txt, luna, skill):
+def handle(txt, core, skill):
     day_map = {
         1: 'ersten',
         2: 'zweiten',
@@ -129,23 +129,23 @@ def handle(txt, luna, skill):
 
         now = datetime.datetime.now()
         latest = None
-        if luna.analysis['time'] is None:
+        if core.analysis['time'] is None:
             latest = answer[countryCode][-1]
-        elif int(luna.analysis['time']['year']) == now.year and int(luna.analysis['time']['month']) == now.month and int(luna.analysis['time']['day']) == now.day:
+        elif int(core.analysis['time']['year']) == now.year and int(core.analysis['time']['month']) == now.month and int(core.analysis['time']['day']) == now.day:
             latest = answer[countryCode][-1]
         else:
             for possible in answer[countryCode]:
                 possible_date_tokens = possible['date'].split('-', 2)
-                if int(luna.analysis['time']['year']) == int(possible_date_tokens[0]) and int(luna.analysis['time']['month']) == int(possible_date_tokens[1]) and int(luna.analysis['time']['day']) == int(possible_date_tokens[2]):
+                if int(core.analysis['time']['year']) == int(possible_date_tokens[0]) and int(core.analysis['time']['month']) == int(possible_date_tokens[1]) and int(core.analysis['time']['day']) == int(possible_date_tokens[2]):
                     latest = possible
 
         if latest is None:
-            luna.say('Für diese Zeit kann ich keine Daten finden. Hier die aktuellen.')
+            core.say('Für diese Zeit kann ich keine Daten finden. Hier die aktuellen.')
             latest = answer[countryCode][-1]
 
         date_tokens = latest['date'].split('-', 2)
         return_string = 'Am {} {} {} gab es in {} {} Infizierte, {} Todesfälle und {} wieder Gesunde.'\
             .format(day_map[int(date_tokens[2])], month_map[int(date_tokens[1])], date_tokens[0], countryName, str(latest['confirmed']), str(latest['deaths']), str(latest['recovered']))
-        luna.say(return_string)
+        core.say(return_string)
     except SyntaxError:
-        luna.say('Momentan kann ich leider keine daten finden.')
+        core.say('Momentan kann ich leider keine daten finden.')

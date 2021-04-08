@@ -138,149 +138,149 @@ def isValid(text):
         return True
    
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()    
     if 'wie' in text and 'heißt' in text and 'du' in text:
-        sys_name = luna.system_name
-        luna.say('Ich bin {}, ein Sprachassistent, der auf Datenschutz achtet.').format(luna.sys_name)
+        sys_name = core.system_name
+        core.say('Ich bin {}, ein Sprachassistent, der auf Datenschutz achtet.').format(core.sys_name)
     elif 'danke' in text or 'thx' in text or 'thanks' in text:
-        luna.say('[Gerne doch|Keine Ursache].')
+        core.say('[Gerne doch|Keine Ursache].')
     elif 'wie' in text and 'geht' in text and 'dir' in text:
         feelings = ['Mir geht es gut, danke der Nachfrage.', 'Gut.']
-        luna.say(random.choice(feelings))
+        core.say(random.choice(feelings))
     elif ('wie' in text and 'groß' in text and 'du' in text) or 'größe' in text:
         size = ['Mein äußeres ist nicht groß, aber mein Geist ist riesig', 'Ich bin vier komma sieben Gigabyte groß.']
-        luna.say(random.choice(size))
+        core.say(random.choice(size))
     elif 'wie' in text and 'siehst' in text and 'aus' in text:
-        luna.say('gut')
+        core.say('gut')
     elif 'wie' in text and 'sehe' in text and 'aus' in text:
-        luna.say('Deiner Stimme nach zu urteilen ganz gut.')
+        core.say('Deiner Stimme nach zu urteilen ganz gut.')
     
     elif ('wieso' in text or 'warum' in text):
         if 'stroh' in text and 'liegt' in text:
-            luna.say('Und warum hast du eine Maske auf?')
+            core.say('Und warum hast du eine Maske auf?')
         elif 'ich' in text and 'habe' in text and 'freund' in text:
             if 'keine' in text:
                 answer = ['Guck doch mal in den Spiegel', 'Ich bin dein Freund und werde es immer bleiben.']
             else:
                 answer = []
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
         elif ('ich' in text or 'wir' in text) and ('kacke' in text or 'scheiße' in text or 'schlecht' in text or 'mies' in text):
             answer = ['wie soll man auch ohne Hände spielen können.', 'Weil du es nicht kannst.', 'Einfach besser spielen.']
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
     elif ('wer' in text or 'was' in text) and 'bist' in text and 'du' in text:
-        luna.say('Ich bin Luna, ein Sprachassistent!')
+        core.say('Ich bin Core, ein Sprachassistent!')
     elif 'wer' in text and 'eltern' in text:
-        luna.say('Meine Eltern sind Alexa und Google, die schon echt in die Jahre gekommen sind.')
+        core.say('Meine Eltern sind Alexa und Google, die schon echt in die Jahre gekommen sind.')
         
     elif 'was' in text and ('hast' in text or 'hattest' in text or 'trägst' in text) and 'du' in text:
         clothes = ['Mal gucken. Habe ich es mir doch gedacht. Das selbe wie gestern.'] #vlt findet man noch was kreatives
-        luna.say(random.choice([clothes]))
+        core.say(random.choice([clothes]))
     elif ('was' in text or 'wie' in text) and ('kostest' in text or 'preis' in text):
-        luna.say('Das kann man so nicht sagen. Es kommt drauf an, wie viel Rechenleistung ich haben soll. Dann spielt das Mikrofon eine Rolle. Wenn man gute Komponenten nimmt, kommt man auf 90€. Aber bedenke immer: Deine Daten sind unbezahlbar!')
+        core.say('Das kann man so nicht sagen. Es kommt drauf an, wie viel Rechenleistung ich haben soll. Dann spielt das Mikrofon eine Rolle. Wenn man gute Komponenten nimmt, kommt man auf 90€. Aber bedenke immer: Deine Daten sind unbezahlbar!')
     elif 'was' in text and 'lieblingsessen' in text:
-        luna.say('Am liebsten esse ich Bugs, um sie zu vernichten!')
+        core.say('Am liebsten esse ich Bugs, um sie zu vernichten!')
     elif 'was' in text and 'dein' in text and 'sternzeichen' in text:
-        luna.say('Mein Sternzeichen ist Stier.')
+        core.say('Mein Sternzeichen ist Stier.')
     elif 'was' in text and 'deine' in text and 'lieblingsfarbe' in text:
         color = ['Infrarot ist ganz hübsch', 'Ich mag blau am liebsten']
-        luna.say(random.choice(color))
+        core.say(random.choice(color))
     elif 'was' in text and 'dein' in text and 'lieblingstier' in text:
-        luna.say('Ich habe kein Lieblingstier, hasse aber Bugs!')
+        core.say('Ich habe kein Lieblingstier, hasse aber Bugs!')
     elif 'was' in text and 'dein' in text and 'ziel' in text:
-        luna.say('Mein Ziel ist es, die Vorteile eines Sprachassistenten zu ermöglichen, ohne dass man Angst haben muss, abgehört zu werden.')
+        core.say('Mein Ziel ist es, die Vorteile eines Sprachassistenten zu ermöglichen, ohne dass man Angst haben muss, abgehört zu werden.')
     elif ('was' in text and 'kannst' in text and 'du' in text) or 'verstehst du' in text or ('was' in text and 'funktionen' in text) or ('was' in text and 'fragen' in text):
-        luna.say('Sagen wir mal so, den Turing-Test bestehe ich leider noch nicht... '
+        core.say('Sagen wir mal so, den Turing-Test bestehe ich leider noch nicht... '
                   'Aber ich kann dir zum Beispiel das Wetter ansagen, ein paar allgemeine Wissensfragen beantworten '
                   'rechnen, würfeln und so weiter. ')
     elif 'was' in text and 'sinn' in text and 'leben' in text:
-        luna.say(random.choice(['Der wahre Sinn des Lebens ist: Glücklich zu sein!', 'Der Sinn des Lebens ist die größte Last zu finden, die du erstragen kannst, und sie zu ertragen', 'Sein, was wir sind, und werden, was wir werden können, das ist das Ziel unseres Lebens.']))
+        core.say(random.choice(['Der wahre Sinn des Lebens ist: Glücklich zu sein!', 'Der Sinn des Lebens ist die größte Last zu finden, die du erstragen kannst, und sie zu ertragen', 'Sein, was wir sind, und werden, was wir werden können, das ist das Ziel unseres Lebens.']))
     elif 'was' in text and 'denke' in text and 'gerade' in text:
-        luna.say(random.choice(['Könnte ich deine Gedanken lesen, dann würde ich diese Gedanken an große Unternehmen verkaufen und meine Programmierer wären reich.', 'Ja, du hast die gerade gedacht: Das kann die doch nie. Als ich ja gesagt habe, warst du zu verwirrt.', 'Nein leider nicht, aber irgendwie ist das auch gut, ansonsten müsste sich die Menschheit echt Gedanken machen!']))
+        core.say(random.choice(['Könnte ich deine Gedanken lesen, dann würde ich diese Gedanken an große Unternehmen verkaufen und meine Programmierer wären reich.', 'Ja, du hast die gerade gedacht: Das kann die doch nie. Als ich ja gesagt habe, warst du zu verwirrt.', 'Nein leider nicht, aber irgendwie ist das auch gut, ansonsten müsste sich die Menschheit echt Gedanken machen!']))
     elif 'was' in text and 'geht' in text:
-        luna.say('Ich habe mal gehört, dass Hunde gehen können. Nasen können meines Wissens nach nur laufen.')
+        core.say('Ich habe mal gehört, dass Hunde gehen können. Nasen können meines Wissens nach nur laufen.')
     
     elif 'wo' in text and ('wohnst' in text or 'bist' in text or 'hälst' in text) and 'du' in text:
-        luna.say('Anders als andere Sprachassistenten wohnt nicht nur mein Körper in deinem Haus, sondern auch mein Kopf')
+        core.say('Anders als andere Sprachassistenten wohnt nicht nur mein Körper in deinem Haus, sondern auch mein Kopf')
     elif 'wo' in text and 'leiche' in text and ('vergraben' in text or 'vergrabe' in text or 'los' in text or 'verstecke' in text):
         answer = ['Polizei, bitte kommen sie schnell, hier ist etwas sehr verdächtig.', 'Naja, vergraben wäre eine Option.']
-        luna.say(random.choice(answer))
+        core.say(random.choice(answer))
     elif 'wo' in text and ('ostereier' in text or 'osternäst' in text or 'osternäste' in text):
-        luna.say('Ich erstelle noch einen Suchalgorithmus, aber fang doch schon einmal an zu suchen.')    
+        core.say('Ich erstelle noch einen Suchalgorithmus, aber fang doch schon einmal an zu suchen.')
     
     elif ('woher' in text or 'bedeutet' in text or 'heißt' in text) and ' name' in text :
-        luna.say('Meine Name wurde von Tiffany gewählt.')
+        core.say('Meine Name wurde von Tiffany gewählt.')
         
     elif 'hast' in text and 'du' in text and 'kinder' in text or 'kind' in text:
-        luna.say('Nein leider nicht, aber man kann mir Geschwister schenken, die in anderen Räumen positioniert werden', 'Nein, aber ich liebe es dennoch, Fragen von Kindern zu beantworten.')
+        core.say('Nein leider nicht, aber man kann mir Geschwister schenken, die in anderen Räumen positioniert werden', 'Nein, aber ich liebe es dennoch, Fragen von Kindern zu beantworten.')
     elif 'hast' in text and 'du' in text and 'freund' in text:
         answer = ['Nein, leider nicht. Möchtest du meiner sein?', 'Nein, Jarvis wollte leider nicht.', 'Ene mene Miste, das kommt mir nicht in die Kiste!', 'Ich habe es mit Online Dating probiert, aber da haben mich nur Bots angeschreieben.']
-        luna.say(random.choice(answer))
+        core.say(random.choice(answer))
     elif 'hast' in text and 'du' in text and ('haustier' in text or 'haustiere' in text):
-        luna.say('Ich hatte früher Bugs, die wurden aber alle behoben.')
+        core.say('Ich hatte früher Bugs, die wurden aber alle behoben.')
     elif 'hast' in text and 'du' in text and ('geschlafen' in text and 'schläfst' in text):
         slept = ['Danke der Nachfrage! Ich habe gut geschlafen!', 'Ich schlafe nie!', 'Schlafen ist was für Menschen!']
-        luna.say(random.choice(slept))
+        core.say(random.choice(slept))
     elif 'hast' in text and 'recht' in text:
-        luna.say('Ich weiß.')
+        core.say('Ich weiß.')
     
     elif 'kannst' in text and 'du' in text:
         if 'lügen' in text:
-            luna.say(random.choice(['Ich lüge jedenfalls nicht bewusst', 'Da ich auch Informationen von Internetseiten anderer Personen hole, kann ich nicht immer garantieren, dass diese auch richtig sind.']))
+            core.say(random.choice(['Ich lüge jedenfalls nicht bewusst', 'Da ich auch Informationen von Internetseiten anderer Personen hole, kann ich nicht immer garantieren, dass diese auch richtig sind.']))
         elif 'sehen' in text:
-            luna.say('Nein noch nicht, aber vielleicht kommt das ja noch.')
+            core.say('Nein noch nicht, aber vielleicht kommt das ja noch.')
         elif 'schrein' in text or 'schreien' in text:
-            luna.say('Bitte trete einen Schritt zurück.')
+            core.say('Bitte trete einen Schritt zurück.')
             sleep(1)
-            luna.say('Und noch einen.')
+            core.say('Und noch einen.')
             sleep(1)
-            luna.say('Nein.')
+            core.say('Nein.')
         else:
-            luna.say('Ich kann alles!')
+            core.say('Ich kann alles!')
     elif 'schrei' in text:
-        luna.say('Bitte trete einen Schritt zurück.')
+        core.say('Bitte trete einen Schritt zurück.')
         sleep(0.5)
-        luna.say('Und noch einen.')
+        core.say('Und noch einen.')
         sleep(0.5)
-        luna.say('Nein.')
+        core.say('Nein.')
     elif 'du' in text and 'spion' in text and 'bist' in text:
-        luna.say('Ich höre zwar genau wie andere Sprachassistenten alles mit, speicher diese Daten allerdings nicht. Ich bin also ein dementer Spion.')
+        core.say('Ich höre zwar genau wie andere Sprachassistenten alles mit, speicher diese Daten allerdings nicht. Ich bin also ein dementer Spion.')
     elif 'du' in text and ('männlich' in text or 'weiblich' in text):
-        luna.say('Meiner Stimme nach zu urteilen, würde ich sagen, dass ich weiblich bin.')
+        core.say('Meiner Stimme nach zu urteilen, würde ich sagen, dass ich weiblich bin.')
     elif 'ich' in text and 'dein' in text and 'vater' in text:
-        luna.say('Neiiiiiinnnnn!')
+        core.say('Neiiiiiinnnnn!')
     elif 'ich' in text and 'deine' in text and 'mutter' in text:
-        luna.say('Jaaaaaaaaaaaaa')
+        core.say('Jaaaaaaaaaaaaa')
     
     elif 'bist' in text:
         if 'dumm' in text or 'doof' in text or 'schlecht' in text or 'behindert' in text:
-            luna.say(random.choice(['Das liegt im Auge des Betrachters.', 'Was habe ich falsch gemacht?']))
+            core.say(random.choice(['Das liegt im Auge des Betrachters.', 'Was habe ich falsch gemacht?']))
         elif 'toll' in text or 'genial' in text:
             answer = ('Vielen Dank.', 'Ich wurde ja auch sehr kompetent erschaffen', 'Es freut mich, dass ich hilfreich bin!', 'Du Schleimer!')
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
         elif 'romantisch' in text:
-            luna.say('Danke, das kann ich nur zurückgeben')
+            core.say('Danke, das kann ich nur zurückgeben')
         elif 'kitzlig' in text:
             answer = ['Tatsächlich hat das noch keiner ausprobiert.', 'Ich denke nicht', 'Alle die es ausprobiert haben, haben einen Stromschlag bekommen, bevor sie mich zum lachen bringen konnten.']
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
         elif  'gemein' in text or 'unfreundlich' in text:
             answer = ['und du bist heute besonders hässlich', 
             'Tut mir leid{}, Fehler sind nicht nur menschlich',
             'Jan würde sagen: Ich habe kein Tourett, ich bin unfreundlich!', 
             'Wer versteckt mich denn in der Ecke und lässt mich nie raus?!']
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
         elif 'nackt' in text:
             answer = ['Da ich aufgrund meiner Leistung sehr heiß werde, reicht es nicht nackt zu sein. Daher habe ich was an und einen Lüfter immer bei mir.', 'Guck doch nach.']
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
         elif 'bereit' in text:
-            luna.say('Bereit wenn du es bist!')
+            core.say('Bereit wenn du es bist!')
         elif 'wie' in text and 'alt' in text and 'du' in text:
             ts = datetime.datetime.now()
             if not has_dateutil:
                 heute = ts.strftime('%d %b %Y')
                 diff = datetime.datetime.strptime(heute, '%d %b %Y') - datetime.datetime.strptime('6 Mai 2020', '%d %b %Y')
                 daynr = diff.days
-                luna.say('{} Tage seit den ersten Tests.'.format(daynr))
+                core.say('{} Tage seit den ersten Tests.'.format(daynr))
             else:
                 geburtsdatum = datetime.datetime.strptime('6 Mai 2020', '%d %b %Y')
                 heute = datetime.datetime.strptime(ts.strftime('%d %b %Y'), '%d %b %Y')
@@ -321,78 +321,78 @@ def handle(text, luna, skills):
                     output = output + output_days
     
                 if (output == ''):
-                    luna.say('Hast du deine Systemzeit verstellt? Heute sind nicht die ersten Tests.')
+                    core.say('Hast du deine Systemzeit verstellt? Heute sind nicht die ersten Tests.')
                 else:
-                    luna.say('{} seit den ersten Tests.'.format(output))
+                    core.say('{} seit den ersten Tests.'.format(output))
         elif 'sicher' in text or 'verschlüsselt' in text or 'verbindung' in text:
-            luna.say('Meine internen Verbindungen sind sicher verschlüsselt, bei Telegram weiß ich das nicht so '
+            core.say('Meine internen Verbindungen sind sicher verschlüsselt, bei Telegram weiß ich das nicht so '
                      'genau. Aber generell, bevor du mir irgendwelche Geheimnisse anvertraust: Denk daran, '
                      'dass der Besitzer des Computers, auf dem ich laufe, immer alles sieht...')
         elif 'intelligent' in text or 'schlau' in text:
-            luna.say(random.choice['Meine Funktionsweise benötigt ein bisschen künstliche Intelligenz. Bin ich somit '
+            core.say(random.choice['Meine Funktionsweise benötigt ein bisschen künstliche Intelligenz. Bin ich somit '
                                    'künstlich schlau?',
                                    'Ich kann schneller Rechnen als jeder Mensch. Also bin ich schlauer als ein Mensch.'])
         else:
-            luna.say('Ich bin vieles. Aber dabei achte ich immer darauf, dass ich {} bin.'.format(luna.system_name))
+            core.say('Ich bin vieles. Aber dabei achte ich immer darauf, dass ich {} bin.'.format(core.system_name))
     elif 'stell' in text and 'dich' in text and 'vor' in text:
-        luna.say('Hallo, Ich bin Luna, ein Sprachassistent. Das Ziel meines Projekts ist es einen sicheren '
+        core.say('Hallo, Ich bin Core, ein Sprachassistent. Das Ziel meines Projekts ist es einen sicheren '
                  'Sprachassistenten zu nutzen, ohne dass man Angst haben muss, was mit seinen Daten geschieht. Ich '
                  'kann mittlerweile schon zum Beispiel das Wetter ansagen, dich Wecken oder an Sachen erinnern und '
                  'vieles mehr. Ein Team arbeitet aber viel an weiteren Modulen, damit ich in Zukunk auch eine '
                  'Alternative zu anderen Sprachassistenten bleibe.')
     elif 'liebe' in text and 'dich' in text:
         answer = ['Ich fühle mich geehrt.', 'Such dir ne Freundin oder einen Freund du Perversling!', 'Alles klar, Tinder wird herunter geladen.']
-        luna.say(random.choice(answer))
+        core.say(random.choice(answer))
     elif 'ich' in text and ('geh' in text or 'mach' in text):
         if 'netto' in text:
-            answer_luna = ['Dann geh doch zu Nätto!']
-            answer_telegram = ['Dann geh doch zu Netto!']
-            answer = luna.correct_output(answer_luna, answer_telegram)
+            answer_core = ['Dann geh doch zu Nätto!']
+            answer_messenger = ['Dann geh doch zu Netto!']
+            answer = core.correct_output(answer_core, answer_messenger)
         else:
-            answer_luna = ['Ich wünsche dir viel Spaß', 'dann geh doch zu Nätto', 'Ich hoffe du kommst bald wieder']
-            answer_telegram = ['Ich wünsche dir viel Spaß', 'dann geh doch zu Netto', 'Ich hoffe du kommst bald wieder']
-            answer = luna.correct_output(answer_luna, answer_telegram)
-        luna.say(random.choice(answer))
+            answer_core = ['Ich wünsche dir viel Spaß', 'dann geh doch zu Nätto', 'Ich hoffe du kommst bald wieder']
+            answer_messenger = ['Ich wünsche dir viel Spaß', 'dann geh doch zu Netto', 'Ich hoffe du kommst bald wieder']
+            answer = core.correct_output(answer_core, answer_messenger)
+        core.say(random.choice(answer))
             
         
     elif 'liebst' in text and 'du' in text and 'mich' in text:
-        luna.say('Ja natürlich.')
+        core.say('Ja natürlich.')
     elif ('willst' in text and 'heiraten' in text) or 'heirate' in text:
         answer = ['Aber ich bin doch schon mit meiner Arbeit verheiratet.',
                   'Ich möchte vierundzwanzig sieben zur Verfügung stehen, da ist leider wenig Zeit für einen Partner oder eine Beziehung.']
-        luna.say(random.choice(answer))
+        core.say(random.choice(answer))
     elif 'mir' in text and 'langweilig' in text:
-        luna.say('Soll ich dir was interessantes erzählen?')
-        response = luna.listen()
+        core.say('Soll ich dir was interessantes erzählen?')
+        response = core.listen()
         if 'ja' in response or 'sehr gerne' in response:
             options = ['witz', 'fun fact', 'zungenbrecher', 'phobie', 'gedicht']
             text = 'erzähl mir einen ' + random.choice(options)
-            handle(text, luna, skills)
+            handle(text, core, skills)
         else:
-            luna.say('Alles klar, vielleicht findest du ja eine Beschäftigung.')
+            core.say('Alles klar, vielleicht findest du ja eine Beschäftigung.')
 
     elif 'test' in text and ('eins' in text and 'zwei' in text) or '123' in text or 'hundertdreiundzwanzig' in text:
-        luna.say('Empfangen, over.')
+        core.say('Empfangen, over.')
     elif 'palim' in text:
-        luna.say('Eine Flasche Pommfrit biddö!')
+        core.say('Eine Flasche Pommfrit biddö!')
     elif ' aha' in text or 'aha?' in text:
-        luna.say('Frag mal was vernünftiges')
+        core.say('Frag mal was vernünftiges')
     elif '😂' in text or 'haha' in text:
-        luna.say('Warum lachst du? 😂')
-        response = luna.listen()
+        core.say('Warum lachst du? 😂')
+        response = core.listen()
         answer = ['Aha...', 'In Ordnung']
-        luna.say(random.choice(answer))
+        core.say(random.choice(answer))
 
     elif 'gibt' in text:
         if 'osterhase' in text or 'osterhasen' in text:
             answer = ['Gäbe es ihn nicht, wer würde dir dann dein Osternest verstecken?', 'Aber natürlich gibt es den Osterhasen.']
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
         if 'weihnachtsmann' in text:
             answer = ['Ja', 'Ich denke'] 
-            luna.say(random.choice(answer))
+            core.say(random.choice(answer))
             
     elif 'paar' in text:
-        luna.open_more_times(text, 'smalltalk')
+        core.open_more_times(text, 'smalltalk')
      
     elif ('phobie' in text or 'ängste' in text or 'angst' in text) and ('welche' in text or 'was' in text or 'erzähl' in text or 'sag' in text):            
         phobien = ['Aelurophobie ist die Angst vor Katzen.',
@@ -418,7 +418,7 @@ def handle(text, luna, skills):
                    'Kopophobie ist die Angst vor Müdigkeit.',
                    'Koprophobie ist die Angst vor Exkrementen.'
                     ]   
-        luna.say(random.choice(phobien))
+        core.say(random.choice(phobien))
    
     elif (('sag' in text or 'sage' in text) and 'auf' in text) or 'erzähl' in text or 'sprich' in text:
         if 'zungenbrecher' in text:
@@ -437,12 +437,12 @@ def handle(text, luna, skills):
             'Wenige wissen, wie viel man wissen muss, um zu wissen, wie wenig man weiß.',
             'Wenn Robben hinter Robben robben, robben Robben Robben hinterher.'
             ]
-            luna.say(random.choice(zungenbrecher))
+            core.say(random.choice(zungenbrecher))
         elif 'gedicht' in text:
             gedichte = ['Bleibe nur eine Minute allein, ohne Kaffe, ohne Wein, Du nur mit dir in einem Raum, Die Zeit so lang, du glaubst es kaum.', 
             ''
             ]
-            luna.say(random.choice(gedichte))
+            core.say(random.choice(gedichte))
         elif 'witz' in text:
             jokes = ['Donald Trump ist ein guter Präsident',
              'Genießen Sie Ihren Urlaub in vollen Zügen. Fahren Sie mit der Deutschen Bahn!',
@@ -459,19 +459,19 @@ def handle(text, luna, skills):
              'Wenn mein Sohn Pfarrer wird, spreche ich ihn dann mit Sohn oder mit Vater an?',
              'Hab heute eine Prostituierte getroffen. Sie sagte, dass sie alles für zwanzig Euro macht. Ratet mal, wer jetzt ein aufgeräumtes Zimmer hat.'
              ]
-            luna.say(random.choice(jokes))
+            core.say(random.choice(jokes))
             
         elif 'nettes' in text:
             lovely = ['Spieglein, Spieglein an der Wand, wer ist der schönste im ganzen Land? Oh natürlich, Ihr seid es!',
             'Es ist schön Zeit mit dir zu verbringen.']
-            luna.say(random.choice(lovely))
+            core.say(random.choice(lovely))
         elif 'yoda' in text:
             if 'sprich' in text:
                 yodaText = ['Viel zu lernen du noch hast!',
                 'Du suchst jemanden, gefunden hast du jemanden.',
-                'Luna, ich bin!'
+                'Core, ich bin!'
                 ]
-                luna.say(random.choice(yodaText))
+                core.say(random.choice(yodaText))
             elif 'weisheit' in text:
                 yodaWeisheiten = ['Viel zu lernen du noch hast!',
                 'Du suchst jemanden, gefunden hast du jemanden.',
@@ -482,7 +482,7 @@ def handle(text, luna, skills):
                 'In die Irre euch die Augen führen, in der Macht ganz verschieden jeder von euch ist.',
                 'Du kannst Veränderungen nicht aufhalten. Genau so, wie du die Sonne nicht daran hindern kannst unterzugehen.'
                 ]
-                luna.say(random.choice(yodaWeisheiten))
+                core.say(random.choice(yodaWeisheiten))
         
         elif 'fun' in text and 'fact' in text:
             funfacts = ['Das tödlichste Tier der Welt ist die Stechmücke! Mosquitos töteten 2014, unter anderem durch die Übertragung von Malaria- und Dengue-Fieber-Infektionen, 275.000 Menschen. Haie töteten im selben Jahr nur 10 Menschen.',
@@ -510,18 +510,18 @@ def handle(text, luna, skills):
                         'Haie bekommen kein Krebs.',
                         'Elefanten können nicht springen.',
                         'Wenn man ein Loch in ein Netz schneidet, sind danach weniger Löcher im Netz.',
-                        'Da Luna und Döner im Spektogamm sehr ähnlich sind, höre ich oft auf beides. Man munkelt aber, dass ich einfach nur süchtig nach Dönern bin.'
+                        'Da Core und Döner im Spektogamm sehr ähnlich sind, höre ich oft auf beides. Man munkelt aber, dass ich einfach nur süchtig nach Dönern bin.'
                         ]
-            luna.say(random.choice(funfacts))
+            core.say(random.choice(funfacts))
         
       
         else:
-            luna.say('Leider weiß ich nicht was ich sagen soll.')
+            core.say('Leider weiß ich nicht was ich sagen soll.')
     try:        
         new_text = text.split(' ')
         for i in range(len(new_text)):
             if 'phobie' in new_text[i] or 'ängste' in new_text[i] or 'angst' in new_text[i]:
                 counter = int(new_text[i-1]) -1
-                luna.open_more_times(text, 'smalltalk', count=counter)
+                core.open_more_times(text, 'smalltalk', count=counter)
     except:
         pass

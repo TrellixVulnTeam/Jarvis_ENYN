@@ -14,9 +14,9 @@ import os
 
 class TelegramInterface:
 
-    def __init__(self, token, luna):
+    def __init__(self, token, core):
         self.token = token
-        self.luna = luna
+        self.core = core
 
         self.bot = telepot.Bot(token)
         self.bot.getMe()
@@ -26,10 +26,10 @@ class TelegramInterface:
 
     def say(self, text, uid):
         try:
-            user = self.luna.local_storage['LUNA_telegram_id_to_name_table'][uid]
+            user = self.core.local_storage['LUNA_messenger_id_to_name_table'][uid]
         except:
             user = uid
-        self.luna.Log.write('ACTION', '--{}--@{} (Telegram): {}'.format(self.luna.system_name.upper(), user, text), show=True)
+        self.core.Log.write('ACTION', '--{}--@{} (Telegram): {}'.format(self.core.system_name.upper(), user, text), show=True)
         self.bot.sendMessage(uid, text, parse_mode='HTML')
 
     def sendAudio(self, audio_file, uid):

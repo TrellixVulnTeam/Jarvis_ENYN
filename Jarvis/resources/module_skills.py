@@ -23,12 +23,13 @@ class skills:
             ausgabe = ausgabe + ' und ' + new_array[-1]
         return ausgabe
 
-    def get_text_beetween(self, start_word, text, end_word='', output='array'):
+    def get_text_beetween(self, start_word, text, end_word='', output='array', split_text=True):
         ausgabe = []
         index = -1
         start_word = start_word.lower()
         text = text.replace(".", "")
-        text = text.split(' ')
+        if split_text:
+            text = text.split(' ')
         for i in range(len(text)):
             # Erst hier .lower und Groß- und Kleinschreibung beizubehalten
             if text[i].lower() == start_word:

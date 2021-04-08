@@ -2,10 +2,10 @@ import datetime
 
 INTERVALL = 2
 
-def run(luna, profile):
+def run(core, profile):
     now = datetime.datetime.now()
-    if 'Timer' in luna.local_storage.keys():
-        timer = luna.local_storage.get('Timer')
+    if 'Timer' in core.local_storage.keys():
+        timer = core.local_storage.get('Timer')
         for item in timer:
             benutzer = item['Benutzer']
             zeit = item['Zeit']
@@ -14,6 +14,6 @@ def run(luna, profile):
                 output = item['Text']
                 ausgabe = output
                 dic = {'Text': ausgabe, 'Benutzer': benutzer, 'Dauer': item['Dauer']}
-                luna.start_module(user=benutzer, name='timerausgabe', text=dic)
+                core.start_module(user=benutzer, name='timerausgabe', text=dic)
                 timer.remove(item)
-                luna.local_storage['Timer'] = timer
+                core.local_storage['Timer'] = timer

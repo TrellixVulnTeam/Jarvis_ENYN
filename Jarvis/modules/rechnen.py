@@ -50,11 +50,11 @@ denomintorMap = {
     '12tel': '12',
 }
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     match = termFinder.match(text)
     if (match is None):
-        luna.say("Ich kenne das Ergebnis nicht.")
+        core.say("Ich kenne das Ergebnis nicht.")
         return
     text = match.group(1)
     text = text.replace('klammer auf', '(')
@@ -130,10 +130,10 @@ def handle(text, luna, skills):
     try:
         result = eval(text)
     except ZeroDivisionError:
-        luna.say('Du Krümelmonster! So eine Rechnung verletzt mich in meinen tiefsten Schaltkreisen!')
+        core.say('Du Krümelmonster! So eine Rechnung verletzt mich in meinen tiefsten Schaltkreisen!')
         return
     except:
-        luna.say('Das kann ich nicht berechnen.')
+        core.say('Das kann ich nicht berechnen.')
         return
 
     resultStr = '{:.8f}'.format(result)
@@ -146,7 +146,7 @@ def handle(text, luna, skills):
         resultStr = tokens[0] + ' komma ' + (' '.join(tokens[1]))
     if (resultStr.startswith('-')):
         resultStr = 'minus ' + resultStr[1:]
-    luna.say(resultStr)
+    core.say(resultStr)
 
 def isValid(text):
     text = text.lower()

@@ -31,7 +31,7 @@ class AudioInput:
         with sr.Microphone(device_index=None) as source:
             # terminate noise
             self.speech_engine.adjust_for_ambient_noise(source)
-        self.luna = None
+        self.core = None
 
     def start(self):
         # starts the hotword detection
@@ -44,8 +44,8 @@ class AudioInput:
         # ends the hotword detection
         self.stopped = True
 
-    def set_luna(self, luna):
-        self.luna = luna
+    def set_core(self, core):
+        self.core = core
 
     def recognize_file(self, audio_file):
         with audio_file as source:
@@ -60,7 +60,7 @@ class AudioInput:
                 # record user input
                 if not listen:
                     # if there is no conservation, play a bling sound
-                    self.luna.play_bling_sound()
+                    self.core.play_bling_sound()
                 audio = self.speech_engine.listen(source)
                 try:
                     # translate audio to text
@@ -70,7 +70,7 @@ class AudioInput:
                 except:
                     text = "Audio could not be recorded"
             if not listen:
-                self.luna.hotword_detected(text)
+                self.core.hotword_detected(text)
             else:
                 return text
         except:
@@ -99,7 +99,7 @@ class AudioInput:
                 keyword_index = porcupine.process(pcm)
                 if keyword_index >= 0:
                     if keyword_index > 0:
-                        self.luna.hotword_detected("wrong assistant!")
+                        self.core.hotword_detected("wrong assistant!")
                     else:
                         print(f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
                         self.recognize_input()

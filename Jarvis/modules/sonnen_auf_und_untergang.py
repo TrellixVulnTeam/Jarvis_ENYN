@@ -55,7 +55,7 @@ def speechVariation(input):
     """
     This function is the counterpiece to the batchGen-function. It compiles the same
     sentence-format as given there but it only picks one random variant and directly
-    pushes it into luna. It returns the generated sentence.
+    pushes it into core. It returns the generated sentence.
     """
     if not isinstance(input, str):
         parse = random.choice(input)
@@ -71,10 +71,10 @@ def speechVariation(input):
     return parse
 
 
-def sayAsync(luna, text):
+def sayAsync(core, text):
     try:
-        luna.end_Conversation()
-        luna.start_module(name="justsaysomethin", text=text)
+        core.end_Conversation()
+        core.start_module(name="justsaysomethin", text=text)
     except AttributeError:
         print("ASYNC>" + text)
 
@@ -122,12 +122,12 @@ class sunsetTimes(object):
             return False
 
 
-def handle(text, luna, profile):
+def handle(text, core, profile):
     text = text.lower()
-    if luna.analysis["town"] == "None" or luna.analysis["town"] == None:
-        place = luna.local_storage("home_location")
+    if core.analysis["town"] == "None" or core.analysis["town"] == None:
+        place = core.local_storage.get("home_location")
     else:
-        place = luna.analysis["town"]
+        place = core.analysis["town"]
 
     # Call Nominatim-API
     place = place.replace(" ", "+")
@@ -142,14 +142,14 @@ def handle(text, luna, profile):
             lon = float(placeData["lon"])
 
             if lat > 66.5 or lat < -66.5:
-                luna.say(speechVariation(
+                core.say(speechVariation(
                     "Es ist mir etwas peinlich, aber für diesen Ort kann ich "
                     "leider den Sonnen auf beziehungsweise Untergang nicht "
                     "berechnen. Dafür ist mein hinterlegter Algorithmus nicht "
                     "ausgelegt worden."
                 ))
             else:
-                datetimeTemp = luna.analysis["datetime"]
+                datetimeTemp = core.analysis["datetime"]
 
                 datestr = datetimeTemp.strftime("%Y%m%d")
                 day_of_year = int(datetimeTemp.strftime("%j"))
@@ -159,7 +159,11 @@ def handle(text, luna, profile):
                     timezone = 1
                 sT = sunsetTimes(lat, lon, day_of_year, timezone)
                 sunrise, sunset = sT.converted
-                luna.say(speechVariation(
+                print("\n\n\n\n\n\n\n")
+                print(sunrise)
+                print(sunset)
+                print("\n\n\n\n\n\n\n")
+                core.say(speechVariation(
                     "In {0} geht die Sonne [nach meinen Berechnungen|] um "
                     " {1} Uhr {2} auf und um {3} Uhr {4} wieder unter. Du "
                     "kannst also volle {5} Stunden und {6} Minuten "
@@ -174,13 +178,13 @@ def handle(text, luna, profile):
                     )
                 ))
         except IndexError:
-            luna.say(speechVariation(
+            core.say(speechVariation(
                 "Oh je, ich konnte zu [deinem angefragten Ort|] {0} leider keine"
                 "Position[sdaten|] finden. Vielleicht willst du es mit einer"
                 "anderen Aussprache-Variante ausprobieren?".format(place)
             ))
     else:
-        luna.say(speechVariation(
+        core.say(speechVariation(
             "Oh, ich habe gerade [Probleme|Schwierigkeiten], "
             "[an die Koordinaten zu kommen|die Koordinaten zu übersetzen]. "
             "Vielleicht probierst du es einfach später nochmal[, okay|]?"

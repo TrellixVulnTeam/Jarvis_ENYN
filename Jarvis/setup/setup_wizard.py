@@ -18,7 +18,7 @@ class FirstStart:
             self.config_data = json.load(config_file)
 
         self.Audio = Audio
-        self.telegram = False
+        self.messenger = False
         time.sleep(2)
         self.run()
 
@@ -31,7 +31,7 @@ class FirstStart:
         self.add_user()
         self.set_voice_gender()
         self.set_home_location()
-        self.set_telegram()
+        self.set_messenger()
 
         self.say("Wir sind fast fertig. Wir richten nur noch ein paar Module ein.")
         print("\n[STEP-INFO] Switched to setting up the modules...")
@@ -104,10 +104,10 @@ class FirstStart:
         else:
             print("[INFO] Phillips HUE not wanted.")
 
-    def set_telegram(self):
-        use_telegram = self.ask_with_answer(
+    def set_messenger(self):
+        use_messenger = self.ask_with_answer(
             "Möchtest du Telegram verwenden? Bedenke, dass für die Sicherheit des Messengers nicht gesorgt ist.")
-        if self.is_desired(use_telegram):
+        if self.is_desired(use_messenger):
             now = self.ask_with_answer(
                 "Alles klar. Möchtest du den benötigten Schlüssel jetzt diktieren oder später selber eingeben")
             if "jetzt" in now:
@@ -119,8 +119,8 @@ class FirstStart:
                     try:
                         self.Audio.play_bling_sound()
                         token = self.listen()
-                        self.set_telegram_tokens(self.config_data["Local_storage"]["user"], token)
-                        print("[INFO] Telegram Key fixed: ", self.config_data["telegram_key"])
+                        self.set_messenger_tokens(self.config_data["Local_storage"]["user"], token)
+                        print("[INFO] Telegram Key fixed: ", self.config_data["messenger_key"])
                         break
                     except:
                         self.say("Tut mir leid, es gab ein Problem, bitte versuche es erneut!")

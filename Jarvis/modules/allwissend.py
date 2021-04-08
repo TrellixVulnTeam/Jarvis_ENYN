@@ -30,7 +30,7 @@ def isValid(text):
         return False
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower().replace("ß", "ss")
     try:
         if "über" in text:
@@ -55,7 +55,7 @@ def handle(text, luna, skills):
         try:
             wikitext = wikipedia.summary(article)
             wikitext = shorten(wikitext)
-            luna.say("Ich habe folgendes herausgefunden: " + wikitext)
+            core.say("Ich habe folgendes herausgefunden: " + wikitext)
         except wikipedia.exceptions.DisambiguationError as e:
             succ = False
             for el in e.options:
@@ -73,12 +73,12 @@ def handle(text, luna, skills):
                     print("EEERRR", ef)
                     outstr = "Leider kann ich dir im Moment nichts darüber erzählen. vielleicht versuchst du, deine Frage klarer zu formulieren?"
                 except wikipedia.exceptions.PageError:
-                    luna.say("Ich habe zwar Antworten gefunden, aber keine davon passt so richtig auf deine Frage. Entschuldige.")
-            luna.say(outstr)
+                    core.say("Ich habe zwar Antworten gefunden, aber keine davon passt so richtig auf deine Frage. Entschuldige.")
+            core.say(outstr)
         except wikipedia.exceptions.PageError:
-            luna.say("Leider weiß ich keine Antwort auf deine Frage. Vielleicht hilft dir eine Suche im Internet weiter?")
+            core.say("Leider weiß ich keine Antwort auf deine Frage. Vielleicht hilft dir eine Suche im Internet weiter?")
     except IndexError:
-        luna.say("Leider hast du deine Frage so forumliert, dass ich sie nicht verstehen konnte. Das tut mir leid, versuch s doch einfach erneut!")
+        core.say("Leider hast du deine Frage so forumliert, dass ich sie nicht verstehen konnte. Das tut mir leid, versuch s doch einfach erneut!")
 
 ## WIKIPEDIA-extract first sentence
 

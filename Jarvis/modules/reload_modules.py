@@ -2,18 +2,18 @@ import time
 
 SECURE = False
 #toDo Asynchronus say
-def reload_own(luna):
+def reload_own(core):
     print('\n\n--------- RELOAD ---------')
     # Eigene Module neu laden
-    luna.core.Modules.stop_continuous()
-    luna.core.Modules.load_modules()
-    luna.core.Modules.start_continuous()
+    core.core.Modules.stop_continuous()
+    core.core.Modules.load_modules()
+    core.core.Modules.start_continuous()
 
-def handle(text, luna, skills):
-    #luna.say('Okay, warte einen Moment')
-    reload_own(luna)
+def handle(text, core, skills):
+    #core.say('Okay, warte einen Moment')
+    reload_own(core)
     print('--------- FERTIG ---------\n\n')
-    luna.say('Die Module wurden neu geladen.')
+    core.say('Die Module wurden neu geladen.')
 
 
 def isValid(text):

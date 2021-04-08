@@ -8,7 +8,7 @@ def isValid(text):
     else:
         return False
 
-def get_text(luna, text):
+def get_text(core, text):
     remembrall = ''
     e_ind = 0
     text = text.lower()
@@ -109,7 +109,7 @@ def get_text(luna, text):
     return ausgabe
 
 
-def get_reply_time(luna, dicanalyse):
+def get_reply_time(core, dicanalyse):
     time = dicanalyse.get('time')
     jahr = str(time['year'])
     monat = str(time['month'])
@@ -153,93 +153,93 @@ def get_reply_time(luna, dicanalyse):
     return reply
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     if 'lösch' in text:
-        time = luna.analyze['time']
-        erinnerungen = luna.local_storage['Erinnerungen']
+        time = core.analyze['time']
+        erinnerungen = core.local_storage['Erinnerungen']
         founded = []
         for item in erinnerungen:
             if item['Zeit'] is time:
                 founded.append(item)
         if len(founded) is 0:
-            luna.say(
+            core.say(
                 'Ich habe leider keine Erinnerung zu dieser Zeit gefunden. Ich werde mal nach deinen Einträgen gucken.')
             sleep(2)
             entries = []
             for item in erinnerungen:
-                if item['Benutzer'] is luna.user:
+                if item['Benutzer'] is core.user:
                     entries.append(item)
-                luna.say(
+                core.say(
                     'Ich habe folgendes herausgefunden: du hast {} Erinnerungseinträge. Soll ich sie dir Vorlesen und '
                     'du sagst, wenn es das richtige ist?'.format(str(len(entries))))
-                answer = luna.listen()
+                answer = core.listen()
                 if 'ja' in answer:
                     for item in entries:
-                        luna.say(
+                        core.say(
                             'Okay, ich werde dir einfach die Einträge vorlesen und nach jedem Eintrag sagst du entweder ja oder nein.')
                         hit = False
                         for item in entries:
                             if not hit:
-                                luna.say(item['Text'] + ' Ist das richtig?')
-                                response = luna.listen()
+                                core.say(item['Text'] + ' Ist das richtig?')
+                                response = core.listen()
                                 if 'ja' in response:
                                     founded = True
                                     erinnerungen.remove(item)
-                                    luna.local_storage['Erinnerungen'] = erinnerungen
+                                    core.local_storage['Erinnerungen'] = erinnerungen
                 else:
-                    luna.say('Okay, vielleicht probierst du es erneut.')
+                    core.say('Okay, vielleicht probierst du es erneut.')
         if len(founded) > 1:
-            luna.say('Zu dieser Zeit gibt es mehrere Erinnerungen. Soll ich alle löschen?')
-            response = luna.listen()
+            core.say('Zu dieser Zeit gibt es mehrere Erinnerungen. Soll ich alle löschen?')
+            response = core.listen()
             if 'ja' in response:
-                luna.say('Alles klar, ich werde alle Einträge zu diesem Zeitpunkt löschen.')
+                core.say('Alles klar, ich werde alle Einträge zu diesem Zeitpunkt löschen.')
                 for item in founded:
                     erinnerungen.remove(item)
-                luna.local_storage['Erinnerungen'] = erinnerungen
+                core.local_storage['Erinnerungen'] = erinnerungen
             else:
-                luna.say('Soll ich dir jeden Eintrag vorlesen und du sagst mir, ob es der richtige war oder nicht?')
-                response = luna.listen()
+                core.say('Soll ich dir jeden Eintrag vorlesen und du sagst mir, ob es der richtige war oder nicht?')
+                response = core.listen()
                 if 'ja' in response:
-                    luna.say(
+                    core.say(
                         'Okay, ich werde dir einfach die Einträge vorlesen und nach jedem Eintrag sagst du entweder ja oder nein.')
                     for item in founded:
-                        luna.say(response['Text'] + ' Ist das richt?')
-                        response = luna.listen()
+                        core.say(response['Text'] + ' Ist das richt?')
+                        response = core.listen()
                         if 'ja' in response:
                             erinnerungen.remove(item)
-                            luna.local_storage['Erinnerungen'] = erinnerungen
+                            core.local_storage['Erinnerungen'] = erinnerungen
                 else:
-                    luna.say('Alles klar, dann probiere es vielleicht nocheinmal.')
+                    core.say('Alles klar, dann probiere es vielleicht nocheinmal.')
 
     elif text != '_UNDO_':
         reply = ''
         Erinnerung = {}
-        r = get_text(luna, text)
-        E_eins = {'Zeit': luna.analysis['datetime'], 'Text': r, 'Benutzer': luna.user}
-        if 'Erinnerungen' in luna.local_storage.keys():
-            luna.local_storage['Erinnerungen'].append(E_eins)
+        r = get_text(core, text)
+        E_eins = {'Zeit': core.analysis['datetime'], 'Text': r, 'Benutzer': core.user}
+        if 'Erinnerungen' in core.local_storage.keys():
+            core.local_storage['Erinnerungen'].append(E_eins)
         else:
-            luna.local_storage['Erinnerungen'] = [E_eins]
-        rep = get_reply_time(luna, luna.analysis)
+            core.local_storage['Erinnerungen'] = [E_eins]
+        rep = get_reply_time(core, core.analysis)
         if 'dass ' in r:
             antwort = 'Alles klar, ich sage dir am ' + rep + ' bescheid, ' + r + '.'  ###
         elif 'ans ' in text:
             antwort = 'Alles klar, ich erinnere dich am ' + rep + ' ans ' + r + '.'
         else:
             antwort = 'Alles klar, ich sage dir am ' + rep + ' bescheid, dass du ' + r + ' musst.'
-        luna.say(antwort)
+        core.say(antwort)
     else:
-        liste = luna.local_storage.get('Erinnerungen')
+        liste = core.local_storage.get('Erinnerungen')
         element = liste[len(liste)]
-        if element.get('Benutzer') == luna.user:
+        if element.get('Benutzer') == core.user:
             del liste[len(liste)]
         else:
             element = liste[len(liste) - 1]
-            if element.get('Benutzer') == luna.user:
+            if element.get('Benutzer') == core.user:
                 del liste[len(liste) - 1]
             else:
                 element = liste[len(liste) - 2]
-                if element.get('Benutzer') == luna.user:
+                if element.get('Benutzer') == core.user:
                     del liste[len(liste) - 2]
                 else:
                     del liste[len(liste) - 3]

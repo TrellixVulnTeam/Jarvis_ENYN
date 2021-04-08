@@ -25,7 +25,7 @@ def isValid(text):
             return True
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     room = "Zimmer"
 
     text.replace('.', '')
@@ -39,7 +39,7 @@ def handle(text, luna, skills):
     new_text = text.split(' ')
     new_text_length = len(new_text)
 
-    ip = luna.module_storage(module_name="phillips_hue").get("Bridge-IP")
+    ip = core.module_storage(module_name="phillips_hue").get("Bridge-IP")
     bridge = Bridge(ip)
 
     light_names = []
@@ -52,19 +52,19 @@ def handle(text, luna, skills):
             room = new_text[i + 1]
 
     if room is None:
-        if luna.telegram_call:
+        if core.messenger_call:
             # Den Output müsste man eigentlich nicht setzten, da im Normalfall sowieso per Telegram
             # geantwortet werden würde, aber wir gehen mal auf Nummer sicher
-            luna.say('Wenn du das Licht über Telegram steuern möchtest, musst du einen Raum nennen.', output='telegram')
+            core.say('Wenn du das Licht über Telegram steuern möchtest, musst du einen Raum nennen.', output='messenger')
         else:
-            room = luna.room
+            room = core.room
 
     room_lights = bridge.get_group(room, 'lights')
     if room_lights == None:
         room = room.capitalize()
         room_lights = bridge.get_group(room, 'lights')
 
-    light = get_lights(luna, text)
+    light = get_lights(core, text)
     if 'alle ' in text:
         lights = light_names
     elif len(light) > 1:
@@ -75,11 +75,11 @@ def handle(text, luna, skills):
             # lights.append(item)
             lights.append(int(item))
     lights = list(set(lights))
-    Wrapper(bridge, lights, text, luna)
+    Wrapper(bridge, lights, text, core)
 
 
-def Wrapper(bridge, lights, text, luna):
-    # luna.say("Okay.")
+def Wrapper(bridge, lights, text, core):
+    # core.say("Okay.")
     if 'aus' in text:
         light_off(bridge, lights)
 
@@ -88,29 +88,29 @@ def Wrapper(bridge, lights, text, luna):
 
     elif 'heller' in text:
         if 'viel' in text:
-            light_brighter(bridge, lights, 140, luna)
+            light_brighter(bridge, lights, 140, core)
         else:
-            light_brighter(bridge, lights, 60, luna)
+            light_brighter(bridge, lights, 60, core)
 
     elif 'dunkler' in text or 'dimm' in text:
         if 'viel' in text:
-            light_darker(bridge, lights, 140, luna)
+            light_darker(bridge, lights, 140, core)
         else:
-            light_darker(bridge, lights, 60, luna)
+            light_darker(bridge, lights, 60, core)
 
     elif 'hell' in text:
         light_set_brightsness(bridge, lights, 254)
 
     elif 'prozent' in text or '%' in text:
-        light_set_brightsness(bridge, lights, get_brightness(text, luna))
+        light_set_brightsness(bridge, lights, get_brightness(text, core))
 
     for item in colors:
         if item in text:
-            light_change_color(bridge, lights, luna, text)
+            light_change_color(bridge, lights, core, text)
     # elif 'regenbogen' in text and 'licht' in text:
-    #    regenbogenfarbe(bridge, lights, luna)
+    #    regenbogenfarbe(bridge, lights, core)
     # else:
-    #    luna.say('Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.')
+    #    core.say('Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.')
 
 
 def light_on(bridge, lights):
@@ -122,18 +122,18 @@ def light_off(bridge, lights):
     bridge.set_light(lights, 'on', False)
 
 
-def light_change_color(bridge, lights, luna, text):
-    color = get_color(text, luna)
+def light_change_color(bridge, lights, core, text):
+    color = get_color(text, core)
     if color[0] != -1 and color[1] != -1:
         light_on(bridge, lights)
         bridge.set_light(lights, 'xy', [color[0], color[1]])
         bridge.set_light(lights, 'bri', 254)
     else:
-        luna.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
+        core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
 
 
 """
-def regenbogenfarbe(bridge, lights, luna):
+def regenbogenfarbe(bridge, lights, core):
     regenbogenfarbe_ongoing = True
     while regenbogenfarbe_ongoing is True:
         i = 0
@@ -149,7 +149,7 @@ def regenbogenfarbe(bridge, lights, luna):
 
 
 # lamp_brighter and lamp_darker are realy redundant...
-def light_brighter(bridge, lights, value, luna):
+def light_brighter(bridge, lights, value, core):
     try:
         for item in lights:
             brightness = bridge.get_light(int(item), 'bri') + value
@@ -161,11 +161,11 @@ def light_brighter(bridge, lights, value, luna):
             bridge.set_light(item, 'bri', brightness)
     except:
         # 'Try and catch' are unnecessary, since the <0 and >254 actually exclude any incorrect value, but I would rather be on the safe side here
-        luna.say(random.choice[
+        core.say(random.choice[
                      'Tut mir leid, leider konnte ich die Helligkeit nicht erhöhen.', 'Anscheinend habe ich einen Rechenfehler gemacht. Bitte gib mir doch noch eine zweite Möglichkeit.', 'Leider habe ich es nicht geschafft, das Licht zu dimmen. Da hat Jakob bein Programmieren wohl was verkackt.'])
 
 
-def light_darker(bridge, lights, value, luna):
+def light_darker(bridge, lights, value, core):
     try:
         for item in lights:
             brightness = bridge.get_light(int(item), 'bri') - value
@@ -177,7 +177,7 @@ def light_darker(bridge, lights, value, luna):
             bridge.set_light(item, 'bri', brightness)
     except:
         # 'Try and except' are unnecessary, since the <0 and >254 actually exclude any incorrect value, but I would rather be on the safe side here
-        luna.say(random.choice[
+        core.say(random.choice[
                      'Tut mir leid, leider konnte ich die Helligkeit nicht erhöhen.', 'Anscheinend habe ich einen Rechenfehler gemacht. Bitte gib mir doch noch eine zweite Möglichkeit.', 'Leider habe ich es nicht geschafft, das Licht zu dimmen. Da hat Jakob bein Programmieren wohl was verkackt.'])
 
 
@@ -185,17 +185,17 @@ def light_set_brightsness(bridge, lights, value):
     bridge.set_light(lights, 'bri', value)
 
 
-def get_room(luna):
-    room = luna.analysis["room"]
+def get_room(core):
+    room = core.analysis["room"]
     if room == None:
-        if luna.room_name == 'telegram':
+        if core.room_name == 'messenger':
             room = 'FALSE'
         else:
             room = "Zimmer"
     return room
 
 
-def get_lights(luna, text):
+def get_lights(core, text):
     # afterwards it is checked, whether only certain lamps should be addressed or all shoud be changed
     lights = ['FALSE']
     for item in light_names:
@@ -204,7 +204,7 @@ def get_lights(luna, text):
     return lights
 
 
-def get_color(text, luna):
+def get_color(text, core):
     converter = Converter()
     color = [-1, -1]
     founded = 0
@@ -219,13 +219,13 @@ def get_color(text, luna):
             founded += 1
 
     if founded > 1:
-        luna.say(
+        core.say(
             'Du hast mehr als eine Farbe genannt. Dies kann ich leider nicht umsetzten und werde daher die letzte, die du genannt hast, nehmen.')
 
     return color
 
 
-def get_brightness(text, luna):
+def get_brightness(text, core):
     brightness = -1
     text = text.replace('prozent', '%')  # unnötig, da sowieso wegen der SpeechRecognition % aber sicher ist sicher
     text_split = text.split(' ')
@@ -238,7 +238,7 @@ def get_brightness(text, luna):
     return brightness
 
 
-def change_brightness(bridge, text, value, luna):
+def change_brightness(bridge, text, value, core):
     brightness = [-1]
     i = 0
     if 'alle' in text:
@@ -247,7 +247,7 @@ def change_brightness(bridge, text, value, luna):
             brightness[i] = bridge.get_light(light, 'bri')
             i += 1
     else:
-        brightness[i] = bridge.get_light(get_lights(luna, text), 'bri')
+        brightness[i] = bridge.get_light(get_lights(core, text), 'bri')
 
     if 'heller' in text:
         for item in brightness:

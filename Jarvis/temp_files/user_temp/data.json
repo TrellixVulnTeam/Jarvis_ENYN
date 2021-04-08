@@ -10,7 +10,7 @@
       },
       "role": "ADMIN",
       "uid": 0,
-      "telegram_id": 0,
+      "messenger_id": 0,
       "wecker_ton": "standart.wav",
       "wartende_benachrichtigungen": []
   }

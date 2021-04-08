@@ -2,10 +2,10 @@ import datetime
 
 INTERVALL = 2
 
-def run(luna, profile):
+def run(core, profile):
     now = datetime.datetime.now()
-    if 'Erinnerungen' in luna.local_storage.keys():
-        erinnerungen = luna.local_storage.get('Erinnerungen')
+    if 'Erinnerungen' in core.local_storage.keys():
+        erinnerungen = core.local_storage.get('Erinnerungen')
         for item in erinnerungen:
             benutzer = item['Benutzer']
             output = item['Text']
@@ -20,6 +20,6 @@ def run(luna, profile):
             differenz = zeit - now
             dic = {'Text': ausgabe, 'Benutzer': benutzer}
             if differenz.total_seconds() <= 0:
-                luna.start_module(user=benutzer, name='erinnerungsausgabe', text=dic)
+                core.start_module(user=benutzer, name='erinnerungsausgabe', text=dic)
                 erinnerungen.remove(item)
-                luna.local_storage['Erinnerungen'] = erinnerungen
+                core.local_storage['Erinnerungen'] = erinnerungen

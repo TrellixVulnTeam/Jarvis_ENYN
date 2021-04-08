@@ -14,8 +14,8 @@ def isValid(text):
         return False
 
 
-def handle(text, luna, skills):
-    luna.say('42')
+def handle(text, core, skills):
+    core.say('42')
 
 
 def batchGen(batch):

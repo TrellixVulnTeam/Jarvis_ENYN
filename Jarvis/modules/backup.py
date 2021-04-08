@@ -53,15 +53,15 @@ def check_iter(iter):
     liste = tuple(liste)
     return liste
 
-def handle(text, luna, skills):
-    luna.asynchronous_say('Okay, ich erstelle eine Kopie meiner temporären Daten.')
+def handle(text, core, skills):
+    core.asynchronous_say('Okay, ich erstelle eine Kopie meiner temporären Daten.')
     backup_json = {}
-    backup_json['Local_storage'] = check(luna.local_storage)
-    backup_json['Log_raw'] = check(luna.core.Log.log)
+    backup_json['Local_storage'] = check(core.local_storage)
+    backup_json['Log_raw'] = check(core.core.Log.log)
 
-    with open(luna.path + '/LUNA_LOG.json','w') as json_file:
+    with open(core.path + '/LUNA_LOG.json','w') as json_file:
         json.dump(backup_json, json_file, indent=4, ensure_ascii=False)
-    luna.say('Die Daten wurden gespeichert.')
+    core.say('Die Daten wurden gespeichert.')
 
 def batchGen(batch):
     """

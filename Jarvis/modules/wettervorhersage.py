@@ -67,20 +67,20 @@ def zeitabfrage(dic):
     return time
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     now = datetime.datetime.now()
-    o = luna.analysis['town']
+    o = core.analysis['town']
     if o == None:
-        luna.say('Für welchen Ort möchtest du das Wetter erfahren?')
-        antwort = luna.listen()
+        core.say('Für welchen Ort möchtest du das Wetter erfahren?')
+        antwort = core.listen()
         if antwort == 'TIMEOUT_OR_INVALID':
-            luna.say('Ich konnte den Ort leider nicht verstehen')
+            core.say('Ich konnte den Ort leider nicht verstehen')
         else:
             antwort = antwort.lower()
             if len(antwort.split()) == 1:
                 o = antwort
             elif 'hier' in antwort or 'zu hause' in antwort:
-                o = luna.local_storage['home_location'].lower()
+                o = core.local_storage['home_location'].lower()
             else:
                 sonst = 'der dem den einer'
                 satz = {}
@@ -116,16 +116,16 @@ def handle(text, luna, skills):
     try:
         response = urlopen(request)
     except:
-        luna.say('Ich konnte das Wetter für den Ort {} leider nicht aufrufen.'.format(o))
+        core.say('Ich konnte das Wetter für den Ort {} leider nicht aufrufen.'.format(o))
         return
     html = response.read()
     html = str(html)
     ohneb = html[2:len(html)-1]
     wetterdictionary = ast.literal_eval(ohneb)
-    zeit = zeitabfrage(luna.analysis) #dt_txt = zeit
+    zeit = zeitabfrage(core.analysis) #dt_txt = zeit
     if zeit == 'Ich kann leider nicht so weit in die Zukunft sehen.': #Möchtest du wissen, wie das Wetter in 5 Tagen wird muss ich noch rauslassen, weil ich nicht weiÃŸ, wie ich dann mit der Antwort umgehen muss
-        luna.say(zeit)
-        '''antwort = luna.listen()
+        core.say(zeit)
+        '''antwort = core.listen()
         antwort = antwort.lower()
         if 'ja' in antwort:'''
 
@@ -135,7 +135,7 @@ def handle(text, luna, skills):
         minimum = 0
         maximum = 0
         for item in liste_der_wetterbeschreibungen:
-            genannte_zeit = zeitabfrage(luna.analysis)
+            genannte_zeit = zeitabfrage(core.analysis)
             zeit_im_api = item.get("dt_txt") + '0000'
             zeit_im_api = datetime.datetime.strptime(zeit_im_api, "%Y-%m-%d %H:%M:%f")
             differenz = zeit_im_api - genannte_zeit
@@ -166,7 +166,7 @@ def handle(text, luna, skills):
                 wetter = 'In ' + ort + ' gibt es ' + weatherdescription + ' bei ' + minimum + ' bis ' + maximum + ' Grad Celsius.'
             else:
                 wetter = 'In ' + ort + ' gibt es ' + weatherdescription + ' bei ' + minimum + ' Grad Celsius.'
-        luna.say(wetter)
+        core.say(wetter)
 
     response.close()
 

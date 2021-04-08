@@ -2,7 +2,7 @@
 import datetime
 import random
 
-def get_inhalt(txt, luna):
+def get_inhalt(txt, core):
     inhalt = ''
     start_index = 0
     satz = {}
@@ -31,7 +31,7 @@ def get_inhalt(txt, luna):
             break
     if sag_ind != 500:
         nutzer = satz.get(sag_ind + 1)
-        vorhandene_nutzer = luna.local_storage.get('users')
+        vorhandene_nutzer = core.local_storage.get('users')
         vn = ''
         vn = 'allen'
         for nr in vorhandene_nutzer.keys():
@@ -83,24 +83,24 @@ def get_inhalt(txt, luna):
         nutzer = first_letter + nutzer[1:]
         i_und_n = [inhalt, nutzer]
     return i_und_n
-def get_aufruf(text, luna):
+def get_aufruf(text, core):
     aufruf = ''
-    i_und_n = get_inhalt(text, luna)
+    i_und_n = get_inhalt(text, core)
     inhalt = i_und_n[0]
-    inhalt = inhalt.replace(' mir', (' ' + luna.user))
-    inhalt = inhalt.replace(' mich', (' ' + luna.user))
-    inhalt = inhalt.replace(' ich', (' ' + luna.user))
+    inhalt = inhalt.replace(' mir', (' ' + core.user))
+    inhalt = inhalt.replace(' mich', (' ' + core.user))
+    inhalt = inhalt.replace(' ich', (' ' + core.user))
     inhalt = inhalt.replace(' er ', ' du ')
     inhalt = inhalt.replace(' sie ', ' du ')
     nutzer = i_und_n[1]
-    aufruf = nutzer + ', ' + luna.user + ' möchte dir sagen, dass ' + inhalt
+    aufruf = nutzer + ', ' + core.user + ' möchte dir sagen, dass ' + inhalt
 
     nutzer_str = ''
     anrede_wort = 'euch'
     if nutzer.lower() != 'allen':
         nutzer_str = nutzer + ', '
         anrede_wort = 'dir'
-    aufruf = nutzer_str + luna.user + ' möchte ' + anrede_wort + ' sagen, dass ' + inhalt
+    aufruf = nutzer_str + core.user + ' möchte ' + anrede_wort + ' sagen, dass ' + inhalt
     x = aufruf[-1:]
     if x == ' ':
         aufruf = aufruf[:-1]
@@ -110,9 +110,9 @@ def get_aufruf(text, luna):
     else:
         aufruf = aufruf + 'st'
     return aufruf
-def get_antwort(text, luna):
+def get_antwort(text, core):
     antwort = ''
-    i_und_n = get_inhalt(text, luna)
+    i_und_n = get_inhalt(text, core)
     nutzer = i_und_n[1]
     inhalt = i_und_n[0]
     if nutzer == 'fehler':
@@ -125,32 +125,32 @@ def get_antwort(text, luna):
         inhalt = inhalt.replace(' dich', ( 'mich'))
         antwort = 'Alles klar, ich sage ' + nutzer + ', dass ' + inhalt
     return antwort
-def handle(text, luna, skills):
-    aufruf = get_aufruf(text, luna)
-    antwort = get_antwort(text, luna)
+def handle(text, core, skills):
+    aufruf = get_aufruf(text, core)
+    antwort = get_antwort(text, core)
     if antwort == 'Ich konnte leider keinen entsprechenden Nutzer finden.':
-        luna.say(antwort, user = luna.user)
+        core.say(antwort, user = core.user)
     else:
-        i_und_n = get_inhalt(text, luna)
+        i_und_n = get_inhalt(text, core)
         nutzer = i_und_n[1]
-        luna.say(antwort, user = luna.user)
-        luna.say(aufruf, user = nutzer)
+        core.say(antwort, user = core.user)
+        core.say(aufruf, user = nutzer)
         if (nutzer.lower() == 'allen'):
-            for nn in luna.local_storage['users'].keys():
-                luna.say(aufruf, user = nn)
+            for nn in core.local_storage['users'].keys():
+                core.say(aufruf, user = nn)
         else:
-            luna.say(aufruf, user = nutzer)
-        '''neuertext = luna.listen(user = nutzer)
+            core.say(aufruf, user = nutzer)
+        '''neuertext = core.listen(user = nutzer)
         if neuertext != 'TIMEOUT_OR_INVALID':
-            if 'wo ist ' in neuertext.lower() and luna.user in neuertext:
-                usersdictionary = luna.local_storage.get('users')
-                user = usersdictionary.get(luna.user)
+            if 'wo ist ' in neuertext.lower() and core.user in neuertext:
+                usersdictionary = core.local_storage.get('users')
+                user = usersdictionary.get(core.user)
                 raum = user.get('room')
                 if raum == 'Küche':
-                    zweite_antwort = random.choice([luna.user + ' ist gerade in der Küche', luna.user + ' ist momentan in der Küche'])
+                    zweite_antwort = random.choice([core.user + ' ist gerade in der Küche', core.user + ' ist momentan in der Küche'])
                 else:
-                    zweite_antwort = random.choice([luna.user + ' ist gerade im ' + raum, luna.user + ' ist momentan im ' + raum])
-                luna.say(zweite_antwort, user = nutzer)'''
+                    zweite_antwort = random.choice([core.user + ' ist gerade im ' + raum, core.user + ' ist momentan im ' + raum])
+                core.say(zweite_antwort, user = nutzer)'''
 def isValid(txt):
     tt = txt.replace('.', (''))
     tt = tt.replace('?', (''))

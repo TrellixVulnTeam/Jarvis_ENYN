@@ -182,21 +182,21 @@ def isValid(text):
         (('fussball' in text or 'fußball' in text) and ('weltmeisterschaft' in text or ' wm ' in text or 'europameisterschaft' in text or 'europa meisterschaft' in text or ' em ' in text)) or \
         'champions league' in text
 
-def handle(text, luna, skill):
+def handle(text, core, skill):
     rang, liga, verein = getMatch(text)
 
     if liga is None:
-        luna.say('Das kann ich dir nicht sagen, Sportsfreund.')
+        core.say('Das kann ich dir nicht sagen, Sportsfreund.')
     elif isinstance(liga, list):
         for l in list(liga):
             out = ligaResult(rang, l, verein)
             if out is not None:
-                luna.say(out)
+                core.say(out)
                 return
     else:
         out = ligaResult(rang, liga, verein)
         if out is not None:
-            luna.say(out)
+            core.say(out)
             return
 
-    luna.say('Das kann ich dir nicht sagen, Sportsfreund.')
+    core.say('Das kann ich dir nicht sagen, Sportsfreund.')

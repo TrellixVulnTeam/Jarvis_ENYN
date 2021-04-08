@@ -43,10 +43,10 @@ def getnum(str):
     }
     return map.get(str.lower(), str)
 
-def handle(text, luna, skill):
-    luna.say('Dann leg mal los.')
+def handle(text, core, skill):
+    core.say('Dann leg mal los.')
     body = []
-    text = luna.listen().strip()
+    text = core.listen().strip()
     while (text.lower() != 'stop' and text.lower() != 'stopp' and text.lower() != 'fertig'):
         if text != '' and text != 'TIMEOUT_OR_INVALID':
             if TEXT_EDITOR is 'xdotool':
@@ -64,11 +64,11 @@ def handle(text, luna, skill):
                     subprocess.call(['xdotool', 'type', '--delay', '0', text])
         else:
               body.append(text)
-        text = luna.listen().strip()
+        text = core.listen().strip()
     if TEXT_EDITOR is 'xdotool':
-        luna.say('Es war mir eine Freude, dir zu helfen.')
+        core.say('Es war mir eine Freude, dir zu helfen.')
     else:
-        luna.end_Conversation()
+        core.end_Conversation()
         try:
             file = tempfile.NamedTemporaryFile(mode='w', delete=False)
             for line in body:
@@ -76,5 +76,5 @@ def handle(text, luna, skill):
             file.close()
             os.system(TEXT_EDITOR + ' "' + file.name + '"')
         except IOError:
-            luna.say('Es ist ein Fehler aufgetreten.')
+            core.say('Es ist ein Fehler aufgetreten.')
             

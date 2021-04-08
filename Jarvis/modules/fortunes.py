@@ -16,17 +16,17 @@ def isValid(text):
             return False
     return False
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     try:
         fortune = subprocess.check_output("fortune", shell=True).decode('utf-8').strip().lower()
         if (fortune != ''):
-            luna.say(fortune)
+            core.say(fortune)
         elif 'irgendetwas' in text.lower():
-            luna.say('irgendetwas')
+            core.say('irgendetwas')
         else:
-            luna.say('irgendwas')
+            core.say('irgendwas')
     except subprocess.CalledProcessError:
         if 'irgendetwas' in text.lower():
-            luna.say('irgendetwas')
+            core.say('irgendetwas')
         else:
-            luna.say('irgendwas')
+            core.say('irgendwas')

@@ -4,8 +4,8 @@ def isValid(text):
         return True
     return False
 
-def handle(text, luna, skills):
-    luna.say("Alles klar.")
+def handle(text, core, skills):
+    core.say("Alles klar.")
     startword = "spiele" if "spiele" in text else "spiel"
     until = ''
     until_words = ['nächstes', 'danach', 'gleich']
@@ -18,4 +18,4 @@ def handle(text, luna, skills):
     if 'nächstes' in text or 'danach' in text or 'gleich' in text:
         next = True
 
-    luna.play_music(by_name=song, url=False, path=False, next=next, now=False, playlist=False, announce=False)
+    core.play_music(by_name=song, url=False, path=False, next=next, now=False, playlist=False, announce=False)

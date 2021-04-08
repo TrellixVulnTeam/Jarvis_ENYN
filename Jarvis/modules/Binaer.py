@@ -15,12 +15,12 @@ def isValid(text):
         return False
 
 
-def handle(text, luna, skill):
+def handle(text, core, skill):
     decNumber = getNumber(text)
     if decNumber != 'UNDO':
-        luna.say('Die Zahl ' + decNumber + ' ist ' + binary(int(decNumber)) + ' in dem Binären.')
+        core.say('Die Zahl ' + decNumber + ' ist ' + binary(int(decNumber)) + ' in dem Binären.')
     else:
-        luna.say('Ich konnte die Zahl leider nicht herausfiltern.')
+        core.say('Ich konnte die Zahl leider nicht herausfiltern.')
 
 def binary(n):
     output = ""

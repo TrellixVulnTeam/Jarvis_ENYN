@@ -9,14 +9,14 @@ def isValid(text):
         return True
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     if 'wann' in text and ('nächste' in text or 'wieder' in text):
         year = datetime.date.today().year+1
         founded = False
         while founded is False:
             if leap_year(year) is True:
-                luna.say('Das nächste Schaltjahr ist {}'.format(year))
+                core.say('Das nächste Schaltjahr ist {}'.format(year))
                 founded = True
             else:
                 year += 1
@@ -27,9 +27,9 @@ def handle(text, luna, skills):
             output = 'ein'
         else:
             output = 'kein'
-        luna.say('Das Jahr {} ist {} Schaltjahr.'.format(get_year(text), output))
+        core.say('Das Jahr {} ist {} Schaltjahr.'.format(get_year(text), output))
     else:
-        luna.say("Es gab ein Problem")
+        core.say("Es gab ein Problem")
 
 def get_year(text):
     year = -1

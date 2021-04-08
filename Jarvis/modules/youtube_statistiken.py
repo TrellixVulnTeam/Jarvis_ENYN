@@ -6,8 +6,8 @@ def isValid(text):
         return False
 
 
-def handle(text, luna, skills):
-    luna.say("Dieses Modul ist leider noch in Arbeit. Bitte versuche es später erneut!")
+def handle(text, core, skills):
+    core.say("Dieses Modul ist leider noch in Arbeit. Bitte versuche es später erneut!")
     return
     text = text.lower()
     if "wann" in text and 'hat' in text and 'hochgeladen' in text:

@@ -25,121 +25,121 @@ def isValid(text):
         return True
 
 
-def handle(text, luna, skills):
+def handle(text, core, skills):
     text = text.lower()
     now = datetime.datetime.now()
     # wochentag = datetime.datetime.today().weekday()
     time = now.hour
     if ' uhr ' in text or 'spät' in text:
-        luna.say('Es ist ' + get_time(now))
+        core.say('Es ist ' + get_time(now))
     elif 'welchen tag' in text or 'welcher tag' in text or 'wochentag' in text or 'datum' in text or 'den wievielten haben wir heute' in text or 'der wievielte ist es' in text:
-        luna.say(get_day(text))
+        core.say(get_day(text))
     elif 'hallo' in text:
-        luna.say('Hallo!')
+        core.say('Hallo!')
     elif 'guten' in text and 'tag' in text:
         if time >= 20 or time <= 4:
-            luna.say('Naja "Tag" würde ich das nicht mehr nennen, aber ich wünsche dir auch einen guten Abend')
+            core.say('Naja "Tag" würde ich das nicht mehr nennen, aber ich wünsche dir auch einen guten Abend')
         elif 5 <= time <= 20:
-            luna.say('Guten Tag!')
+            core.say('Guten Tag!')
     elif 'guten' in text and 'morgen' in text:
         if time is 4 or time is 5:
-            luna.say('Hast du heute was wichtiges anstehen?')
-            response = luna.listen
+            core.say('Hast du heute was wichtiges anstehen?')
+            response = core.listen
             if 'ja' in text:
-                luna.say('Dann wünsche ich dir dabei viel Erfolg!')
+                core.say('Dann wünsche ich dir dabei viel Erfolg!')
             else:
-                luna.say('Dann schlaf ruhig weiter, es ist noch viel zu früh, um aufzustehen.')
+                core.say('Dann schlaf ruhig weiter, es ist noch viel zu früh, um aufzustehen.')
         elif 6 <= time <= 10:
-            luna.say('Guten Morgen!')
+            core.say('Guten Morgen!')
         elif time is 11 or time is 12:
-            luna.say('Wurde aber auch langsam Zeit. Aber dennoch auch dir einen guten Morgen.')
+            core.say('Wurde aber auch langsam Zeit. Aber dennoch auch dir einen guten Morgen.')
         elif 14 <= time <= 18:
-            luna.say(
+            core.say(
                 'Ob es noch Morgen ist, liegt wohl im Blickwinkel des Betrachters. Ich würde eher sagen, dass es Mittag oder Nachmittag ist.')
         elif time >= 19 or time <= 3:
-            luna.say(
+            core.say(
                 'Also Morgen ist es auf jeden Fall nicht mehr. Daher wünsche ich dir einfach Mal einen guten Abend.')
         else:
-            luna.say('Hallo!')
+            core.say('Hallo!')
     elif 'guten' in text and 'abend' in text:
         if 6 <= time <= 17:
-            luna.say(
+            core.say(
                 'Ob es noch Abend ist, liegt wohl im Blickwinkel des Betrachters. In Amerika ist es jetzt in der Tat Abend.')
         elif time >= 18 or time <= 5:
-            luna.say('Gute nacht')
+            core.say('Gute nacht')
         else:
-            luna.say('Guten Abend.')
+            core.say('Guten Abend.')
 
     elif 'gute' in text and 'nacht' in text:
         if 1 <= time <= 13:
-            luna.say('Du solltest echt langsam ins Bett gehen.')
+            core.say('Du solltest echt langsam ins Bett gehen.')
         elif (8 <= time <= 24) or time is 0:
-            luna.say('Gute Nacht.')
+            core.say('Gute Nacht.')
         else:
-            luna.say('Eine sehr interessante Definition der derzeitigen Uhrzeit.')
-        luna.say('Soll ich dich morgen wecken?')
-        response = luna.listen()
+            core.say('Eine sehr interessante Definition der derzeitigen Uhrzeit.')
+        core.say('Soll ich dich morgen wecken?')
+        response = core.listen()
         if 'ja' in response or 'gerne' in response or 'bitte' in response:
-            if luna.analysis['datetime'] is None:
-                luna.say('Wann soll ich dich denn wecken?')
-                response_two = luna.listen()
+            if core.analysis['datetime'] is None:
+                core.say('Wann soll ich dich denn wecken?')
+                response_two = core.listen()
                 text = 'weck ' + response_two
-                luna.start_module(text=text)
+                core.start_module(text=text)
             else:
-                luna.start_module(text=text)
+                core.start_module(text=text)
         else:
-            luna.say('Okay, dann wünsche ich dir eine gute Nacht.')
+            core.say('Okay, dann wünsche ich dir eine gute Nacht.')
     elif 'timer' in text:
-        timer(text, luna, skills)
+        timer(text, core, skills)
     elif 'stoppuhr' in text:
-        stopwatch(text, luna, skills)
+        stopwatch(text, core, skills)
     elif 'counter' in text:
-        countdown(text, luna)
+        countdown(text, core)
     else:
-        luna.say('Aaahhh, das sind zu viele Möglichkeiten mit Zeiten umzugehen. Bitte versuche es erneut.')
+        core.say('Aaahhh, das sind zu viele Möglichkeiten mit Zeiten umzugehen. Bitte versuche es erneut.')
 
 
-def timer(text, luna, skills):
+def timer(text, core, skills):
     if 'start' in text:
-        luna.say('Sicher, dass du nicht die Stoppuhr meinst?')
-        luna.say('Soll ich für dich eine Stoppuhr starten?')
-        response = luna.listen()
+        core.say('Sicher, dass du nicht die Stoppuhr meinst?')
+        core.say('Soll ich für dich eine Stoppuhr starten?')
+        response = core.listen()
         if 'ja' in response or 'bitte' in text or 'gerne' in text:
-            luna.say('Okay, soll ich eine Stoppuhr nur für dich oder für alle starten?')
-            response = luna.listen()
+            core.say('Okay, soll ich eine Stoppuhr nur für dich oder für alle starten?')
+            response = core.listen()
             if 'mich' in response or 'meine' in response:
-                stopwatch('starte meine stoppuhr', luna, skills)
+                stopwatch('starte meine stoppuhr', core, skills)
             else:
-                stopwatch('starte die stoppuhr', luna, skills)
+                stopwatch('starte die stoppuhr', core, skills)
         else:
-            luna.say('Okay. Dann mach ich nichts.')
+            core.say('Okay. Dann mach ich nichts.')
 
     elif 'stell' in text or 'beginn' in text:
         # Einheitlichkeit
         text = text.replace(' auf ', ' in ')
 
-        time = luna.Analyzer.analyze(text)['datetime']
+        time = core.Analyzer.analyze(text)['datetime']
 
         temp_text = "Dein Timer ist abgelaufen."
 
         duration = skills.get_text_beetween('in', text, output='String')
 
-        # Zeit: Um wieviel Uhr der Timer fertig ist; Text: Antwort von Luna; Benutzer; Raum; Dauer: Wie lange der Timer gehen soll
-        E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration, 'Benutzer': luna.user}
+        # Zeit: Um wieviel Uhr der Timer fertig ist; Text: Antwort von Core; Benutzer; Raum; Dauer: Wie lange der Timer gehen soll
+        E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration, 'Benutzer': core.user}
 
         # Vermeidung von Redundanz. Wird für 1 und mehrere Timer verwendet
         # Aufzählung wenn mehrere Timer
-        if 'Timer' in luna.local_storage.keys():
-            luna.local_storage['Timer'].append(E_eins)
-            anzahl = len(luna.local_storage['Timer'])
-            luna.say(str(anzahl) + '. Timer: ' + str(E_eins['Dauer']) + ' ab jetzt.')
+        if 'Timer' in core.local_storage.keys():
+            core.local_storage['Timer'].append(E_eins)
+            anzahl = len(core.local_storage['Timer'])
+            core.say(str(anzahl) + '. Timer: ' + str(E_eins['Dauer']) + ' ab jetzt.')
         else:
-            luna.local_storage['Timer'] = [E_eins]
-            luna.say(str(E_eins['Dauer']) + ' ab jetzt.')
+            core.local_storage['Timer'] = [E_eins]
+            core.say(str(E_eins['Dauer']) + ' ab jetzt.')
 
     elif 'wie' in text and 'lange' in text:
         #Begrenzt Timer auf die des Benutzers
-        user_timer = luna.local_storage['Timer']
+        user_timer = core.local_storage['Timer']
         aussage_timer = ''
         if len(user_timer) == 0:
             aussage_timer = "Du hast keinen aktiven Timer!"
@@ -150,7 +150,7 @@ def timer(text, luna, skills):
                 timer_abgelaufen = (now - item["Zeit"])
                 if timer_abgelaufen:
                     user_timer.remove(item)
-                    luna.local_storage["Timer"].remove(item)
+                    core.local_storage["Timer"].remove(item)
 
                 # Verbleibende Zeit runden
                 genaue_zeit = item['Zeit'] - datetime.datetime.now()
@@ -174,97 +174,97 @@ def timer(text, luna, skills):
                 aussage_timer += 'Du hast einen ' + item['Dauer'] + ' mit noch etwa ' + get_time_differenz(skills, verbleibende_zeit) + ' verbleibend.\n'
 
             if len(user_timer) > 1:
-                aussage = 'Du hast ' + str(len(luna.local_storage['Timer'])) + ' Timer gestellt.\n' + aussage_timer
+                aussage = 'Du hast ' + str(len(core.local_storage['Timer'])) + ' Timer gestellt.\n' + aussage_timer
 
-        luna.say(aussage_timer)
+        core.say(aussage_timer)
 
 
     elif 'lösch' in text or 'beend' in text or 'stopp' in text:
-        user_timer = luna.local_storage["Timer"]
-        if 'Timer' in luna.local_storage.keys():
+        user_timer = core.local_storage["Timer"]
+        if 'Timer' in core.local_storage.keys():
             if 'alle' in text:
                 for item in user_timer:
-                    luna.local_storage['Timer'].remove(item)
-                    luna.say("Alle Timer von dir gelöscht!")
+                    core.local_storage['Timer'].remove(item)
+                    core.say("Alle Timer von dir gelöscht!")
 
             elif 'von' in text:
                 duration = skills.get_text_beetween('von', text, output='String')
                 for item in user_timer:
                     if item["Dauer"] == duration:
-                        timer = luna.local_storage["Timer"].remove(item)
-                        luna.local_storage["Timer"] = timer
-                        luna.say("Alles klar, ich habe den Timer mit der Dauer " + item["Dauer"] + " gelöscht.")
+                        timer = core.local_storage["Timer"].remove(item)
+                        core.local_storage["Timer"] = timer
+                        core.say("Alles klar, ich habe den Timer mit der Dauer " + item["Dauer"] + " gelöscht.")
                         break
             else:
-                if luna.telegram_call:
+                if core.messenger_call:
                     text = "Folgende Timer habe ich in deiner Liste gefunden:\n"
                     i = 1
                     for item in user_timer:
                         temp_string = str(i)+". Dauer: "+item["Dauer"]+" Du hast den Timer im Raum '"+item["Raum"]+"' gestellt.\n"
                         text = text + temp_string
                     text = text + "Bitte schreib nur die Ziffer des Timers, welcher gelöscht werden soll."
-                    luna.say(text, output='telegram') #Der output ist eigentlich unnötig, aber wir gehen auf nummer sicher
-                    number = luna.listen()
+                    core.say(text, output='messenger') #Der output ist eigentlich unnötig, aber wir gehen auf nummer sicher
+                    number = core.listen()
                     if number <= len(user_timer):
-                        timer = luna.local_storage["Timer"].remove(user_timer[int(number)-1])
-                        luna.say("Ich habe den Timer mit der Dauer " + item["Dauer"]+" gelöscht!", output='telegram')
+                        timer = core.local_storage["Timer"].remove(user_timer[int(number)-1])
+                        core.say("Ich habe den Timer mit der Dauer " + item["Dauer"]+" gelöscht!", output='messenger')
                     else:
-                        luna.say("Deine Eingabe war ungültig!", output='telegram')
+                        core.say("Deine Eingabe war ungültig!", output='messenger')
                 else:
-                    luna.say(
+                    core.say(
                         "Ich werde dir jetzt die Zeitlängen aller Timer von dir vorlesen. Du sagst dann einfach ja, wenn es das richtige ist.")
                     for item in user_timer:
-                        luna.say(item["Dauer"])
-                        response = luna.listen()
+                        core.say(item["Dauer"])
+                        response = core.listen()
                         if "ja" in response:
-                            timer = luna.local_storage["Timer"].remove(item)
-                            luna.local_storage["Timer"] = timer
-                            luna.say(luna.correct_output("Alles klar, ich habe den Timer mit der Dauer " + item["Dauer"] + " gelöscht."))
+                            timer = core.local_storage["Timer"].remove(item)
+                            core.local_storage["Timer"] = timer
+                            core.say(core.correct_output("Alles klar, ich habe den Timer mit der Dauer " + item["Dauer"] + " gelöscht."))
                             break
 
         else:
-            luna_array = ["Du hast noch gar keinen Teimer gestellt, daher kann ich auch keinen löschen"]
-            telegram_array = ["Du hast noch gar keinen Timer gestellt, daher kann ich auch keinen löschen"]
-            luna.say(luna.correct_output(luna_array, telegram_array))
+            core_array = ["Du hast noch gar keinen Teimer gestellt, daher kann ich auch keinen löschen"]
+            messenger_array = ["Du hast noch gar keinen Timer gestellt, daher kann ich auch keinen löschen"]
+            core.say(core.correct_output(core_array, messenger_array))
 
     elif 'beend' in text:
-        luna.say('Ich kann einen Timer nicht beenden, nur löschen. Vielleicht meinst du ja die Stoppuhr.')
+        core.say('Ich kann einen Timer nicht beenden, nur löschen. Vielleicht meinst du ja die Stoppuhr.')
     else:
-        luna.say('Leider weiß ich nicht, was ich mit dem Timer machen soll.')
+        core.say('Leider weiß ich nicht, was ich mit dem Timer machen soll.')
 
 
-def stopwatch(text, luna, skills):
+def stopwatch(text, core, skills):
     if 'start' in text:
-        if 'stoppuhr' in luna.local_storage.keys():
-            luna.say('Es läuft bereits eine Stoppuhr. Soll ich diese erst stoppen?')
-            response = luna.listen()
+        if 'stoppuhr' in core.local_storage.keys():
+            core.say('Es läuft bereits eine Stoppuhr. Soll ich diese erst stoppen?')
+            response = core.listen()
             if 'ja' in response:
-                luna.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(get_time(luna.local_storage['stoppuhr']), get_time_differenz(luna.local_storage['stoppuhr'], skills)))
-                luna.local_storage['stoppuhr'] = datetime.datetime.now()
+                core.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(get_time(core.local_storage['stoppuhr']), get_time_differenz(core.local_storage['stoppuhr'], skills)))
+                core.local_storage['stoppuhr'] = datetime.datetime.now()
             else:
-                luna.say('Alles klar, die alte Stoppuhr läuft weiter.')
+                core.say('Alles klar, die alte Stoppuhr läuft weiter.')
         else:
-            luna.say('Alles klar, die Stoppuhr wurde um {} gestartet.'.format(get_time(datetime.datetime.now())))
-            luna.local_storage['stoppuhr'] = datetime.datetime.now()
+            core.say('Alles klar, die Stoppuhr wurde um {} gestartet.'.format(get_time(datetime.datetime.now())))
+            core.local_storage['stoppuhr'] = datetime.datetime.now()
 
     elif 'stopp' in text or 'beende' in text:
 
-        if 'stoppuhr' in luna.local_storage.keys() and luna.local_storage['stoppuhr'] != '':
-            luna.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(get_time(datetime.datetime.now()), get_time_differenz(luna.local_storage["stoppuhr"], skills)))
-            luna.local_storage['stoppuhr'] = ''
+        if 'stoppuhr' in core.local_storage.keys() and core.local_storage['stoppuhr'] != '':
+            core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(get_time(datetime.datetime.now()), get_time_differenz(core.local_storage["stoppuhr"], skills)))
+            core.local_storage['stoppuhr'] = ''
         else:
-            luna.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')
-            response = luna.listen()
+            core.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')
+            response = core.listen()
             if 'ja' in response:
-                luna.say('Alles klar, Stoppuhr wurde um {} gestartet'.format(
+                core.say('Alles klar, Stoppuhr wurde um {} gestartet'.format(
                     get_time(datetime.datetime.now())))
-                luna.local_storage['stoppuhr'] = datetime.datetime.now()
+                core.local_storage['stoppuhr'] = datetime.datetime.now()
     else:
-        luna.say(
+        core.say(
             'Ich kann die Stoppuhr nur starten oder stoppen.')  # bald sollte noch eine Pause-Funktion hinzugefügt werden
 
 
-def countdown(text, luna):
+def countdown(text, core):
     text = text.split(' ')
     timecode = -1
     for i in range(len(text)):
@@ -273,18 +273,18 @@ def countdown(text, luna):
     if 'minute' in text:
         timecode = timecode * 60
     elif 'stunde' in text:
-        luna.say('Ist das nicht ein bisschen zu lang?')
-        response = luna.listen()
+        core.say('Ist das nicht ein bisschen zu lang?')
+        response = core.listen()
         if 'nein' in text:
             timecode = timecode * 3600
 
     if timecode is not -1:
         for i in range(timecode):
             time = timecode - i
-            luna.say(str(time))
+            core.say(str(time))
             sleep(1)
     else:
-        luna.say('Tut mir leid, leider habe ich nicht verstanden, von wo ich herunter zählen soll')
+        core.say('Tut mir leid, leider habe ich nicht verstanden, von wo ich herunter zählen soll')
 
 
 def get_time_differenz(start_time, skills, time=datetime.datetime.now()):

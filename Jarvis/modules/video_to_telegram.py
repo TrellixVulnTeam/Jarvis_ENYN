@@ -19,29 +19,29 @@ def isValid(text):
 		return False
 
 	
-def handle(text, luna, skills):
+def handle(text, core, skills):
 	# Festlegen der Zielpfade
-	SAVE_PATH = luna.path + '/modules/resources'
+	SAVE_PATH = core.path + '/modules/resources'
 	VIDEO_PATH = SAVE_PATH + '/YouTube.mp4'
-	luna.say('Wie lautet die URL von dem Youtube-Video, das ich dir schicken soll?', output='telegram')
+	core.say('Wie lautet die URL von dem Youtube-Video, das ich dir schicken soll?', output='messenger')
 	# Holen der URL
-	response = luna.listen(input='telegram')
+	response = core.listen(input='messenger')
 	try:
-		luna.say('Video wird heruntergeladen. Bitte warte einen Moment.', output='telegram')
+		core.say('Video wird heruntergeladen. Bitte warte einen Moment.', output='messenger')
 		try:
 			youtube = pytube.YouTube(response)
 		except:
-			luna.say('Der Link konnte keinem Video zugeordnet werden.')
+			core.say('Der Link konnte keinem Video zugeordnet werden.')
 
 		# Die höchte Auflösung finden und dann herunterladen
 		video = youtube.streams.get_highest_resolution()
-		luna.say("Einen Moment bitte. Das Video wird heruntergeladen...")
+		core.say("Einen Moment bitte. Das Video wird heruntergeladen...")
 		video.download(SAVE_PATH, filename="YouTube")
 		
-		send_video_to_telegram(luna, VIDEO_PATH)
+		send_video_to_messenger(core, VIDEO_PATH)
 	
 	except Exception as e:
-		luna.say('Es gab einen Fehler. Bitte versuche es erneut.')
+		core.say('Es gab einen Fehler. Bitte versuche es erneut.')
 		traceback.print_exc()
 	try:
 		# Video wird gelöscht, damit der Speicher nicht unnötig belastet wird
@@ -49,13 +49,13 @@ def handle(text, luna, skills):
 	except:
 		traceback.print_exc()
 		
-def send_video_to_telegram(luna, VIDEO_PATH):
+def send_video_to_messenger(core, VIDEO_PATH):
 	try:
 		# UID aus local_storage entnehmen und dann VIdeo als file dem Nutzer schicken
 		# Da Videos gerne auch mal länger als 10min gehen, wird auf das Senden
 		# als Datei gesetzt, da es sonst zu Problemen kommen kann
-		uid = luna.local_storage['LUNA_telegram_name_to_id_table'][luna.user]
-		luna.telegram.bot.send_file(uid, video=open(VIDEO_PATH, 'rb'), supports_streaming=True)
+		uid = core.local_storage['LUNA_messenger_name_to_id_table'][core.user]
+		core.messenger.bot.send_file(uid, video=open(VIDEO_PATH, 'rb'), supports_streaming=True)
 	except KeyError as e:
 		print('[WARNING] Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben wurde'.format(text, user), conv_id=original_command, show=True)
 		traceback.print_exc()
