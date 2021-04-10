@@ -1,3 +1,4 @@
+import os
 import random
 import re
 import struct
@@ -6,6 +7,8 @@ import traceback
 import urllib.request
 from datetime import datetime
 from threading import Thread
+import io
+
 import vlc
 import pafy
 from resources.tts import Text_to_Speech
@@ -32,6 +35,7 @@ class AudioInput:
             # terminate noise
             self.speech_engine.adjust_for_ambient_noise(source)
         self.core = None
+        self.Audio_Output = None
 
     def start(self):
         # starts the hotword detection
@@ -44,8 +48,9 @@ class AudioInput:
         # ends the hotword detection
         self.stopped = True
 
-    def set_core(self, core):
+    def set_core(self, core, Audio_Output):
         self.core = core
+        self.Audio_Output = Audio_Output
 
     def recognize_file(self, audio_file):
         with audio_file as source:
@@ -60,7 +65,8 @@ class AudioInput:
                 # record user input
                 if not listen:
                     # if there is no conservation, play a bling sound
-                    self.core.play_bling_sound()
+                    self.Audio_Output.detected_hotword()
+                    self.Audio_Output.play_bling_sound()
                 audio = self.speech_engine.listen(source)
                 try:
                     # translate audio to text
@@ -114,6 +120,8 @@ class AudioInput:
         with sr.Microphone(device_index=None) as source:
             self.speech_engine.adjust_for_ambient_noise(source)
 
+
+
     def py_error_handler(self, filename, line, function, err, fmt):
         # This function suppress warnings from Alsa, which are totally useless
         pass
@@ -124,7 +132,7 @@ class AudioOutput:
     -------------------------
     AudioOutput:
         - responsible for the "normal" audio output
-        - don´t use it for playing musik (this is the task of the "MusicPlayer" class)
+        - don´t use it for playing music (this is the task of the "MusicPlayer" class)
     -------------------------
     """
     def __init__(self, voice):
@@ -197,6 +205,16 @@ class AudioOutput:
         while text in self.notification:
             time.sleep(0.2)
 
+    def detected_hotword(self):
+        audio.Channel(1).set_volume(0.25)
+        audio.Channel(2).set_volume(0.25)
+        self.music_player.set_volume(25)
+
+    def continue_after_hotword(self):
+        audio.Channel(1).set_volume(1)
+        audio.Channel(2).set_volume(1)
+        self.music_player.set_volume(100)
+
     def play_music(self, name, next=False):
         if next:
             self.music.insert(0, name)
@@ -214,6 +232,16 @@ class AudioOutput:
             self.notification.append(buff)
         else:
             self.notification.insert(0, buff)
+
+    def play_bling_sound(self):
+        # playing Bling-Sound
+        TOP_DIR = os.path.dirname(os.path.abspath(__file__))
+        DETECT_DONG = os.path.join(TOP_DIR, "resources/sounds/bling.wav")
+
+        with open(DETECT_DONG, "rb") as wavfile:
+            input_wav = wavfile.read()
+        data = io.BytesIO(input_wav)
+        self.play_notification(data, next=True)
 
     def pause(self, channel):
         audio.Channel(channel).pause()
@@ -261,6 +289,7 @@ class MusicPlayer:
         self.stopped = False
         self.paused = False
         self.skip = False
+        self.old_volume = 1
 
     def start(self):
         self.music_thread = Thread(target=self.run)
@@ -300,10 +329,10 @@ class MusicPlayer:
         """if playlist:
             self.add_playlist(url, by_name, next)"""
         if not by_name == None:
-            _url = 'https://www.youtube.com/results?search_query=' + str(by_name)
+            _url = 'https://www.youtube.com/results?search_query={0}'.format(str(by_name))
             html = urllib.request.urlopen(_url)
             video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
-            while(True):
+            while True:
                 video = pafy.new(random.choice(video_ids))
                 duration = str(video.duration).split(":")
                 if int(duration[0]) == 0 and int(duration[1]) < 10:
@@ -319,7 +348,7 @@ class MusicPlayer:
             media = self.instance.media_new(path)
         else:
             return
-        if media != None:
+        if media is not None:
             media.get_mrl()
         if next:
             self.playlist.insert(0, media)
@@ -356,6 +385,7 @@ class MusicPlayer:
         self.player.play()
 
     def set_volume(self, volume):
+        self.old_volume = self.player.audio_get_volume()
         self.player.audio_set_volume(volume)
 
     def stop(self):

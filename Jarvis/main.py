@@ -339,7 +339,6 @@ class Modulewrapper:
             self.messenger_say(text)
         else:
             text = self.correct_output_automate(text)
-            print('\n--{}:-- {}'.format(self.system_name.upper(), text))
             self.Audio_Output.say(text)
 
     @staticmethod
@@ -584,35 +583,17 @@ class LUNA:
             time.sleep(0.03)
 
     def hotword_detected(self, text):
-        if text == "Audio could not be recorded":
-            """
-            md = Modulewrapper(text, None, None)
-            Modulewrapper.say(md, "Bitte wiederhole deine Frage.")
-            self.Audio_Input.recognize_input()
-            """
-            pass
-        elif text == "wrong assistant!":
+        if text == "wrong assistant!":
             Audio_Output.say("Geh mir nicht fremd, du sau!")
         else:
             user = self.users.get_user_by_name(self.local_storage["user"])
             Modules.start_module(text=str(text), user=user)
+            self.Audio_Output.continue_after_hotword()
 
     def start_module(self, text, name, user):
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
         Modules.query_threaded(name, text, user, direct=False)
-
-    def play_bling_sound(self):
-        # The name was deliberately chosen with regard to further reactions (such as lights, etc.)
-
-        # playing Bling-Sound
-        TOP_DIR = os.path.dirname(os.path.abspath(__file__))
-        DETECT_DONG = os.path.join(TOP_DIR, "resources/sounds/bling.wav")
-
-        with open(DETECT_DONG, "rb") as wavfile:
-            input_wav = wavfile.read()
-        data = io.BytesIO(input_wav)
-        self.Audio_Output.play_notification(data, next=True)
 
 
 class Users:
@@ -699,7 +680,7 @@ if __name__ == "__main__":
     Audio_Output = AudioOutput(voice=config_data["voice"])
     Core = LUNA(Local_storage)
     Core.local_storage['LUNA_starttime'] = time.time()
-    Audio_Input.set_core(Core)
+    Audio_Input.set_core(Core, Audio_Output)
     time.sleep(2)
     # -----------Starting-----------#
     Modules.start_continuous()

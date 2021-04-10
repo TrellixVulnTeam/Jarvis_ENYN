@@ -101,8 +101,7 @@ def handle(text, core, skills):
 
 def timer(text, core, skills):
     if 'start' in text:
-        core.say('Sicher, dass du nicht die Stoppuhr meinst?')
-        core.say('Soll ich für dich eine Stoppuhr starten?')
+        core.say('Sicher, dass du nicht die Stoppuhr meinst? Soll ich für dich eine Stoppuhr starten?')
         response = core.listen()
         if 'ja' in response or 'bitte' in text or 'gerne' in text:
             core.say('Okay, soll ich eine Stoppuhr nur für dich oder für alle starten?')
@@ -117,6 +116,7 @@ def timer(text, core, skills):
     elif 'stell' in text or 'beginn' in text:
         # Einheitlichkeit
         text = text.replace(' auf ', ' in ')
+        text = text.replace(' von ', ' in ')
 
         time = core.Analyzer.analyze(text)['datetime']
 

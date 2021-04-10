@@ -18,7 +18,7 @@ def handle(text, core, skills):
             time = time -12
     """
     stunde = str(time['hour'])
-    if 'lösch' in text or 'beend' in text:
+    if 'lösch' in text or 'beend' in text or ('schalt' in text and 'ab' in text):
         if 'täglich' in text or 'jeden tag' in text:
             days = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag"]
             try:
@@ -26,7 +26,7 @@ def handle(text, core, skills):
                 wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
-                core.say("Täglichen Wecker um {} Uhr {} gelöcht.".format(stunde, minute))
+                core.say("Täglichen Wecker um {} Uhr {} gelöscht.".format(stunde, minute))
             except:
                 core.say("Welchen Wecker soll ich ausschalten?")
                 for item in core.local_storage["regular_alarm"].keys():
@@ -39,6 +39,17 @@ def handle(text, core, skills):
                     core.local_storage["regular_alarm"][item].remove(wecker)
                 core.say("Täglichen Wecker um {} Uhr {} gelöscht.". format(wecker['Zeit']['hour'], wecker['Zeit']['minute']))
 
+        elif 'alle' in text:
+            core.say('Soll ich auch die regelmäßigen Wecker löschen?')
+            response = core.listen()
+            if skills.is_approved(response):
+                core.local_storage["Wecker"] = []
+            if 'was' in response and ('regelmäßig' in response or 'sind' in response):
+                core.say('Damit sind diese Wecker gemeint, welche zum Beispiel jeden Dienstag oder jeden Tag klingeln. Also solche, die regelmäßig wiederholt werden. Soll ich auch die regelmäßigen Wecker löschen?')
+                response = core.listen()
+            if skills.is_approved(response):
+                core.local_storage["regular_alarm"] = []
+
         elif 'wochenende' in text:
             days = ["samstag", "sonntag"]
             try:
@@ -46,7 +57,7 @@ def handle(text, core, skills):
                 wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
-                core.say("Täglichen Wecker um {} Uhr {} gelöcht.".format(stunde, minute))
+                core.say("Täglichen Wecker um {} Uhr {} gelöscht.".format(stunde, minute))
             except:
                 core.say("Welchen Wecker soll ich ausschalten?")
                 for item in days:
@@ -66,7 +77,7 @@ def handle(text, core, skills):
                 wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
-                core.say("Wecker unter der Woche um {} Uhr {} gelöcht.".format(stunde, minute))
+                core.say("Wecker unter der Woche um {} Uhr {} gelöscht.".format(stunde, minute))
             except:
                 core.say("Welchen Wecker soll ich ausschalten?")
                 for item in days:
@@ -80,7 +91,7 @@ def handle(text, core, skills):
                 core.say("Wecker unter der Woche um {} Uhr {} gelöscht.".format(wecker['Zeit']['hour'], wecker['Zeit']['minute']))
 
         elif 'jeden' in text or 'jedem' in text:
-            days = get_text_beetween('jeden', text)
+            days = skills.get_text_beetween('jeden', text)
             for item in days:
                 if item.lower() not in ["montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag"]:
                     days.remove(item)
@@ -89,7 +100,7 @@ def handle(text, core, skills):
                 wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
                 for item in days:
                     core.local_storage["regular_alarm"][item].remove(wecker)
-                core.say("Täglichen Wecker um {} Uhr {} gelöcht.".format(stunde, minute))
+                core.say("Täglichen Wecker um {} Uhr {} gelöscht.".format(stunde, minute))
             except:
                 core.say("Welchen Wecker soll ich ausschalten?")
                 for item in days:
@@ -130,14 +141,18 @@ def handle(text, core, skills):
             core.local_storage["regular_alarm"]["freitag"].append(wecker)
             core.say("Wecker gestellt für jeden Wochentag um {} Uhr {}.". format(stunde, minute))
         elif 'jeden' in text or 'jedem' in text:
+            if not 'regular_alarm' in core.local_storage.keys():
+                core.local_storage["regular_alarm"] = []
             wecker = {'Zeit': time, 'User': core.user, 'Ton': ton}
-            days = get_text_beetween('jeden', text)
+            days = skills.get_text_beetween('jeden', text)
             for item in days:
                 if item.lower() in ["montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag", "sonntag"]:
                     core.local_storage["regular_alarm"][item.lower()].append(wecker)
                 else:
                     days.remove(item)
-            core.say("Wecker gestellt für jeden {} um {} Uhr {}.".format(get_enumerate(days), stunde, minute))
+                print(days)
+                print(skills.get_enumerate(days))
+            core.say("Wecker gestellt für jeden {} um {} Uhr {}.".format(skills.get_enumerate(days), stunde, minute))
         else:
             wecker = {'Zeit': core.analysis['datetime'], 'User': core.user, 'Ton': ton}
             if 'Wecker' in core.local_storage.keys():
@@ -176,47 +191,3 @@ def get_reply(core, time):
         core_output = tage.get(tag) + monate.get(monat)
         messenger_output = tag + '. ' + monat
         return 'den ' + core.correct_output(core_output, messenger_output)
-
-def get_text_beetween(start_word, text, end_word='', output='array'):
-    ausgabe = []
-    index = -1
-    text = text.split(' ')
-    for i in range(len(text)):
-        if text[i] is start_word:
-            index = i + 1
-    if index is not -1:
-        if end_word is '':
-            while index <= len(text):
-                ausgabe.append(text[index])
-                index += 1
-        else:
-            founded = False
-            while index <= len(text) and not founded:
-                if text[index] is end_word:
-                    founded = True
-                else:
-                    ausgabe.append(text[index])
-                    index += 1
-    if output is 'array':
-        return ausgabe
-    elif output is 'String':
-        ausgabe_neu = ''
-        for item in ausgabe:
-            ausgabe += item + ' '
-        return ausgabe
-
-def get_enumerate(array):
-    new_array = []
-    for item in array:
-        new_array.append(item.strip(' '))
-    ausgabe = ''
-    if len(new_array) == 0:
-        pass
-    elif len(new_array) == 1:
-        ausgabe = array[0]
-    else:
-        for item in range(len(new_array) - 1):
-            ausgabe += new_array[item] + ', '
-        ausgabe = ausgabe.rsplit(', ', 1)[0]
-        ausgabe = ausgabe + ' und ' + new_array[-1]
-    return ausgabe

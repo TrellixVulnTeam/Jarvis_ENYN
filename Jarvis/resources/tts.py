@@ -1,13 +1,9 @@
-import logging
-import random
 import time
 from pathlib import Path
 from threading import Thread
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
 from pyvirtualdisplay import Display
-from Proxy_List_Scrapper import Scrapper, Proxy, ScrapperException
 
 
 class Text_to_Speech:
@@ -33,8 +29,8 @@ class Text_to_Speech:
 
     def run(self, gender):
         print("[LOADING] Speechmodule")
-        self.display = Display(visible=False, size=(800, 600))
-        self.display.start()
+        #self.display = Display(visible=False, size=(800, 600))
+        #self.display.start()
         self.gender = gender
         # start browser
         self.start_driver()
@@ -75,6 +71,7 @@ class Text_to_Speech:
     def start_driver(self):
         driver_Path = str(Path(__file__).parent) + '/webdriver/chromedriver'
         self.driver = webdriver.Chrome(driver_Path, chrome_options=self.get_opt())
+        self.start_vpn()
         self.get_website_inf()
 
     def get_website_inf(self):
@@ -86,6 +83,8 @@ class Text_to_Speech:
 
     def start_vpn(self):
         self.driver.get(self.index_page)
+        #self.driver.find_element_by_class_name('dropdown-item active').click()
+        #self.driver.find_element_by_class_name('dropdown-area').select_by_visible_text('Germany')
         self.driver.find_element_by_id('connect-button').click()
         self.driver.implicitly_wait(10)
 

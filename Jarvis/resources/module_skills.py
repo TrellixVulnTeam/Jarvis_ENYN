@@ -23,6 +23,12 @@ class skills:
             ausgabe = ausgabe + ' und ' + new_array[-1]
         return ausgabe
 
+    def is_approved(self, text):
+        if ('ja' in text or 'gerne' in text or 'bitte' in text) and not ('nein' in text or 'nicht' in text or 'nö' in text or 'ne' in text):
+            return True
+        else:
+            return False
+
     def get_text_beetween(self, start_word, text, end_word='', output='array', split_text=True):
         ausgabe = []
         index = -1

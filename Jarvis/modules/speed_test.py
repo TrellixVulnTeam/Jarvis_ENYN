@@ -27,7 +27,7 @@ def run_speedtest(core):
     try:
         core.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
         st = speedtest.Speedtest()
-        server_names = []
+        server_names = ["google.com"]
         st.get_servers(server_names)
 
         downlink_bps = st.download()

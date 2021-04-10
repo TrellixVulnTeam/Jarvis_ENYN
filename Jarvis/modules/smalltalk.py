@@ -353,8 +353,6 @@ def handle(text, core, skills):
             answer_messenger = ['Ich wünsche dir viel Spaß', 'dann geh doch zu Netto', 'Ich hoffe du kommst bald wieder']
             answer = core.correct_output(answer_core, answer_messenger)
         core.say(random.choice(answer))
-            
-        
     elif 'liebst' in text and 'du' in text and 'mich' in text:
         core.say('Ja natürlich.')
     elif ('willst' in text and 'heiraten' in text) or 'heirate' in text:
@@ -509,8 +507,7 @@ def handle(text, core, skills):
                         'Wir verbrauchen mehr Salz, um die Straßen von Eis zu befreien 8% als wir Essen 6%.',
                         'Haie bekommen kein Krebs.',
                         'Elefanten können nicht springen.',
-                        'Wenn man ein Loch in ein Netz schneidet, sind danach weniger Löcher im Netz.',
-                        'Da Core und Döner im Spektogamm sehr ähnlich sind, höre ich oft auf beides. Man munkelt aber, dass ich einfach nur süchtig nach Dönern bin.'
+                        'Wenn man ein Loch in ein Netz schneidet, sind danach weniger Löcher im Netz.'
                         ]
             core.say(random.choice(funfacts))
         
