@@ -123,6 +123,9 @@ def timer(text, core, skills):
         temp_text = "Dein Timer ist abgelaufen."
 
         duration = skills.get_text_beetween('in', text, output='String')
+        if duration is "":
+            core.say('Ich habe nicht verstanden, wie lange der Timer dauern soll. Bitte versuche es erneut!')
+            return
 
         # Zeit: Um wieviel Uhr der Timer fertig ist; Text: Antwort von Core; Benutzer; Raum; Dauer: Wie lange der Timer gehen soll
         E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration, 'Benutzer': core.user}
@@ -145,12 +148,16 @@ def timer(text, core, skills):
             aussage_timer = "Du hast keinen aktiven Timer!"
         else:
             for item in user_timer:
-                #erst einmal checken, ob der Timer vlt eigentlich schon abgelaufen ist, was eigentlich nicht passieren sollte.
-                now = datetime.datetime.now()
-                timer_abgelaufen = (now - item["Zeit"])
-                if timer_abgelaufen:
-                    user_timer.remove(item)
-                    core.local_storage["Timer"].remove(item)
+                try:
+                    #erst einmal checken, ob der Timer vlt eigentlich schon abgelaufen ist, was eigentlich nicht passieren sollte.
+                    now = datetime.datetime.now()
+                    timer_abgelaufen = (now - item["Zeit"])
+                    if timer_abgelaufen:
+                        user_timer.remove(item)
+                        core.local_storage["Timer"].remove(item)
+                except:
+                    # local_storage doesn´t extend this timer. Just write this into the Log
+                    core.core.Log.write("WARNING", 'Not existing timer could not be deleted')
 
                 # Verbleibende Zeit runden
                 genaue_zeit = item['Zeit'] - datetime.datetime.now()
@@ -181,7 +188,7 @@ def timer(text, core, skills):
 
     elif 'lösch' in text or 'beend' in text or 'stopp' in text:
         user_timer = core.local_storage["Timer"]
-        if 'Timer' in core.local_storage.keys():
+        if 'Timer' in core.local_storage.keys() and not core.local_storage["Timer"] is None and not core.local_storage["Timer"] == []:
             if 'alle' in text:
                 for item in user_timer:
                     core.local_storage['Timer'].remove(item)
@@ -201,12 +208,12 @@ def timer(text, core, skills):
                     i = 1
                     for item in user_timer:
                         temp_string = str(i)+". Dauer: "+item["Dauer"]+" Du hast den Timer im Raum '"+item["Raum"]+"' gestellt.\n"
-                        text = text + temp_string
-                    text = text + "Bitte schreib nur die Ziffer des Timers, welcher gelöscht werden soll."
+                        text += temp_string
+                    text += "Bitte schreib nur die Ziffer des Timers, welcher gelöscht werden soll."
                     core.say(text, output='messenger') #Der output ist eigentlich unnötig, aber wir gehen auf nummer sicher
                     number = core.listen()
                     if number <= len(user_timer):
-                        timer = core.local_storage["Timer"].remove(user_timer[int(number)-1])
+                        core.local_storage["Timer"].remove(user_timer[int(number)-1])
                         core.say("Ich habe den Timer mit der Dauer " + item["Dauer"]+" gelöscht!", output='messenger')
                     else:
                         core.say("Deine Eingabe war ungültig!", output='messenger')

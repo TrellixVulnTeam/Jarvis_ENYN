@@ -68,13 +68,18 @@ class AudioInput:
                     self.Audio_Output.detected_hotword()
                     self.Audio_Output.play_bling_sound()
                 audio = self.speech_engine.listen(source)
+                #self.speech_engine.record(source)
                 try:
                     # translate audio to text
-                    self.adjusting()
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
                     print("[USER INPUT] ", text)
                 except:
-                    text = "Audio could not be recorded"
+                    try:
+                        # if it didn´t worked, adjust the ambient-noise and try again
+                        self.adjusting()
+                        text = self.speech_engine.recognize_google(audio, language="de-DE")
+                    except:
+                        text = "Audio could not be recorded"
             if not listen:
                 self.core.hotword_detected(text)
             else:
@@ -167,8 +172,8 @@ class AudioOutput:
             try:
                 if not self.notification == [] and audio.Channel(0).get_busy() == 0 and not self.tts.is_reading:
                     if audio.Channel(1).get_busy() == 1:
-                        audio.Channel(1).set_volume(0.25)
-                        audio.Channel(2).set_volume(0.25)
+                        audio.Channel(1).set_volume(0.10)
+                        audio.Channel(2).set_volume(0.10)
                     if type(self.notification[0]) == type("string"):
                         self.tts.say(self.notification[0])
                         self.notification.pop(0)
@@ -206,9 +211,9 @@ class AudioOutput:
             time.sleep(0.2)
 
     def detected_hotword(self):
-        audio.Channel(1).set_volume(0.25)
-        audio.Channel(2).set_volume(0.25)
-        self.music_player.set_volume(25)
+        audio.Channel(1).set_volume(0.10)
+        audio.Channel(2).set_volume(0.10)
+        self.music_player.set_volume(10)
 
     def continue_after_hotword(self):
         audio.Channel(1).set_volume(1)

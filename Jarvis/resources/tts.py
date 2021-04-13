@@ -29,8 +29,8 @@ class Text_to_Speech:
 
     def run(self, gender):
         print("[LOADING] Speechmodule")
-        #self.display = Display(visible=False, size=(800, 600))
-        #self.display.start()
+        self.display = Display(visible=False, size=(800, 600))
+        self.display.start()
         self.gender = gender
         # start browser
         self.start_driver()

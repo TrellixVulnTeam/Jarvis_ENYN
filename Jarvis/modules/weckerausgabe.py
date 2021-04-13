@@ -1,4 +1,3 @@
-import os
 
 def handle(text, core, skills):
     ton = text.get('Ton')
@@ -6,7 +5,7 @@ def handle(text, core, skills):
     path = core.path + "/modules/resources/clock_sounds/" + ton
     
     if core.local_storage['module_storage']['phillips_hue']['Bridge-IP'] != '':
-        core.start_module(name='phillips_hue', text='Mach das Licht weiß')
+        core.start_module(name='phillips_hue', text='Mach das Licht weiß', user=core.user)
     try:
         core.play(path=path, next=True)
     except FileNotFoundError:

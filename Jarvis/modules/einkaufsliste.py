@@ -50,11 +50,10 @@ def get_item(core, skills):
         text = text.split(' ')
         founded = False
         i = 0
-        while i <= len(text) and founded is False:
-            if text[i] == 'setz' or text[i] == 'setzte' or text[i] == 'schreib' or text[i] == 'schreibe':
+        for i in range(len(text)):
+            if text[i-1] == 'setz' or text[i-1] == 'setzte' or text[i-1] == 'schreib' or text[i-1] == 'schreibe':
                 index = i + 1
-                founded = True
-            i += 1
+                break
 
     elif 'füg' in text or 'füge' in text:
         text = text.split(' ')

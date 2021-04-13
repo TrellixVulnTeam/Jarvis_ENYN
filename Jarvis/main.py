@@ -65,6 +65,7 @@ class Modules:
         return modules
 
     def query_threaded(self, name, text, user, direct, messenger=False):
+        print(f'Messenger: {messenger}')
         mod_skill = skills()
         if text == None:
             # generate a random text
@@ -115,6 +116,7 @@ class Modules:
         return
 
     def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
+        print(f'Messenger: {messenger}')
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = skills()
         analysis = {}
@@ -302,10 +304,9 @@ class Modulewrapper:
         self.Audio_Input = Core.Audio_Input
 
         self.messenger_call = messenger
-        self.messenger = Core.messenger
 
         self.room = "messenger" if messenger else "raum"
-        self.messenger = messenger
+        self.messenger = Core.messenger
 
         self.core = Core
         self.Analyzer = Core.Analyzer
@@ -335,7 +336,7 @@ class Modulewrapper:
         if output == 'auto':
             if self.messenger_call:
                 output = 'messenger'
-        if 'messenger' in output.lower() or self.messenger:
+        if 'messenger' in output.lower() or self.messenger_call:
             self.messenger_say(text)
         else:
             text = self.correct_output_automate(text)
@@ -354,7 +355,7 @@ class Modulewrapper:
 
     def messenger_say(self, text):
         try:
-            self.messenger.say(text, self.user['messenger_id'])
+            self.messenger.say(text, self.user['telegram_id'])
         except KeyError:
             Log.write('WARNING',
                       'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben '
@@ -397,8 +398,7 @@ class Modulewrapper:
                 return False
         return True
 
-    @staticmethod
-    def start_module(name, text, user):
+    def start_module(self, name, text, user):
         Core.start_module(text, name, user)
 
     @staticmethod

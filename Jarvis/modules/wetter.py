@@ -60,43 +60,8 @@ def get_temperature(pl):
 def handle(text, core, skills):
     o = core.analysis['town']
     if o == 'None':
-        core.say('Für welchen Ort möchtest du das Wetter erfahren?')
-        antwort = core.listen()
-        if antwort == 'TIMEOUT_OR_INVALID':
-            core.say('Ich konnte den Ort leider nicht verstehen')
-        else:
-            antwort = antwort.lower()
-            if len(antwort.split()) == 1:
-                o = antwort
-            elif 'hier' in antwort or 'zu hause' in antwort:
-                o = core.local_storage['home_location'].lower()
-            else:
-                sonst = 'der dem den einer'
-                satz = {}
-                mind = 0
-                falsches_in = 0
-                i = str.split(antwort)
-                ind = 1
-                for w in i:
-                    satz[ind] = w
-                    ind += 1
-                for iindex, word in satz.items():
-                    if word in sonst:
-                        mind = mind + iindex
-                for iindex, word in satz.items():
-                    if iindex == mind - 1:
-                        falsches_in = falsches_in + iindex
-                if falsches_in >= 1:
-                    del satz[falsches_in]
-                for iindex, word in satz.items(): #findet Wort 'in''s key
-                    if word == 'in':
-                        in_index = iindex
-                        myind = in_index + 1
-                        o = satz.get(myind)
-                    elif word == 'für':
-                        für_index = iindex
-                        myind = für_index + 1
-                        o = satz.get(myind)
+        o = core.local_storage["home_location"]
+
     else:
         o = o
     ort = o.lower()
@@ -133,7 +98,3 @@ def isValid(text):
     if 'ist ' in text or 'haben ' in text:
         if 'wetter' in text or 'temperatur' in text or ' warm' in text or ' kalt' in text:
             return True
-
-
-if __name__ == "__main__":
-    main()

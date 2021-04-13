@@ -18,7 +18,7 @@ def handle(text, core, skills):
 
 def isValid(text):
     text = text.lower()
-    if ('lad' in text or 'nadel' in text or 'load' in text) and ('module' in text or 'Duden' in text):
+    if ('lad' in text or 'nadel' in text or 'load' in text) and ('modul' in text or 'Duden' in text):
         return True
     else:
         return False

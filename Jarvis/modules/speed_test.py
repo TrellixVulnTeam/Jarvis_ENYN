@@ -1,3 +1,5 @@
+import traceback
+
 import requests
 import speedtest
 
@@ -41,7 +43,8 @@ def run_speedtest(core):
                 "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
                 )
 
-    except Exception as e:
+    except Exception:
+        traceback.print_exc()
         core.say("Der Speedtest konnte nicht gestartet werden.")
 
 
