@@ -348,7 +348,7 @@ class Modulewrapper:
         times = 0
         if output == "messenger":
             for word in text.split(" "):
-                if "<" in word and ">" and any(["break time", "emphasis level", "prosody rate", "prosody pitch", "amazon:effect"]) in word:
+                if "<" in word and ">" and ("break time" in word or "emphasis level" in word or "prosody rate" in word or "prosody pitch" in word or "amazon:effect" in word):
                     times += 1
             for i in range(times):
                 text.replace(skill.get_text_beetween("<", text, end_word=">", output="String", split_text=False), '')
@@ -382,7 +382,9 @@ class Modulewrapper:
         self.Audio_Output.music_player.play(by_name=by_name, url=url, path=path, next=next, now=now, playlist=playlist,
                                             announce=announce)
 
-    def listen(self, messenger=False):
+    def listen(self, text=None, messenger=False):
+        if text != None:
+            self.say(text)
         if messenger:
             return self.core.messenger_listen(self.user)
         else:
@@ -649,7 +651,6 @@ class Users:
             if user["messenger_id"] == t_id:
                 return user
         return None
-
 
 """def clear_momory():
     while True:
