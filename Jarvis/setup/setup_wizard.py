@@ -41,6 +41,7 @@ class FirstStart:
             "Zum Schluss werde ich noch ein paar Dinge erledigen und anschließend automatisch starten. Das kann etwas dauern.")
         self.set_Network_Key()
         subprocess.run(('sudo chmod 777 -R ' + self.relPath).split(' '))
+        self.say('Die Einrichtung ist abgeschlossen. Ich werde jetzt meine Systeme starten.')
 
     def say(self, text):
         self.Audio.say(text)
@@ -78,12 +79,16 @@ class FirstStart:
         home_location = self.ask_with_answer("Wo wohnst du?")
         if home_location.startswith("in "):
             home_location.replace("in ", "")
+        if home_location.startswith("bei "):
+            home_location.replace("bei ", "")
+        if home_location.startswith('auf '):
+            home_location.replace('auf ', '')
         self.config_data["Local_storage"]["home_location"] = home_location
         print("[INFO] Place of residence fixed: ", self.config_data["Local_storage"]["home_location"])
 
     def set_voice_gender(self):
         gender = "female"
-        voice_gender = self.ask_with_answer("Zunächst einmal soll ich männlich oder weiblich sein?")
+        voice_gender = self.ask_with_answer("Soll meine Stimme männlich oder weiblich sein?")
         if "männlich" in voice_gender or "mann" in voice_gender:
             gender = "male"
         self.config_data["voice"] = gender
@@ -106,7 +111,7 @@ class FirstStart:
 
     def set_messenger(self):
         use_messenger = self.ask_with_answer(
-            "Möchtest du Telegram verwenden? Bedenke, dass für die Sicherheit des Messengers nicht gesorgt ist.")
+            "Möchtest du Telegram verwenden? Bedenke, dass die Sicherheit des Messengers nicht garantiert ist.")
         if self.is_desired(use_messenger):
             now = self.ask_with_answer(
                 "Alles klar. Möchtest du den benötigten Schlüssel jetzt diktieren oder später selber eingeben")
@@ -118,8 +123,8 @@ class FirstStart:
                 while True:
                     try:
                         self.Audio.play_bling_sound()
-                        token = self.listen()
-                        self.set_messenger_tokens(self.config_data["Local_storage"]["user"], token)
+                        token = int(self.listen())
+                        self.config_data["messenger_allowed_id_table"].append(token)
                         print("[INFO] Telegram Key fixed: ", self.config_data["messenger_key"])
                         break
                     except:
@@ -200,9 +205,3 @@ def install_packeges():
             subprocess.run(command.split(' '))
     for command in versions.get('shellcommands for update'):
         subprocess.run(command.split(' '))
-
-if __name__ == "__main__":
-    installation = FirstStart(InstallationAudio())
-    installation.run()
-
-    core = main

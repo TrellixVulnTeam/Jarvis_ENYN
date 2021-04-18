@@ -8,7 +8,7 @@ def handle(text, core, skills):
     core.say("Alles klar.")
     startword = "spiele" if "spiele" in text else "spiel"
     until = ''
-    until_words = ['nächstes', 'danach', 'gleich']
+    until_words = ['nächstes', 'danach', 'gleich', 'als']
     for word in until_words:
         if word in text:
             until = word

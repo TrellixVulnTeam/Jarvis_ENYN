@@ -1,4 +1,6 @@
 import datetime
+import json
+
 INTERVALL = 2 # so oft wegen Silvester
 
 def run(core, profile):

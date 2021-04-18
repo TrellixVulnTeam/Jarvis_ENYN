@@ -13,11 +13,10 @@ def handle(text, core, skills):
     text = text.lower()
     if 'wann' in text and ('nächste' in text or 'wieder' in text):
         year = datetime.date.today().year+1
-        founded = False
-        while founded is False:
+        while True:
             if leap_year(year) is True:
                 core.say('Das nächste Schaltjahr ist {}'.format(year))
-                founded = True
+                break
             else:
                 year += 1
     elif 'ist' in text and 'schaltjahr' in text:
@@ -29,7 +28,7 @@ def handle(text, core, skills):
             output = 'kein'
         core.say('Das Jahr {} ist {} Schaltjahr.'.format(get_year(text), output))
     else:
-        core.say("Es gab ein Problem")
+        core.say('Ich habe nicht verstanden, was du im Zusammenhang mit Schaltjahren wissen möchtest.')
 
 def get_year(text):
     year = -1

@@ -11,7 +11,7 @@ def get_weather(place):
     if 'overcast' in place:
         w = w + 'bedeckt'
     elif 'cloud' in place or 'cloudy' in place or 'clouds' in place:
-        if 'scattered' or 'broken' or 'few' in place:
+        if 'scattered' in place or 'broken' in place or 'few' in place:
             w = w + 'teils wolkig'
         else:
             w = w + 'wolkig'
@@ -19,14 +19,14 @@ def get_weather(place):
         w = w + 'leichten Nieselregen'
     elif 'clear' in place:
         w = w + 'klar'
-    elif 'rain' or 'rainy' in place:
+    elif 'rain' in place or 'rainy' in place:
         if 'light' in place:
             w = w + 'leichter Regen'
         elif 'heavy' in place:
             w = w + 'starker Regen'
         else:
             w = w + 'regnerisch'
-    elif 'mist' or 'misty' in place:
+    elif 'mist' in place or 'misty' in place:
         w = w + 'neblig'
     elif 'haze' in place:
         w = w + 'leichter Dunst'
@@ -34,11 +34,11 @@ def get_weather(place):
         w = w + 'Heil Hydra'
     elif 'smoke' in place:
         w = w + 'Waldbrand'
-    elif 'storm' or 'stormy' in place:
+    elif 'storm' in place or 'stormy' in place:
         w = w + 'stürmisch'
     elif 'thunderstorm' in place:
         w = w + 'Gewitter'
-    elif 'snow' or 'snowy' or 'snowfall' in place:
+    elif 'snow' in place or 'snowy' in place or 'snowfall' in place:
         if 'heavy' in place:
             w = w + 'starker Schneefall'
         elif 'light' in place:

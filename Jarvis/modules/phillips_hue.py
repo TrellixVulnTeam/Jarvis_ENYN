@@ -37,7 +37,6 @@ def handle(text, core, skills):
     text = text.lower()
 
     new_text = text.split(' ')
-    new_text_length = len(new_text)
 
     ip = core.module_storage(module_name="phillips_hue").get("Bridge-IP")
     bridge = Bridge(ip)
@@ -48,7 +47,7 @@ def handle(text, core, skills):
         light_names.append(l.name)
 
     for i in range(len(new_text)):
-        if new_text[i] == 'im' and new_text_length > i:
+        if new_text[i] == 'im' and len(new_text) > i:
             room = new_text[i + 1]
 
     if room is None:
@@ -56,6 +55,7 @@ def handle(text, core, skills):
             # Den Output müsste man eigentlich nicht setzten, da im Normalfall sowieso per Telegram
             # geantwortet werden würde, aber wir gehen mal auf Nummer sicher
             core.say('Wenn du das Licht über Telegram steuern möchtest, musst du einen Raum nennen.', output='messenger')
+            return
         else:
             room = core.room
 
@@ -130,23 +130,6 @@ def light_change_color(bridge, lights, core, text):
         bridge.set_light(lights, 'bri', 254)
     else:
         core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
-
-
-"""
-def regenbogenfarbe(bridge, lights, core):
-    regenbogenfarbe_ongoing = True
-    while regenbogenfarbe_ongoing is True:
-        i = 0
-        for item in lights:
-            color = code[i]
-            bridge.set_light(lights, 'xy', color)
-            if i >= len(code): #>= an sich unnötig, allerdings zum Vorbeugen eines Fehlers sinvoll
-                i = 0
-            else:
-                i += 1
-            time.sleep(1)
-"""
-
 
 # lamp_brighter and lamp_darker are realy redundant...
 def light_brighter(bridge, lights, value, core):

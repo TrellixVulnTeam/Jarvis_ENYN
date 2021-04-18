@@ -14,17 +14,14 @@ numb_to_day = {
         "6": "saturday",
         "7": "sunday"}
 
+
 def run(core, skills):
-    with open(core.path + "/modules/resources/routine/declaration.json") as declaration_file:
-        inf = json.load(declaration_file)
     now = datetime.now()
 
-    for routine in inf:
-        routine = inf.get(routine)
+    for routine in core.local_storage["routines"]:
         if is_day_correct(now, routine) and is_time_correct(now, routine, core):
-            for command in routine["actions"]:
-                for text in command["text"]:
-                    core.start_module(name=command["module_name"], text=text)
+            core.start_module(name="start_routine", text=routine, user=core.user)
+
 
 def is_day_correct(now, inf):
     is_correct = False
@@ -44,7 +41,9 @@ def is_time_correct(now, inf, core):
     time_inf = inf["retakes"]["time"]
     if time_inf["clock_time"] is not [""]:
         for time in time_inf["clock_time"]:
-            if now.hour >= int(time.split(":")[0]) and now.minute >= int(time.split(":")[1]):
+            hour = int(time.split(":")[0])
+            minute = int(time.split(":")[1])
+            if now.hour >= hour and now.minute >= minute:
                 is_correct = True
     if inf["retakes"]["after_sunrise"]:
         if is_sunrise(core.local_storage, now):
@@ -90,6 +89,7 @@ def get_sunrise_sunset_inf(location):
     except:
         print("[WARINING] Something went wrong with the Sunrise and Sunset module!")
 
+
 class sunsetTimes(object):
     def __init__(self, lat_d, lon_d, day_of_year, time_zone=0):
         """
@@ -116,13 +116,15 @@ class sunsetTimes(object):
         times = self.utc_times(lon_d, hour_angle, eq_time)
         self.converted = ((times[0] + time_zone * 60), (times[1] + time_zone * 60))
 
-    def utc_times(self, lon, hour_angle, eq_time):
+    @staticmethod
+    def utc_times(lon, hour_angle, eq_time):
         """returns utc sunrise and sunset times based on parameters"""
         sunrise = 720 - 4 * (lon + hour_angle) - eq_time
         sunset = 720 - 4 * (lon - hour_angle) - eq_time
         return (sunrise, sunset)
 
-    def is_leap(self, year):
+    @staticmethod
+    def is_leap(year):
         """checks if the date occurs in a leap year"""
         year = int(year)
         if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):

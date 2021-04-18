@@ -25,6 +25,7 @@ class AudioInput:
         - responsible for the whole audio input
     -------------------------
     """
+
     def __init__(self):
         self.stopped = False
         # load microphone
@@ -68,7 +69,7 @@ class AudioInput:
                     self.Audio_Output.detected_hotword()
                     self.Audio_Output.play_bling_sound()
                 audio = self.speech_engine.listen(source)
-                #self.speech_engine.record(source)
+                # self.speech_engine.record(source)
                 try:
                     # translate audio to text
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
@@ -112,7 +113,8 @@ class AudioInput:
                     if keyword_index > 0:
                         self.core.hotword_detected("wrong assistant!")
                     else:
-                        print(f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
+                        print(
+                            f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
                         self.recognize_input()
 
         except MemoryError:
@@ -124,8 +126,6 @@ class AudioInput:
     def adjusting(self):
         with sr.Microphone(device_index=None) as source:
             self.speech_engine.adjust_for_ambient_noise(source)
-
-
 
     def py_error_handler(self, filename, line, function, err, fmt):
         # This function suppress warnings from Alsa, which are totally useless
@@ -140,6 +140,7 @@ class AudioOutput:
         - don´t use it for playing music (this is the task of the "MusicPlayer" class)
     -------------------------
     """
+
     def __init__(self, voice):
         # The channel are splittet on the buffers:
         # Channel(0): notification
@@ -194,7 +195,8 @@ class AudioOutput:
                     track = audio.Sound(self.playback[0])
                     self.playback.pop(0)
                     audio.Channel(1).play(track)
-                if not audio.Channel(0).get_busy() == 1 and audio.Channel(1).get_volume != 1 and audio.Channel(2).get_volume != 1:
+                if not audio.Channel(0).get_busy() == 1 and audio.Channel(1).get_volume != 1 and audio.Channel(
+                        2).get_volume != 1:
                     audio.Channel(1).set_volume(1)
                     audio.Channel(2).set_volume(1)
                 time.sleep(0.3)

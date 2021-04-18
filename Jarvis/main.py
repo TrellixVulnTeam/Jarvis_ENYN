@@ -7,6 +7,7 @@ import urllib
 from urllib.request import Request, urlopen
 from Audio import AudioOutput, AudioInput
 from resources.analyze import Sentence_Analyzer
+from setup.setup_wizard import FirstStart
 import pkgutil
 from pathlib import Path
 from threading import Thread
@@ -16,13 +17,15 @@ import io
 
 
 class Modules:
-    def __init__(self, local_storage):
+    def __init__(self, core, local_storage, log):
+        self.core = core
+        self.log = log
         self.local_storage = local_storage
         self.modules = []
         self.continuous_modules = []
 
-        self.Modulewrapper = Modulewrapper
-        self.Modulewrapper_continuous = Modulewrapper_continuous
+        self.modulewrapper = Modulewrapper
+        self.modulewrapper_continuous = Modulewrapper_continuous
 
         self.continuous_stopped = False
         self.continuous_threads_running = 0
@@ -43,8 +46,8 @@ class Modules:
         dirname = os.path.dirname(os.path.abspath(__file__))
         locations = [os.path.join(dirname, directory)]
         modules = []
-        if "modules" not in Local_storage:
-            Local_storage["modules"] = {}
+        if "modules" not in self.local_storage:
+            self.local_storage["modules"] = {}
         for finder, name, ispkg in pkgutil.walk_packages(locations):
             try:
                 loader = finder.find_module(name)
@@ -74,7 +77,7 @@ class Modules:
         else:
             # else there is a valid text -> analyze
             try:
-                analysis = Core.Analyzer.analyze(str(text))
+                analysis = self.core.Analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')
@@ -83,7 +86,7 @@ class Modules:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    Core.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
+                    self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger, user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
@@ -94,7 +97,8 @@ class Modules:
             for module in self.modules:
                 try:
                     if module.isValid(text):
-                        Core.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
+                        self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger,
+                                                                                 user)
                         mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                         mt.daemon = True
                         mt.start()
@@ -116,33 +120,32 @@ class Modules:
         return
 
     def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
-        print(f'Messenger: {messenger}')
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = skills()
         analysis = {}
         if text == None:
             text = str(random.randint(0, 1000000000))
         else:
-            Log.write('ACTION', '{}'.format(text), conv_id=str(text), show=True)
+            self.log.write('ACTION', '{}'.format(text), conv_id=str(text), show=True)
             try:
-                analysis = Core.Analyzer.analyze(str(text))
+                analysis = self.core.Analyzer.analyze(str(text))
                 # Log.write('ACTION', 'Analysis: ' + str(analysis), conv_id=str(text), show=True)
             except:
                 traceback.print_exc()
-                Log.write('ERROR', 'Sentence analysis failed!', conv_id=str(text), show=True)
+                self.log.write('ERROR', 'Sentence analysis failed!', conv_id=str(text), show=True)
 
         if name is not None:
             for module in self.modules:
                 if module.__name__ == name:
-                    Log.write('ACTION', '--Modul {} was called directly (Parameter: {})--'.format(name, text),
-                              conv_id=str(text), show=False)
-                    Core.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
+                    self.log.write('ACTION', '--Modul {} was called directly (Parameter: {})--'.format(name, text),
+                                   conv_id=str(text), show=False)
+                    self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger, user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
         else:
             try:
-                analysis = Core.Analyzer.analyze(str(text))
+                analysis = self.core.Analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')
@@ -150,7 +153,8 @@ class Modules:
             for module in self.modules:
                 try:
                     if module.isValid(text):
-                        Core.active_modules[str(text)] = self.Modulewrapper(text, analysis, messenger, user)
+                        self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger,
+                                                                                 user)
                         mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                         mt.daemon = True
                         mt.start()
@@ -159,18 +163,17 @@ class Modules:
                     print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
         return False
 
-    @staticmethod
-    def run_threaded_module(text, module, mod_skill):
+    def run_threaded_module(self, text, module, mod_skill):
         try:
-            module.handle(text, Core.active_modules[str(text)], mod_skill)
+            module.handle(text, self.core.active_modules[str(text)], mod_skill)
         except:
             traceback.print_exc()
             print('[ERROR] Runtime error in module {}. The module was terminated.\n'.format(module.__name__))
-            Core.active_modules[str(text)].say(
+            self.core.active_modules[str(text)].say(
                 'Entschuldige, es gab ein Problem mit dem Modul {}.'.format(module.__name__))
         finally:
             try:
-                del Core.active_modules[str(text)]
+                del self.core.active_modules[str(text)]
             except:
                 pass
             return
@@ -183,33 +186,35 @@ class Modules:
     def run_continuous(self):
         # Runs the continuous_modules. Continuous_modules always run in the background,
         # to wait for events other than voice commands (e.g. sensor values, data etc.).
-        Core.continuous_modules = {}
+        self.core.continuous_modules = {}
         for module in self.continuous_modules:
             intervalltime = module.INTERVALL if hasattr(module, 'INTERVALL') else 0
             if __name__ == '__main__':
-                Core.continuous_modules[module.__name__] = self.Modulewrapper_continuous(intervalltime)
+                self.core.continuous_modules[module.__name__] = self.modulewrapper_continuous(self.core, intervalltime,
+                                                                                              self)
             try:
-                module.start(Core.continuous_modules[module.__name__], Core.local_storage)
-                Log.write('INFO', 'Modul {} started'.format(module.__name__), show=False)
+                module.start(self.core.continuous_modules[module.__name__], self.core.local_storage)
+                self.log.write('INFO', 'Modul {} started'.format(module.__name__), show=False)
             except:
                 # traceback.print_exc()
                 continue
-        Local_storage['module_counter'] = 0
+        self.local_storage['module_counter'] = 0
         while not self.continuous_stopped:
             for module in self.continuous_modules:
-                if time.time() - Core.continuous_modules[module.__name__].last_call >= Core.continuous_modules[
-                    module.__name__].intervall_time:
-                    Core.continuous_modules[module.__name__].last_call = time.time()
+                if time.time() - self.core.continuous_modules[module.__name__].last_call >= \
+                        self.core.continuous_modules[
+                            module.__name__].intervall_time:
+                    self.core.continuous_modules[module.__name__].last_call = time.time()
                     try:
-                        module.run(Core.continuous_modules[module.__name__], Core.local_storage)
+                        module.run(self.core.continuous_modules[module.__name__], self.core.local_storage)
                     except:
                         traceback.print_exc()
                         print(
                             '[ERROR] Runtime-Error in Continuous-Module {}. The module is no longer executed.\n'.format(
                                 module.__name__))
-                        del Core.continuous_modules[module.__name__]
+                        del self.core.continuous_modules[module.__name__]
                         self.continuous_modules.remove(module)
-            Local_storage['module_counter'] += 1
+            self.local_storage['module_counter'] += 1
             time.sleep(0.01)
         self.continuous_threads_running -= 1
 
@@ -217,7 +222,7 @@ class Modules:
         # Stops the thread in which the continuous_modules are executed at the end of the run.
         # But gives the modules another opportunity to clean up afterwards...
         if self.continuous_threads_running > 0:
-            Log.write('', '------ Modules are terminated...', show=True)
+            self.log.write('', '------ Modules are terminated...', show=True)
             self.continuous_stopped = True
             # Wait until all threads have returned
             while self.continuous_threads_running > 0:
@@ -228,15 +233,15 @@ class Modules:
             no_stopped_modules = True
             for module in self.continuous_modules:
                 try:
-                    module.stop(Core.continuous_modules[module.__name__], Core.local_storage)
-                    Log.write('INFO', 'Modul {} terminated'.format(module.__name__), show=True)
+                    module.stop(self.core.continuous_modules[module.__name__], self.core.local_storage)
+                    self.log.write('INFO', 'Modul {} terminated'.format(module.__name__), show=True)
                     no_stopped_modules = False
                 except:
                     continue
             # clean up
-            Core.continuous_modules = {}
+            self.core.continuous_modules = {}
             if no_stopped_modules:
-                Log.write('INFO', '-- (None to finish)', show=True)
+                self.log.write('INFO', '-- (None to finish)', show=True)
         return
 
     # toDo: run
@@ -295,25 +300,25 @@ class Logging:
 
 
 class Modulewrapper:
-    def __init__(self, text, analysis, messenger, user):
+    def __init__(self, core, text, analysis, messenger, user):
         self.text = text
         self.analysis = analysis
-        self.analysis['town'] = Core.local_storage['home_location'] if self.analysis['town'] is None else None
+        self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
 
-        self.Audio_Output = Core.Audio_Output
-        self.Audio_Input = Core.Audio_Input
+        self.Audio_Output = core.Audio_Output
+        self.Audio_Input = core.Audio_Input
 
         self.messenger_call = messenger
 
         self.room = "messenger" if messenger else "raum"
-        self.messenger = Core.messenger
+        self.messenger = core.messenger
 
-        self.core = Core
-        self.Analyzer = Core.Analyzer
-        self.local_storage = Core.local_storage
-        self.server_name = Core.server_name
-        self.system_name = Core.system_name
-        self.path = Core.path
+        self.core = core
+        self.Analyzer = core.Analyzer
+        self.local_storage = core.local_storage
+        self.server_name = core.server_name
+        self.system_name = core.system_name
+        self.path = core.path
         self.user = user
 
     def say(self, text, output='auto'):
@@ -348,7 +353,8 @@ class Modulewrapper:
         times = 0
         if output == "messenger":
             for word in text.split(" "):
-                if "<" in word and ">" and ("break time" in word or "emphasis level" in word or "prosody rate" in word or "prosody pitch" in word or "amazon:effect" in word):
+                if "<" in word and ">" and (
+                        "break time" in word or "emphasis level" in word or "prosody rate" in word or "prosody pitch" in word or "amazon:effect" in word):
                     times += 1
             for i in range(times):
                 text.replace(skill.get_text_beetween("<", text, end_word=">", output="String", split_text=False), '')
@@ -357,9 +363,9 @@ class Modulewrapper:
         try:
             self.messenger.say(text, self.user['telegram_id'])
         except KeyError:
-            Log.write('WARNING',
-                      'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben '
-                      'wurde'.format(text, self.user), show=True)
+            self.core.log.write('WARNING',
+                                'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben '
+                                'wurde'.format(text, self.user), show=True)
         return
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
@@ -401,15 +407,13 @@ class Modulewrapper:
         return True
 
     def start_module(self, name, text, user):
-        Core.start_module(text, name, user)
+        self.core.start_module(text, name, user)
 
-    @staticmethod
-    def start_module_and_confirm(name=None, text=None, user=None):
-        return Core.start_module(text, name, user)
+    def start_module_and_confirm(self, name=None, text=None, user=None):
+        return self.core.start_module(text, name, user)
 
-    @staticmethod
-    def module_storage(module_name=None):
-        module_storage = Core.local_storage.get("module_storage")
+    def module_storage(self, module_name=None):
+        module_storage = self.core.local_storage.get("module_storage")
         if module_name is None:
             return module_storage
         # I am now just so free and lazy and assume that a module name is passed from a module that actually exists.
@@ -479,30 +483,31 @@ class Modulewrapper_continuous:
     # are missing (so exactly what the module wrapper was actually there for xD), because continuous_-
     # modules are not supposed to make calls to the outside. For this there is a
     # parameter for the time between two calls of the module.
-    def __init__(self, intervalltime):
+    def __init__(self, core, intervalltime, modules):
         self.intervall_time = intervalltime
         self.last_call = 0
         self.counter = 0
-        self.messenger = Core.messenger
-        self.core = Core
-        self.Analyzer = Core.Analyzer
-        self.audio_Input = Core.Audio_Input
-        self.audio_Output = Core.Audio_Output
-        self.local_storage = Core.local_storage
-        self.server_name = Core.server_name
-        self.system_name = Core.system_name
-        self.path = Core.path
+        self.messenger = self.core.messenger
+        self.core = core
+        self.Analyzer = core.Analyzer
+        self.audio_Input = core.Audio_Input
+        self.audio_Output = core.Audio_Output
+        self.local_storage = core.local_storage
+        self.server_name = core.server_name
+        self.system_name = core.system_name
+        self.path = core.path
+        self.modules = modules
 
     def start_module(self, name=None, text=None, user=None):
         # user prediction is not implemented yet, therefore here the workaround
         # user = self.local_storage['user']
-        Modules.start_module(text=text, user=user, name=name)
+        self.modules.start_module(text=text, user=user, name=name)
 
     def start_module_and_confirm(self, name=None, text=None, user=None):
-        return Core.start_module(name, text, user)
+        return self.core.start_module(name, text, user)
 
     def module_storage(self, module_name=None):
-        module_storage = Core.local_storage.get("module_storage")
+        module_storage = self.core.local_storage.get("module_storage")
         if module_name is None:
             return module_storage
         # I am now just so free and lazy and assume that a module name is passed from a module that actually exists.
@@ -514,25 +519,25 @@ class Modulewrapper_continuous:
 
 
 class LUNA:
-    def __init__(self, local_storage):
+    def __init__(self, local_storage, modules, log, analyzer, Audio_Input, Audio_Output, server_name, system_name):
         self.local_storage = local_storage
-        self.Modules = Modules
-        self.Log = Log
-        self.Analyzer = Analyzer
+        self.modules = modules
+        self.log = log
+        self.analyzer = analyzer
         self.messenger = None
         self.messenger_queued_users = []  # These users are waiting for a response
         self.messenger_queue_output = {}
 
-        self.users = Users()
+        self.users = Users(self, log)
 
         self.Audio_Input = Audio_Input
         self.Audio_Output = Audio_Output
 
         self.active_modules = {}
         self.continuous_modules = {}
-        self.server_name = Server_name
-        self.system_name = System_name
-        self.path = Local_storage['LUNA_PATH']
+        self.server_name = server_name
+        self.system_name = system_name
+        self.path = local_storage['LUNA_PATH']
 
     def messenger_thread(self):
         # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.
@@ -545,13 +550,14 @@ class LUNA:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
                     self.local_storage['rejected_messenger_messages'].append(msg)
                     try:
-                        Log.write('WARNING',
-                                  'Nachricht von unbekanntem Telegram-Nutzer {} ({}). Zugriff verweigert.'.format(
-                                      msg['from']['first_name'], msg['from']['id']), conv_id=msg['text'], show=True)
+                        self.log.write('WARNING',
+                                       'Nachricht von unbekanntem Telegram-Nutzer {} ({}). Zugriff verweigert.'.format(
+                                           msg['from']['first_name'], msg['from']['id']), conv_id=msg['text'],
+                                       show=True)
                     except KeyError:
-                        Log.write('WARNING',
-                                  'Nachricht von unbekanntem Telegram-Nutzer ({}). Zugriff verweigert.'.format(
-                                      msg['from']['id']), conv_id=msg['text'], show=True)
+                        self.log.write('WARNING',
+                                       'Nachricht von unbekanntem Telegram-Nutzer ({}). Zugriff verweigert.'.format(
+                                           msg['from']['id']), conv_id=msg['text'], show=True)
                     self.messenger.say(
                         'Entschuldigung, aber ich darf leider zur Zeit nicht mit Fremden reden.',
                         msg['from']['id'], msg['text'])
@@ -563,13 +569,13 @@ class LUNA:
                 #    self.messenger.say('Leider kann ich noch nichts mit Bildern anfangen.', self.users.get_user_by_name(user))
                 # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
                 if msg['text'].lower().startswith("Jarvis"):
-                    Modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
+                    self.modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
                 # Message is not a request at all, but a response (or a module expects such a response)
                 elif user in self.messenger_queued_users:
                     self.messenger_queue_output[user] = msg
                 # Message is a normal request
                 else:
-                    Modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
+                    self.modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
                 '''if response == False:
                     self.messenger.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['messenger_id'])'''
                 self.messenger.messages.remove(msg)
@@ -586,21 +592,23 @@ class LUNA:
 
     def hotword_detected(self, text):
         if text == "wrong assistant!":
-            Audio_Output.say("Geh mir nicht fremd, du sau!")
+            self.Audio_Output.say("Geh mir nicht fremd, du sau!")
         else:
             user = self.users.get_user_by_name(self.local_storage["user"])
-            Modules.start_module(text=str(text), user=user)
+            self.modules.start_module(text=str(text), user=user)
             self.Audio_Output.continue_after_hotword()
 
     def start_module(self, text, name, user):
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
-        Modules.query_threaded(name, text, user, direct=False)
+        self.modules.query_threaded(name, text, user, direct=False)
 
 
 class Users:
-    def __init__(self):
+    def __init__(self, core, log):
         self.users = []
+        self.log = log
+        self.core = core
         self.load_users()
 
     def get_user_list(self):
@@ -608,8 +616,8 @@ class Users:
 
     def load_users(self):
         # Load users separately from the users folder
-        Log.write('', '---------- USERS ---------', show=True)
-        location = os.path.join(absPath, 'users')
+        self.log.write('', '---------- USERS ---------', show=True)
+        location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'users')
         subdirs = os.listdir(location)
         try:
             subdirs.remove("README.txt")
@@ -622,9 +630,9 @@ class Users:
             if not username == 'README.txt' and not username == 'README.md':
                 userpath = os.path.join(location, username)
                 self.add_user(userpath)
-                Log.write('INFO', 'Nutzer {} geladen'.format(username), show=True)
+                self.log.write('INFO', 'Nutzer {} geladen'.format(username), show=True)
         if self.users == []:
-            Core.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
+            self.core.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
 
     def add_user(self, path):
         with open(path + "/data.json") as user_file:
@@ -652,59 +660,69 @@ class Users:
                 return user
         return None
 
+
+class Conversations:
+    # This class manages all conversations that have been made since system startup.
+    def __init__(self):
+        old_convs = []
+        current_conv = None
+
+
+class Conversation:
+    # Represents a single conversation
+    def __init__(self):
+        pass
+
+
 """def clear_momory():
     while True:
         time.sleep(60)
         gc.collect()"""
 
-if __name__ == "__main__":
-    relPath = str(Path(__file__).parent) + "/"
-    absPath = os.path.dirname(os.path.abspath(__file__))
 
-    Log = Logging()
+def start(config_data):
+    log = Logging()
 
-    Log.write('', '--------- Start System ---------\n\n', show=True)
+    log.write('', '--------- Start System ---------\n\n', show=True)
 
-    with open(relPath + "config.json", "r") as config_file:
-        config_data = json.load(config_file)
-
-    System_name = config_data['System_name']
-    Server_name = config_data['Server_name']
-    Home_location = config_data["Local_storage"]["home_location"]
-    Local_storage = config_data['Local_storage']
-    Local_storage['LUNA_PATH'] = absPath
+    system_name = config_data['System_name']
+    server_name = config_data['Server_name']
+    home_location = config_data["Local_storage"]["home_location"]
+    local_storage = config_data['Local_storage']
+    local_storage['LUNA_PATH'] = os.path.dirname(os.path.abspath(__file__))
     Audio_Input = AudioInput()
     # clear unnececary warnings
     os.system('clear')
-    Modules = Modules(Local_storage)
-    Analyzer = Sentence_Analyzer()
+    modules = None
+    analyzer = Sentence_Analyzer()
     Audio_Output = AudioOutput(voice=config_data["voice"])
-    Core = LUNA(Local_storage)
-    Core.local_storage['LUNA_starttime'] = time.time()
-    Audio_Input.set_core(Core, Audio_Output)
+    core = LUNA(local_storage, modules, log, analyzer, Audio_Input, Audio_Output, server_name, system_name)
+    modules = Modules(core, local_storage, log)
+    core.local_storage['LUNA_starttime'] = time.time()
+    Audio_Input.set_core(core, Audio_Output)
     time.sleep(2)
     # -----------Starting-----------#
-    Modules.start_continuous()
+    modules.start_continuous()
     Audio_Input.start()
     Audio_Output.start()
     time.sleep(0.75)
 
     if config_data['messenger']:
-        Log.write('INFO', 'Start Telegram...', show=True)
+        log.write('INFO', 'Start Telegram...', show=True)
         if config_data['messenger_key'] == '':
-            Log.write('ERROR', 'No Telegram-Bot-Token entered!', show=True)
+            log.write('ERROR', 'No Telegram-Bot-Token entered!', show=True)
         else:
             from resources.messenger import TelegramInterface
 
-            Core.messenger = TelegramInterface(config_data['messenger_key'], Core)
-            Core.messenger.start()
-            tgt = Thread(target=Core.messenger_thread)
+            core.messenger = TelegramInterface(config_data['messenger_key'], core)
+            core.messenger.start()
+            tgt = Thread(target=core.messenger_thread)
             tgt.daemon = True
             tgt.start()
 
-    Log.write('', '--------- FERTIG ---------\n\n', show=True)
+    log.write('', '--------- FERTIG ---------\n\n', show=True)
     time.sleep(3)
-    Core.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
+    core.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
 
     # Starting the main-loop
     # main_loop(Local_storage)
@@ -716,8 +734,31 @@ if __name__ == "__main__":
         try:
             time.sleep(10)
         except:
-            Modules.stop_continuous()
+            modules.stop_continuous()
             Audio_Input.stop()
             Audio_Output.stop()
-            Log.write('', '\n[{}] Goodbye!\n'.format(System_name.upper()), show=True)
+            log.write('', '\n[{}] Goodbye!\n'.format(system_name.upper()), show=True)
             break
+
+
+def stop(local_storage):
+    local_storage["users"] = {}
+    local_storage["rejected_messenger_messages"] = []
+    config_data["Local_storage"] = local_storage
+    json.dump(config_data, file)
+
+
+if __name__ == "__main__":
+    relPath = str(Path(__file__).parent) + "/"
+    with open(relPath + "config.json", "r") as config_file:
+        config_data = json.load(config_file)
+    if not config_data["established"]:
+        print('[WARNING] System not yet set up. Setup is started...')
+        setup_wizart = FirstStart
+        setup_wizart.run()
+        config_data["established"] = True
+        with open(relPath + "config.json", "w") as file:
+            json.dump(config_data, file)
+    config_data["routines"] = []
+    config_data["alarm_routines"] = []
+    start(config_data)

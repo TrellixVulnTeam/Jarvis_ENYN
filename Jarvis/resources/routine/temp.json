@@ -1,0 +1,29 @@
+{
+    "description": "beschreibt, was die Routine macht",
+    "retakes": {
+      "days": {
+        "daily": false,
+        "monday": false,
+        "tuesday": false,
+        "wednesday": false,
+        "thursday": false,
+        "friday": false,
+        "saturday": false,
+        "sunday": false,
+        "date_of_day": ["3", "7"]
+      },
+      "time": {
+        "clock_time": ["1:11", "2:22"],
+        "after_alarm": false,
+        "after_sunrise": false,
+        "after_sunset": false
+      }
+    },
+    "actions": {
+      "commands": [
+          { "module_name": "name des aufzurufenden Moduls",
+            "text": ["Befehl, den das Modul übergeben bekommt"]
+          }
+      ]
+    }
+}
