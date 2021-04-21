@@ -13,11 +13,11 @@ import sys
 import random
 from helpWrapper import InstallWrapper
 
-# TIANE_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
+# JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from distutils.dir_util import copy_tree
 
-# Imports for handling the main-tiane-System, defining global variable for that thread
+# Imports for handling the main-JARVIS-System, defining global variable for that thread
 from webserverCommunication import mThr
 
 mainThread = mThr()
@@ -148,15 +148,15 @@ def writeServerConfig():
         config_data = json.load(config_file)
     # check every parameter and update those in the config file
     if "System_name" in data and data["System_name"].strip() != "":
-        config_data["System_name"] = data["tianeName"]
+        config_data["System_name"] = data["JARVISName"]
     config_data["Local_storage"]["System_name"] = config_data["System_name"]
 
-    if "tianeSystem" in data and data["tianeSystem"].strip() != "":
-        config_data["Server_name"] = data["tianeName"]
+    if "JARVISSystem" in data and data["JARVISSystem"].strip() != "":
+        config_data["Server_name"] = data["JARVISName"]
     config_data["Local_storage"]["server_name"] = config_data["System_name"]
 
-    if "tianeActivation" in data and data["tianeActivation"].strip() != "":
-        config_data['Activation_Phrase'] = data["tianeActivation"]
+    if "JARVISActivation" in data and data["JARVISActivation"].strip() != "":
+        config_data['Activation_Phrase'] = data["JARVISActivation"]
     config_data['Local_storage']['activation_phrase'] = config_data['Activation_Phrase']
 
     if "homeLocation" in data and data["homeLocation"].strip() != "":
@@ -189,7 +189,7 @@ def writeServerConfig():
             config_data["use_interface"] = t
             bedingt_kopieren('../server/resources/optional_modules/POI_Interface.py', '../server/modules/continuous/POI_Interface.py', t)
             bedingt_kopieren('../server/resources/optional_modules/POI_Interface_controls.py', '../server/modules/POI_Interface_controls.py', t)
-    with open('../server/TIANE_config.json', 'w') as config_file:
+    with open('../server/JARVIS_config.json', 'w') as config_file:
         json.dump(config_data, config_file, indent=4)
         return "ok"
     return "err"
