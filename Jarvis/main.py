@@ -2,6 +2,19 @@ import json
 import traceback
 from pathlib import Path
 
+import os
+import random
+import time
+import datetime
+import urllib
+from urllib.request import Request, urlopen
+from Audio import AudioOutput, AudioInput
+from resources.analyze import Sentence_Analyzer
+import pkgutil
+from threading import Thread
+from resources.module_skills import skills
+import io
+
 class Modules:
     def __init__(self, core, local_storage, log):
         self.core = core
@@ -667,6 +680,24 @@ class Conversation:
 
 
 def start(config_data):
+    """with open(relPath + "config.json", "r") as config_file:
+        config_data = json.load(config_file)
+    if not config_data["established"]:
+        from setup.setup_wizard import FirstStart
+        print('[WARNING] System not yet set up. Setup is started...')
+        try:
+            setup_wizard = FirstStart()
+            setup_done = config_data = setup_wizard.run()
+            config_data["established"] = True
+            with open(relPath + 'config.json', 'w') as file:
+                json.dump(config_data, file)
+        except:
+            print("[WARNING] There was a problem with the Setup-Wizard!")
+            traceback.print_exc()"""
+
+    config_data["Local_storage"]["routines"] = []
+    config_data["Local_storage"]["alarm_routines"] = []
+
     log = Logging()
 
     log.write('', '--------- Start System ---------\n\n', show=True)
@@ -729,7 +760,7 @@ def start(config_data):
     stop(local_storage)
 
 
-def stop(local_storage):
+def stop(local_storage, config_data):
     local_storage["users"] = {}
     local_storage["rejected_messenger_messages"] = []
     config_data["Local_storage"] = local_storage
@@ -741,35 +772,4 @@ if __name__ == "__main__":
     relPath = str(Path(__file__).parent) + "/"
     with open(relPath + "config.json", "r") as config_file:
         config_data = json.load(config_file)
-    print(f'established: {config_data["established"]}')
-    if not config_data["established"]:
-        from setup.setup_wizard import FirstStart
-        print('[WARNING] System not yet set up. Setup is started...')
-        try:
-            setup_wizard = FirstStart()
-            config_data = setup_wizard.run()
-            config_data["established"] = True
-            with open(relPath + 'config.json', 'w') as file:
-                json.dump(config_data, file)
-        except:
-            print("[WARNING] There was a problem with the Setup-Wizard!")
-            traceback.print_exc()
-
-
-    import os
-    import random
-    import time
-    import datetime
-    import urllib
-    from urllib.request import Request, urlopen
-    from Audio import AudioOutput, AudioInput
-    from resources.analyze import Sentence_Analyzer
-    import pkgutil
-    from threading import Thread
-    from resources.module_skills import skills
-    import io
-
-    time.sleep(10)
-    config_data["Local_storage"]["routines"] = []
-    config_data["Local_storage"]["alarm_routines"] = []
     start(config_data)
