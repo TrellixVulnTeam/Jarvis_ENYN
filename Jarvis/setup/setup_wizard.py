@@ -1,28 +1,26 @@
 import base64
+import io
 import json
 import os
 import subprocess
 import time
 import traceback
 from pathlib import Path
+
 from Crypto import Random
 import speech_recognition as sr
-from Jarvis.resources.tts import Text_to_Speech
+from resources.tts import Text_to_Speech
 from pygame import mixer as audio
 
 
 class FirstStart:
-    def __init__(self, Audio):
-        self.relPath = str(Path(__file__).parent) + "/"
+    def __init__(self, ):
+        self.relPath = str(Path(__file__).parent).strip("setup")
         with open(self.relPath + "config.json", "r") as config_file:
             self.config_data = json.load(config_file)
 
-        self.Audio = Audio
+        self.Audio = InstallationAudio()
         self.messenger = False
-        time.sleep(2)
-        self.run()
-
-        json.dump(self.config_data, config_file)
 
     def run(self):
         self.say(
@@ -40,8 +38,8 @@ class FirstStart:
         self.say(
             "Zum Schluss werde ich noch ein paar Dinge erledigen und anschließend automatisch starten. Das kann etwas dauern.")
         self.set_Network_Key()
-        subprocess.run(('sudo chmod 777 -R ' + self.relPath).split(' '))
         self.say('Die Einrichtung ist abgeschlossen. Ich werde jetzt meine Systeme starten.')
+        return self.config_data
 
     def say(self, text):
         self.Audio.say(text)
@@ -66,14 +64,38 @@ class FirstStart:
         return False
 
     def add_user(self):
-        user_name = self.ask_with_answer("Wie heißt du?")
-        user_age = self.ask_with_answer("Wie alt bist du?")
+        user_first_name = self.ask_with_answer("Was ist dein Vorname?")
+        user_last_name = self.ask_with_answer("Was ist dein Nachname?")
+        user_age = self.ask_with_answer(
+            "An welchem Datum wurdest du gebohren? Bitte verwende keine Namen für Monate.").split('.')
         user = {
-            "name": user_name,
+            "name": user_first_name,
             "age": user_age
         }
-        self.config_data["Local_storage"]["user"] = user_name
-        self.config_data["Local_storage"]["users"][user_name] = user
+        self.config_data["Local_storage"]["user"] = user_first_name
+        self.config_data["Local_storage"]["users"][user_first_name] = user
+
+        path = self.relPath + "users"
+        subprocess.call(f'mkdir path/{user_first_name}')
+        subprocess.call(f'mkdir {path}/{user_first_name}/resources')
+        subprocess.call(f'cat {path}/data.json')
+        subprocess.call(f'cat {path}/resources/user_storage.json')
+
+        with open(self.relPath + '/temp_files/user_temp/data.json', 'r') as data:
+            with open(f'{path}/data.json', 'w'):
+                data_conf = json.load(data)
+                data_conf["name"] = user_first_name
+                data_conf["first_name"] = "user_first_name"
+                data_conf["last_name"] = "user_last_name"
+                data_conf["date_of_birth"]["year"] = user_age[2]
+                data_conf["date_of_birth"]["month"] = user_age[1]
+                data_conf["date_of_birth"]["day"] = user_age[0]
+                data_conf["uid"] = ""
+                json.dump(data_conf, data)
+
+        with open(self.relPath + '/temp_files/user_temp/resources/user_storage.json', 'r') as user_storage:
+            empty_json = {}
+            json.dump(empty_json, user_storage)
 
     def set_home_location(self):
         home_location = self.ask_with_answer("Wo wohnst du?")
@@ -96,13 +118,16 @@ class FirstStart:
         print("[INFO] voice gender fixed: ", self.config_data["voice"])
 
     def set_phillips_hue(self):
-        use_phillip_hue = True if self.is_desired(self.ask_with_answer("Besitzt du ein Phillips Hue System und möchtest es über Jarvis steuern?")) else False
+        use_phillip_hue = True if self.is_desired(
+            self.ask_with_answer("Besitzt du ein Phillips Hue System und möchtest es über Jarvis steuern?")) else False
         if use_phillip_hue:
-            self.say("Alles klar. Bitte such die Bridch EI PI heraus. Diese findest du in der Phillips Hue App. Ich gebe "
-                     "dir 30 Sekunden Zeit und spiel dann ein Signalton ab. Bitte sag danach die IP laut und "
-                     "deutlich. Die Punkte müssen auch genannt werden.")
+            self.say(
+                "Alles klar. Bitte such die Bridch EI PI heraus. Diese findest du in der Phillips Hue App. Ich gebe "
+                "dir 30 Sekunden Zeit und spiel dann ein Signalton ab. Bitte sag danach die IP laut und "
+                "deutlich. Die Punkte müssen auch genannt werden.")
             time.sleep(30)
-            self.Audio.play_bling_sound()
+            # self.Audio.play_bling_sound()
+            self.say("Okay. Sprich bitte laut und deutlich.")
             self.config_data["Local_storage"]["module_storage"]["Bridge-IP"] = self.listen()
             print("[INFO] Phillips HUE --> BridgeIP fixed: ",
                   self.config_data["Local_storage"]["module_storage"]["Bridge-IP"])
@@ -118,11 +143,12 @@ class FirstStart:
             if "jetzt" in now:
                 self.say("Bitte suche deine Bot-ID heraus. Diese findest du, indem du den "
                          "Bot-father auf Telegram anschreibst und dann släsh start eingibst. Ich warte 30 "
-                         "Sekunden und gebe dir dann ein Signalton. Bitte diktiere danach deutlich die Bot-ID.")
+                         "Sekunden und gebe dir dann bescheid. Bitte diktiere danach deutlich die Bot-ID.")
                 time.sleep(30)
                 while True:
                     try:
-                        self.Audio.play_bling_sound()
+                        # self.Audio.play_bling_sound()
+                        self.say("Okay. Sprich bitte laut und deutlich.")
                         token = int(self.listen())
                         self.config_data["messenger_allowed_id_table"].append(token)
                         print("[INFO] Telegram Key fixed: ", self.config_data["messenger_key"])
@@ -169,10 +195,10 @@ class InstallationAudio:
         audio.init()
 
     def recognize_input(self):
-        #self.play_bling_sound()
+        self.play_bling_sound()
         try:
             with sr.Microphone(device_index=None) as source:
-                audio = self.speech_engine.listen(source, timeout=5, phrase_time_limit=5)
+                audio = self.speech_engine.listen(source)
                 try:
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
                     print(text)
@@ -186,15 +212,18 @@ class InstallationAudio:
 
     def say(self, text):
         self.tts.say(text)
+        while self.tts.is_reading:
+            time.sleep(0.1)
 
     def play_bling_sound(self):
         TOP_DIR = os.path.dirname(os.path.abspath(__file__))
-        DETECT_DONG = os.path.join(TOP_DIR, "../resources/sounds/bling.wav")
+        DETECT_DONG = os.path.join(TOP_DIR.rstrip('setup'), "resources/sounds/bling.wav")
 
         with open(DETECT_DONG, "rb") as wavfile:
             input_wav = wavfile.read()
-            audio.music.load(input_wav)
-            audio.music.play()
+            data = io.BytesIO(input_wav)
+            track = audio.Sound(data)
+            audio.Channel(0).play(track)
 
 
 def install_packeges():

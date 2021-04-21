@@ -1,20 +1,6 @@
 import json
-import os
-import random
-import time
-import datetime
-import urllib
-from urllib.request import Request, urlopen
-from Audio import AudioOutput, AudioInput
-from resources.analyze import Sentence_Analyzer
-from setup.setup_wizard import FirstStart
-import pkgutil
-from pathlib import Path
-from threading import Thread
 import traceback
-from resources.module_skills import skills
-import io
-
+from pathlib import Path
 
 class Modules:
     def __init__(self, core, local_storage, log):
@@ -77,7 +63,7 @@ class Modules:
         else:
             # else there is a valid text -> analyze
             try:
-                analysis = self.core.Analyzer.analyze(str(text))
+                analysis = self.core.analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')
@@ -128,7 +114,7 @@ class Modules:
         else:
             self.log.write('ACTION', '{}'.format(text), conv_id=str(text), show=True)
             try:
-                analysis = self.core.Analyzer.analyze(str(text))
+                analysis = self.core.analyzer.analyze(str(text))
                 # Log.write('ACTION', 'Analysis: ' + str(analysis), conv_id=str(text), show=True)
             except:
                 traceback.print_exc()
@@ -145,7 +131,7 @@ class Modules:
                     mt.start()
         else:
             try:
-                analysis = self.core.Analyzer.analyze(str(text))
+                analysis = self.core.analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')
@@ -314,7 +300,7 @@ class Modulewrapper:
         self.messenger = core.messenger
 
         self.core = core
-        self.Analyzer = core.Analyzer
+        self.Analyzer = core.analyzer
         self.local_storage = core.local_storage
         self.server_name = core.server_name
         self.system_name = core.system_name
@@ -487,9 +473,9 @@ class Modulewrapper_continuous:
         self.intervall_time = intervalltime
         self.last_call = 0
         self.counter = 0
-        self.messenger = self.core.messenger
+        self.messenger = core.messenger
         self.core = core
-        self.Analyzer = core.Analyzer
+        self.Analyzer = core.analyzer
         self.audio_Input = core.Audio_Input
         self.audio_Output = core.Audio_Output
         self.local_storage = core.local_storage
@@ -690,17 +676,18 @@ def start(config_data):
     home_location = config_data["Local_storage"]["home_location"]
     local_storage = config_data['Local_storage']
     local_storage['LUNA_PATH'] = os.path.dirname(os.path.abspath(__file__))
-    Audio_Input = AudioInput()
     # clear unnececary warnings
     os.system('clear')
     modules = None
     analyzer = Sentence_Analyzer()
     Audio_Output = AudioOutput(voice=config_data["voice"])
+    Audio_Input = AudioInput()
     core = LUNA(local_storage, modules, log, analyzer, Audio_Input, Audio_Output, server_name, system_name)
     modules = Modules(core, local_storage, log)
+    core.modules = modules
     core.local_storage['LUNA_starttime'] = time.time()
     Audio_Input.set_core(core, Audio_Output)
-    time.sleep(2)
+    time.sleep(1)
     # -----------Starting-----------#
     modules.start_continuous()
     Audio_Input.start()
@@ -721,7 +708,6 @@ def start(config_data):
             tgt.start()
 
     log.write('', '--------- FERTIG ---------\n\n', show=True)
-    time.sleep(3)
     core.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
 
     # Starting the main-loop
@@ -740,25 +726,50 @@ def start(config_data):
             log.write('', '\n[{}] Goodbye!\n'.format(system_name.upper()), show=True)
             break
 
+    stop(local_storage)
+
 
 def stop(local_storage):
     local_storage["users"] = {}
     local_storage["rejected_messenger_messages"] = []
     config_data["Local_storage"] = local_storage
-    json.dump(config_data, file)
+    with open(str(Path(__file__).parent) + '/config.json', 'w') as file:
+        json.dump(config_data, file)
 
 
 if __name__ == "__main__":
     relPath = str(Path(__file__).parent) + "/"
     with open(relPath + "config.json", "r") as config_file:
         config_data = json.load(config_file)
+    print(f'established: {config_data["established"]}')
     if not config_data["established"]:
+        from setup.setup_wizard import FirstStart
         print('[WARNING] System not yet set up. Setup is started...')
-        setup_wizart = FirstStart
-        setup_wizart.run()
-        config_data["established"] = True
-        with open(relPath + "config.json", "w") as file:
-            json.dump(config_data, file)
-    config_data["routines"] = []
-    config_data["alarm_routines"] = []
+        try:
+            setup_wizard = FirstStart()
+            config_data = setup_wizard.run()
+            config_data["established"] = True
+            with open(relPath + 'config.json', 'w') as file:
+                json.dump(config_data, file)
+        except:
+            print("[WARNING] There was a problem with the Setup-Wizard!")
+            traceback.print_exc()
+
+
+    import os
+    import random
+    import time
+    import datetime
+    import urllib
+    from urllib.request import Request, urlopen
+    from Audio import AudioOutput, AudioInput
+    from resources.analyze import Sentence_Analyzer
+    import pkgutil
+    from threading import Thread
+    from resources.module_skills import skills
+    import io
+
+    time.sleep(10)
+    config_data["Local_storage"]["routines"] = []
+    config_data["Local_storage"]["alarm_routines"] = []
     start(config_data)

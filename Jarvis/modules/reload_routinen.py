@@ -2,7 +2,7 @@ import json
 import os
 
 
-def is_Valid(text):
+def isValid(text):
     text = text.lower()
     if 'lad' in text and 'routine' in text:
         return True
