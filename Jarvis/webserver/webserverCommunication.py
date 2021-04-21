@@ -6,9 +6,8 @@ import mmap
 import pickle
 from pathlib import Path
 
-from Jarvis import main
-
 sys.path.append(os.path.join(os.path.dirname(__file__), "../server/"))
+from Jarvis import main
 
 class mThr():
     """
