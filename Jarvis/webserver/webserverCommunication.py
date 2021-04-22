@@ -25,8 +25,7 @@ class mThr():
         """
         The process is started and the two memory maps linked into the process
         """
-        relPath = str(Path(__file__).parent) + "/"
-        with open(relPath + "config.json", "r") as config_file:
+        with open("../config.json", "r") as config_file:
             config_data = json.load(config_file)
 
         self.thr = Process(target=main.start, args=config_data)
