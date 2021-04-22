@@ -38,7 +38,7 @@ def getData():
 
 nav = [
 {"href": "/setup", "text": "\"Erste Schritte\""},
-{"href": "/setupServer", "text": "Server einrichten"},
+{"href": "/setupSystem", "text": "Server einrichten"},
 {"href": "/setupUser", "text": "Benutzer erstellen"},
 {"href": "/setupModules", "text": "Module bearbeiten (WIP)"},
 ]

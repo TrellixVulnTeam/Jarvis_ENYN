@@ -11,7 +11,7 @@ from Jarvis import main
 
 class mThr():
     """
-    the mThr-Class wraps around the main TIANE-Server. TIANE is started in a
+    the mThr-Class wraps around the main JARVIS-Server. JARVIS is started in a
     seperate Process and not a Thread - so you can kill them without modifying
     the JARVIS-Part. The communication runs via two memory-maps which can be
     accessed by both processes.
