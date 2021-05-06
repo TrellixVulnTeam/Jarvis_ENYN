@@ -15,6 +15,7 @@ from threading import Thread
 from resources.module_skills import skills
 import io
 
+
 class Modules:
     def __init__(self, core, local_storage, log):
         self.core = core
@@ -589,6 +590,12 @@ class LUNA:
                 break
             time.sleep(0.03)
 
+    def webserver_action(self, action):
+        if action == 'mute':
+            return 'ok'
+        else:
+            return 'err'
+
     def hotword_detected(self, text):
         if text == "wrong assistant!":
             self.Audio_Output.say("Geh mir nicht fremd, du sau!")
@@ -636,7 +643,7 @@ class Users:
     def add_user(self, path):
         with open(path + "/data.json") as user_file:
             user_data = json.load(user_file)["User_Info"]
-        with open(path + ("/resources/user_storage.json")) as user_storage_file:
+        with open(path + "/resources/user_storage.json") as user_storage_file:
             user_storage = json.load(user_storage_file)
         user_data["user_storage"] = user_storage
         self.users.append(user_data)
@@ -658,19 +665,6 @@ class Users:
             if user["messenger_id"] == t_id:
                 return user
         return None
-
-
-class Conversations:
-    # This class manages all conversations that have been made since system startup.
-    def __init__(self):
-        old_convs = []
-        current_conv = None
-
-
-class Conversation:
-    # Represents a single conversation
-    def __init__(self):
-        pass
 
 
 """def clear_momory():
@@ -702,6 +696,9 @@ def start(config_data):
 
     log.write('', '--------- Start System ---------\n\n', show=True)
 
+    import webserver.server_new as Webserver
+    webserver = Webserver
+
     system_name = config_data['System_name']
     server_name = config_data['Server_name']
     home_location = config_data["Local_storage"]["home_location"]
@@ -714,6 +711,7 @@ def start(config_data):
     Audio_Output = AudioOutput(voice=config_data["voice"])
     Audio_Input = AudioInput()
     core = LUNA(local_storage, modules, log, analyzer, Audio_Input, Audio_Output, server_name, system_name)
+    webserver.core = core
     modules = Modules(core, local_storage, log)
     core.modules = modules
     core.local_storage['LUNA_starttime'] = time.time()
@@ -757,7 +755,7 @@ def start(config_data):
             log.write('', '\n[{}] Goodbye!\n'.format(system_name.upper()), show=True)
             break
 
-    stop(local_storage)
+    stop(local_storage, config_data)
 
 
 def stop(local_storage, config_data):
