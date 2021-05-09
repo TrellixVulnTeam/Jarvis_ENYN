@@ -64,9 +64,9 @@ class AudioInput:
         try:
             with sr.Microphone(device_index=None) as source:
                 # record user input
+                self.Audio_Output.detected_hotword()
                 if not listen:
                     # if there is no conservation, play a bling sound
-                    self.Audio_Output.detected_hotword()
                     self.Audio_Output.play_bling_sound()
                 audio = self.speech_engine.listen(source)
                 # self.speech_engine.record(source)
@@ -259,13 +259,13 @@ class AudioOutput:
     def set_volume(self, channel, volume):
         audio.Channel(channel).set_volume(volume)
 
-    def stopp_notification(self):
+    def stop_notification(self):
         audio.Channel(0).stop()
 
-    def stopp_music(self):
+    def stop_music(self):
         audio.Channel(1).stop()
 
-    def stopp_playback(self):
+    def stop_playback(self):
         audio.Channel(2).stop()
 
     def stop(self):
@@ -309,7 +309,7 @@ class MusicPlayer:
         while self.playlist == []:
             # wait until song is loaded in playlist
             time.sleep(0.2)
-        time.sleep(2)
+        time.sleep(1)
         while self.playlist != []:
             self.player.set_media(self.playlist[0])
             self.player.play()
@@ -329,6 +329,7 @@ class MusicPlayer:
         self.player.stop()
 
     def play(self, by_name=None, url=False, path=False, next=False, now=False, playlist=False, announce=False):
+        self.stopped = False
         if not self.is_playing and not self.paused:
             self.is_playing = True
             self.start()
@@ -336,18 +337,24 @@ class MusicPlayer:
         """if playlist:
             self.add_playlist(url, by_name, next)"""
         if not by_name == None:
-            _url = 'https://www.youtube.com/results?search_query={0}'.format(str(by_name))
+            _url = f'https://www.youtube.com/results?search_query={str(by_name)}'.replace("'", "").replace(' ', '+').rstrip('+')
+            print(_url)
             html = urllib.request.urlopen(_url)
             video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+            print(video_ids)
             while True:
-                video = pafy.new(random.choice(video_ids))
-                duration = str(video.duration).split(":")
-                if int(duration[0]) == 0 and int(duration[1]) < 10:
-                    break
-                else:
+                print("while-")
+                try:
+                    video = pafy.new(random.choice(video_ids))
+                    duration = str(video.duration).split(":")
+                    if int(duration[0]) == 0 and int(duration[1]) < 10:
+                        best = video.getbest()
+                        media = self.instance.media_new(best.url)
+                        break
+                    else:
+                        continue
+                except:
                     continue
-            best = video.getbest()
-            media = self.instance.media_new(best.url)
 
         elif not url == False:
             media = self.instance.media_new(url)
@@ -396,8 +403,10 @@ class MusicPlayer:
         self.player.audio_set_volume(volume)
 
     def stop(self):
+        self.playlist = []
         self.is_playing = False
         self.player.stop()
+        self.skip = True
 
     def stop_player(self):
         self.is_playing = False

@@ -16,7 +16,7 @@
             "phillips_hue":{
                 "Bridge-IP": ""
             },
-            "philips-tv": {
+            "phillips-tv": {
                 "user": "",
                 "pass": "",
                 "host": ""

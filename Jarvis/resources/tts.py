@@ -4,11 +4,9 @@ from pathlib import Path
 from threading import Thread
 from selenium import webdriver
 from selenium.webdriver import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
 from pyvirtualdisplay import Display
-from selenium.webdriver.support.wait import WebDriverWait
+import pyperclip
 
 
 class Text_to_Speech:
@@ -66,9 +64,10 @@ class Text_to_Speech:
 
     def push_text(self, text):
         self.text_area.clear()
-        self.text_area.send_keys(text)
-        #script = "var element = arguments[0], txt = arguments[1]; element.value = txt; element.dispatchEvent(new Event('change'));"
-        #self.driver.execute_script(script, self.text_area, text)
+        pyperclip.copy(text)
+        self.text_area.send_keys(Keys.CONTROL, 'v')
+        # script = "var element = arguments[0], txt = arguments[1]; element.value = txt; element.dispatchEvent(new Event('change'));"
+        # self.driver.execute_script(script, self.text_area, text)
 
     def select_german(self):
         self.driver.find_element_by_id('downshift-0-toggle-button').click()
@@ -107,13 +106,14 @@ class Text_to_Speech:
     def start_driver(self):
         driver_Path = str(Path(__file__).parent) + '/webdriver/chromedriver'
         self.driver = webdriver.Chrome(driver_Path, chrome_options=self.get_opt())
-        #self.start_vpn()
+        # self.start_vpn()
         self.get_website_inf()
 
     def get_website_inf(self):
         URL = "https://www.ibm.com/demos/live/tts-demo/self-service/home"
         self.driver.get(URL)
         self.text_area = self.driver.find_element_by_id('text-area')
+        time.sleep(1)
         self.play_button = self.driver.find_element_by_id('btn')
         #self.select_german()
         self.select_voice(self.gender)
