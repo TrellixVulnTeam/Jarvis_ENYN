@@ -113,6 +113,75 @@
     ],
     "required": "partially",
     "description": "Diese Komponente dient ausschließlich zu Testzwecken."
+  },
+  "pywhatkit": {
+    "python_installs": [
+      "pywhatkit"
+    ],
+    "required": "partially",
+    "description": "Diese Komponente wird für einige Module genutzt, bei welchen Wissen abgefragt werden.",
+    "install_check": {
+      "import": "pywhatkit"
+    }
+  },
+  "python-vlc": {
+    "python_installs": [
+      "python-vlc",
+      "youtube-dl"
+    ],
+    "required": "partially",
+    "description": "Python-VLC wird benötigt, um Musik abzuspielen.",
+    "install_check": {
+      "import": "vlc"
+    }
+  },
+  "pvporcupine": {
+    "python_installs": [
+      "pvporcupine"
+    ],
+    "required": "partially",
+    "description": "Notwendig für das Erkennen des Hotwords.",
+    "install_check": {
+      "import": "pvporcupine"
+    }
+  },
+  "pafy": {
+    "python_installs": [
+      "pafy"
+    ],
+    "required": "partially",
+    "description": "Pafy wird benötigt, um Musik abzuspielen oder Informationen über Youtube-Videos/Kanäle auszulesen.",
+    "install_check": {
+      "import": "pafy"
+    }
+  },
+  "selenium": {
+    "python_installs": [
+      "selenium",
+      "PyVirtualDisplay"
+    ],
+    "required": "partially",
+    "description": "Selenium ist ein wichtiger Bestandteil der Sprachausgabe."
+  },
+  "androidtv": {
+    "python_installs": [
+      "androidtv"
+    ],
+    "required": "partially",
+    "description": "benötigt, um einen Phillips-Fernseher zu steuern.",
+    "install_check": {
+      "import": "androidtv"
+    }
+  },
+  "phillips_hue": {
+    "python_installs": [
+      "phue"
+    ],
+    "required": "partially",
+    "description": "benötigt, um Phillips-HUE Systeme zu steuern.",
+    "install_check": {
+      "import": "phue"
+    }
   }
 
 }

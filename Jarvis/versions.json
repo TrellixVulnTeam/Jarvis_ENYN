@@ -3,7 +3,7 @@
   "new changes": "First version of Jarvis. Implementation of the audio driver, speech module, server, modules and much more",
   "shellcommands for update": [
     "sudo apt-get install xvfb -y",
-    "sudo pip3 install pywhatkit python-vlc pvporcupine pafy youtube-dl SpeechRecognition PyVirtualDisplay selenium androidtv wikipedia  googlemaps python_dateutil pytube3 qrcode Proxy-List-Scrapper"
+    "sudo pip3 install pywhatkit python-vlc pvporcupine pafy youtube-dl SpeechRecognition PyVirtualDisplay selenium androidtv wikipedia  googlemaps python_dateutil pytube3 qrcode"
   ],
   "last versions": {
   }
