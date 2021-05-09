@@ -5,9 +5,9 @@ SECURE = False
 def reload_own(core):
     print('\n\n--------- RELOAD ---------')
     # Eigene Module neu laden
-    core.core.Modules.stop_continuous()
-    core.core.Modules.load_modules()
-    core.core.Modules.start_continuous()
+    core.core.modules.stop_continuous()
+    core.core.modules.load_modules()
+    core.core.modules.start_continuous()
 
 def handle(text, core, skills):
     #core.say('Okay, warte einen Moment')
