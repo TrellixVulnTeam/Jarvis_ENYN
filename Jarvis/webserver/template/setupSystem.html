@@ -1,5 +1,5 @@
 <head>
-  <title>JARVIS - Server einrichten</title>
+  <title>JARVIS - System einrichten</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
@@ -24,7 +24,7 @@
 <div class="container-fluid">
   <div class="row justify-content-md-center">
     <div class="col-md-10 col-sm-12">
-    <h2>Server einrichten</h2>
+    <h2>System einrichten</h2>
     <p>
       Jetzt kannst du deinen neuen Sprachassistenten JARVIS einrichten. In diesem
       Menü geht es explizit um grundlegende Eintellungen für <b>JARVIS</b>.
@@ -35,18 +35,13 @@
         <h5>Einstellungen</h5>
       </li>
       <li class="list-group-item">
-        <div class="form-group">
-          <label for="JARVISName">Soll meine Sprachcodierung männdlich oder weiblich sein?</label>
-          <input type="text" class="form-control" id="JARVISName" placeholder="z.B. JARVIS, Alexa oder J.A.R.V.I.S" value="">
-          <small class="form-text text-muted">Wenn du dieses Feld leer lässt werde ich männlich klingen.</small>
+        <label for="speech">Soll meine Sprachcodierung männlich oder weiblich sein?</label>
+        <div class="input-group">
+          <button class="btn btn-success mr-3" id="speechMale" onclick="$('#speech').val('male')">männlich</button>
+          <button class="btn btn-danger mr-3" id="speechFemale" onclick="$('#speech').val('female')">weiblich</button>
+          <input type="text" class="form-control disabled" disabled id="speech" value="male"></input>
         </div>
-      </li>
-      <li class="list-group-item">
-        <div class="form-group">
-          <label for="JARVISSystem">In welcher Stadt befindet das System?</label>
-          <input type="text" class="form-control" id="JARVISSystem" placeholder="z.B. München, Berlin oder Würzburg" value="">
-          <small class="form-text text-muted">Wenn du dieses Feld leer lässt werde ich z.B. bei der Wettervorhersage dich immer fragen.</small>
-        </div>
+        <small class="form-text text-muted">Die Sprachcodierung bestimmt den Klang der Stimme</small>
       </li>
       <li class="list-group-item list-group-item-secondary">
         <h5>Weitere Funktionen</h5>
@@ -112,6 +107,6 @@
     {% endif %}
   </div>
 </div>
-<script src="{{ url_for('static', filename='main_setupServer.js')}}"></script>
+<script src="{{ url_for('static', filename='main_setupSystem.js')}}"></script>
 </div>
 </body>

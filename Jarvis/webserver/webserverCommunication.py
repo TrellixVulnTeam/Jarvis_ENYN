@@ -1,13 +1,13 @@
 import json
 import sys
 import os
-from multiprocessing import Process
+from threading import Thread
 import mmap
 import pickle
 from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../server/"))
-from Jarvis import main
+sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
+import main
 
 class mThr():
     """
@@ -18,33 +18,19 @@ class mThr():
     """
     def __init__(self):
         self.thr = None
-        self.command = mmap.mmap(-1, 2048) # reserve 128kiB in Vstor
-        self.feedback = mmap.mmap(-1, 1024*1024) # reserve one Megabyte in Vstor
+        self.core = main
+        with open("../config.json", "r") as config_file:
+            self.config_data = json.load(config_file)
+
 
     def start(self):
-        """
-        The process is started and the two memory maps linked into the process
-        """
-        with open("../config.json", "r") as config_file:
-            config_data = json.load(config_file)
+        self.thr = Thread(target=self.core.start(self.config_data))
+        self.thr.start()
 
-        self.thr = Process(target=main.start, args=config_data)
-        try:
-            self.thr.start()
-        except AssertionError:
-            pass
     def stop(self):
-        """
-        The process is killed without asking, use with care!
-        """
-        self.thr.terminate()
+        self.core.stop(self.core.LUNA.local_storage, self.core.config_data)
 
     def status(self):
-        """
-        If the thread wasn't started yet, it returns "unknown", if it is running,
-        it returns "running". If the process crashed or was stopped manually, it
-        responds with "stopped"
-        """
         if self.thr is not None:
             data = "running" if self.thr.is_alive() else "stopped"
         else:
@@ -52,13 +38,4 @@ class mThr():
         return data
 
     def getFeed(self):
-        """
-        This method parses the Local storage-Variable and returns it for later
-        use in other functions.
-        """
-        self.feedback.seek(0)
-        try:
-            pick = pickle.load(self.feedback)
-        except EOFError:
-            pick = {}
-        return pick
+        return self.config_data

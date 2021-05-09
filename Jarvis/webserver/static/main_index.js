@@ -51,15 +51,6 @@ function refreshInformation() {
     }
   });
   $.get("/api/server/list/*", function(data) {
-    var roomBuf = "";
-    var ct = 0;
-    for (var room in data["room"]) {
-      roomBuf += "<span>" + room + "</span><br />";
-      ct = ct +1;
-    }
-    $("#mainRoomList").html(roomBuf);
-    $("#mainRoomListBadge").html("Aktive Räume <span class=\"badge badge-secondary\">" + ct + "</span>");
-
     var usersBuf = "";
     var ct = 0;
     for (var user in data["users"]) {
@@ -71,8 +62,8 @@ function refreshInformation() {
 
     var modulesBuf = "";
     var ct = 0;
-    for (var modules in data["modules"]) {
-      modulesBuf += "<span>" + modules + "</span><br />";
+    for (var module in data["modules"]) {
+      modulesBuf += "<span>" + module + "</span><br />";
       if(ct == 3) {
         modulesBuf += '<div class="collapse" id="collapseModuleBox">';
       }
@@ -84,6 +75,24 @@ function refreshInformation() {
     }
     $("#mainModuleList").html(modulesBuf);
     $("#mainModuleListBadge").html("Aktive Module <span class=\"badge badge-secondary\">" + ct + "</span>");
+
+    var externBuf = "";
+    var ct = 0;
+
+    for(var extSys in data["externSystems"]){
+      externBuf += "<span>" + extSys + "</span><br />";
+      if(ct == 3) {
+        externBuf += '<div class="collapse" id="collapseSystemBox">';
+      }
+      ct = ct +1;
+    }
+    if(ct >= 3) {
+      externBuf += "</div>";
+      externBuf += "<a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapseSystemBox\" aria-expanded=\"false\">mehr anzeigen…</a>"
+    }
+    $("#mainExternList").html(externBuf);
+    $("#mainExternListBadge").html("Externe Systeme <span class=\"badge badge-secondary\">" + ct + "</span>");
+
   });
 }
 
@@ -99,7 +108,7 @@ function statusServer(action) {
           $("#serverStatusStartButton")
             .removeClass("btn-outline-secondary")
             .addClass("btn-success")
-            .html("TIANE starten");
+            .html("System starten");
         }, 200);
       });
       break;
@@ -113,7 +122,7 @@ function statusServer(action) {
             $("#serverStatusStopButton")
               .removeClass("btn-outline-secondary")
               .addClass("btn-danger")
-              .html("TIANE stoppen");
+              .html("System stoppen");
           }, 200);
         });
         break;

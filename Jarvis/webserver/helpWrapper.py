@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-import os
 import time
 import json
 import subprocess
 import importlib
+from pathlib import Path
 from threading import Thread
 
 
-class InstallWrapper():
+class InstallWrapper:
     """
     The install wrapper class initiates a thread and enables a few helper functions
     to install components described in the services.json file
@@ -121,7 +121,7 @@ class InstallWrapper():
         services.json-config-file. Additionally it returns the class-internal
         packagesRaw-Variable where the contents of the services.json files are stored
         """
-        config = os.path.join(os.path.dirname(os.path.abspath(__file__)), "services.json")
+        config = str(Path(__file__).parent) + '/services.json'
         self.packagesRaw = json.load(open(config, encoding="utf-8"))
 
         return self.packagesRaw

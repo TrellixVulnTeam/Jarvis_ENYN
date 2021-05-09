@@ -8,7 +8,7 @@
     <script src="{{ url_for('static', filename='bootstrap.min.js')}}"></script>
 </head>
 <body>
-    <nav class="navbar navbar-light bg-light navbar-expand-sm">
+    <nav class="navbar navbar-dark bg-dark navbar-expand-sm">
       <a class="navbar-brand" href="/index">JARVIS</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -65,7 +65,7 @@
                 <h5 class="card-title">Zusatz-Module</h5>
                 <h6 class="card-subtitle mb-2 text-muted">Läuft die Messenger-Anbindung?</h6>
                 <div class="d-flex justify-content-between">
-                  <span class="mt-1">Messenger</span>
+                  <span class="mt-1">Telegram</span>
                   <h3 class="text-center"><span class="badge badge-danger" id="">unbekannt</span></h3>
                 </div>
               </div>
@@ -99,6 +99,19 @@
               </div>
               <div class="card-footer d-flex justify-content-between">
                 <a href="/setupModules" class="card-link disabled">zur Modul-Übersicht…</a>
+              </div>
+            </div>
+            <!-- CARD-Element-Block -->
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title" id="mainExternListBadge">Externe Systeme</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Welche externe Systeme sind in JARVIS eingebunden?</h6>
+                <p class="card-text" id="mainExternList">
+                  lädt…
+                </p>
+              </div>
+              <div class="card-footer d-flex justify-content-between">
+                <a href="/setupModules" class="card-link disabled">zur externe System-Übersicht…</a>
               </div>
             </div>
           </div>

@@ -14,6 +14,7 @@ import pkgutil
 from threading import Thread
 from resources.module_skills import skills
 import io
+import wb_server as ws
 
 
 class Modules:
@@ -33,6 +34,7 @@ class Modules:
         self.load_modules()
 
     def load_modules(self):
+        self.local_storage["modules"] = {}
         print('---------- MODULES...  ----------')
         self.modules = self.get_modules('modules')
         if self.modules == []:
@@ -52,9 +54,10 @@ class Modules:
             try:
                 loader = finder.find_module(name)
                 mod = loader.load_module(name)
+                self.local_storage["modules"][name] = {"name": name, "status": "loaded"}
             except:
                 traceback.print_exc()
-                self.local_storage["modules"][name] = {"name": name, "status": "error", type: "unknown"}
+                self.local_storage["modules"][name] = {"name": name, "status": "error"}
                 print('[WARNING] Modul {} is incorrect and was skipped!'.format(name))
                 continue
             else:
@@ -316,7 +319,6 @@ class Modulewrapper:
         self.core = core
         self.Analyzer = core.analyzer
         self.local_storage = core.local_storage
-        self.server_name = core.server_name
         self.system_name = core.system_name
         self.path = core.path
         self.user = user
@@ -493,7 +495,6 @@ class Modulewrapper_continuous:
         self.audio_Input = core.Audio_Input
         self.audio_Output = core.Audio_Output
         self.local_storage = core.local_storage
-        self.server_name = core.server_name
         self.system_name = core.system_name
         self.path = core.path
         self.modules = modules
@@ -519,7 +520,7 @@ class Modulewrapper_continuous:
 
 
 class LUNA:
-    def __init__(self, local_storage, modules, log, analyzer, Audio_Input, Audio_Output, server_name, system_name):
+    def __init__(self, local_storage, modules, log, analyzer, Audio_Input, Audio_Output, system_name):
         self.local_storage = local_storage
         self.modules = modules
         self.log = log
@@ -535,7 +536,6 @@ class LUNA:
 
         self.active_modules = {}
         self.continuous_modules = {}
-        self.server_name = server_name
         self.system_name = system_name
         self.path = local_storage['LUNA_PATH']
 
@@ -696,22 +696,17 @@ def start(config_data):
 
     log.write('', '--------- Start System ---------\n\n', show=True)
 
-    import webserver.server_new as Webserver
-    webserver = Webserver
-
     system_name = config_data['System_name']
-    server_name = config_data['Server_name']
     home_location = config_data["Local_storage"]["home_location"]
     local_storage = config_data['Local_storage']
     local_storage['LUNA_PATH'] = os.path.dirname(os.path.abspath(__file__))
-    # clear unnececary warnings
+    # clear unnecessary warnings
     os.system('clear')
     modules = None
     analyzer = Sentence_Analyzer()
     Audio_Output = AudioOutput(voice=config_data["voice"])
     Audio_Input = AudioInput()
-    core = LUNA(local_storage, modules, log, analyzer, Audio_Input, Audio_Output, server_name, system_name)
-    webserver.core = core
+    core = LUNA(local_storage, modules, log, analyzer, Audio_Input, Audio_Output, system_name)
     modules = Modules(core, local_storage, log)
     core.modules = modules
     core.local_storage['LUNA_starttime'] = time.time()
@@ -735,6 +730,10 @@ def start(config_data):
             tgt = Thread(target=core.messenger_thread)
             tgt.daemon = True
             tgt.start()
+
+    webThr = Thread(target=ws.Webserver, args=[core])
+    webThr.daemon = True
+    webThr.start()
 
     log.write('', '--------- FERTIG ---------\n\n', show=True)
     core.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
@@ -762,8 +761,8 @@ def stop(local_storage, config_data):
     local_storage["users"] = {}
     local_storage["rejected_messenger_messages"] = []
     config_data["Local_storage"] = local_storage
-    with open(str(Path(__file__).parent) + '/config.json', 'w') as file:
-        json.dump(config_data, file)
+    #with open(str(Path(__file__).parent) + '/config.json', 'w') as file:
+    #    json.dump(config_data, file, indent=4)
 
 
 if __name__ == "__main__":
