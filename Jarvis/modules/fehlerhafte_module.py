@@ -8,7 +8,6 @@ def isValid(text):
 
 def handle(text, core, skills):
 	faulty_list = []
-	print(core.local_storage['modules'])
 	for module in core.local_storage['modules'].values():
 		if module['status'] == 'error':
 			faulty_list.append(module['name'])

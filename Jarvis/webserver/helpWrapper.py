@@ -94,9 +94,9 @@ class InstallWrapper:
             self.installLog += "\n Starting installation for " + str(packageName) + "."
             t_2 = time.time()
             if type == "apache":
-                command = ["apt-get", "install", packageName, "-y"]
+                command = ["sudo", "apt-get", "install", packageName, "-y"]
             elif type == "pip3":
-                command = ["pip3", "install", packageName]
+                command = ["sudo", "pip3", "install", packageName]
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             while process.returncode == None:
                 text = process.stdout.read()

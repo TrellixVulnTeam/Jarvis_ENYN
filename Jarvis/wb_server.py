@@ -172,10 +172,8 @@ def Webserver(core):
                 config_data["use_interface"] = t
                 bedingt_kopieren('./resources/optional_modules/POI_Interface.py', './modules/continuous/POI_Interface.py', t)
                 bedingt_kopieren('./resources/optional_modules/POI_Interface_controls.py', './modules/POI_Interface_controls.py', t)
-        print("create key")
         if config_data["Network_Key"] == "":
             config_data["Network_Key"] = generate_key(32)
-        print("before writing...")
         with open('config.json', 'w') as config_file:
             json.dump(config_data, config_file, indent=4)
             return "ok"
@@ -245,10 +243,11 @@ def Webserver(core):
                 return "err"
             with open('./users/' + config_data['User_Info']['name'] + '/data.json', 'w') as config_file:
                 json.dump(config_data, config_file, indent=4)
+            # update Userlist
+            core.users.load_users()
             return "ok"
         else:
             return "err"
-
 
 
     @webapp.route("/api/loadConfig/user/<userName>")

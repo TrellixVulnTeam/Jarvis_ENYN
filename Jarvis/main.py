@@ -638,7 +638,8 @@ class Users:
                 self.add_user(userpath)
                 self.log.write('INFO', 'Nutzer {} geladen'.format(username), show=True)
         if self.users == []:
-            self.core.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
+            #self.core.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
+            pass
 
     def add_user(self, path):
         with open(path + "/data.json") as user_file:
