@@ -1,5 +1,3 @@
-from telepot import Bot
-from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from telepot.loop import MessageLoop
 from tempfile import mkstemp
 import speech_recognition as sr
@@ -7,8 +5,7 @@ from io import BytesIO
 import subprocess
 import telepot
 import wave
-import time
-import sys
+import logging
 import os
 
 
@@ -29,7 +26,7 @@ class TelegramInterface:
             user = self.core.local_storage['LUNA_messenger_id_to_name_table'][uid]
         except:
             user = uid
-        self.core.Log.write('ACTION', '--{}--@{} (Telegram): {}'.format(self.core.system_name.upper(), user, text), show=True)
+        logging.info('--{}--@{} (Telegram): {}'.format(self.core.system_name.upper(), user, text))
         self.bot.sendMessage(uid, text, parse_mode='HTML')
 
     def sendAudio(self, audio_file, uid):
@@ -128,6 +125,11 @@ class TelegramInterface:
         except:
             text = "TIMEOUT_OR_INVALID"
         return text
+
+    def stop(self, users):
+        for user in users:
+            if user["uid"] != 0:
+                self.bot.leaveChat(user["uid"])
 
 """def main():
     tgi = TelegramInterface()

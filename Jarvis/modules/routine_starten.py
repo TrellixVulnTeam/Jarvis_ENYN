@@ -8,8 +8,7 @@ def isValid(text):
         return False
 
 def handle(text, core, skills):
-    with open("../resources/routine/sonnenuntergang.json") as decl:
-        inf = json.load(decl)
+
     for word in text:
         if "routine" in word.lower():
             routine = inf.get(word)

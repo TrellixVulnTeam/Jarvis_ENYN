@@ -28,5 +28,8 @@
     "System_name": "JARVIS",
     "messenger": true,
     "voice": "male",
-    "Network_Key": ""
+    "Network_Key": "",
+    "use_cameras": false,
+    "use_facerec": false,
+    "use_interface": false
 }

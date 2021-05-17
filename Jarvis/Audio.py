@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import re
@@ -73,7 +74,7 @@ class AudioInput:
                 try:
                     # translate audio to text
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
-                    print("[USER INPUT] ", text)
+                    logging.info("[USER INPUT] ", text)
                 except:
                     try:
                         # if it didn´t worked, adjust the ambient-noise and try again
@@ -87,7 +88,7 @@ class AudioInput:
                 return text
         except:
             traceback.print_exc()
-            print("[WARNING] Text could not be translated...")
+            logging.warning("Text could not be translated...")
             return "Das habe ich nicht verstanden."
 
     def run(self):
@@ -105,7 +106,7 @@ class AudioInput:
 
             print('\n[INFO] Listening {%s}' % keywords)
 
-            while True:
+            while not self.stopped:
                 pcm = audio_stream.read(porcupine.frame_length)
                 pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
                 keyword_index = porcupine.process(pcm)
@@ -147,6 +148,8 @@ class AudioOutput:
         # Channel(1): music
         # Channel(2): playback
 
+        self.listen = False
+
         # music means "Backgroundmusic" or something like that
         self.music = []
         # playback are similar to music, but don´t contain "music"
@@ -171,8 +174,13 @@ class AudioOutput:
     def run(self):
         while True:
             try:
+                if self.listen:
+                    print("Listen.......")
+                    audio.Channel(0).set_volume(0.1)
+                    audio.Channel(1).set_volume(0.1)
+                    audio.Channel(2).set_volume(0.1)
                 if not self.notification == [] and audio.Channel(0).get_busy() == 0 and not self.tts.is_reading:
-                    if audio.Channel(1).get_busy() == 1:
+                    if audio.Channel(0).get_busy() == 1:
                         audio.Channel(1).set_volume(0.10)
                         audio.Channel(2).set_volume(0.10)
                     if type(self.notification[0]) == type("string"):
@@ -213,13 +221,11 @@ class AudioOutput:
             time.sleep(0.2)
 
     def detected_hotword(self):
-        audio.Channel(1).set_volume(0.10)
-        audio.Channel(2).set_volume(0.10)
+        self.listen = True
         self.music_player.set_volume(10)
 
     def continue_after_hotword(self):
-        audio.Channel(1).set_volume(1)
-        audio.Channel(2).set_volume(1)
+        self.listen = False
         self.music_player.set_volume(100)
 
     def play_music(self, name, next=False):
@@ -296,7 +302,7 @@ class MusicPlayer:
         self.stopped = False
         self.paused = False
         self.skip = False
-        self.old_volume = 1
+        self.old_volume = 50
 
     def start(self):
         self.music_thread = Thread(target=self.run)
@@ -338,12 +344,9 @@ class MusicPlayer:
             self.add_playlist(url, by_name, next)"""
         if not by_name == None:
             _url = f'https://www.youtube.com/results?search_query={str(by_name)}'.replace("'", "").replace(' ', '+').rstrip('+')
-            print(_url)
             html = urllib.request.urlopen(_url)
             video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
-            print(video_ids)
             while True:
-                print("while-")
                 try:
                     video = pafy.new(random.choice(video_ids))
                     duration = str(video.duration).split(":")

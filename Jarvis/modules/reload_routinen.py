@@ -10,8 +10,9 @@ def isValid(text):
 
 def handle(text, core, skills):
     routines = []
-    for file in os.listdir(core.path):
-        with open(file) as routine_file:
+    print(os.listdir(core.path + '/resources/routine/'))
+    for file in os.listdir(core.path + '/resources/routine/'):
+        with open(core.path + '/resources/routine/' + file) as routine_file:
             routine = json.load(routine_file)
         routines.append(routine)
 
@@ -20,4 +21,5 @@ def handle(text, core, skills):
             core.local_storage["alarm_routines"].append(routine)
             routines.remove(routine)
     core.local_storage["routines"] = routines
-    core.say('Die Routinen wurden aktualisiert.')
+    if text is not "":
+        core.say('Die Routinen wurden aktualisiert.')

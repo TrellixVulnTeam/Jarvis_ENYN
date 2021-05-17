@@ -17,10 +17,9 @@ numb_to_day = {
 
 def run(core, skills):
     now = datetime.now()
-
     for routine in core.local_storage["routines"]:
         if is_day_correct(now, routine) and is_time_correct(now, routine, core):
-            core.start_module(name="start_routine", text=routine, user=core.user)
+            core.start_module(name="start_routine", text=routine)
 
 
 def is_day_correct(now, inf):
@@ -37,21 +36,21 @@ def is_day_correct(now, inf):
 
 def is_time_correct(now, inf, core):
     # after_alarm is ignored, since this is only called by the alarm itself
-    is_correct = False
     time_inf = inf["retakes"]["time"]
-    if time_inf["clock_time"] is not [""]:
+    if time_inf["clock_time"] is not [""] and time_inf["clock_time"] is not []:
         for time in time_inf["clock_time"]:
-            hour = int(time.split(":")[0])
-            minute = int(time.split(":")[1])
-            if now.hour >= hour and now.minute >= minute:
-                is_correct = True
-    if inf["retakes"]["after_sunrise"]:
+            if len(time.split(":")) == 2:
+                hour = int(time.split(":")[0])
+                minute = int(time.split(":")[1])
+                if now.hour >= hour and now.minute >= minute:
+                    return True
+    if inf["retakes"]["time"]["after_sunrise"]:
         if is_sunrise(core.local_storage, now):
-            is_correct = True
-    if inf["retakes"]["after_sunset"]:
+            return True
+    if inf["retakes"]["time"]["after_sunset"]:
         if is_sunset(core.local_storage, now):
-            is_correct = True
-    return is_correct
+            return True
+    return False
 
 
 def is_sunrise(local_storage, now):

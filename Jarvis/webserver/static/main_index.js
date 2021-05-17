@@ -71,7 +71,7 @@ function refreshInformation() {
     }
     if(ct >= 3) {
       modulesBuf += "</div>";
-      modulesBuf += "<a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapseModuleBox\" aria-expanded=\"false\">mehr anzeigen…</a>"
+      modulesBuf += "<a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapseModuleBox\" aria-expanded=\"true\">mehr anzeigen…</a>"
     }
     $("#mainModuleList").html(modulesBuf);
     $("#mainModuleListBadge").html("Aktive Module <span class=\"badge badge-secondary\">" + ct + "</span>");
@@ -88,7 +88,7 @@ function refreshInformation() {
     }
     if(ct >= 3) {
       externBuf += "</div>";
-      externBuf += "<a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapseSystemBox\" aria-expanded=\"false\">mehr anzeigen…</a>"
+      externBuf += "<a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapseSystemBox\" aria-expanded=\"true\">mehr anzeigen…</a>"
     }
     $("#mainExternList").html(externBuf);
     $("#mainExternListBadge").html("Externe Systeme <span class=\"badge badge-secondary\">" + ct + "</span>");

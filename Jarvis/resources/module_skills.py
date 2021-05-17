@@ -37,7 +37,7 @@ class skills:
         if split_text:
             text = text.split(' ')
         for i in range(len(text)):
-            # Erst hier .lower und Groß- und Kleinschreibung beizubehalten
+            # Erst hier .lower um Groß- und Kleinschreibung beizubehalten
             if text[i].lower() == start_word:
                 index = i + 1
 

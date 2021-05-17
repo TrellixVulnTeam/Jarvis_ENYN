@@ -4,6 +4,7 @@
 import base64
 import logging
 import shutil
+import time
 
 from flask import Flask, render_template, jsonify, request, send_file, make_response, redirect
 from gevent import pywsgi
@@ -32,12 +33,11 @@ def Webserver(core):
     # ------------------------------------------------------------------------------
 
     nav = [
-    {"href": "/setup", "text": "\"Erste Schritte\""},
-    {"href": "/setupSystem", "text": "Server einrichten"},
-    {"href": "/setupUser", "text": "Benutzer erstellen"},
-    {"href": "/setupModules", "text": "Module bearbeiten (WIP)"},
+        {"href": "/setup", "text": "\"Erste Schritte\""},
+        {"href": "/setupSystem", "text": "Server einrichten"},
+        {"href": "/setupUser", "text": "Benutzer erstellen"},
+        {"href": "/setupModules", "text": "Module bearbeiten (WIP)"},
     ]
-
 
     @webapp.route("/")
     @webapp.route("/index")
@@ -65,7 +65,7 @@ def Webserver(core):
     def setupSystem():
         data = getData()
         if os.path.exists("config.json"):
-            g = True    # "config-exists"-trigger
+            g = True  # "config-exists"-trigger
         else:
             g = False
         with open("config.json") as conf:
@@ -80,7 +80,7 @@ def Webserver(core):
         }
         return render_template("setupSystem.html", nav=nav, st=standards, gold=g)
 
-    @webapp.route("/setupUser")     # TODO
+    @webapp.route("/setupUser")  # TODO
     def setupUser():
         data = getData()
         gold = os.path.exists("temp_files/user_temp")
@@ -96,7 +96,8 @@ def Webserver(core):
         standards = {
             "userName": "",
             "userRole": config["User_Info"]["role"],
-            "userTelegram": config["User_Info"]["telegram_id"] if "telegram" in ServerConfig and "telegram_id" in config["User_Info"] else "-1",
+            "userTelegram": config["User_Info"]["telegram_id"] if "telegram" in ServerConfig and "telegram_id" in
+                                                                  config["User_Info"] else "-1",
             "userFullName": config["User_Info"]["first_name"],
             "userFullLastName": config["User_Info"]["last_name"],
             "userBirthYear": config["User_Info"]["date_of_birth"]["year"],
@@ -127,7 +128,7 @@ def Webserver(core):
         data = installer.startInstallation(packageName)
         return jsonify(data)
 
-    @webapp.route("/api/setup/prerequesites") # TODO
+    @webapp.route("/api/setup/prerequesites")  # TODO
     def getPrereqSetup():
         """
         checks things which would be checked on setup start
@@ -138,10 +139,11 @@ def Webserver(core):
 
     @webapp.route("/api/writeConfig/system")
     def writeSystemConfig():
-        print("start")
         data = getData()
-        with open("config.json", "r") as config_file:
-            config_data = json.load(config_file)
+        config_data = core.config_data
+        config_data["Local_storage"] = core.local_storage
+        config_data["Local_storage"]["modules"] = {}
+        config_data["Local_storage"]["routines"] = {}
         # check every parameter and update those in the config file
         if "System_name" in data and data["System_name"].strip() != "":
             config_data["System_name"] = data["JARVISName"]
@@ -152,34 +154,42 @@ def Webserver(core):
         if "homeLocation" in data and data["homeLocation"].strip() != "":
             config_data['Local_storage']['home_location'] = data['homeLocation']
 
-        if "messengerKey" in data and len(data["messengerKey"].strip()) == 45:
+        if "messengerKey" in data and len(data["messengerKey"].strip()) <= 47:
             config_data["messenger_key"] = data["messengerKey"].strip()
             config_data["messenger"] = True
 
         if "useCameras" in data and data["useCameras"].strip() != "":
             t = True if data["useCameras"] == "true" else False
             config_data["use_cameras"] = t
-            bedingt_kopieren('./resources/optional_modules/recieve_cameras.py', './modules/continuous/recieve_cameras.py', t)
+            bedingt_kopieren('./resources/optional_modules/recieve_cameras.py',
+                             './modules/continuous/recieve_cameras.py', t)
 
             if "useFaceRec" in data and data["useFaceRec"].strip() != "":
                 t = True if data["useFaceRec"] == "true" else False
                 config_data["use_facerec"] = t
-                bedingt_kopieren('./resources/optional_modules/face_recognition.py', './modules/continuous/face_recognition.py', t)
+                bedingt_kopieren('./resources/optional_modules/face_recognition.py',
+                                 './modules/continuous/face_recognition.py', t)
                 bedingt_kopieren('./resources/optional_modules/retrain_facerec.py', './modules/retrain_facerec.py', t)
 
             if "useInterface" in data and data["useInterface"].strip() != "":
                 t = True if data["useInterface"] == "true" else False
                 config_data["use_interface"] = t
-                bedingt_kopieren('./resources/optional_modules/POI_Interface.py', './modules/continuous/POI_Interface.py', t)
-                bedingt_kopieren('./resources/optional_modules/POI_Interface_controls.py', './modules/POI_Interface_controls.py', t)
+                bedingt_kopieren('./resources/optional_modules/POI_Interface.py',
+                                 './modules/continuous/POI_Interface.py', t)
+                bedingt_kopieren('./resources/optional_modules/POI_Interface_controls.py',
+                                 './modules/POI_Interface_controls.py', t)
         if config_data["Network_Key"] == "":
             config_data["Network_Key"] = generate_key(32)
-        with open('config.json', 'w') as config_file:
-            json.dump(config_data, config_file, indent=4)
-            return "ok"
-        return "err"
+        try:
+            with open('config.json', 'w') as config_file:
+                json.dump(config_data, config_file, indent=4)
+                print("\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped")
+            core.reload_system()
+        except:
+            return "err"
+        return "ok"
 
-    @webapp.route("/api/writeConfig/user/<userName>")   # TODO
+    @webapp.route("/api/writeConfig/user/<userName>")  # TODO
     def writeUserConfig(userName):
         data = getData()
         if "userName" in data and data["userName"].strip() != "":
@@ -239,7 +249,8 @@ def Webserver(core):
             try:
                 copy_tree("temp_files/user_temp", "./users/" + config_data["User_Info"]["name"])
             except IOError:
-                print('\n' '[ERROR] Fehler beim kopieren der Dateien. Bitte versuche, den Setup-Assistent mit Root-Rechten auszuführen.')
+                print(
+                    '\n' '[ERROR] Fehler beim kopieren der Dateien. Bitte versuche, den Setup-Assistent mit Root-Rechten auszuführen.')
                 return "err"
             with open('./users/' + config_data['User_Info']['name'] + '/data.json', 'w') as config_file:
                 json.dump(config_data, config_file, indent=4)
@@ -248,7 +259,6 @@ def Webserver(core):
             return "ok"
         else:
             return "err"
-
 
     @webapp.route("/api/loadConfig/user/<userName>")
     def loadUserConfig(userName):
@@ -272,7 +282,7 @@ def Webserver(core):
         else:
             return jsonify("user not found")
 
-    @webapp.route("/api/server/<action>") # TODO
+    @webapp.route("/api/server/<action>")  # TODO
     def getServerStatus(action):
         if action == "stopp":
             return 'ok'
@@ -287,16 +297,16 @@ def Webserver(core):
         modules = core.local_storage["modules"]
 
         externSystems = {
-                "Phillips HUE": {
-                    "name": "Phillips Hue",
-                    "established": True if feed["module_storage"]["phillips_hue"]["Bridge-IP"] != "" else False
-                },
-                "Phillips TV": {
-                    "name": "Phillips TV",
-                    "established": True if (feed["module_storage"]["phillips-tv"]["user"] != ""
-                                            and feed["module_storage"]["phillips-tv"]["pass"] != ""
-                                            and feed["module_storage"]["phillips-tv"]["host"] != "") else False
-                }
+            "Phillips HUE": {
+                "name": "Phillips Hue",
+                "established": True if feed["module_storage"]["phillips_hue"]["Bridge-IP"] != "" else False
+            },
+            "Phillips TV": {
+                "name": "Phillips TV",
+                "established": True if (feed["module_storage"]["phillips-tv"]["user"] != ""
+                                        and feed["module_storage"]["phillips-tv"]["pass"] != ""
+                                        and feed["module_storage"]["phillips-tv"]["host"] != "") else False
+            }
         }
 
         if action == "users":
@@ -321,9 +331,9 @@ def Webserver(core):
         feed = core.local_storage
         return jsonify(feed["modules"] if "modules" in feed else {})
 
-    @webapp.route("/api/module/<modName>/<action>")     # TODO
+    @webapp.route("/api/module/<modName>/<action>")  # TODO
     def changeModuleMode(modName, action):
-        modules = [] # dummyList
+        modules = []  # dummyList
         if modName in modules:
             if action == "load":
                 pass
@@ -357,6 +367,14 @@ def Webserver(core):
         key_string = key_encoded.decode('utf-8')
         return key_string
 
+    @webapp.route('/stopServer', methods=['GET'])
+    def stopServer():
+        time.sleep(3)
+        ws.close()
+        # os.kill(os.getpid(), 50500)
+        return jsonify({"success": True, "message": "Server is shutting down..."})
+
     ws = pywsgi.WSGIServer(("0.0.0.0", 50500), webapp)
+
     print("To connect to the JARVIS-Webserver, please visit http://localhost:50500/setup ")
     ws.serve_forever()
