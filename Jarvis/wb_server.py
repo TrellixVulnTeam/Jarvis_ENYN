@@ -269,7 +269,7 @@ def Webserver(core):
                 "userName": config["name"],
                 "userRole": config["role"],
                 "userID": config["uid"],
-                "userTelegram": config["messenger_id"],
+                "userTelegram": config["telegram_id"],
                 "userBirthYear": config["date_of_birth"]["year"],
                 "userBirthMonth": config["date_of_birth"]["month"],
                 "userBirthDay": config["date_of_birth"]["day"],
