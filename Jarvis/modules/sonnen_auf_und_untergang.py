@@ -122,7 +122,7 @@ class sunsetTimes(object):
             return False
 
 
-def handle(text, core, profile):
+def handle(text, core, skills):
     text = text.lower()
     if core.analysis["town"] == "None" or core.analysis["town"] == None:
         place = core.local_storage.get("home_location")

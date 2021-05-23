@@ -1,5 +1,7 @@
 import json
+import logging
 import math
+import traceback
 from datetime import datetime
 import requests
 
@@ -63,6 +65,10 @@ def is_time_correct(now, inf, core):
 
 def is_sunrise(local_storage, now):
     location = local_storage["home_location"]
+    if location == '':
+        # logging.log(0, "No homelocation was entered, so its not possible to say, if it is sunrise or sunset!")
+        return False
+
     sunrise, sunset = get_sunrise_sunset_inf(location)
     if (sunrise // 60) >= now.hour and (sunrise % 60) >= now.minute:
         return True
@@ -70,17 +76,23 @@ def is_sunrise(local_storage, now):
 
 def is_sunset(local_storage, now):
     location = local_storage["home_location"]
+    if location == '':
+        # logging.log(0, "No homelocation was entered, so its not possible to say, if it is sunrise or sunset!")
+        return False
+
+    print(f'location: {location}')
     sunrise, sunset = get_sunrise_sunset_inf(location)
     if (sunset // 60) >= now.hour and (sunset % 60) >= now.minute:
         return True
 
 
 def get_sunrise_sunset_inf(location):
+    print(f'location {location}')
     place = location.replace(" ", "+")
     r = requests.get("https://nominatim.openstreetmap.org/search?q={0}&format=json".format(place))
     try:
         response = json.loads(r.text)
-        placeData = response[0]
+        placeData = response.get('0')
         lat = float(placeData["lat"])
         lon = float(placeData["lon"])
         datetimeTemp = datetime.now()
@@ -94,7 +106,10 @@ def get_sunrise_sunset_inf(location):
         sunrise, sunset = sT.converted
         return sunrise, sunset
     except:
+        traceback.print_exc()
         print("[WARINING] Something went wrong with the Sunrise and Sunset module!")
+        # return invalid values, so it wont be a sunrise or a sunset
+        return 24, 0
 
 
 class sunsetTimes(object):
