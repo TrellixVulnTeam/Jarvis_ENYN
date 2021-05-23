@@ -747,8 +747,6 @@ def reload(core):
     start(reload_dat)"""
 
 
-
-
 def stop(core):
     logging.info('Stop System...')
     core.local_storage["users"] = {}
