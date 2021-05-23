@@ -4,6 +4,7 @@
 import base64
 import logging
 import shutil
+import socket
 import time
 
 from flask import Flask, render_template, jsonify, request, send_file, make_response, redirect
@@ -314,14 +315,14 @@ def Webserver(core):
         elif action == "modules":
             data = feed["modules"] if "modules" in feed else {}
         elif action == "telegram":
-            data = feed["rejected_telegram_messages"] if "rejected_telegram_messages" in feed else []
+            data = core.config_data['messenger']
         elif action == "externSystems":
             data = externSystems
         else:
             data = {
                 "users": users,
                 "modules": modules,
-                "telegram": True if feed["messenger_allowed_id_table"] != [] else [],
+                "telegram": core.config_data['messenger'],
                 "externSystems": externSystems
             }
         return jsonify(data)
@@ -376,5 +377,5 @@ def Webserver(core):
 
     ws = pywsgi.WSGIServer(("0.0.0.0", 50500), webapp)
 
-    print("To connect to the JARVIS-Webserver, please visit http://localhost:50500/setup ")
+    print(f"To connect to the JARVIS-Webserver, please visit http://{socket.gethostname()}:50500")
     ws.serve_forever()

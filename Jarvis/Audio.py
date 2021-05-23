@@ -60,7 +60,7 @@ class AudioInput:
             text = self.speech_engine.recognize_google(audio, language="de-DE")
             return text
 
-    def recognize_input(self, listen=False):
+    def recognize_input(self, listen=False, play_bling_before_listen=False):
         # recognize user input through the microphone
         try:
             with sr.Microphone(device_index=None) as source:
@@ -74,15 +74,16 @@ class AudioInput:
                 try:
                     # translate audio to text
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
-                    logging.info("[USER INPUT] ", text)
+                    logging.info("[USER INPUT]\t", text)
                 except:
                     try:
                         # if it didn´t worked, adjust the ambient-noise and try again
                         self.adjusting()
                         text = self.speech_engine.recognize_google(audio, language="de-DE")
+                        logging.info('[USER INPUT]\t' + text)
                     except:
                         text = "Audio could not be recorded"
-            if not listen:
+            if not listen and not play_bling_before_listen:
                 self.core.hotword_detected(text)
             else:
                 return text
@@ -175,7 +176,6 @@ class AudioOutput:
         while True:
             try:
                 if self.listen:
-                    print("Listen.......")
                     audio.Channel(0).set_volume(0.1)
                     audio.Channel(1).set_volume(0.1)
                     audio.Channel(2).set_volume(0.1)
@@ -343,7 +343,9 @@ class MusicPlayer:
         """if playlist:
             self.add_playlist(url, by_name, next)"""
         if not by_name == None:
-            _url = f'https://www.youtube.com/results?search_query={str(by_name)}'.replace("'", "").replace(' ', '+').rstrip('+')
+            _url = f'https://www.youtube.com/results?search_query={str(by_name)}'.replace("'", "").replace(' ',
+                                                                                                           '+').rstrip(
+                '+')
             html = urllib.request.urlopen(_url)
             video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
             while True:

@@ -24,6 +24,14 @@ def run(core, skills):
 
 def is_day_correct(now, inf):
     is_correct = False
+    # check if no day is specified
+    all_false = True
+    for day in inf["retakes"]["days"].keys():
+        if day is True or not day == []:
+            all_false = False
+    if all_false:
+        return True
+
     day_name = numb_to_day.get(str(now.isoweekday()))
     day_inf = inf.get("retakes").get("days")
     if day_inf["daily"] or day_inf[day_name]:

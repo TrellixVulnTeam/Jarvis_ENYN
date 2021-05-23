@@ -548,6 +548,8 @@ class LUNA:
         if text == "wrong assistant!":
             self.Audio_Output.say("Geh mir nicht fremd, du sau!")
         else:
+            logging.info('[USER INPUT]\t' + text)
+            print('[USER INPUT]\t' + text)
             user = self.users.get_user_by_name(self.local_storage["user"])
             self.modules.start_module(text=str(text), user=user)
             self.Audio_Output.continue_after_hotword()
