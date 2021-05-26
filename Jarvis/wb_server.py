@@ -4,7 +4,6 @@
 import base64
 import logging
 import shutil
-import socket
 import time
 
 from flask import Flask, render_template, jsonify, request, send_file, make_response, redirect
@@ -144,7 +143,6 @@ def Webserver(core):
         config_data = core.config_data
         config_data["Local_storage"] = core.local_storage
         config_data["Local_storage"]["modules"] = {}
-        config_data["Local_storage"]["routines"] = {}
         # check every parameter and update those in the config file
         if "System_name" in data and data["System_name"].strip() != "":
             config_data["System_name"] = data["JARVISName"]
@@ -277,7 +275,8 @@ def Webserver(core):
                 "userFullName": config["first_name"],
                 "userFullLastName": config["last_name"],
                 "alarmSound": config["wecker_ton"],
-                "waitingMessages": config["wartende_benachrichtigungen"]
+                "waitingMessages": config["wartende_benachrichtigungen"],
+                "telegram_established": True if core.config_data["messenger_key"] != "" else False
             }
             return jsonify(data)
         else:
@@ -318,11 +317,19 @@ def Webserver(core):
             data = core.config_data['messenger']
         elif action == "externSystems":
             data = externSystems
+        elif action == "alarmSounds":
+            path = core.path + "/modules/resources/clock_sounds/"
+            names = [os.listdir(path)]
+            for file in names:
+                file.replace('./', '')
+                file.replace('.wav', '')
+            data = {}
+            data["alarmSounds"] = names
         else:
             data = {
                 "users": users,
                 "modules": modules,
-                "telegram": core.config_data['messenger'],
+                "telegram": True if core.config_data["messenger_key"] != "" else False,
                 "externSystems": externSystems
             }
         return jsonify(data)
@@ -368,14 +375,7 @@ def Webserver(core):
         key_string = key_encoded.decode('utf-8')
         return key_string
 
-    @webapp.route('/stopServer', methods=['GET'])
-    def stopServer():
-        time.sleep(3)
-        ws.close()
-        # os.kill(os.getpid(), 50500)
-        return jsonify({"success": True, "message": "Server is shutting down..."})
-
     ws = pywsgi.WSGIServer(("0.0.0.0", 50500), webapp)
 
-    print(f"To connect to the JARVIS-Webserver, please visit http://{socket.gethostname()}:50500")
+    print("To connect to the JARVIS-Webserver, please visit http://localhost:50500/setup ")
     ws.serve_forever()
