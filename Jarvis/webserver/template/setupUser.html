@@ -8,7 +8,7 @@
   <script src="{{ url_for('static', filename='bootstrap.min.js')}}"></script>
 </head>
 <body>
-<nav class="navbar navbar-light bg-light navbar-expand-sm">
+<nav class="navbar navbar-dark bg-dark navbar-expand-sm">
   <a class="navbar-brand" href="/index">JARVIS</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -53,7 +53,7 @@
         </div>
         <small class="form-text text-muted">Ein normaler Benutzer-Zugang darf zum Beispiel keine Einstellungen am Server vornehmen, ein Administrator dagegen schon.</small>
       </li>
-      {% if st["userTelegram"] == "-1" %}
+      {% if st["telegram_established"] == false %}
       <li class="list-group-item">
         <div class="alert alert-info" role="alert">
           <h5>Hinweis</h5>
@@ -79,14 +79,12 @@
         <div class="form-group">
           <label for="userFullName">Bitte gib einen Vornamen für diesen Benutzer an.</label>
           <input type="text" class="form-control" id="userFullName" placeholder="z.B. Max, Klaus, Heinz" value="{{st["userFullName"]}}">
-          <small class="form-text text-muted">Ohne Namen wäre JARVIS ganz schön anonym, findest du nicht?</small>
         </div>
       </li>
       <li class="list-group-item">
         <div class="form-group">
           <label for="userFullName">Bitte gib einen Nachnamen für diesen Benutzer an.</label>
           <input type="text" class="form-control" id="userFullLastName" placeholder="z.B. Mustermann, Maier, Müller" value="{{st["userFullLastName"]}}">
-          <small class="form-text text-muted">Aller guten Dinge sind zwei - zu einem Vornamen gehört auch immer mindestens ein Nachname!</small>
         </div>
       </li>
       <li class="list-group-item">
@@ -100,7 +98,6 @@
           <small class="form-text text-muted">Es wäre doch nett, wenn JARVIS dir zum Beispiel zum Geburtstag gratuliert, oder?</small>
         </div>
       </li>
-
     </ul>
     <br />
     <a class="btn btn-success btn-lg float-right mb-3 ml-3" role="button" id="button_execute" onclick="finalizeConfig()">Speichern und zurück zur Übersicht</a>

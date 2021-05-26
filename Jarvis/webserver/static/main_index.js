@@ -1,6 +1,6 @@
 function refreshInformation() {
   $.get("/api/server/status", function(data) {
-    if(data["status"] == "running") {
+    if(data["status"] === "running") {
       $("#StartPageServerStatus")
         .removeClass("badge-danger")
         .removeClass("badge-secondary")
@@ -55,7 +55,7 @@ function refreshInformation() {
     var ct = 0;
     for (var user in data["users"]) {
       usersBuf += "<span>" + user + " (" + data["users"][user]["first_name"] + " " + data["users"][user]["last_name"] + ")</span><br />";
-      ct = ct +1;
+      ct = ct + 1;
     }
     $("#mainUserList").html(usersBuf);
     $("#mainUserListBadge").html("Registrierte Benutzer <span class=\"badge badge-secondary\">" + ct + "</span>");
@@ -64,12 +64,12 @@ function refreshInformation() {
     var ct = 0;
     for (var module in data["modules"]) {
       modulesBuf += "<span>" + module + "</span><br />";
-      if(ct == 3) {
+      if (ct == 3) {
         modulesBuf += '<div class="collapse" id="collapseModuleBox">';
       }
-      ct = ct +1;
+      ct = ct + 1;
     }
-    if(ct >= 3) {
+    if (ct >= 3) {
       modulesBuf += "</div>";
       modulesBuf += "<a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapseModuleBox\" aria-expanded=\"true\">mehr anzeigen…</a>"
     }
@@ -79,20 +79,24 @@ function refreshInformation() {
     var externBuf = "";
     var ct = 0;
 
-    for(var extSys in data["externSystems"]){
+    for (var extSys in data["externSystems"]) {
       externBuf += "<span>" + extSys + "</span><br />";
-      if(ct == 3) {
+      if (ct == 3) {
         externBuf += '<div class="collapse" id="collapseSystemBox">';
       }
-      ct = ct +1;
+      ct = ct + 1;
     }
-    if(ct >= 3) {
+    if (ct >= 3) {
       externBuf += "</div>";
       externBuf += "<a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapseSystemBox\" aria-expanded=\"true\">mehr anzeigen…</a>"
     }
     $("#mainExternList").html(externBuf);
     $("#mainExternListBadge").html("Externe Systeme <span class=\"badge badge-secondary\">" + ct + "</span>");
 
+    $("#telegramIndicator")
+            .removeClass("badge badge-danger")
+            .addClass("badge badge-success")
+            .html("läuft");
   });
 }
 
@@ -130,6 +134,7 @@ function statusServer(action) {
 
   }
 }
+
 window.onload = function () {
   refreshInformation();
   setInterval(refreshInformation, 3500);

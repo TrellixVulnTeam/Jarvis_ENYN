@@ -8,8 +8,8 @@ function finalizeConfig() {
     .addClass("disabled")
     .attr("disabled", "disabled")
     .html("aktualisiere…");
-  // fetch all data
-  data = {
+    // fetch all data
+    data = {
       "userName": $("#userName").val(),
       "userRole": $("#userRole").val(),
       "userTelegram": $("#userTelegram").val(),
@@ -19,6 +19,7 @@ function finalizeConfig() {
       "userBirthMonth": $("#userBirthMonth").val(),
       "userBirthDay": $("#userBirthDay").val(),
   }
+
   // push data to server
   $.get("/api/writeConfig/user/" + data["userName"], data, function(data) {
     window.location.replace("/index");
@@ -45,4 +46,15 @@ window.onload = function() {
       }
     });
   });
+
+  $.get("/api/server/list/alarmSounds", function (data){
+        var select = "<label for='alarmSound'>Wähle einen Ton aus, den du als Wecker haben möchtest</label>";
+        select += "<select class='form-control' id='alarmSound'>";
+        for (var element in data["alarmSounds"]){
+            select += "<option>" + element + "</option>";
+        }
+        select += "</select>";
+        $("#alarmSound").html(select)
+    });
+
 }
