@@ -754,7 +754,6 @@ def stop(core):
     core.local_storage["users"] = {}
     core.local_storage["rejected_messenger_messages"] = []
     config_data["Local_storage"] = core.local_storage
-    core.messenger.stop(core.users.get_user_list())
     core.modules.stop_continuous()
     core.Audio_Input.stop()
     core.Audio_Output.stop()
