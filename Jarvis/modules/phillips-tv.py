@@ -1,5 +1,7 @@
 import platform
 import subprocess
+from typing import Dict, List
+
 import requests
 import json
 import string
@@ -13,6 +15,14 @@ user = ''
 password = ''
 path = ''
 
+color_in_hsb = {
+    "blau": [240, 100, 100],
+    "rot": [0, 100, 100],
+    "gelb": [60, 100, 100],
+    "grün": [120, 100, 100],
+    "magenta": [300, 100, 100]
+}
+
 def isValid(text):
     text = text.lower()
     if 'fernseh' in text:
@@ -22,9 +32,9 @@ def handle(text, core, skills):
     text = text.lower()
 
     if "hdmi" in text:
-        pass
+        core.say("Diese Funktion ist leider noch in der Entwicklung.") #ToDo
     elif 'mach' in text and 'lauter' in text:
-        pass
+        core.say("Diese Funktion ist leider noch in der Entwicklung.") #ToDo
     elif ("schalte" in text or 'mach' in text) and "aus" in text:
         # it is not really "switch off" but "stand by"
         run_command('standby', core)
@@ -77,6 +87,17 @@ def handle(text, core, skills):
             run_command('ambilight_on', core)
         elif 'aus' in text:
             run_command('ambilight_off', core)
+        elif any(color_in_hsb.keys()) in text:
+            for color in color_in_hsb.keys():
+                if color in text:
+                    color_inf = color_in_hsb.get(color)
+                    run_command('ambilight_color', core, body={"hue": color_inf[0],
+                                                               "saturation": color_inf[1],
+                                                               "brightness": color_inf[2]})
+        elif 'video' in text:
+            run_command('ambilight_video_standard', core)
+        elif 'natur' in text:
+            run_command('ambilight_color_fresh_nature', core)
 
     elif 'ist' in text and 'an' in text:
         if get_powerstate(core):
@@ -84,7 +105,17 @@ def handle(text, core, skills):
         else:
             core.say('Nein.')
 
-    elif 'öffne' in text:
+    elif 'hdmi' in text:
+        if '1' in text:
+            run_command('input_hdmi_1', core)
+        elif '2' in text:
+            run_command('input_hdmi_2', core)
+        elif '3' in text:
+            run_command('input_hdmi_3', core)
+        elif '4' in text:
+            run_command('input_hdmi_4', core)
+
+    elif 'öffne' in text or 'start' in text:
         if 'netflix' in text:
             launch_app('netflix', core)
         elif 'amazon' in text and 'prime' in text:
@@ -110,6 +141,9 @@ def handle(text, core, skills):
             launch_app('web', core)
         elif 'fernsehen' in text or 'tv' in text:
             run_command('watch_tv', core)
+
+    else:
+           run_command('google_assistant', core, body={"query": text})
 
 
 def run_command(command, core, body=None):
