@@ -106,6 +106,12 @@ def Webserver(core):
         }
         return render_template("setupUser.html", nav=nav, st=standards, gold=gold)
 
+    @webapp.route("/pHUE.html")
+    def controlPhilipsLights():
+        established = True if (not core.local_storage["module_storage"]["phillips_hue"]["Bridge-IP"] == "") else False
+
+        return render_template("pHUE.html", nav=nav, established=established)
+
     # API-like-Calls
 
     @webapp.route("/api/installer/listPackages")
@@ -350,6 +356,35 @@ def Webserver(core):
             elif action == "status":
                 pass
         return "ok"
+
+    @webapp.route("/api/phue/list/<action>")
+    def listPHUE(action="*"):
+        if action == "lights":
+            from modules.new_phillips_lights import PhillipsWrapper
+            from resources.module_skills import skills
+            skills = skills()
+            phueWrapper = PhillipsWrapper(core, skills)
+            lights = phueWrapper.get_lights_in_json()
+            return jsonify(lights)
+
+    @webapp.route("/api/alarm/list/<action>")
+    def listAlarm(action="*"):
+        if action == "alarms":
+            alarm_list = {"regular_alarm": core.local_storage["regular_alarm"],
+                          "simple_alarm": core.local_storage["Wecker"]}
+            return jsonify(alarm_list)
+
+
+    @webapp.route("/api/alarm/remove/<regular>/<day>/<time>")
+    def deleteAlarm(regular, day, time):
+        if regular:
+            for alarm in core.local_storage["regular_alarm"][day]:
+                if alarm["Zeit"] == time:
+                    core.local_storage["regular_alarm"][day].remove(alarm)
+        else:
+            for alarm in core.local_storage["Wecker"][day]:
+                if alarm["Zeit"] == time:
+                    core.local_storage["Wecker"][day].remove(alarm)
 
     @webapp.errorhandler(404)
     def error_404(error):

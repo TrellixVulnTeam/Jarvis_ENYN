@@ -188,7 +188,6 @@ def get_lights(core, text):
 
 
 def get_color(text, core):
-    converter = Converter()
     color = [-1, -1]
     founded = 0
     for item in range(len(colors)):
@@ -199,7 +198,6 @@ def get_color(text, core):
             # color[1] = converter.hex_to_xy(farbe)[1]
             color[0] = code[item][0]
             color[1] = code[item][1]
-            founded += 1
 
     if founded > 1:
         core.say(
@@ -225,7 +223,6 @@ def change_brightness(bridge, text, value, core):
     brightness = [-1]
     i = 0
     if 'alle' in text:
-        room = get_room()
         for light in room:
             brightness[i] = bridge.get_light(light, 'bri')
             i += 1

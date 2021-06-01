@@ -56,5 +56,4 @@ window.onload = function() {
         select += "</select>";
         $("#alarmSound").html(select)
     });
-
 }

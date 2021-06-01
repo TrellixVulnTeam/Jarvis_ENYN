@@ -69,7 +69,7 @@ class AudioInput:
                 if not listen:
                     # if there is no conservation, play a bling sound
                     self.Audio_Output.play_bling_sound()
-                audio = self.speech_engine.listen(source)
+                audio = self.speech_engine.listen(source, timeout=8)
                 # self.speech_engine.record(source)
                 try:
                     # translate audio to text

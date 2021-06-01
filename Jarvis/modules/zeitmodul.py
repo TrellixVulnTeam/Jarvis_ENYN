@@ -6,22 +6,7 @@ SECURE = True
 
 def isValid(text):
     text = text.lower()
-    if (text.startswith(
-            'hallo') or text == 'hi' or text == 'hey' or text == '/start') and not 'geht' in text or 'läuft' in text:
-        return True
-    elif 'wie' in text and ('uhr' in text or 'spät' in text):
-        return True
-    elif 'welchen tag' in text or 'welcher tag' in text or 'wochentag' in text or 'datum' in text or 'den wievielten haben wir heute' in text or 'der wievielte ist es' in text:
-        return True
-    elif 'guten' in text and 'tag' in text:
-        return True
-    elif 'guten' in text and 'morgen' in text:
-        return True
-    elif 'guten' in text and 'abend' in text:
-        return True
-    elif 'gute' in text and 'nacht' in text:
-        return True
-    elif 'timer' in text or 'stoppuhr' in text or 'countdown' in text:
+    if 'timer' in text or 'stoppuhr' in text or 'countdown' in text:
         return True
 
 
@@ -29,67 +14,8 @@ def handle(text, core, skills):
     text = text.lower()
     now = datetime.datetime.now()
     # wochentag = datetime.datetime.today().weekday()
-    time = now.hour
-    if ' uhr ' in text or 'spät' in text:
-        core.say('Es ist ' + get_time(now))
-    elif 'welchen tag' in text or 'welcher tag' in text or 'wochentag' in text or 'datum' in text or 'den wievielten haben wir heute' in text or 'der wievielte ist es' in text:
-        core.say(get_day(text))
-    elif 'hallo' in text:
-        core.say('Hallo!')
-    elif 'guten' in text and 'tag' in text:
-        if time >= 20 or time <= 4:
-            core.say('Naja "Tag" würde ich das nicht mehr nennen, aber ich wünsche dir auch einen guten Abend')
-        elif 5 <= time <= 20:
-            core.say('Guten Tag!')
-    elif 'guten' in text and 'morgen' in text:
-        if time is 4 or time is 5:
-            core.say('Hast du heute was wichtiges anstehen?')
-            response = core.listen
-            if 'ja' in text:
-                core.say('Dann wünsche ich dir dabei viel Erfolg!')
-            else:
-                core.say('Dann schlaf ruhig weiter, es ist noch viel zu früh, um aufzustehen.')
-        elif 6 <= time <= 10:
-            core.say('Guten Morgen!')
-        elif time is 11 or time is 12:
-            core.say('Wurde aber auch langsam Zeit. Aber dennoch auch dir einen guten Morgen.')
-        elif 14 <= time <= 18:
-            core.say(
-                'Ob es noch Morgen ist, liegt wohl im Blickwinkel des Betrachters. Ich würde eher sagen, dass es Mittag oder Nachmittag ist.')
-        elif time >= 19 or time <= 3:
-            core.say(
-                'Also Morgen ist es auf jeden Fall nicht mehr. Daher wünsche ich dir einfach Mal einen guten Abend.')
-        else:
-            core.say('Hallo!')
-    elif 'guten' in text and 'abend' in text:
-        if 6 <= time <= 17:
-            core.say(
-                'Ob es noch Abend ist, liegt wohl im Blickwinkel des Betrachters. In Amerika ist es jetzt in der Tat Abend.')
-        elif time >= 18 or time <= 5:
-            core.say('Gute nacht')
-        else:
-            core.say('Guten Abend.')
 
-    elif 'gute' in text and 'nacht' in text:
-        if 1 <= time <= 13:
-            core.say('Du solltest echt langsam ins Bett gehen.')
-        elif (8 <= time <= 24) or time is 0:
-            core.say('Gute Nacht.')
-        else:
-            core.say('Eine sehr interessante Definition der derzeitigen Uhrzeit.')
-        core.say('Soll ich dich morgen wecken?')
-        response = core.listen()
-        if 'ja' in response or 'gerne' in response or 'bitte' in response:
-            if core.analysis['datetime'] is None:
-                core.say('Wann soll ich dich denn wecken?')
-                response_two = core.listen()
-                text = 'weck ' + response_two
-                core.start_module(text=text)
-            else:
-                core.start_module(text=text)
-        else:
-            core.say('Okay, dann wünsche ich dir eine gute Nacht.')
-    elif 'timer' in text:
+    if 'timer' in text:
         timer(text, core, skills)
     elif 'stoppuhr' in text:
         stopwatch(text, core, skills)
@@ -246,25 +172,25 @@ def stopwatch(text, core, skills):
             core.say('Es läuft bereits eine Stoppuhr. Soll ich diese erst stoppen?')
             response = core.listen()
             if 'ja' in response:
-                core.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(get_time(core.local_storage['stoppuhr']), get_time_differenz(core.local_storage['stoppuhr'], skills)))
+                core.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(skills.get_time(core.local_storage['stoppuhr']), get_time_differenz(core.local_storage['stoppuhr'], skills)))
                 core.local_storage['stoppuhr'] = datetime.datetime.now()
             else:
                 core.say('Alles klar, die alte Stoppuhr läuft weiter.')
         else:
-            core.say('Alles klar, die Stoppuhr wurde um {} gestartet.'.format(get_time(datetime.datetime.now())))
+            core.say('Alles klar, die Stoppuhr wurde um {} gestartet.'.format(skills.get_time(datetime.datetime.now())))
             core.local_storage['stoppuhr'] = datetime.datetime.now()
 
     elif 'stopp' in text or 'beende' in text:
 
         if 'stoppuhr' in core.local_storage.keys() and core.local_storage['stoppuhr'] != '':
-            core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(get_time(datetime.datetime.now()), get_time_differenz(core.local_storage["stoppuhr"], skills)))
+            core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(skills.get_time(datetime.datetime.now()), get_time_differenz(core.local_storage["stoppuhr"], skills)))
             core.local_storage['stoppuhr'] = ''
         else:
             core.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')
             response = core.listen()
             if 'ja' in response:
                 core.say('Alles klar, Stoppuhr wurde um {} gestartet'.format(
-                    get_time(datetime.datetime.now())))
+                    skills.get_time(datetime.datetime.now())))
                 core.local_storage['stoppuhr'] = datetime.datetime.now()
     else:
         core.say(
@@ -294,95 +220,6 @@ def countdown(text, core):
         core.say('Tut mir leid, leider habe ich nicht verstanden, von wo ich herunter zählen soll')
 
 
-def get_time_differenz(start_time, skills, time=datetime.datetime.now()):
-    aussage = []
-    if time == None:
-        dz = start_time
-    else:
-        dz = start_time - time
-    days = dz.days
-    seconds = dz.seconds
-    microseconds = dz.microseconds
-
-    years = 0
-    hours = 0
-    minutes = 0
-
-    if days >= 365:
-        years = int(days / 365)
-        days = days % 365
-    if seconds >= 3600:
-        hours = int(seconds / 3600)
-        seconds = seconds % 3600
-    if seconds >= 60:
-        minutes = int(seconds / 60)
-        seconds = seconds % 60
-    if microseconds >= 5:
-        seconds += 1
-
-    if years == 1:
-        aussage.append('einem Jahr')
-    elif years > 1:
-        aussage.append(str(years) + ' Jahren')
-    if days == 1:
-        aussage.append('einem Tag')
-    elif days > 1:
-        aussage.append(str(days) + ' Tagen')
-    if hours == 1:
-        aussage.append('einer Stunde')
-    elif hours > 1:
-        aussage.append(str(hours) + ' Stunden')
-    if minutes == 1:
-        aussage.append('einer Minute')
-    elif minutes > 1:
-        aussage.append(str(minutes) + ' Minuten')
-    if seconds == 1:
-        aussage.append('einer Sekunde')
-    elif seconds > 1:
-        aussage.append(str(seconds) + ' Sekunden')
-    return skills.get_enumerate(aussage)
-
-def get_time(i):
-    stunde = i.hour
-    naechste_stunde = stunde + 1
-    if naechste_stunde == 24:
-        naechste_stunde = 0
-    minute = i.minute
-    stunde = str(stunde) if stunde > 9 else '0' + str(stunde)
-    minute = str(minute) if minute > 9 else '0' + str(minute)
-    if minute == 0:
-        ausgabe = stunde + ' Uhr.'
-    elif minute == 5:
-        ausgabe = 'fünf nach ' + stunde
-    elif minute == 10:
-        ausgabe = 'zehn nach ' + stunde
-    elif minute == 15:
-        ausgabe = 'viertel nach ' + stunde
-    elif minute == 20:
-        ausgabe = 'zwanzig nach ' + stunde
-    elif minute == 25:
-        ausgabe = 'fünf vor halb ' + stunde
-    elif minute == 30:
-        ausgabe = 'halb ' + naechste_stunde
-    elif minute == 35:
-        ausgabe = 'fünf nach halb ' + naechste_stunde
-    elif minute == 40:
-        ausgabe = 'zwanzig vor ' + naechste_stunde
-    elif minute == 45:
-        ausgabe = 'viertel vor ' + naechste_stunde
-    elif minute == 50:
-        ausgabe = 'zehn vor ' + naechste_stunde
-    elif minute == 55:
-        ausgabe = 'fünf vor ' + naechste_stunde
-    else:
-        ausgabe = stunde + ':' + minute + ' Uhr'
-    return ausgabe
 
 
-def get_day(i):
-    now = datetime.datetime.now()
-    wochentag = datetime.datetime.today().weekday()
-    tage = {0: 'Montag', 1: 'Dienstag', 2: 'Mittwoch', 3: 'Donnerstag', 4: 'Freitag', 5: 'Samstag', 6: 'Sonntag'}
 
-    ausgabe = 'Heute ist ' + str(tage.get(wochentag)) + ' der ' + str(now.day) + '.' + str(now.month) + '.'
-    return ausgabe

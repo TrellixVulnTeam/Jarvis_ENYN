@@ -1,9 +1,9 @@
-
 class skills:
     def __init__(self):
         pass
 
-    def get_enumerate(self, array):
+    @staticmethod
+    def get_enumerate(array):
         # print(array)
         new_array = []  # array=['Apfel', 'Birne', 'Gemüse', 'wiederlich']
         for item in array:
@@ -23,13 +23,16 @@ class skills:
             ausgabe = ausgabe + ' und ' + new_array[-1]
         return ausgabe
 
-    def is_approved(self, text):
-        if ('ja' in text or 'gerne' in text or 'bitte' in text) and not ('nein' in text or 'nicht' in text or 'nö' in text or 'ne' in text):
+    @staticmethod
+    def is_approved(text):
+        if ('ja' in text or 'gerne' in text or 'bitte' in text) and not (
+                'nein' in text or 'nicht' in text or 'nö' in text or 'ne' in text):
             return True
         else:
             return False
 
-    def get_text_beetween(self, start_word, text, end_word='', output='array', split_text=True):
+    @staticmethod
+    def get_text_beetween(start_word, text, end_word='', output='array', split_text=True):
         ausgabe = []
         index = -1
         start_word = start_word.lower()
@@ -61,7 +64,8 @@ class skills:
                 ausgabe_neu += item + ' '
             return ausgabe_neu
 
-    def delete_duplications(self, array):
+    @staticmethod
+    def delete_duplications(array):
         return list(set(array))
 
     def assamble_new_items(self, array1, array2):
@@ -103,7 +107,8 @@ class skills:
 
         return self.delete_duplications(new_array)
 
-    def is_enthalten(self, item, array):
+    @staticmethod
+    def is_enthalten(item, array):
         item = item.lower()
         valid = True
         for position in array:
@@ -111,11 +116,13 @@ class skills:
                 item_position = position.split(" ", 1)[1].lower()
             except:
                 item_position = position.lower()
-            if item_position == item or item_position.rstrip(item_position[-1]) == item or item_position == item.rstrip(item[-1]):
+            if item_position == item or item_position.rstrip(item_position[-1]) == item or item_position == item.rstrip(
+                    item[-1]):
                 valid = False
         return valid
 
-    def get_value_number(self, item):
+    @staticmethod
+    def get_value_number(item):
         first_value = item.split(' ', 1)[0]
         value = ""
         number = 1
@@ -148,7 +155,7 @@ class skills:
         return value, number
 
     def assamble_array(self, array):
-        #print(f"Beim Start von assamble_array: {array}")
+        # print(f"Beim Start von assamble_array: {array}")
         temp_array = []
         temp_array0 = array
         for item in temp_array0:
@@ -182,3 +189,51 @@ class skills:
                 temp3_array.append(item)
 
         return temp3_array
+
+    def get_time(i):
+        hour = i.hour
+        next_hour = hour + 1
+        if next_hour == 24:
+            next_hour = 0
+        minute = i.minute
+        hour = str(hour) if hour > 9 else '0' + str(hour)
+        minute = str(minute) if minute > 9 else '0' + str(minute)
+        if minute == 0:
+            output = hour + ' Uhr.'
+        elif minute == 5:
+            output = 'fünf nach ' + hour
+        elif minute == 10:
+            output = 'zehn nach ' + hour
+        elif minute == 15:
+            output = 'viertel nach ' + hour
+        elif minute == 20:
+            output = 'zwanzig nach ' + hour
+        elif minute == 25:
+            output = 'fünf vor halb ' + hour
+        elif minute == 30:
+            output = 'halb ' + next_hour
+        elif minute == 35:
+            output = 'fünf nach halb ' + next_hour
+        elif minute == 40:
+            output = 'zwanzig vor ' + next_hour
+        elif minute == 45:
+            output = 'viertel vor ' + next_hour
+        elif minute == 50:
+            output = 'zehn vor ' + next_hour
+        elif minute == 55:
+            output = 'fünf vor ' + next_hour
+        else:
+            output = hour + ':' + minute + ' Uhr'
+        return output
+
+    @staticmethod
+    def is_desired(text):
+        # returns True, if user want this option
+        approvals = ['ja', 'gerne']
+        if any(approvals) in text:
+            return True
+        elif 'bitte' in text and not 'nicht' in text:
+            return True
+        elif 'danke' in text and not 'nein' in text:
+            return True
+        return False
