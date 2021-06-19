@@ -73,7 +73,6 @@ class Modules:
         return modules
 
     def query_threaded(self, name, text, user, direct, messenger=False):
-        print(f'Messenger: {messenger}')
         mod_skill = skills()
         if text == None:
             # generate a random text
@@ -101,7 +100,7 @@ class Modules:
             # Search the modules normally
             for module in self.modules:
                 try:
-                    if module.isValid(text):
+                    if module.isValid(text.lower()):
                         self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger,
                                                                                  user)
                         mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
@@ -147,6 +146,8 @@ class Modules:
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
+                    mt.join() # wait until Module is done...
+                    self.start_module(user=user, name='wartende_benachrichtigung')
         else:
             try:
                 analysis = self.core.analyzer.analyze(str(text))
@@ -178,6 +179,7 @@ class Modules:
         finally:
             try:
                 del self.core.active_modules[str(text)]
+
             except:
                 pass
             return
@@ -185,7 +187,7 @@ class Modules:
     def run_module(self, text, modulewrapper, mod_skill):
         for module in self.modules:
             if module.isValid(text):
-                module.handle(text, modulewrapper, )
+                module.handle(text, modulewrapper, mod_skill)
 
     def run_continuous(self):
         # Runs the continuous_modules. Continuous_modules always run in the background,
@@ -248,8 +250,6 @@ class Modules:
                 logging.info('-- (None to finish)')
         return
 
-    # toDo: run
-
 
 class Modulewrapper:
     def __init__(self, core, text, analysis, messenger, user):
@@ -272,22 +272,7 @@ class Modulewrapper:
         self.path = core.path
         self.user = user
 
-    def say(self, text, output='auto'):
-        """
-        for better performance you can use:
-        Add a break
-        Mary had a little lamb <break time="1s"/> Whose fleece was white as snow.
-        Emphasizing words
-        I already told you I <emphasis level="strong">really like </emphasis> that person.
-        Speed
-        For dramatic purposes, you might wish to <prosody rate="slow">slow down the speaking rate of your text.</prosody>
-        Or if you are in a hurry <prosody rate="fast">your may want to speed it up a bit.</prosody>
-        Pitch
-        Do you like sythesized speech <prosody pitch="high">with a pitch that is higher than normal?</prosody>
-        Or do you prefer your speech <prosody pitch="-20%">with a somewhat lower pitch?</prosody>
-        Whisper
-        <amazon:effect name="whispered">If you make any noise, </amazon:effect> she said, <amazon:effect name="whispered">they will hear us.</amazon:effect>
-        """
+    def say(self, text, output='auto', wait=True):
         text = self.speechVariation(text)
         if output == 'auto':
             if self.messenger_call:
@@ -297,18 +282,6 @@ class Modulewrapper:
         else:
             text = self.correct_output_automate(text)
             self.Audio_Output.say(text)
-
-    @staticmethod
-    def corregate_voice_changes(text, output):
-        skill = skills()
-        times = 0
-        if output == "messenger":
-            for word in text.split(" "):
-                if "<" in word and ">" and (
-                        "break time" in word or "emphasis level" in word or "prosody rate" in word or "prosody pitch" in word or "amazon:effect" in word):
-                    times += 1
-            for i in range(times):
-                text.replace(skill.get_text_beetween("<", text, end_word=">", output="String", split_text=False), '')
 
     def messenger_say(self, text):
         try:
@@ -546,10 +519,9 @@ class LUNA:
 
     def hotword_detected(self, text):
         if text == "wrong assistant!":
-            self.Audio_Output.say("Geh mir nicht fremd, du sau!")
+            self.Audio_Output.say("Geh mir nicht fremd, du Sau!")
         else:
             logging.info('[USER INPUT]\t' + text)
-            print('[USER INPUT]\t' + text)
             user = self.users.get_user_by_name(self.local_storage["user"])
             self.modules.start_module(text=str(text), user=user)
             self.Audio_Output.continue_after_hotword()

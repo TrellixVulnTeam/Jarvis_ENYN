@@ -106,11 +106,15 @@ def Webserver(core):
         }
         return render_template("setupUser.html", nav=nav, st=standards, gold=gold)
 
-    @webapp.route("/pHUE.html")
+    @webapp.route("/pHUE")
     def controlPhilipsLights():
-        established = True if (not core.local_storage["module_storage"]["phillips_hue"]["Bridge-IP"] == "") else False
+        established = True if (not core.local_storage["module_storage"]["philips_hue"]["Bridge-IP"] == "") else False
 
         return render_template("pHUE.html", nav=nav, established=established)
+
+    @webapp.route("/alarm")
+    def controlAlarm():
+        return render_template("alarm.html", nav=nav)
 
     # API-like-Calls
 
@@ -188,7 +192,8 @@ def Webserver(core):
         try:
             with open('config.json', 'w') as config_file:
                 json.dump(config_data, config_file, indent=4)
-                print("\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped")
+                print(
+                    "\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped")
             core.reload_system()
         except:
             return "err"
@@ -305,13 +310,11 @@ def Webserver(core):
         externSystems = {
             "Phillips HUE": {
                 "name": "Phillips Hue",
-                "established": True if feed["module_storage"]["phillips_hue"]["Bridge-IP"] != "" else False
+                "established": False
             },
             "Phillips TV": {
                 "name": "Phillips TV",
-                "established": True if (feed["module_storage"]["phillips-tv"]["user"] != ""
-                                        and feed["module_storage"]["phillips-tv"]["pass"] != ""
-                                        and feed["module_storage"]["phillips-tv"]["host"] != "") else False
+                "established": False
             }
         }
 
@@ -371,20 +374,21 @@ def Webserver(core):
     def listAlarm(action="*"):
         if action == "alarms":
             alarm_list = {"regular_alarm": core.local_storage["regular_alarm"],
-                          "simple_alarm": core.local_storage["Wecker"]}
+                          "single_alarm": core.local_storage["Wecker"]}
             return jsonify(alarm_list)
 
-
-    @webapp.route("/api/alarm/remove/<regular>/<day>/<time>")
-    def deleteAlarm(regular, day, time):
-        if regular:
-            for alarm in core.local_storage["regular_alarm"][day]:
-                if alarm["Zeit"] == time:
-                    core.local_storage["regular_alarm"][day].remove(alarm)
-        else:
-            for alarm in core.local_storage["Wecker"][day]:
-                if alarm["Zeit"] == time:
-                    core.local_storage["Wecker"][day].remove(alarm)
+    @webapp.route("/api/alarm/<action>/<regular>/<day>/<time>")
+    def changeAlarm(action, regular, day, time):
+        if action == "delete":
+            if regular:
+                for alarm in core.local_storage["regular_alarm"][day]:
+                    if alarm["Zeit"] == time:
+                        core.local_storage["regular_alarm"][day].remove(alarm)
+            else:
+                for alarm in core.local_storage["Wecker"][day]:
+                    if alarm["Zeit"] == time:
+                        core.local_storage["Wecker"][day].remove(alarm)
+            return "ok"
 
     @webapp.errorhandler(404)
     def error_404(error):

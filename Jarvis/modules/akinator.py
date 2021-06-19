@@ -3,7 +3,7 @@ PRIORITY = 3
 
 def isValid(text):
     text = text.lower()
-    if ('start' in text or 'beginn' in text) and ('ratespiel' in text or 'akinator' in text):
+    if ('start' in text or 'beginn' in text) and ('ratespiel' in text or 'akinator' in text or 'wer bin ich' in text):
         return True
     return False
 

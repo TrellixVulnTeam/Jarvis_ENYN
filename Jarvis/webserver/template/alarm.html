@@ -23,11 +23,20 @@
     </nav>
 
 
-    <div class="container-fluid">
-        <div class="alert alert-warning" id="alarmEnum">
-            <strong>lädt...</strong>
-        </div>
-    </div>
+
+
+    <ul class="list-group" id="mainContentBox">
+      <li class="list-group-item list-group-item-secondary">
+        <h5>Reguläre Wecker</h5>
+      </li>
+        {% for item in alarms %}
+          <li class="list-group-item">
+
+          </li>
+        {% endfor %}
+    </ul>
+
+
 
     <script src="{{ url_for('static', filename='main_alarm.js')}}"></script>
 </body>

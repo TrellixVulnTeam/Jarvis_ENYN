@@ -12,5 +12,11 @@ def handle(text, core, skills):
 
 def in_progress(text, core, skills):
 	if 'einkaufsliste' in text:
-		core.say('Die Einkaufsliste trennt die einzelnen Items bei jedem und. Daher musst du diese auch mit und trennen, ansonsten werden diese zusammengezogen. ')
-		core.say('Versuch doch mal folgende Syntax: Core, setz Butter und 500g Rinderhack und Marmelade auf die Einkaufsliste.')
+		core.say('Die Einkaufsliste trennt die einzelnen Items bei jedem "und". Daher musst du diese auch mit und '
+				 + 'trennen, ansonsten werden diese zusammengezogen. Versuch doch mal folgende Syntax: Core, setz Butter '
+				 + 'und 500g Rinderhack und Marmelade auf die Einkaufsliste.')
+
+	elif 'akinator' in text or 'ratespiel' in text or 'wer bin ich' in text:
+		core.say('Um dieses Spiel zu beginnen, musst du zunächst sagen: Jarvis, starte wer bin ich! Anschließend wird '
+				 + 'dir das Modul weitere Instruktionen geben.')
+

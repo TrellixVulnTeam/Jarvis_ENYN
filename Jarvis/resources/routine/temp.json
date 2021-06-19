@@ -12,11 +12,12 @@
         "sunday": false,
         "date_of_day": ["3", "7"]
       },
-      "time": {
+      "activation": {
         "clock_time": ["1:11", "2:22"],
         "after_alarm": false,
         "after_sunrise": false,
-        "after_sunset": false
+        "after_sunset": false,
+        "after_call": false
       }
     },
     "actions": {

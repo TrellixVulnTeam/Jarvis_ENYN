@@ -237,3 +237,22 @@ class skills:
         elif 'danke' in text and not 'nein' in text:
             return True
         return False
+
+    class Statics:
+        color_ger_to_eng = {
+            "schwarz": "black",
+            "blau": "blue",
+            "rot": "red",
+            "gelb": "yellow",
+            "grün": "green"
+        }
+
+        color_eng_to_ger = {
+            "black": "schwarz",
+            "blue": "blau",
+            "red": "rot",
+            "yellow": "gelb",
+            "green": "grün"
+        }
+
+        weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']

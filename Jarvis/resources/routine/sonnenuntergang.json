@@ -12,7 +12,7 @@
         "sunday": false,
         "date_of_day": [""]
       },
-      "time": {
+      "activation": {
         "clock_time": [""],
         "after_alarm": false,
         "after_sunrise": false,

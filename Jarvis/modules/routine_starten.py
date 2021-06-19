@@ -1,4 +1,4 @@
-import json
+import logging
 
 
 def isValid(text):
@@ -7,12 +7,16 @@ def isValid(text):
     else:
         return False
 
-def handle(text, core, skills):
 
-    for word in text:
-        if "routine" in word.lower():
-            routine = inf.get(word)
-            for command in routine["actions"]:
-                for text in command["text"]:
-                    core.start_module(name=command["module_name"], text=text)
-            break
+def handle(text, core, skills):
+    actions = text["actions"]
+
+    try:
+        for action in actions:
+            if action["module_name"] == "":
+                core.start_module(text=action["text"], user=core.user)
+            else:
+                core.start_module(name=action["module_name"], text=action["text"], user=core.user)
+    except:
+        core.local_storage["routines"].remove(text)
+        logging.warning(f'Routine with action {text["description"]} doesnt works. It is removed from the List!')

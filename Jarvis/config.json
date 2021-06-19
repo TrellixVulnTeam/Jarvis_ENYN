@@ -13,7 +13,7 @@
         "messenger_allowed_id_table": [],
         "rejected_messenger_messages": [],
         "module_storage": {
-            "phillips_hue":{
+            "philips_hue":{
                 "Bridge-IP": ""
             },
             "philips-tv": {

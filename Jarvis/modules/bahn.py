@@ -5,7 +5,7 @@ import random
 import requests
 import json
 import datetime
-from bs4 import BeautifulSoup # needs html5lib
+from bs4 import BeautifulSoup  # needs html5lib
 import time
 import traceback
 
@@ -42,6 +42,7 @@ def batchGen(batch):
                 batch.append(rebuild)
     return outlist
 
+
 def batchMatch(batch, match):
     t = False
     if isinstance(batch, str):
@@ -50,6 +51,7 @@ def batchMatch(batch, match):
         if piece.lower() in match.lower():
             t = True
     return t
+
 
 def speechVariation(input):
     """
@@ -62,20 +64,13 @@ def speechVariation(input):
     else:
         parse = input
     while "[" in parse and "]" in parse:
-        sp0 = parse.split("[",1)
+        sp0 = parse.split("[", 1)
         front = sp0[0]
-        sp1 = sp0[1].split("]",1)
-        middle = sp1[0].split("|",1)
+        sp1 = sp0[1].split("]", 1)
+        middle = sp1[0].split("|", 1)
         end = sp1[1]
         parse = front + random.choice(middle) + end
     return parse
-
-def sayAsync(core, text):
-    try:
-        core.end_Conversation()
-        core.start_module(name="justsaysomethin", text=text)
-    except AttributeError:
-        pass
 
 
 """
@@ -84,8 +79,10 @@ This "libary" uses a wild mixture of several parsers scraping db-reiseauskunft a
 these "APIs" may or may not be depracted instantly when deutschebahn or marudor change something in their online-page-structure
 """
 
+
 class MainBlock(object):
     """Main Class to handle everything."""
+
     def __init__(self, start='', end='', timestamp=None):
         if timestamp != None:
             self.time = timestamp
@@ -102,27 +99,27 @@ class MainBlock(object):
     def interactive(self):
         startRaw = input("Bitte geben Sie Ihren Startbahnhof ein: ")
         self.start = TrainStation(startRaw)
-        #print("Folgender Startbahnhof wurde ausgefäwhlt:", self.start.name, '\n')
+        # print("Folgender Startbahnhof wurde ausgefäwhlt:", self.start.name, '\n')
         endRaw = input("Bitte geben Sie Ihren Zielbahnhof ein:  ")
         self.end = TrainStation(endRaw)
-        #print("Folgender Zielbahnhof wurde ausgewählt:", self.end.name, '\n')
+        # print("Folgender Zielbahnhof wurde ausgewählt:", self.end.name, '\n')
         types = input("Nah oder Fernverkehr? (N/V)")
-        #print("\nDie Verbindungen werden berechnet.")
+        # print("\nDie Verbindungen werden berechnet.")
         if types == "N":
             self.getConnections("0011111111")
         else:
             self.getConnections("1111111111")
-        #print("\nEs wurden " + str(len(self.data.connections)) + " Verbindungen gefunden:\n")
+        # print("\nEs wurden " + str(len(self.data.connections)) + " Verbindungen gefunden:\n")
         count = 0
         for connection in self.data.connections:
             count += 1
-            #print('VERBINDUNG', count, str(connection.price))
-            #for train in connection.trainList:
-                #print('  ', train.startTime, "+" + str(train.startDelay), train.startStation, '\t', train.startTrack)
-                #print('   |', str(train.duration) + 'min')
-                #print('   ->', train.endTime, train.endStation, '\t', train.endTrack)
-                #print('     (', train.trainNumber, ')')
-            #print('\n')
+            # print('VERBINDUNG', count, str(connection.price))
+            # for train in connection.trainList:
+            # print('  ', train.startTime, "+" + str(train.startDelay), train.startStation, '\t', train.startTrack)
+            # print('   |', str(train.duration) + 'min')
+            # print('   ->', train.endTime, train.endStation, '\t', train.endTrack)
+            # print('     (', train.trainNumber, ')')
+            # print('\n')
 
     def getConnections(self, trafficType="1111111111"):
         self.data = ConnectionGroup(self.time, self.start.id, self.end.id)
@@ -132,6 +129,7 @@ class MainBlock(object):
 
 class TrainStation(object):
     """The TrainStation-class stores information about a station of Deutsche Bahn."""
+
     def __init__(self, string):
         self.station = self.idFromName(string)
         self.type = self.station['stationType']
@@ -160,8 +158,8 @@ class TrainStation(object):
                 'stationID': str(data['suggestions'][0]['extId']),
                 'stationName': str(data['suggestions'][0]['value']),
                 'stationType': str(data['suggestions'][0]['typeStr']),
-                'lat': int(data['suggestions'][0]['xcoord'])/1000000,
-                'long': int(data['suggestions'][0]['ycoord'])/1000000
+                'lat': int(data['suggestions'][0]['xcoord']) / 1000000,
+                'long': int(data['suggestions'][0]['ycoord']) / 1000000
             }
             return dict_out
         else:
@@ -314,6 +312,7 @@ class ConnectionGroup(object):
 
 class Connection(object):
     """Single Train Connection"""
+
     def __init__(self, detailUrl, tID, mainTime):
         self.ident = detailUrl.split("ident=")[1].split("&")[0]
         self.ld = detailUrl.split("ld=")[1].split("&")[0]
@@ -480,8 +479,10 @@ class TrainLane(object):
             timeFine = datetime.datetime.strptime(timeFine, "%H:%M")
             timeFineLive = datetime.datetime.strptime(timeFineLive, "%H:%M")
             # merge the two times together
-            timeFine = datetime.datetime(self.mainTime.year, self.mainTime.month, self.mainTime.day, timeFine.hour, timeFine.minute, 0)
-            timeFineLive = datetime.datetime(self.mainTime.year, self.mainTime.month, self.mainTime.day, timeFineLive.hour, timeFineLive.minute, 0)
+            timeFine = datetime.datetime(self.mainTime.year, self.mainTime.month, self.mainTime.day, timeFine.hour,
+                                         timeFine.minute, 0)
+            timeFineLive = datetime.datetime(self.mainTime.year, self.mainTime.month, self.mainTime.day,
+                                             timeFineLive.hour, timeFineLive.minute, 0)
         except ValueError:
             pass
         return timeFine, timeFineLive
@@ -512,20 +513,23 @@ def refineTime(timeRaw, mainTime):
     return timeFine
 
 
-
-def handle(text, core, skill):
+def handle(text, core, skills):
     text = text.lower().replace("ß", "ss")
     ziel = None
     try:
         start = core.analysis["town"]
         if start == 'None' or start == None:
-            textOut = "Ich weiß noch gar nicht, wo [wir hier gerade sind|es losgehen soll]. "
-            textOut += "An welche[m Bahnhof|r Station] [willst|möchtest] du [|denn] [|gerne] [ab|los]fahren?"
-            core.say(speechVariation(textOut))
-            start = core.listen().strip()
+            if not core.local_storage["home_location"] == "":
+                start = core.local_storage["home_location"]
+            else:
+                textOut = "Ich weiß noch gar nicht, wo [wir hier gerade sind|es losgehen soll]. "
+                textOut += "An welche[m Bahnhof|r Station] [willst|möchtest] du [|denn] [|gerne] [ab|los]fahren?"
+                core.say(speechVariation(textOut))
+                start = core.listen().strip()
         startB = TrainStation(start)
         if "nach " in text:
-            sayAsync(core, speechVariation(["Mal sehen, was so auf den Schienen los ist.", "Einen Augenblick bitte."]))
+            core.say(speechVariation(["Mal sehen, was so auf den Schienen los ist.", "Einen Augenblick bitte."]),
+                     wait=False)
             ziel = text.split("nach ")[1]
         if "planen" in text or "reise" in text:
             core.say(speechVariation([
@@ -544,7 +548,7 @@ def handle(text, core, skill):
                 dest = deps["destination"].replace("Hbf", "Hauptbahnhof").replace("(", "").replace(")", "")
                 text = "[Der nächste Zug, der|Die nächste Bahn, die] in " + startB.name + " abfährt, heißt "
                 text += deps["name"]["name"] + ", [fährt nach|hat als Fahrziel] " + dest
-                text += " und fährt planmäßig in " + str(round(deps["departure_rel"]/60))
+                text += " und fährt planmäßig in " + str(round(deps["departure_rel"] / 60))
                 text += " Minuten ab."
             except TypeError:
                 text = "Im Moment konnte ich keine [passenden|] Abfahrten finden. [Vielleicht|Eventuell] schaust du mal im Bahn Navigator nach?"
@@ -553,7 +557,7 @@ def handle(text, core, skill):
             zielB = TrainStation(ziel)
             DeltaLat = abs(startB.lat - zielB.lat) * 111.11
             DeltaLong = abs(startB.long - zielB.long) * 111.11
-            airdist = round((DeltaLat**2 + DeltaLong**2)**0.5)
+            airdist = round((DeltaLat ** 2 + DeltaLong ** 2) ** 0.5)
             # timeStamp = datetime.datetime.now()
             if "datetime" in core.analysis:
                 timeStamp = core.analysis["datetime"]
@@ -564,7 +568,7 @@ def handle(text, core, skill):
                 bridgeText += " Oh, da hast du dir aber eine lange [|Reise][strecke|route] ausgesucht."
             else:
                 bridgeText += " Bitte [gedulde dich noch ein wenig|habe einen Moment Geduld]."
-            sayAsync(core, speechVariation(bridgeText))
+            core.say(speechVariation(bridgeText), wait=False)
             # check nahverkehr
             connectionGroup = ConnectionGroup(timeStamp, startB.id, zielB.id)
             connectionGroup.requestConnections(vehicleSelection)
@@ -580,15 +584,18 @@ def handle(text, core, skill):
             if timeToDepart <= 1:
                 timespan = "sofort"
             else:
-                timespan = "in " + str(round(timeToDepart)) + " Minuten" if timeToDepart < 60 else str(round(timeToDepart//60)) + " Stunden und " + str(round(timeToDepart%60)) + " Minuten"
+                timespan = "in " + str(round(timeToDepart)) + " Minuten" if timeToDepart < 60 else str(
+                    round(timeToDepart // 60)) + " Stunden und " + str(round(timeToDepart % 60)) + " Minuten"
 
-            duration = str(round(duration)) + " Minuten" if duration < 60 else str(round(duration//60)) + " Stunden und " + str(round(duration%60)) + " Minuten"
+            duration = str(round(duration)) + " Minuten" if duration < 60 else str(
+                round(duration // 60)) + " Stunden und " + str(round(duration % 60)) + " Minuten"
 
-            if hopCount-1 == 0:
+            if hopCount - 1 == 0:
                 text = "Die nächste Verbindung von " + startB.name + " nach " + zielB.name + " [fährt|kommt] " + timespan + " und dauert ungefähr " + duration + "."
             else:
                 text = "Die nächste Verbindung [fährt|kommt] " + timespan + " und dauert bei "
-                text += str(hopCount-1) + " [Zugwechsel|Umstieg]" + ("" if hopCount-1 == 1 else "n") + " ungefähr " + duration + "."
+                text += str(hopCount - 1) + " [Zugwechsel|Umstieg]" + (
+                    "" if hopCount - 1 == 1 else "n") + " ungefähr " + duration + "."
 
             text = text.replace("Hbf", "[|Hauptbahnhof]").replace("(", " ").replace(")", " ").replace("  ", " ")
             core.say(speechVariation(text))
@@ -604,18 +611,18 @@ def handle(text, core, skill):
 
                 for t in connection.trainList:
                     typeTranslate = {
-                    "NJ": "dein Nachtzug",
-                    "RJ": "dein Railjet",
-                    "ICE": "dein I C E",
-                    "IC": "dein Intercity",
-                    "EC": "dein Eurocity",
-                    "IRE": "dein Inter-Regionalexpress",
-                    "RE": "dein Regionalexpress",
-                    "RB": "deine Regionalbahn",
-                    "S": "deine Ess-Bahn",
-                    "U": "deine U-Bahn",
-                    "STR": "deine Straßenbahn",
-                    "Bus": "dein Bus"
+                        "NJ": "dein Nachtzug",
+                        "RJ": "dein Railjet",
+                        "ICE": "dein I C E",
+                        "IC": "dein Intercity",
+                        "EC": "dein Eurocity",
+                        "IRE": "dein Inter-Regionalexpress",
+                        "RE": "dein Regionalexpress",
+                        "RB": "deine Regionalbahn",
+                        "S": "deine Ess-Bahn",
+                        "U": "deine U-Bahn",
+                        "STR": "deine Straßenbahn",
+                        "Bus": "dein Bus"
                     }
                     if t.trainNumber.split(" ")[0].strip() in typeTranslate:
                         startTrainName = typeTranslate[t.trainNumber.split(" ")[0].strip()]
@@ -627,10 +634,11 @@ def handle(text, core, skill):
 
                     # generate TrainNumber. For Number-Lengths under 4 speak the number-code as a number. for longer train-names split those into groups of two or three.
                     tempTrainNameNumber = t.trainNumber.split(" ")[1].strip()
-                    if len(tempTrainNameNumber) <=3:
+                    if len(tempTrainNameNumber) <= 3:
                         startTrainNameNumber = tempTrainNameNumber
                     elif len(tempTrainNameNumber) == 5:
-                        startTrainNameNumber = tempTrainNameNumber[0:1] + " " + tempTrainNameNumber[2] + " " + tempTrainNameNumber[3:4]
+                        startTrainNameNumber = tempTrainNameNumber[0:1] + " " + tempTrainNameNumber[
+                            2] + " " + tempTrainNameNumber[3:4]
                     else:
                         startTrainNameNumber = ""
                         ct = 0
@@ -641,17 +649,20 @@ def handle(text, core, skill):
                             ct += 1
                     # startTrainNameNumber = " ".join(t.trainNumber.split(" ")[1]).strip()
                     # startTrainNameNumber = "  ".join(startTrainNameNumber.split())
-                    #print(startTrainNameNumber)
+                    # print(startTrainNameNumber)
 
                     startTrainNamePronoun = "Er" if "dein" in startTrainName else "Sie"
 
-                    track = " [am Bahnsteig|an Gleis] " + str(t.startTrack) if len(str(t.startTrack).strip()) >= 1 else ""
+                    track = " [am Bahnsteig|an Gleis] " + str(t.startTrack) if len(
+                        str(t.startTrack).strip()) >= 1 else ""
 
-                    if first and len(connection.trainList) == 1: # only one single train in connection
-                        text += "Um " + t.startTime.strftime("%-H Uhr %-M ") + "fährt " + startTrainName + track + " ab."
+                    if first and len(connection.trainList) == 1:  # only one single train in connection
+                        text += "Um " + t.startTime.strftime(
+                            "%-H Uhr %-M ") + "fährt " + startTrainName + track + " ab."
 
-                    elif first and len(connection.trainList) > 1: # first train in a longer travel chain
-                        text += "Als erstes steigst du um " + t.startTime.strftime("%-H Uhr %-M ") + " " + track + " in " + startTrainNameB + " " + startTrainNameNumber + " ein. "
+                    elif first and len(connection.trainList) > 1:  # first train in a longer travel chain
+                        text += "Als erstes steigst du um " + t.startTime.strftime(
+                            "%-H Uhr %-M ") + " " + track + " in " + startTrainNameB + " " + startTrainNameNumber + " ein. "
 
                     elif not first and len(connection.trainList) > 1:
                         varA = "[|Nach deiner Ankunft] in " + t.startStation
@@ -659,7 +670,8 @@ def handle(text, core, skill):
                             " steigst du [als nächstes|dann] in " + startTrainNameC + " " + startTrainNameNumber + " nach " + t.endStation + " ein. ",
                             " wechselst du [|dann] in " + startTrainNameC + " " + startTrainNameNumber + " nach " + t.endStation + ". "
                         ])
-                        varA += startTrainNamePronoun + " fährt um " + t.startTime.strftime("%-H Uhr %-M ") + track + " [los|ab]. "
+                        varA += startTrainNamePronoun + " fährt um " + t.startTime.strftime(
+                            "%-H Uhr %-M ") + track + " [los|ab]. "
 
                         if len(str(t.startTrack).strip()) >= 1:
                             varB = random.choice([
@@ -667,9 +679,11 @@ def handle(text, core, skill):
                                 "Nach deiner Ankunft in " + t.startStation + " "
                             ])
                             varB += "[gehst|läufst] du dann zum " + track + " "
-                            varB += "und steigst [kurz vor|um] " + t.startTime.strftime("%-H Uhr %-M ") + "in " + startTrainNameC  + " " + startTrainNameNumber + " ein. "
+                            varB += "und steigst [kurz vor|um] " + t.startTime.strftime(
+                                "%-H Uhr %-M ") + "in " + startTrainNameC + " " + startTrainNameNumber + " ein. "
                         else:
-                            varB = "Spätestens um " + t.startTime.strftime("%-H Uhr %-M ") + "solltest du in " + t.startStation + " sein, damit"
+                            varB = "Spätestens um " + t.startTime.strftime(
+                                "%-H Uhr %-M ") + "solltest du in " + t.startStation + " sein, damit"
                             varB += " du noch " + startTrainNameC + " nach " + t.endStation + " [erreichst|bekommst]. "
 
                         text += random.choice([varA, varB])
@@ -681,9 +695,12 @@ def handle(text, core, skill):
             else:
                 core.say(speechVariation("[Okay|keine Ursache]"))
     except IndexError as e:
-        core.say(speechVariation("[ooh je|ups], irgend[et|]was ist da [schiefgegangen|nicht nach plan gelaufen]. Wie wäre es, wenn du es einfach [später|noch einmal] versuchst?"))
-        #print(e)
+        core.say(speechVariation(
+            "[ooh je|ups], irgend[et|]was ist da [schiefgegangen|nicht nach plan gelaufen]. Das kommt bei der "
+            + "deutschen Bahn des öfteren vor. Wie wäre es, wenn du es einfach [später|noch einmal] versuchst?"))
+        # print(e)
         traceback.print_exc()
+
 
 def isValid(text):
     text = text.lower()
@@ -691,9 +708,8 @@ def isValid(text):
         "wann [fährt|kommt] [der|die] nächste [Zug|Bahn]",
         "wann [fährt|gibt es] [die nächste|eine] [bahn|]verbindung [von|ab|nach]",
         "welche[|r] [Zug|Bahn] [fährt|kommt] [als nächstes|demnächst|bald|gleich]"
-        ]
+    ]
     if batchMatch(batch, text) or ("reise" in text and "planen" in text):
         return True
     else:
         return False
-

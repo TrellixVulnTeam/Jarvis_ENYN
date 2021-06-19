@@ -9,7 +9,7 @@ def handle(text, core, skills):
     try:
         core.play(path=path, next=True)
     except FileNotFoundError:
-        pass
+        core.say('Alarm! Alarm! Alarm! Aufstehen! Klingeling!')
     if user.get('fist_name') == 'Unknown':
         core.say('Guten Morgen! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag!')
     else:
