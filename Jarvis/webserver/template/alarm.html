@@ -22,21 +22,46 @@
         </div>
     </nav>
 
-
-
-
-    <ul class="list-group" id="mainContentBox">
-      <li class="list-group-item list-group-item-secondary">
-        <h5>Reguläre Wecker</h5>
-      </li>
-        {% for item in alarms %}
+    <div class="panel panel-default">
+      <div class="panel-heading">reguläre Wecker</div>
+      <div class="panel-body">
+      {% if reg_alarm_exist %}
           <li class="list-group-item">
+            {% for item in data.regular_alarm %}
+                <div class="d-flex justify-content-between">
+                  <span class="mt-1">{{ item }}</span>
+                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#myModal">löschen</button>
+                </div>
+                <br />
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+              <strong>Info!</strong> Es wurden noch keine regulären Wecker angelegt.
+            </div>
+        {% endif %}
+      </div>
+    </div>
 
-          </li>
-        {% endfor %}
-    </ul>
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
 
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Wecker löschen</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body" id="modalTime">
+            <p>Möchtest du den Wecker wirklich löschen?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger">löschen</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">abbrechen</button>
+          </div>
+        </div>
 
-
+      </div>
+    </div>
     <script src="{{ url_for('static', filename='main_alarm.js')}}"></script>
 </body>

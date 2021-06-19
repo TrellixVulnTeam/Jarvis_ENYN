@@ -106,7 +106,7 @@ def Webserver(core):
         }
         return render_template("setupUser.html", nav=nav, st=standards, gold=gold)
 
-    @webapp.route("/pHUE")
+    @webapp.route("/phue")
     def controlPhilipsLights():
         established = True if (not core.local_storage["module_storage"]["philips_hue"]["Bridge-IP"] == "") else False
 
@@ -114,7 +114,14 @@ def Webserver(core):
 
     @webapp.route("/alarm")
     def controlAlarm():
-        return render_template("alarm.html", nav=nav)
+        data = listAlarm(action="json_alarms")
+        print(data)
+        reg_alarm_exist = True if len(core.local_storage["alarms"]["regular"]) > 0 else False
+        sin_alarm_exist = True if len(core.local_storage["alarms"]["single"]) > 0 else False
+        print(f'reg_alarm: {reg_alarm_exist}')
+        print(f'sin_alarm: {sin_alarm_exist}')
+        return render_template("alarm.html", nav=nav, data=data, reg_alarm_exist=reg_alarm_exist,
+                               sin_alarm_exist=sin_alarm_exist)
 
     # API-like-Calls
 
@@ -170,22 +177,22 @@ def Webserver(core):
         if "useCameras" in data and data["useCameras"].strip() != "":
             t = True if data["useCameras"] == "true" else False
             config_data["use_cameras"] = t
-            bedingt_kopieren('./resources/optional_modules/recieve_cameras.py',
+            copy_conditionally('./resources/optional_modules/recieve_cameras.py',
                              './modules/continuous/recieve_cameras.py', t)
 
             if "useFaceRec" in data and data["useFaceRec"].strip() != "":
                 t = True if data["useFaceRec"] == "true" else False
                 config_data["use_facerec"] = t
-                bedingt_kopieren('./resources/optional_modules/face_recognition.py',
+                copy_conditionally('./resources/optional_modules/face_recognition.py',
                                  './modules/continuous/face_recognition.py', t)
-                bedingt_kopieren('./resources/optional_modules/retrain_facerec.py', './modules/retrain_facerec.py', t)
+                copy_conditionally('./resources/optional_modules/retrain_facerec.py', './modules/retrain_facerec.py', t)
 
             if "useInterface" in data and data["useInterface"].strip() != "":
                 t = True if data["useInterface"] == "true" else False
                 config_data["use_interface"] = t
-                bedingt_kopieren('./resources/optional_modules/POI_Interface.py',
+                copy_conditionally('./resources/optional_modules/POI_Interface.py',
                                  './modules/continuous/POI_Interface.py', t)
-                bedingt_kopieren('./resources/optional_modules/POI_Interface_controls.py',
+                copy_conditionally('./resources/optional_modules/POI_Interface_controls.py',
                                  './modules/POI_Interface_controls.py', t)
         if config_data["Network_Key"] == "":
             config_data["Network_Key"] = generate_key(32)
@@ -372,10 +379,20 @@ def Webserver(core):
 
     @webapp.route("/api/alarm/list/<action>")
     def listAlarm(action="*"):
+        if not "alarms" in core.local_storage.keys():
+            core.local_storage["alarms"] = {"regular_alarm": [], "single_alarm": []}
+        if not "regular_alarm" in core.local_storage["alarms"].keys():
+            core.local_storage["alarms"]["regular_alarm"] = []
+        if not "single_alarm" in core.local_storage["alarms"].keys():
+            core.local_storage["alarms"]["single_alarm"] = []
+
+        alarm_list = {"regular_alarm": core.local_storage["alarms"]["regular"],
+                      "single_alarm": core.local_storage["alarms"]["single"]}
         if action == "alarms":
-            alarm_list = {"regular_alarm": core.local_storage["regular_alarm"],
-                          "single_alarm": core.local_storage["Wecker"]}
             return jsonify(alarm_list)
+
+        if action == "json_alarms":
+            return alarm_list
 
     @webapp.route("/api/alarm/<action>/<regular>/<day>/<time>")
     def changeAlarm(action, regular, day, time):
@@ -398,7 +415,7 @@ def Webserver(core):
     def error_500(error):
         return render_template('500.html'), 500
 
-    def bedingt_kopieren(ursprung, ziel, copy):
+    def copy_conditionally(ursprung, ziel, copy):
         if copy:
             if os.path.exists(ziel):
                 return
@@ -416,5 +433,6 @@ def Webserver(core):
 
     ws = pywsgi.WSGIServer(("0.0.0.0", 50500), webapp)
 
-    print("To connect to the JARVIS-Webserver, please visit http://localhost:50500/setup ")
+    print("To conn")
+
     ws.serve_forever()
