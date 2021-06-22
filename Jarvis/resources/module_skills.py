@@ -190,12 +190,12 @@ class skills:
 
         return temp3_array
 
-    def get_time(i):
-        hour = i.hour
+    def get_time(self, i):
+        hour = i["hour"]
         next_hour = hour + 1
         if next_hour == 24:
             next_hour = 0
-        minute = i.minute
+        minute = i["minute"]
         hour = str(hour) if hour > 9 else '0' + str(hour)
         minute = str(minute) if minute > 9 else '0' + str(minute)
         if minute == 0:
@@ -239,6 +239,7 @@ class skills:
         return False
 
     class Statics:
+        # Colors
         color_ger_to_eng = {
             "schwarz": "black",
             "blau": "blue",
@@ -255,4 +256,26 @@ class skills:
             "green": "grün"
         }
 
+        # Weekdays
         weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+        weekdays_engl = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satturday', 'Sunday']
+
+        weekdays_ger_to_eng = {
+            'montag': 'monday',
+            'dienstag': 'tuesday',
+            'mittwoch': 'wednesday',
+            'donnerstag': 'thursday',
+            'freitag': 'friday',
+            'samstag': 'saturday',
+            'sonntag': 'sunday'
+        }
+
+        weekdays_eng_to_ger = {
+            'monday': 'montag',
+            'tuesday': 'dienstag',
+            'wednesday': 'mittwoch',
+            'thursday': 'donnerstag',
+            'friday': 'freitag',
+            'saturday': 'samstag',
+            'sunday': 'sonntag'
+        }

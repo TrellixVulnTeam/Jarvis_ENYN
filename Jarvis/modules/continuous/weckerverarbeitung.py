@@ -2,30 +2,30 @@ import datetime
 
 INTERVALL = 2
 
-def run(core, profile):
+
+def run(core, skills):
+    if 'alarm' in core.local_storage.keys():
+        alarms = core.local_storage.get('alarm')
+        for repeat in alarms:
+            # iterate over 'regular' and 'single'
+            for day in repeat:
+                for alarm in day:
+                    # iterate over each weekday
+                    if is_day_correct(day) and get_total_seconds(alarm["time"]) <= 0 and alarms["active"]:
+                        dic = {'Text': alarm["text"], 'Ton': alarm["sound"], 'User': alarm["user"]}
+                        core.start_module(name='weckerausgabe', text=dic)
+                        alarms.remove(alarm)
+                        core.local_storage['alarm'] = alarms
+
+
+def is_day_correct(day):
+    if day == datetime.datetime.today().strftime("%A").lower():
+        return True
+    return False
+
+
+def get_total_seconds(alarm_time):
     now = datetime.datetime.now()
-    if 'Wecker' in core.local_storage.keys():
-        erinnerungen = core.local_storage.get('Wecker')
-        for item in erinnerungen:
-            zeit = item['Zeit']
-            '''zeit = datetime.datetime.strptime(zeit, '%Y-%m-%d %H:%M:%S.%f')'''
-            differenz = zeit - now
-            if differenz.total_seconds() <= 0:
-                ausgabe = 'Guten Morgen. Ich hoffe, du hast gut geschlafen'
-                """
-                try:
-                    geburtsdatum = core.local_storage['geburtstage']['date']
-                    month = int(geburtsdatum['month'])
-                    day = int(geburtsdatum['day'])
-                    now = datetime.datetime.now()
-                    if now.month == month and now.day == day:
-                        ausgabe = 'Herzlichen Glückwunsch zum Geburtstag. Ich hoffe, du hast einen großartigen Tag.'
-                except KeyError:
-                    '''Do nothing'''
-                """
-                ton = item.get('Ton')
-                user = item.get('User')
-                dic = {'Text': ausgabe, 'Ton': ton, 'User': user}
-                core.start_module(name='weckerausgabe', text=dic)
-                erinnerungen.remove(item)
-                core.local_storage['Wecker'] = erinnerungen
+    now_seconds = now.hour * 3600 + now.minute * 60 + now.second
+
+    return alarm_time["total_seconds"] - now_seconds

@@ -255,7 +255,8 @@ class Modulewrapper:
     def __init__(self, core, text, analysis, messenger, user):
         self.text = text
         self.analysis = analysis
-        self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
+        # toDo: down below
+        # self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
 
         self.Audio_Output = core.Audio_Output
         self.Audio_Input = core.Audio_Input
