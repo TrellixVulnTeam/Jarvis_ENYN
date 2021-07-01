@@ -81,11 +81,11 @@ class Timer:
 
                 remaining_time = datetime.timedelta()
 
-                timer_enum += 'Du hast einen ' + item['Dauer'] + ' mit noch etwa ' \
-                                 + self.get_time_differenz(remaining_time) + ' verbleibend.\n'
+                timer_enum += 'Du hast einen '.join([item['Dauer'], ' mit noch etwa ',
+                                                     self.get_time_differenz(remaining_time), ' verbleibend.\n'])
 
             if len(user_timer) > 1:
-                output = 'Du hast ' + str(len(self.core.local_storage['Timer'])) + ' Timer gestellt.\n' + timer_enum
+                output = 'Du hast '.join([str(len(self.core.local_storage['Timer'])), ' Timer gestellt.\n', timer_enum])
         return output
 
     def delete_timer_if_passed(self, user_timer, item):
@@ -104,8 +104,7 @@ class Timer:
     def delete_timer(self):
         self.core.say('Diese Funktion wird derzeit auf das Webinterface ausgelagert.')
 
-    @staticmethod
-    def get_time_differenz(start_time, time=datetime.datetime.now()):
+    def get_time_differenz(self, start_time, time=datetime.datetime.now()):
         aussage = []
         if time == None:
             dz = start_time
@@ -151,4 +150,4 @@ class Timer:
             aussage.append('einer Sekunde')
         elif seconds > 1:
             aussage.append(str(seconds) + ' Sekunden')
-        return skills.get_enumerate(aussage)
+        return self.skills.get_enumerate(aussage)
