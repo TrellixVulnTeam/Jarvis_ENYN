@@ -1,7 +1,15 @@
-
+#!/usr/bin/env python3
 from urllib.request import urlopen, Request
 import json
 import datetime
+import sys
+from urllib.parse import urljoin
+
+import requests
+
+API_URL = "https://api.corona-zahlen.org/districts/"
+DISTRICT = ""
+
 
 def isValid(text):
     text = text.lower().strip()
@@ -9,143 +17,37 @@ def isValid(text):
         return True
     else:
         return False
-    
 
-def handle(txt, core, skill):
-    day_map = {
-        1: 'ersten',
-        2: 'zweiten',
-        3: 'dritten',
-        4: 'vierten',
-        5: 'fünften',
-        6: 'sechsten',
-        7: 'siebten',
-        8: 'achten',
-        9: 'neunten',
-        10: 'zehnetn',
-        11: 'elften',
-        12: 'zwölften',
-        13: 'dreizehnten',
-        14: 'vierzehnten',
-        15: 'fünfzehnten',
-        16: 'sechzehnten',
-        17: 'siebzehnten',
-        18: 'achtzehnten',
-        19: 'neunzehnten',
-        20: 'zwanzigsten',
-        21: 'einundzwanzigsten',
-        22: 'zweiundzwanzigsten',
-        23: 'dreiundzwanzigsten',
-        24: 'vierundzwanzigsten',
-        25: 'fünfundzwanzigsten',
-        26: 'sechsundzwanzigsten',
-        27: 'siebenundzwanzigsten',
-        28: 'achtundzwanzigsten',
-        29: 'neunundzwanzigsten',
-        30: 'dreißigsten',
-        31: 'einunddreißigsten'
+
+def get_json(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
+
+
+def get_district_records(district_key):
+    key = str(district_key).lower()
+    if key.isdigit():
+        district_url = urljoin(API_URL, key)
+        return get_json(district_url)["data"]
+    data = get_json(API_URL)["data"]
+    return {
+        ags: dist for ags, dist in data.items()
+        if key in dist["name"].lower()
     }
 
-    month_map = {
-        1: 'Januar',
-        2: 'Februar',
-        3: 'März',
-        4: 'April',
-        5: 'Mai',
-        6: 'Juni',
-        7: 'Juli',
-        8: 'August',
-        9: 'September',
-        10: 'Oktober',
-        11: 'November',
-        12: 'Dezember'
-    }
 
-    countryMap = {
-        'Deutschland': 'Germany',
-        'China': 'China',
-        'Italien': 'Italy',
-        'Frankreich': 'France',
-        'Spanien': 'Spain',
-        'Iran': 'Iran',
-        'Türkei': 'Turkey',
-        'Schweiz': 'Switzerland',
-        'Belgien': 'Belgium',
-        'Niederlande': 'Netherlands',
-        'Kanada': 'Canada',
-        'Österreich': 'Austria',
-        'Südkorea': 'Korea, South',
-        'Portugal': 'Portugal',
-        'Brasilien': 'Brazil',
-        'Israel': 'Israel',
-        'Schweden': 'Sweden',
-        'Australien': 'Australia',
-        'Norwegen': 'Norway',
-        'Russland': 'Russia',
-        'Irland': 'Ireland',
-        'Tschechien': 'Czechia',
-        'Dänemark': 'Denmark',
-        'Chile': 'Chile',
-        'Polen': 'Poland',
-        'Indien': 'India',
-        'Luxemburg': 'Luxembourg',
-        'Thailand': 'Thailand',
-        'Saudi Arabien': 'Saudi Arabia',
-        'Indonesien': 'Indonesia',
-        'Finnland': 'Finland',
-        'Mexiko': 'Mexico',
-        'Griechenland': 'Greece',
-        'Südafrika': 'South Africa',
-        'Serbien': 'Serbia',
-        'Singapur': 'Singapore',
-        'Ukraine': 'Ukraine',
-        'Kroatien': 'Croatia',
-        'Ägypten': 'Egypt',
-        'Neuseeland': 'New Zealand'
-    }
+def get_info_lines(district_key):
+    template = ("({ags}) {name}:\n{weekIncidence:.01f} Inzidenz, "
+                "{cases} Gesamtfälle, {deaths} Verstorbene")
+    result = get_district_records(district_key)
+    return [template.format_map(dist) for dist in result.values()]
 
-    text = txt.lower()
 
-    countryCode = 'Germany'
-    countryName = 'Deutschland'
-
-    if 'vereinigt' in text and 'königreich' in text:
-        countryCode = 'United Kingdom'
-        countryName = 'England'
-
-    if 'usa' in text or ('vereinigt' in text and 'staat' in text):
-        countryCode = 'US'
-        countryName = 'den Vereinigten Staaten'
-
-    for key in countryMap:
-        if key.lower() in text:
-            countryCode = countryMap[key]
-            countryName = key
-
-    try:
-        request = Request('https://pomber.github.io/covid19/timeseries.json')
-        response = urlopen(request)
-        answer = json.loads(response.read())
-
-        now = datetime.datetime.now()
-        latest = None
-        if core.analysis['time'] is None:
-            latest = answer[countryCode][-1]
-        elif int(core.analysis['time']['year']) == now.year and int(core.analysis['time']['month']) == now.month and int(core.analysis['time']['day']) == now.day:
-            latest = answer[countryCode][-1]
-        else:
-            for possible in answer[countryCode]:
-                possible_date_tokens = possible['date'].split('-', 2)
-                if int(core.analysis['time']['year']) == int(possible_date_tokens[0]) and int(core.analysis['time']['month']) == int(possible_date_tokens[1]) and int(core.analysis['time']['day']) == int(possible_date_tokens[2]):
-                    latest = possible
-
-        if latest is None:
-            core.say('Für diese Zeit kann ich keine Daten finden. Hier die aktuellen.')
-            latest = answer[countryCode][-1]
-
-        date_tokens = latest['date'].split('-', 2)
-        return_string = 'Am {} {} {} gab es in {} {} Infizierte, {} Todesfälle und {} wieder Gesunde.'\
-            .format(day_map[int(date_tokens[2])], month_map[int(date_tokens[1])], date_tokens[0], countryName, str(latest['confirmed']), str(latest['deaths']), str(latest['recovered']))
-        core.say(return_string)
-    except SyntaxError:
-        core.say('Momentan kann ich leider keine daten finden.')
+def handle(text, core, skill):
+    district_key = core.analysis["town"] if len(sys.argv) > 1 else core.local_storage["home_location"]
+    lines = get_info_lines(district_key)
+    if lines:
+        core.say('Ich habe folgendes herausgefunden: ' + lines)
+    else:
+        print("Leider habe ich den Landkreis oder die Kreisstadt nicht gefunden")

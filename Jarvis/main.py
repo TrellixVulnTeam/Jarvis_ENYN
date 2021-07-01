@@ -291,6 +291,8 @@ class Modulewrapper:
             logging.warning(
                 'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben '
                 'wurde'.format(text, self.user))
+        except AttributeError:
+            logging.info('Sending message to messenger failed,  because there is no key for it!')
         return
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
@@ -577,7 +579,7 @@ class Users:
                 return user
         return None
 
-    def get_user_by_i(self, id):
+    def get_user_by_id(self, id):
         for user in self.users:
             if user["id"] == id:
                 return user

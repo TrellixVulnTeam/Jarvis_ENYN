@@ -14,7 +14,7 @@ def handle(text, core, skills):
     elif 'wie' in text and 'lange' in text:
         core.say(timer.get_remain_duration())
     elif 'lösch' in text or 'beend' in text or 'stopp' in text:
-
+        timer.delete_timer()
 
 
 class Timer:
