@@ -1,10 +1,11 @@
+
 def handle(text, core, skills):
     ton = text.get('Ton')
     user = text.get('User')
     path = core.path + "/modules/resources/clock_sounds/" + ton
-
-    if core.local_storage['module_storage']['philips_hue']['Bridge-IP'] != '':
-        core.start_module(name='philips_hue', text='Mach das Licht weiß', user=core.user)
+    
+    if core.local_storage['module_storage']['phillips_hue']['Bridge-IP'] != '':
+        core.start_module(name='phillips_hue', text='Mach das Licht weiß', user=core.user)
     try:
         core.play(path=path, next=True)
     except FileNotFoundError:
@@ -12,12 +13,10 @@ def handle(text, core, skills):
     if user.get('fist_name') == 'Unknown':
         core.say('Guten Morgen! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag!')
     else:
-        core.say('Guten Morgen {}! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag'.format(
-            user.get('first_name')))
+        core.say('Guten Morgen {}! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag'.format(user.get('first_name')))
 
     for routine in core.local_storage["alarm_routines"]:
         core.start_module(name="start_routine", text=routine, user=core.user)
-
 
 def isValid(text):
     return False
