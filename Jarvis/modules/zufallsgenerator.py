@@ -61,12 +61,13 @@ def output(txt, core):
     
     elif 'grade' in text and 'ungerade' in text:
         possibilities = ['grade', 'ungerade']
-        output = random.choice(posibilities)
+        output = random.choice(possibilities)
         
 
     if (output == ''):
         output = str(random.randint(1,100))
     return output
+
 
 def handle(text, core, skills):
     ausgabe = output(text, core).strip()

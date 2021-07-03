@@ -1,5 +1,7 @@
+import logging
+
 PRIORITY = 9
-SECURE = True
+
 
 def isValid (text):
 	text = text.lower()
@@ -7,6 +9,7 @@ def isValid (text):
 		return True
 	elif 'abbrechen' in text:
 		return True
-	
+
+
 def handle (text, core, skills):
-	print('[ACTION] Befehl abgebrochen')
+	logging.info('[ACTION] Befehl abgebrochen')
