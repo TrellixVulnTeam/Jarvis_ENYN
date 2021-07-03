@@ -9,7 +9,7 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    actions = text["actions"]
+    actions = text["actions"]["commands"]
 
     try:
         for action in actions:
