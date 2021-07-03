@@ -17,7 +17,7 @@ def handle(text, core, skills):
         routines.append(routine)
 
     for routine in routines:
-        if routine["retakes"]["time"]["after_alarm"]:
+        if routine["retakes"]["activation"]["after_alarm"]:
             core.local_storage["alarm_routines"].append(routine)
             routines.remove(routine)
     core.local_storage["routines"] = routines

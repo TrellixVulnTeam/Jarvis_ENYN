@@ -9,7 +9,8 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    alarm = Alarm(core, skills, core.analysis["time"], get_day(core, text, skills), get_repeat(text))
+    alarm = Alarm(core, skills)
+    alarm.with_values(core.analysis["time"], get_day(text, skills), get_repeat(text))
 
     """
             if core.analysis["time"] is None:
@@ -35,7 +36,7 @@ def get_repeat(text):
         return 'single'
 
 
-def get_day(core, text, skills):
+def get_day(text, skills):
     text = text.lower()
     days = []
 
@@ -57,14 +58,22 @@ def get_day(core, text, skills):
 
 
 class Alarm:
-    def __init__(self, core, skills, time, days, repeat):
+    def __init__(self, core, skills):
         self.core = core
         self.local_storage = core.local_storage
         self.skills = skills
         self.create_alarm_storage()
 
+        self.time = None
+        self.user = None
+        self.days = None
+        self.repeat = None
+        self.text = None
+        self.list = None
+
+    def with_values(self, time, days, repeat):
         self.time = time
-        self.user = core.user
+        self.user = self.core.user
         self.days = days
         self.repeat = repeat
 
@@ -72,8 +81,8 @@ class Alarm:
         self.text = f'Alles Gute zum Geburtstag{user_name}!' if self.is_birthday() else f'Guten Morgen{user_name}!'
         total_seconds = self.time["hour"] * 3600 + self.time["minute"] * 60 + self.time["second"]
         self.list = {"time": {"hour": self.time["hour"], "minute": self.time["minute"], "second": self.time["second"],
-                              "total_seconds": total_seconds},
-                     "sound": self.user["alarm_sound"], "user": self.user["name"],
+                              "total_seconds": total_seconds}, "time_stamp": self.get_time_stamp(),
+                     "sound": self.user["alarm_sound"], "user": self.user,
                      "text": self.text, "active": True}
 
     def create_alarm(self):
@@ -142,7 +151,7 @@ class Alarm:
         else:
             core_output = tage.get(tag) + monate.get(monat)
             messenger_output = tag + '. ' + monat
-            return 'den ' + self.core.correct_output(core_output, messenger_output)
+            return ' den ' + self.core.correct_output(core_output, messenger_output)
 
     def create_alarm_storage(self):
         if not 'alarm' in self.core.local_storage.keys():
@@ -171,3 +180,14 @@ class Alarm:
         else:
             self.core.say(
                 f'{repeatings}Wecker gestellt für{self.get_reply()}, {self.time["hour"]} Uhr {self.time["minute"]}')
+
+    def get_time_stamp(self):
+        hour = str(self.time["hour"])
+        minute = str(self.time["minute"])
+
+        if len(hour) == 1:
+            hour = '0' + hour
+        if len(minute) == 1:
+            minute = '0' + minute
+
+        return f'{hour}:{minute}Uhr'

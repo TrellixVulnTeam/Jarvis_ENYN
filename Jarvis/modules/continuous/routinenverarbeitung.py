@@ -7,24 +7,15 @@ import requests
 
 INTERVALL = 2
 
-numb_to_day = {
-        "1": "monday",
-        "2": "tuesday",
-        "3": "wednesday",
-        "4": "thursday",
-        "5": "friday",
-        "6": "saturday",
-        "7": "sunday"}
-
 
 def run(core, skills):
     now = datetime.now()
     for routine in core.local_storage["routines"]:
-        if is_day_correct(now, routine) and is_time_correct(now, routine, core):
+        if is_day_correct(now, routine, skills) and is_time_correct(now, routine, core):
             core.start_module(name="start_routine", text=routine)
 
 
-def is_day_correct(now, inf):
+def is_day_correct(now, inf, skills):
     is_correct = False
     # check if no day is specified
     all_false = True
@@ -34,19 +25,19 @@ def is_day_correct(now, inf):
     if all_false:
         return True
 
-    day_name = numb_to_day.get(str(now.isoweekday()))
+    day_name = skills.Statics.numb_to_day.get(str(now.isoweekday()))
     day_inf = inf.get("retakes").get("days")
     if day_inf["daily"] or day_inf[day_name]:
         is_correct = True
     for day in day_inf["date_of_day"]:
-        if day == numb_to_day.get(now.day):
+        if day == skills.Statics.numb_to_day.get(now.day):
             is_correct = True
     return is_correct
 
 
 def is_time_correct(now, inf, core):
     # after_alarm is ignored, since this is only called by the alarm itself
-    time_inf = inf["retakes"]["time"]
+    time_inf = inf["retakes"]["activation"]
     if time_inf["clock_time"] is not [""] and time_inf["clock_time"] is not []:
         for time in time_inf["clock_time"]:
             if len(time.split(":")) == 2:
@@ -54,10 +45,10 @@ def is_time_correct(now, inf, core):
                 minute = int(time.split(":")[1])
                 if now.hour >= hour and now.minute >= minute:
                     return True
-    if inf["retakes"]["time"]["after_sunrise"]:
+    if inf["retakes"]["activation"]["after_sunrise"]:
         if is_sunrise(core.local_storage, now):
             return True
-    if inf["retakes"]["time"]["after_sunset"]:
+    if inf["retakes"]["activation"]["after_sunset"]:
         if is_sunset(core.local_storage, now):
             return True
     return False
@@ -102,7 +93,7 @@ def get_sunrise_sunset_inf(location):
             timezone = 2
         else:
             timezone = 1
-        sT = sunsetTimes(lat, lon, day_of_year, timezone)
+        sT = sunset_times(lat, lon, day_of_year, timezone)
         sunrise, sunset = sT.converted
         return sunrise, sunset
     except:
@@ -112,7 +103,7 @@ def get_sunrise_sunset_inf(location):
         return 24, 0
 
 
-class sunsetTimes(object):
+class sunset_times(object):
     def __init__(self, lat_d, lon_d, day_of_year, time_zone=0):
         """
         lat_d: float
