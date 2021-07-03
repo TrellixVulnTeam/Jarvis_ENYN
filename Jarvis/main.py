@@ -208,11 +208,10 @@ class Modules:
         while not self.continuous_stopped:
             for module in self.continuous_modules:
                 if time.time() - self.core.continuous_modules[module.__name__].last_call >= \
-                        self.core.continuous_modules[
-                            module.__name__].intervall_time:
+                        self.core.continuous_modules[module.__name__].intervall_time:
                     self.core.continuous_modules[module.__name__].last_call = time.time()
                     try:
-                        module.run(self.core.continuous_modules[module.__name__], self.core.local_storage)
+                        module.run(self.core.continuous_modules[module.__name__], skills())
                     except:
                         traceback.print_exc()
                         print(
@@ -531,6 +530,9 @@ class LUNA:
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
         self.modules.query_threaded(name, text, user, direct=False)
+
+    def reload_webserver(self):
+        webThr
 
 
 class Users:
