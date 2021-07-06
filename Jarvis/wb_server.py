@@ -21,6 +21,7 @@ from distutils.dir_util import copy_tree
 
 def Webserver(core):
     webapp = Flask("JARVIS", template_folder="webserver/template", static_folder="webserver/static")
+    webapp.config['JSON_SORT_KEYS'] = False
     installer = InstallWrapper()
 
     def getData():
