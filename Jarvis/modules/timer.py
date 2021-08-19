@@ -3,8 +3,15 @@ import logging
 
 
 def isValid(text):
+    text = text.lower()
+    if 'timer' in text:
+        if 'stell' in text or 'beginn' in text:
+            return True
+        elif 'wie' in text and 'lange' in text:
+            return True
+        elif 'lösch' in text or 'beend' in text or 'stopp' in text:
+            return True
     return False
-    # toDo
 
 
 def handle(text, core, skills):
@@ -30,7 +37,7 @@ class Timer:
             return
         # Zeit: Um wieviel Uhr der Timer fertig ist; Text: Antwort von Core; Benutzer; Raum; Dauer: Wie lange der
         # Timer gehen soll
-        E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration, 'Benutzer': self.core.user}
+        E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration.capitalize(), 'Benutzer': self.core.user}
 
         # Vermeidung von Redundanz. Wird für 1 und mehrere Timer verwendet
         # Aufzählung wenn mehrere Timer

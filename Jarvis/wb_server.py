@@ -126,8 +126,14 @@ def Webserver(core):
         reg_alarm_exist = True if reg_len > 0 else False
         sin_alarm_exist = True if sin_len > 0 else False
         print(data)
-        return render_template("alarm_test.html", nav=nav, data=data, reg_alarm_exist=reg_alarm_exist,
+        return render_template("alarm.html", nav=nav, data=data, reg_alarm_exist=reg_alarm_exist,
                                sin_alarm_exist=sin_alarm_exist)
+
+    @webapp.route("/editModule/<moduleName>")
+    def editModule(moduleName):
+        with open(core.path + '/modules/' + moduleName + '.py', 'r') as file:
+            fileCode = file.read()
+        return render_template("editModule.html", nav=nav, fileCode=fileCode, moduleName=moduleName.capitalize())
 
     # API-like-Calls
 
@@ -298,8 +304,8 @@ def Webserver(core):
                 "userBirthDay": config["date_of_birth"]["day"],
                 "userFullName": config["first_name"],
                 "userFullLastName": config["last_name"],
-                "alarmSound": config["wecker_ton"],
-                "waitingMessages": config["wartende_benachrichtigungen"],
+                "alarmSound": config["alarm_sound"],
+                "waitingMessages": config["waiting_notifications"],
                 "telegram_established": True if core.config_data["messenger_key"] != "" else False
             }
             return jsonify(data)
@@ -363,7 +369,7 @@ def Webserver(core):
 
     @webapp.route("/api/module/<modName>/<action>")  # TODO
     def changeModuleMode(modName, action):
-        modules = []  # dummyList
+        modules = core.local_storage["modules"]  # dummyList
         if modName in modules:
             if action == "load":
                 pass
@@ -371,6 +377,12 @@ def Webserver(core):
                 pass
             elif action == "status":
                 pass
+            elif action == "update":
+                newCode = getData()
+                with open("C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\Jarvis\\modules\\"+modName+".py", 'w') as file:
+                    file.write(newCode)
+        else:
+            return "module not found"
         return "ok"
 
     @webapp.route("/api/phue/list/<action>")
