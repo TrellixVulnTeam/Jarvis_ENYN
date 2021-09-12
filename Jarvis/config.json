@@ -3,6 +3,7 @@
     "Local_storage": {
         "LUNA_Modules_defined_Vocabulary": [],
         "home_location": "",
+        "actual_location": "",
         "keys_to_distribute": [
             "users",
             "server_name",
