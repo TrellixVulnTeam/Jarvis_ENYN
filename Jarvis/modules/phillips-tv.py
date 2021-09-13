@@ -1,6 +1,5 @@
 import platform
 import subprocess
-from typing import Dict, List
 
 import requests
 import json
@@ -103,7 +102,9 @@ def handle(text, core, skills):
         if get_powerstate(core):
             core.say('Ja.')
         else:
-            core.say('Nein.')
+            core.say('Nein, soll ich ihn einschalten?')
+            if skills.is_desired(core.listen()):
+                run_command('power_on', core)
 
     elif 'hdmi' in text:
         if '1' in text:
