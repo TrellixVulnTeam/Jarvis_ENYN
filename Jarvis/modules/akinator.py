@@ -9,8 +9,9 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    core.say(
-        'Wilkommen zum Rate-spiel! Ich werde dir Fragen stellen, die du wahrheitsgemäß mit wahlweise \n"Ja"\n"Nein"\n"wahrscheinlich"\n"wahrscheinlich nicht"\noder "keine Ahnung" beantworten musst. Wenn du keine Lust mehr auf das Spiel hast, sag einfach "stopp" oder "beende das Spiel".')
+    core.say('Wilkommen zum Rate-spiel! Ich werde dir Fragen stellen, die du wahrheitsgemäß mit wahlweise '
+             '\n"Ja"\n"Nein"\n"wahrscheinlich"\n"wahrscheinlich nicht"\noder "keine Ahnung" beantworten musst. Wenn '
+             'du keine Lust mehr auf das Spiel hast, sag einfach "stopp" oder "beende das Spiel".')
 
     aki = Akinator()
     question = aki.start_game(language='de')
