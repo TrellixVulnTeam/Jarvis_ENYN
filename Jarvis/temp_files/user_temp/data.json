@@ -12,6 +12,6 @@
       "uid": 0,
       "telegram_id": 0,
       "alarm_sound": "standart.wav",
-      "wartende_benachrichtigungen": []
+      "waiting_notifications": []
   }
 }
