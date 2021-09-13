@@ -15,6 +15,7 @@ def isValid(text):
 
 
 def handle(text, core, skills):
+    print("zeit_datum.py")
     text = text.lower()
     now = datetime.datetime.now()
     if ' uhr ' in text or 'spät' in text:

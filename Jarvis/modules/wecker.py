@@ -81,7 +81,7 @@ class Alarm:
         self.text = f'Alles Gute zum Geburtstag{user_name}!' if self.is_birthday() else f'Guten Morgen{user_name}!'
         total_seconds = self.time["hour"] * 3600 + self.time["minute"] * 60 + self.time["second"]
         self.list = {"time": {"hour": self.time["hour"], "minute": self.time["minute"], "second": self.time["second"],
-                              "total_seconds": total_seconds}, "time_stamp": self.get_time_stamp(),
+                              "total_seconds": total_seconds, "time_stamp": self.get_time_stamp()},
                      "sound": self.user["alarm_sound"], "user": self.user,
                      "text": self.text, "active": True}
 
