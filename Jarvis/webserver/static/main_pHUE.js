@@ -13,9 +13,9 @@ function createPHUEBoxes(groups, allLights){
             tempLight = allLights[spezGroup["lights"][spezLight]];
             output += "<li class=\"list-group-item d-flex justify-content-between align-items-center\">";
             if (tempLight["on"] === true) {
-                output += "<button class=\"btn btn-outline-success\" onclick=\"changePowerstate('"+tempLight["name"]+"')\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
+                output += "<button class=\"btn btn-outline-success\" onclick=\"changePowerstate('"+tempLight["name"]+"', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             } else {
-                output += "<button class=\"btn btn-outline-danger\" onclick=\"changePowerstate('"+tempLight["name"]+"')\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
+                output += "<button class=\"btn btn-outline-danger\" onclick=\"changePowerstate('"+tempLight["name"]+"', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             }
             output += "<span style=\"margin-left: 50px\"></span>";
             output += "<span class=\"lampName\">" + tempLight["name"] + "</span>";
@@ -32,10 +32,14 @@ function createPHUEBoxes(groups, allLights){
     return output;
 }
 
-function changePowerstate(lightname){
-    console.log("change powerstate of " + lightname);
+function changePowerstate(lightname, element){
     $.get("/api/phue/change/powerState/"+lightname, function (){
-        console.log("lamp updated.");
+        if (element.classList.contains("btn-outline-danger")){
+            element.classList = "btn btn-outline-success";
+        }else{
+            element.classList = "btn btn-outline-danger";
+        }
+        console.log("changed");
     });
 }
 
