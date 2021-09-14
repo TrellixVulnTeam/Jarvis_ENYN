@@ -82,12 +82,10 @@ class PhillipsWrapper:
     def light_set_powerstate(self, lights, powerstate):
 
         if powerstate is None and (type(lights) == type("") or len(lights) <= 1):
-            print("first if")
             if self.bridge.get_light(lights, 'on'):
                 powerstate = 'off'
             else:
                 powerstate = 'on'
-        print("change powerstate of " + lights + " to " + powerstate)
         if powerstate == 'on':
             self.bridge.set_light(lights, 'on', True)
         elif powerstate == 'off':
