@@ -1,4 +1,3 @@
-
 function createPHUEBoxes(groups, allLights){
     let output = "";
     for (var gr in groups) {
@@ -20,9 +19,8 @@ function createPHUEBoxes(groups, allLights){
             }
             output += "<span style=\"margin-left: 50px\"></span>";
             output += "<span class=\"lampName\">" + tempLight["name"] + "</span>";
-            output += "<span style=\"margin-left: 50px\"></span>";
-            output += "<span class=\"material-icons-outlined\">brightness_2</span>";
-            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\">";
+            output += "<div style=\"width: 50%\"><span class=\"material-icons-outlined\">brightness_2</span>";
+            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"\"" + tempLight["brightness"] + "\"></div>";
             output += "<span class=\"material-icons-outlined\">light_mode</span>";
             output += "</li>";
 
@@ -35,12 +33,13 @@ function createPHUEBoxes(groups, allLights){
 }
 
 function changePowerstate(lightname){
+    console.log("change powerstate of " + lightname);
     $.get("/api/phue/change/powerState/"+lightname, function (){
         console.log("lamp updated.");
     });
 }
 
-window.onload = function (){
+function refreshInfs(){
     var output = "";
     $.get("/api/phue/list/groups", function (groups){
         $.get("/api/phue/list/lights?id=true", function (allLights){
@@ -52,3 +51,7 @@ window.onload = function (){
     });
 }
 
+window.onload = function (){
+    refreshInfs();
+    setInterval(refreshInfs, 30000);
+}
