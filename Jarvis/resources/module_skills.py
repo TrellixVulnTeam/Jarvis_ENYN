@@ -125,7 +125,7 @@ class skills:
     def get_value_number(item):
         first_value = item.split(' ', 1)[0]
         value = ""
-        number = 1
+        number = -1
         if "kg" in first_value:
             try:
                 first_value.replace("kg", "")
