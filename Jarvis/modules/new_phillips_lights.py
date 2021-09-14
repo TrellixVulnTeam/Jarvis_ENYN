@@ -80,11 +80,14 @@ class PhillipsWrapper:
         core.say('Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.')
 
     def light_set_powerstate(self, lights, powerstate):
-        if powerstate == None and len(lights) <= 1:
+
+        if powerstate is None and (type(lights) == type("") or len(lights) <= 1):
+            print("first if")
             if self.bridge.get_light(lights, 'on'):
                 powerstate = 'off'
             else:
                 powerstate = 'on'
+        print("change powerstate of " + lights + " to " + powerstate)
         if powerstate == 'on':
             self.bridge.set_light(lights, 'on', True)
         elif powerstate == 'off':
@@ -237,4 +240,4 @@ class Core:
 
 if __name__ == "__main__":
     ph = PhillipsWrapper(Core(), None)
-    print(ph.get_lights_in_json(order_by_id=True))
+    ph.light_set_powerstate("Küche", None)

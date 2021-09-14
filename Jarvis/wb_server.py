@@ -113,7 +113,6 @@ def Webserver(core):
     @webapp.route("/phue")
     def controlPhilipsLights():
         established = True if (not core.local_storage["module_storage"]["philips_hue"]["Bridge-Ip"] == "") else False
-
         return render_template("pHUE.html", nav=nav, established=established)
 
     @webapp.route("/alarm")
@@ -397,6 +396,7 @@ def Webserver(core):
             if action == 'color':
                 phueWrapper.light_change_color(name, value)
             elif action == 'powerState':
+                print("change powerstate")
                 phueWrapper.light_set_powerstate(name, value)
             elif action == 'brightness':
                 phueWrapper.light_set_brightness(name, value)
@@ -431,6 +431,7 @@ def Webserver(core):
                 return 'err'
         else:
             return 'err'
+        return 'ok'
 
     @webapp.route("/api/alarm/list/<action>")
     def listAlarm(action="*"):
