@@ -137,6 +137,10 @@ def Webserver(core):
             fileCode = file.read()
         return render_template("editModule.html", nav=nav, fileCode=fileCode, moduleName=moduleName.capitalize())
 
+    @webapp.route("/weatherOverview")
+    def weatherOverview():
+        return render_template("weatherOverview.html", nav=nav)
+
     # API-like-Calls
 
     @webapp.route("/api/installer/listPackages")
