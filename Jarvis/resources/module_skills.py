@@ -125,7 +125,7 @@ class skills:
     def get_value_number(item):
         first_value = item.split(' ', 1)[0]
         value = ""
-        number = 1
+        number = -1
         if "kg" in first_value:
             try:
                 first_value.replace("kg", "")
@@ -191,11 +191,17 @@ class skills:
         return temp3_array
 
     def get_time(self, i):
-        hour = i["hour"]
+        try:
+            hour = i["hour"]
+        except:
+            hour = i.hour
+        try:
+            minute = i["minute"]
+        except:
+            minute = i.minute
         next_hour = hour + 1
         if next_hour == 24:
             next_hour = 0
-        minute = i["minute"]
         hour = str(hour) if hour > 9 else '0' + str(hour)
         minute = str(minute) if minute > 9 else '0' + str(minute)
         if minute == 0:

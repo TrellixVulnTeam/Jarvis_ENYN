@@ -42,7 +42,7 @@ class Text_to_Speech:
             # wait until the text has been changed
             while self.text_area.get_attribute('value') != text:
                 time.sleep(0.1)
-            time.sleep(0.5)
+            time.sleep(0.3)
             self.play_audio()
             # wait until the text starts to say
             while self.state_of_button() == 'creating' or self.state_of_button() == 'waiting':

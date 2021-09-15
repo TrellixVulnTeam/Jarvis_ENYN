@@ -1,14 +1,18 @@
 """
 MIT License
+
 Copyright (c) 2019 NinjaSnail1080
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,8 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from .utils import ans_to_id, get_lang_and_theme, raise_connection_error
-from .exceptions import CantGoBackAnyFurther
+from Jarvis.modules.resources.akinator.utils import ans_to_id, get_lang_and_theme, raise_connection_error
 import re
 import time
 import json
@@ -46,6 +49,7 @@ HEADERS = {
 
 class Akinator():
     """A class that represents an Akinator game.
+
     The first thing you want to do after calling an instance of this class is to call "start_game()".
     """
     def __init__(self):
@@ -97,28 +101,24 @@ class Akinator():
     def _auto_get_region(self, lang, theme):
         """Automatically get the uri and server from akinator.com for the specified language and theme"""
 
-        server_regex = re.compile("[{\"translated_theme_name\":\"[\s\S]*\",\"urlWs\":\"https:\\\/\\\/srv[0-9]+\.akinator\.com:[0-9]+\\\/ws\",\"subject_id\":\"[0-9]+\"}]")
+        server_regex = re.compile(
+            "[{\"translated_theme_name\":\"[\s\S]*\",\"urlWs\":\"https:\\\/\\\/srv[0-9]+\.akinator\.com:[0-9]+\\\/ws\",\"subject_id\":\"[0-9]+\"}]")
         uri = lang + ".akinator.com"
+        r = requests.get("https://" + uri)
 
-        bad_list = ["https://srv12.akinator.com:9398/ws"]
-        while True:
-            r = requests.get("https://" + uri)
+        match = server_regex.search(r.text)
+        parsed = json.loads(match.group().split("'arrUrlThemesToPlay', ")[-1])
 
-            match = server_regex.search(r.text)
-            parsed = json.loads(match.group().split("'arrUrlThemesToPlay', ")[-1])
-
-            if theme == "c":
-                server = next((i for i in parsed if i["subject_id"] == "1"), None)["urlWs"]
-            elif theme == "a":
-                server = next((i for i in parsed if i["subject_id"] == "14"), None)["urlWs"]
-            elif theme == "o":
-                server = next((i for i in parsed if i["subject_id"] == "2"), None)["urlWs"]
-
-            if server not in bad_list:
-                return {"uri": uri, "server": server}
+        if theme == "c":
+            return {"uri": uri, "server": next((i for i in parsed if i["subject_id"] == "1"), None)["urlWs"]}
+        elif theme == "a":
+            return {"uri": uri, "server": next((i for i in parsed if i["subject_id"] == "14"), None)["urlWs"]}
+        elif theme == "o":
+            return {"uri": uri, "server": next((i for i in parsed if i["subject_id"] == "2"), None)["urlWs"]}
 
     def start_game(self, language=None, child_mode=False):
         """Start an Akinator game. Run this function first before the others. Returns a string containing the first question
+
         The "language" parameter can be left as None for English, the default language, or it can be set to one of the following (case-insensitive):
             - "en": English (default)
             - "en_animals": English server for guessing animals
@@ -145,6 +145,7 @@ class Akinator():
             - "tr": Turkish
             - "id": Indonesian
         You can also put the name of the language spelled out, like "spanish", "korean", "french_animals", etc.
+
         The "child_mode" parameter is False by default. If it's set to True, then Akinator won't ask questions about things that are NSFW
         """
         self.timestamp = time.time()
@@ -168,6 +169,7 @@ class Akinator():
 
     def answer(self, ans):
         """Answer the current question, which you can find with "Akinator.question". Returns a string containing the next question
+
         The "ans" parameter must be one of these (case-insensitive):
             - "yes" OR "y" OR "0" for YES
             - "no" OR "n" OR "1" for NO
@@ -188,10 +190,11 @@ class Akinator():
 
     def back(self):
         """Goes back to the previous question. Returns a string containing that question
+
         If you're on the first question and you try to go back again, the CantGoBackAnyFurther exception will be raised
         """
         if self.step == 0:
-            raise CantGoBackAnyFurther("You were on the first question and couldn't go back any further")
+            raise Exception("You were on the first question and couldn't go back any further")
 
         r = requests.get(BACK_URL.format(self.server, self.timestamp, str(self.child_mode).lower(), self.session, self.signature, self.step, self.question_filter), headers=HEADERS)
         resp = self._parse_response(r.text)
@@ -204,8 +207,11 @@ class Akinator():
 
     def win(self):
         """Get Aki's guesses for who the person you're thinking of is based on your answers to the questions so far
+
         Defines and returns the variable "Akinator.first_guess", a dictionary describing his first choice for who you're thinking about. The three most important values in the dict are "name" (character's name), "description" (description of character), and "absolute_picture_path" (direct link to image of character)
+
         This function also defines "Akinator.guesses", which is a list of dictionaries containing his choices in order from most likely to least likely
+
         It's recommended that you call this function when Aki's progression is above 85%, which is when he will have most likely narrowed it down to just one choice. You can get his current progression via "Akinator.progression"
         """
         r = requests.get(WIN_URL.format(self.server, self.timestamp, str(self.child_mode).lower(), self.session, self.signature, self.step), headers=HEADERS)

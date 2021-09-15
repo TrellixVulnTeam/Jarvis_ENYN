@@ -5,6 +5,7 @@ def isValid(text):
     if ('beend' in text) and ('musik' in text or 'ausgabe' in text or 'wecker' in text):
         return True
 
+
 def handle(text, core, skills):
     text = text.lower()
     if 'musik' in text:

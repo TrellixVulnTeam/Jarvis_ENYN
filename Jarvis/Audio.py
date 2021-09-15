@@ -61,6 +61,7 @@ class AudioInput:
             return text
 
     def recognize_input(self, listen=False, play_bling_before_listen=False):
+        logging.info('[Listening] for user-input')
         # recognize user input through the microphone
         try:
             with sr.Microphone(device_index=None) as source:
@@ -105,7 +106,7 @@ class AudioInput:
                 input=True,
                 frames_per_buffer=porcupine.frame_length)
 
-            print('\n[INFO] Listening {%s}' % keywords)
+            logging.info('\nListening {%s}' % keywords)
 
             while not self.stopped:
                 pcm = audio_stream.read(porcupine.frame_length)
@@ -115,15 +116,14 @@ class AudioInput:
                     if keyword_index > 0:
                         self.core.hotword_detected("wrong assistant!")
                     else:
-                        print(
-                            f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
+                        logging.info(f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
                         self.recognize_input()
 
         except MemoryError:
             porcupine.delete()
             self.start()
         except:
-            print(f"[ERROR] {traceback.print_exc()}")
+            logging.error(f"[ERROR] {traceback.print_exc()}")
 
     def adjusting(self):
         with sr.Microphone(device_index=None) as source:
@@ -184,18 +184,24 @@ class AudioOutput:
                         audio.Channel(1).set_volume(0.10)
                         audio.Channel(2).set_volume(0.10)
                     if type(self.notification[0]) == type("string"):
+                        logging.info(f'Saying "{self.notification[0]}"')
+                        # if the notification is a string (a message to say), pass through to tts
                         self.tts.say(self.notification[0])
                         self.notification.pop(0)
                     else:
+                        logging.info(f'Playing the track "{self.notification[0]}"')
+                        # else pass through to audio-manager
                         track = audio.Sound(self.notification[0])
                         self.notification.pop(0)
                         audio.Channel(0).play(track)
                 if not self.music == [] and audio.Channel(2).get_busy() == 0:
                     if type(self.music[0]) == type("string"):
+                        logging.info(f'Play music with name {self.music[0]}')
                         topic = self.music[0]
                         self.music.pop(0)
                         self.music_player.play(by_name=topic)
                     else:
+                        logging.info(f'Play track with path {self.music[0]}')
                         track = audio.Sound(self.music[0])
                         audio.Channel(2).play(track)
                         self.playback.pop(0)

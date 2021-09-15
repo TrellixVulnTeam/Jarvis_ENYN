@@ -30,7 +30,10 @@ class Timer:
         self.skills = skills
 
     def create_timer(self, text):
+        # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
+        text = text.replace(' auf ', ' in ')
         time = self.core.Analyzer.analyze(text)['datetime']
+        print(time)
         temp_text = "Dein Timer ist abgelaufen."
         duration = self.get_duration(text)
         if duration is None:

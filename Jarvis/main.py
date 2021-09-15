@@ -127,7 +127,7 @@ class Modules:
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = skills()
         analysis = {}
-        if text == None:
+        if text is None:
             text = str(random.randint(0, 1000000000))
         else:
             logging.info('{}'.format(text))
@@ -146,8 +146,6 @@ class Modules:
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
-                    mt.join() # wait until Module is done...
-                    self.start_module(user=user, name='wartende_benachrichtigung')
         else:
             try:
                 analysis = self.core.analyzer.analyze(str(text))
@@ -157,12 +155,15 @@ class Modules:
                 analysis = {}
             for module in self.modules:
                 try:
-                    if module.isValid(text):
+                    if module.isValid(text.lower()):
                         self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger,
                                                                                  user)
                         mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                         mt.daemon = True
                         mt.start()
+                        mt.join()  # wait until Module is done...
+                        if not 'wartende_benachrichtigung' in module.__name__:  # dont say, that there was a mistake in this module
+                            self.start_module(user=user, name='wartende_benachrichtigung')
                 except:
                     traceback.print_exc()
                     print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
@@ -474,7 +475,8 @@ class LUNA:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
                     self.local_storage['rejected_messenger_messages'].append(msg)
                     try:
-                        logging.warning('Message from unknown Telegram user {} ({}). Access denied.'.format(msg['from']['first_name']))
+                        logging.warning('Message from unknown Telegram user {} ({}). Access denied.'.format(
+                            msg['from']['first_name']))
                     except KeyError:
                         logging.warning('Nachricht von unbekanntem Telegram-Nutzer ({}). Zugriff verweigert.'.format(
                             msg['from']['id']))

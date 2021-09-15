@@ -1,124 +1,227 @@
-<head>
-    <title>JARVIS</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-</head>
-<body>
-    <nav class="navbar navbar-dark bg-dark navbar-expand-sm">
-      <a class="navbar-brand" href="/index">JARVIS</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="mainNav">
-          <ul class="nav">
-          {% for item in nav %}
-              <li class="nav-item"><a class="nav-link" href="{{ item.href }}">{{ item.text }}</a></li>
-          {% endfor %}
-          </ul>
-        </div>
-    </nav>
+<html>
+    <head>
+        <title>Test</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="index.js"></script>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="piProgress.css" rel="stylesheet">
+        <style>
 
-    <div class="container-fluid">
-    <div class="row justify-content-center mt-3">
-      <div class="col-md-10">
-        <div class="row justify-content-center">
-          <div class="card-deck mb-2">
-            <!-- CARD-Element-Block -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Server Status</h5>
-                <h6 class="card-subtitle mb-2 text-muted">In welchem Zustand befindet sich im Moment das System?</h6>
-                <p class="card-text">
-                  <h2 class="text-center"><span class="badge badge-secondary" id="StartPageServerStatus">unbekannt</span></h2>
-                  <div class="d-flex justify-content-between mt-1" id="timestampUptime">
+            body {
+                background-image:url('static/img/background.jpg');
+                background-repeat: no-repeat;
+                background-size: auto;
+            }
 
+            i {
+                font-size-adjust: auto;
+            }
+
+            .row{
+                margin: 5px;
+                gap: 10px;
+            }
+
+            .modal-body{
+                margin: 20px;
+                justify-content: space-around;
+            }
+
+            .card {
+                background-color: rgba(0, 0, 0, 0.65);
+                min-width: 300px;
+                max-width: 25%;
+            }
+
+            .card-body{
+                align-items: stretch;
+            }
+
+            .icon{
+                font-size: 4em;
+            }
+
+            .header_link{
+                cursor: pointer;
+            }
+
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">JARVIS</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dropdown
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="#">Action</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Something else here</a>
                   </div>
-                </p>
-              </div>
-              <div class="card-footer d-flex justify-content-between">
-                <a class="btn btn-sm btn-success" onclick="statusServer('start')" id="serverStatusStartButton">System starten</a>
-                <a class="btn btn-sm btn-danger" onclick="statusServer('stop')" id="serverStatusStopButton">System stoppen</a>
-              </div>
+                </li>
+              </ul>
+              <form class="form-inline my-2" id="titleTime" style="color: white">
+                <span class="spinner-border spinner-border-sm"></span>
+                Loading..
+              </form>
             </div>
-            <!-- CARD-Element-Block -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Installer Status</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Wird gerade etwas im Hintergrund installiert?</h6>
-                <p class="card-text">
-                  <h2 class="text-center"><span class="badge badge-danger mt-2 " id="StartPageInstallerStatus">Nein</span></h2>
-                  <br />
-                  <pre id="StartPageInstallerLogs"></pre>
-                </p>
-              </div>
-              <div class="card-footer d-flex justify-content-between">
-                <a href="/setup_2" class="card-link disabled">Software-Pakete installieren…</a>
-              </div>
-            </div>
-            <!-- CARD-Element-Block -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Zusatz-Module</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Läuft die Messenger-Anbindung?</h6>
-                <div class="d-flex justify-content-between">
-                  <span class="mt-1">Telegram</span>
-                  <h3 class="text-center"><span class="badge badge-danger" id="telegramIndicator">unbekannt</span></h3>
-                </div>
-              </div>
-              <div class="card-footer d-flex justify-content-between">
-                <a class="card-link disabled" style="opacity: 0;">.</a>
-              </div>
-            </div>
-          </div>
-          <div class="card-deck">
-            <!-- CARD-Element-Block -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title" id="mainUserListBadge">Registrierte Benutzer</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Welche Benutzer sind aktuell eingerichtet?</h6>
-                <p class="card-text" id="mainUserList">
-                  lädt…
-                </p>
-              </div>
-              <div class="card-footer d-flex justify-content-between">
-                <a href="/setupUser" class="card-link disabled">zur Benutzer-Übersicht…</a>
-              </div>
-            </div>
-            <!-- CARD-Element-Block -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title" id="mainModuleListBadge">Aktive Module</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Welche Befehle und Funktionen sind aktuell aktiviert?</h6>
-                <p class="card-text" id="mainModuleList">
-                  lädt…
-                </p>
-              </div>
-              <div class="card-footer d-flex justify-content-between">
-                <a href="/setupModules" class="card-link disabled">zur Modul-Übersicht…</a>
-              </div>
-            </div>
-            <!-- CARD-Element-Block -->
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title" id="mainExternListBadge">Externe Systeme</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Welche externe Systeme sind in JARVIS eingebunden?</h6>
-                <p class="card-text" id="mainExternList">
-                  lädt…
-                </p>
-              </div>
-              <div class="card-footer d-flex justify-content-between">
-                <a href="/setupModules" class="card-link disabled">zur externe System-Übersicht…</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+          </nav>
+        <br />
+        <br />
 
-    </div>
-    </div>
-    <script src="{{ url_for('static', filename='main_index.js')}}"></script>
-</body>
+
+        <div class="row justify-content-center" id="cardRow">
+            <div class="card border-primary">
+                <div class="card-header form-inline bg-primary header_link" data-toggle="modal" data-target="#blueModal" >
+                    <i class="material-icons">bookmark</i> Quick Links
+                </div>
+                <div class="col card-body" id="blueBody">
+                    <div class="row justify-content-md-center">
+                        <button class="col btn btn-lg btn-primary" href="#">
+                            <i class="material-icons icon">settings</i>
+                        </button>
+
+                        <button class="col btn btn-lg btn-primary" href="#">
+                            <i class="material-icons icon">person</i>
+                        </button>
+
+                        <button class="col btn btn-lg btn-primary" href="#">
+                            <i class="material-icons icon">alarm</i>
+                        </button>
+
+                        <button class="col btn btn-lg btn-primary" href="#">
+                            <i class="material-icons icon">cloud</i>
+                        </button>
+
+                        <button class="col btn btn-lg btn-primary" href="#">
+                            <i class="material-icons icon">audiotrack</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-danger">
+                <div class="card-header form-inline bg-danger header_link" data-toggle="modal" data-target="#redModal" >
+                    <i class="material-icons">error</i> Warnings
+                </div>
+                <div class="col card-body text-danger" id="redBody">
+                    Warnungen
+                </div>
+            </div>
+
+            <div class="card border-success">
+                <div class="card-header form-inline bg-success header_link" data-toggle="modal" data-target="#greenModal" >
+                    <i class="material-icons">analytics</i> System Daten
+                </div>
+                <div class="col card-body text-success" id="greenBody">
+
+                </div>
+            </div>
+
+            <div class="card border-info">
+                <div class="card-header form-inline bg-info header_link" data-toggle="modal" data-target="#cyanModal" >
+                    <i class="material-icons">screen_share</i> Device Control
+                </div>
+                <div class="col card-body text-success" id="cyanBody">
+                    <div class="row">
+                        <button class="col btn btn-lg btn-info" href="#">
+                            <i class="material-icons icon">live_tv</i>
+                        </button>
+
+                        <button class="col btn btn-lg btn-info flex-item" href="#">
+                            <i class="material-icons icon">tungsten</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div class="modal fade" id="blueModal" tabindex='-1'>
+            <div class="modal-dialog bg-dark">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h4 class="modal-title"><i class="material-icons">bookmark</i> Quick Links</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="text-primary">
+                    <div class="modal-body" id="blueModalBody">
+                        <script>$("#blueModalBody").html($("#blueBody").html())</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="redModal" tabindex='-1'>
+            <div class="modal-dialog bg-dark">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                        <h4 class="modal-title"><i class="material-icons">error</i> Warnings</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body text-danger">
+                    <div class="modal-body" id="redModalBody">
+                        <script>$("#redModalBody").html($("#redBody").html())</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="greenModal" tabindex='-1'>
+            <div class="modal-dialog bg-dark">
+                <div class="modal-content">
+                    <div class="modal-header bg-success">
+                        <h4 class="modal-title"><i class="material-icons">analytics</i> System Daten</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body text-success">
+                    <div class="modal-body" id="greenModalBody">
+                        <script>$("#greenModalBody").html($("#greenBody").html())</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="cyanModal" tabindex='-1'>
+            <div class="modal-dialog bg-dark">
+                <div class="modal-content">
+                    <div class="modal-header bg-info">
+                        <h4 class="modal-title"><i class="material-icons">screen_share</i> Device Control</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body text-info">
+                    <div class="modal-body" id="cyanModalBody">
+                        <script>$("#cyanModalBody").html($("#cyanBody").html())</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

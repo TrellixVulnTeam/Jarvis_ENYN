@@ -1,9 +1,7 @@
-import random
-import time
+from phue import Bridge
 
 if __name__ == "__main__":
-    for i in range(10):
-        print(10-i)
-        time.sleep(1)
-    filme = ["suicide", "le truck"]
-    print(random.choice(filme))
+    bridge = Bridge("192.168.0.191")
+    bridge.connect()
+
+    print(bridge.get_light(1))

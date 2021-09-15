@@ -4,6 +4,7 @@
 import base64
 import logging
 import shutil
+import socket
 import time
 
 from flask import Flask, render_template, jsonify, request, send_file, make_response, redirect
@@ -13,6 +14,8 @@ import json
 import os
 import sys
 from webserver.helpWrapper import InstallWrapper
+from modules.new_phillips_lights import PhillipsWrapper
+from resources.module_skills import skills
 
 # JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
 sys.path.append(os.path.join(os.path.dirname(__file__), "/"))
@@ -43,11 +46,11 @@ def Webserver(core):
     @webapp.route("/")
     @webapp.route("/index")
     def index():
-        firstTime = False
-        if firstTime:
-            return redirect("/setup")
-        else:
-            return render_template("index.html", nav=nav)
+        return render_template("index.html", nav=nav)
+
+    @webapp.route("/devIndex")
+    def system():
+        return render_template("devIndex.html", nav=nav)
 
     @webapp.route("/setup")
     def setup_1():
@@ -109,8 +112,7 @@ def Webserver(core):
 
     @webapp.route("/phue")
     def controlPhilipsLights():
-        established = True if (not core.local_storage["module_storage"]["philips_hue"]["Bridge-IP"] == "") else False
-
+        established = True if (not core.local_storage["module_storage"]["philips_hue"]["Bridge-Ip"] == "") else False
         return render_template("pHUE.html", nav=nav, established=established)
 
     @webapp.route("/alarm")
@@ -349,10 +351,10 @@ def Webserver(core):
             path = core.path + "/modules/resources/clock_sounds/"
             names = [os.listdir(path)]
             for file in names:
-                file.replace('./', '')
-                file.replace('.wav', '')
-            data = {}
-            data["alarmSounds"] = names
+                print(file)
+                # file.replace('./', '')
+                # file.replace('.wav', '')
+            data = {"alarmSounds": names}
         else:
             data = {
                 "users": users,
@@ -385,15 +387,51 @@ def Webserver(core):
             return "module not found"
         return "ok"
 
-    @webapp.route("/api/phue/list/<action>")
-    def listPHUE(action="*"):
-        if action == "lights":
-            from modules.new_phillips_lights import PhillipsWrapper
-            from resources.module_skills import skills
-            skills = skills()
-            phueWrapper = PhillipsWrapper(core, skills)
-            lights = phueWrapper.get_lights_in_json()
-            return jsonify(lights)
+    @webapp.route("/api/phue/<groupAction>/<action>")
+    @webapp.route("/api/phue/<groupAction>/<action>/<name>")
+    @webapp.route("/api/phue/<groupAction>/<action>/<name>/<value>")
+    def changePHUE(groupAction, action, name=None, value=None):
+        phueWrapper = PhillipsWrapper(core, skills())
+        if groupAction == "change":
+            if action == 'color':
+                phueWrapper.light_change_color(name, value)
+            elif action == 'powerState':
+                print("change powerstate")
+                phueWrapper.light_set_powerstate(name, value)
+            elif action == 'brightness':
+                phueWrapper.light_set_brightness(name, value)
+            elif action == 'createGroup':
+                phueWrapper.create_group(value, getData())
+            elif action == 'renameGroup':
+                phueWrapper.rename_group(name, value)
+            elif action == 'changeLightsInGroup':
+                phueWrapper.change_lights_in_group(name, getData())
+            else:
+                return 'err'
+        elif groupAction == 'list':
+            phueWrapper = PhillipsWrapper(core, skills())
+            if action == "lights":
+                print(request.args.get('id'))
+                if request.args.get('id'):
+                    lights = phueWrapper.get_lights_in_json(order_by_id=True)
+                else:
+                    lights = phueWrapper.get_lights_in_json()
+                return jsonify(lights)
+            elif action == 'light':
+                try:
+                    name = int(name)
+                except:
+                    pass
+                return jsonify(phueWrapper.get_light_in_json(name))
+            elif action == 'groups':
+                return jsonify(phueWrapper.get_groups())
+            elif action == 'group':
+                return jsonify(phueWrapper.get_group(name))
+            else:
+                return 'err'
+        else:
+            return 'err'
+        return 'ok'
 
     @webapp.route("/api/alarm/list/<action>")
     def listAlarm(action="*"):
@@ -402,13 +440,29 @@ def Webserver(core):
         from main import Modulewrapper
         alarm = Alarm(Modulewrapper(core, "", None, None, None), skills())
         alarm.create_alarm_storage()
+
+        regular_present = False
+        single_present = False
+
+        for item in core.local_storage["alarm"]["regular"]:
+            if not core.local_storage["alarm"]["regular"][item] == []:
+                regular_present = True
+        for item in core.local_storage["alarm"]["single"]:
+            if not item is []:
+                single_present = True
+
         alarm_list = {"regular_alarm": core.local_storage["alarm"]["regular"],
-                      "single_alarm": core.local_storage["alarm"]["single"]}
+                      "single_alarm": core.local_storage["alarm"]["single"],
+                      "singlePresent": single_present,
+                      "regularPresent": regular_present
+                      }
+        print(regular_present)
         if action == "alarms":
             return jsonify(alarm_list)
-
-        if action == "json_alarms":
+        elif action == "json_alarms":
             return alarm_list
+        elif action == "isPresent":
+            return jsonify({"single": single_present, "regular": regular_present})
 
     @webapp.route("/api/alarm/<action>/<regular>/<day>/<time>")
     def changeAlarm(action, regular, day, time):
@@ -449,6 +503,8 @@ def Webserver(core):
 
     ws = pywsgi.WSGIServer(("0.0.0.0", 50500), webapp)
 
-    print("To conn")
+    logging.info('Webserver startet...')
+
+    print(f"To connect with webinterface, call the following address: {socket.gethostbyname(socket.gethostname())}")
 
     ws.serve_forever()
