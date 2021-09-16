@@ -53,7 +53,7 @@ function refreshWeather(icon){
     } else if (icon >= 611 && icon <= 616){
         weatherIcon = "partly-cloudy"+time+"-sleet.svg";
         weatherKind = "rainy";
-    } else if (icon == 620 || icon == 621){
+    } else if (icon === 620 || icon == 621){
         weatherIcon = "partly-cloudy"+time+"-snow.svg";
         weatherKind = "snowy";
     } else if (icon == 622){
@@ -111,9 +111,9 @@ function refreshBackgroundAndText(weatherKind){
     var cards = document.getElementsByClassName("day-card");
     if (weatherKind == "thunder"){
         if (old_bg != "background_thunder.jpg"){
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_thunder.jpg')";
+            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_thunder.jpg')";
             document.body.style.color = "white";
-            for (var i = 0; i < cards.length; i++){
+            for (let i = 0; i < cards.length; i++){
                 cards[i].style.color = "white";
             }
             changeTempCharXYColor("white");
@@ -126,7 +126,7 @@ function refreshBackgroundAndText(weatherKind){
     }
     else if (date.getHours() >= 22 || date.getHours() <= 6 || weatherKind == "night"){
         if (old_bg != "background_night.jpg"){
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_night.jpg')";
+            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_night.jpg')";
             document.body.style.color = "white";
             for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "white";
@@ -138,7 +138,7 @@ function refreshBackgroundAndText(weatherKind){
         } 
     }else if (weatherKind == "misty"){
         if (old_bg != "background_misty.jpg"){
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_misty.jpg')";
+            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_misty.jpg')";
             document.body.style.color = "black";
             for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "black";
@@ -150,7 +150,7 @@ function refreshBackgroundAndText(weatherKind){
         }
     }else if (weatherKind == "sunny"){
         if (old_bg != "background_sunny.jpg"){
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_sunny.jpg')";
+            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_sunny.jpg')";
             document.body.style.color = "black";
             for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "black";
@@ -163,11 +163,11 @@ function refreshBackgroundAndText(weatherKind){
     } else if (weatherKind.includes("cloudy")){7
         if (weatherKind.includes("partly")){
             if (old_bg != "background_partly_cloudy.jpg"){
-                document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_partly_cloudy.jpg')";
+                document.body.style.backgroundImage = "url('static/img/weatherBackground/background_partly_cloudy.jpg')";
                 old_bg = "background_partly_cloudy.jpg";
             }
         }else if (old_bg != "background_cloudy.jpg"){
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_cloudy.jpg')";
+            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_cloudy.jpg')";
             old_bg = "background_cloudy.jpg";
         }
         document.body.style.color = "black";
@@ -181,7 +181,7 @@ function refreshBackgroundAndText(weatherKind){
 
     } else if (weatherKind == "rainy"){
         if (old_bg != "background_rainy.jpg"){
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_rainy.jpg')";
+            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_rainy.jpg')";
             document.body.style.color = "white";
             for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "white";
@@ -194,7 +194,7 @@ function refreshBackgroundAndText(weatherKind){
         }
 
     } else if (weatherKind == "snowy" && old_bg != "background_snow.jpg"){
-        document.body.style.backgroundImage = "url('static/img/weatherBackground/weatherBackground/background_snow.jpg')";
+        document.body.style.backgroundImage = "url('static/img/weatherBackground/background_snow.jpg')";
         document.body.style.color = "black";
         for (var i = 0; i < cards.length; i++){
             cards[i].style.color = "black";
@@ -254,7 +254,7 @@ function fillInformations (data){
     document.getElementById("todayWeatherVision").innerHTML = (data["current"]["visibility"]/1000) + "km";
     document.getElementById("todayWeatherHumidity").innerHTML = data["current"]["humidity"] + "&percnt;";
     document.getElementById("todayWeatherDescription").innerHTML = data["current"]["weather"]["0"]["description"];
-    document.getElementById("todayWeatherIcon").innerHTML = "<img/weatherBackground src="+tempWeather[0]+"\"../../../../../Documents/html_schr/static/svg/weatherIcons\" width=\"175px\">";
+    document.getElementById("todayWeatherIcon").innerHTML = "<img/weatherBackground src=\"static/svg/weatherIcons/"+tempWeather[0]+"\" width=\"175px\">";
     document.getElementById("todayWeatherDew").innerHTML = Math.round(data["current"]["dew_point"]).toString() + "&degC";
     document.getElementById("todayWeatherUVIndex").innerHTML = Math.round(data["current"]["uvi"]);
     refreshBackgroundAndText(tempWeather[1]);
@@ -276,7 +276,7 @@ function fillInformationForOneDay(daynumber, dayWeather){
     } else {
         document.getElementById("day"+daynumber+"-headline").innerHTML = getWeekdayName(newDayNumber);
     }
-    document.getElementById("day"+daynumber+"-weather-icon").innerHTML = "<img/weatherBackground src="+refreshWeather(dayWeather["weather"]["0"]["id"])[0]+"\"../../../../../Documents/html_schr/static/svg/weatherIcons\" width=\"75%\">";
+    document.getElementById("day"+daynumber+"-weather-icon").innerHTML = "<img/weatherBackground src=\"static/svg/weatherIcons/"+refreshWeather(dayWeather["weather"]["0"]["id"])[0]+"\" width=\"75%\">";
     document.getElementById("day"+daynumber+"-max-temp").innerHTML = Math.round(dayWeather["temp"]["max"]) +"&deg;";
     document.getElementById("day"+daynumber+"-min-temp").innerHTML =Math.round( dayWeather["temp"]["min"]) +"&deg;";
 }
@@ -710,7 +710,7 @@ function createDayModals(anzDays, data){
         modalCode += "<div class=\"modal-body\" id=\"day"+i+"-modalBody\" style=\"color: rgb(0, 0, 0)\">";
         modalCode += "<div class=\"row\">";
         modalCode += "<div class=\"col\" id=\"day"+i+"-modal-weather-icon\">";
-        modalCode += "<img/weatherBackground src="+weatherInf[0]+"\"../../../../../Documents/html_schr/static/svg/weatherIcons\" width=\"175px\">";
+        modalCode += "<img/weatherBackground src=\"static/svg/weatherIcons/"+weatherInf[0]+"\" width=\"175px\">";
         modalCode += "</div>";
         modalCode += "<div class=\"col\" id=\"day"+i+"-modal-descr\" style=\"font-size: 3em\">";
         modalCode += data["daily"][i]["weather"]["0"]["description"];
