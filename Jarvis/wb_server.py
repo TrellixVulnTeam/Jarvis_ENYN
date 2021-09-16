@@ -408,7 +408,7 @@ def Webserver(core):
     @webapp.route("/api/phue/<groupAction>/<action>/<name>")
     @webapp.route("/api/phue/<groupAction>/<action>/<name>/<value>")
     def changePHUE(groupAction, action, name=None, value=None):
-        phueWrapper = PhillipsWrapper(core, skills())
+        phueWrapper = PhillipsWrapper(core)
         if groupAction == "change":
             if action == 'color':
                 phueWrapper.light_change_color(name, value)
@@ -426,7 +426,7 @@ def Webserver(core):
             else:
                 return 'err'
         elif groupAction == 'list':
-            phueWrapper = PhillipsWrapper(core, skills())
+            phueWrapper = PhillipsWrapper(core)
             if action == "lights":
                 print(request.args.get('id'))
                 if request.args.get('id'):

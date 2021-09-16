@@ -169,7 +169,7 @@ class Alarm:
                     self.core.local_storage["alarm"][extension][day] = []
 
     def confirm_action(self):
-        repeatings = 'Regelmäßiger ' if self.repeat == 'regular' else ' '
+        repeatings = 'Regelmäßiger ' if self.repeat == 'regular' else ''
         day_names = []
         for item in self.days:
             day_names.append(self.skills.Statics.weekdays_eng_to_ger[item])
@@ -191,3 +191,19 @@ class Alarm:
             minute = '0' + minute
 
         return f'{hour}:{minute}Uhr'
+
+class Core:
+    def __init__(self):
+        self.local_storage = {"module_storage": {
+            "philips_hue": {
+                "Bridge-Ip": "192.168.0.191"
+            }
+        }}
+
+    def module_storage(self, module_name=""):
+        return {"Bridge-Ip": "192.168.0.191"}
+
+
+if __name__ == "__main__":
+    ph = Alarm(Core(), None)
+    ph.light_set_powerstate("Küche", None)

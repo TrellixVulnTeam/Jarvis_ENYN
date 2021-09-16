@@ -13,7 +13,7 @@ from Audio import AudioOutput, AudioInput
 from resources.analyze import Sentence_Analyzer
 import pkgutil
 from threading import Thread
-from resources.module_skills import skills
+from resources.module_skills import skills as Skill
 import io
 import wb_server as ws
 import logging
@@ -73,7 +73,7 @@ class Modules:
         return modules
 
     def query_threaded(self, name, text, user, direct, messenger=False):
-        mod_skill = skills()
+        mod_skill = self.core.skills
         if text == None:
             # generate a random text
             text = random.randint(0, 1000000000)
@@ -125,7 +125,7 @@ class Modules:
 
     def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
         # self.query_threaded(name, text, direct, messenger=messenger)
-        mod_skill = skills()
+        mod_skill = self.core.skills
         analysis = {}
         if text is None:
             text = str(random.randint(0, 1000000000))
@@ -212,7 +212,7 @@ class Modules:
                         self.core.continuous_modules[module.__name__].intervall_time:
                     self.core.continuous_modules[module.__name__].last_call = time.time()
                     try:
-                        module.run(self.core.continuous_modules[module.__name__], skills())
+                        module.run(self.core.continuous_modules[module.__name__], self.core.skills)
                     except:
                         traceback.print_exc()
                         print(
@@ -267,6 +267,7 @@ class Modulewrapper:
         self.messenger = core.messenger
 
         self.core = core
+        self.skills = core.skills
         self.Analyzer = core.analyzer
         self.local_storage = core.local_storage
         self.system_name = core.system_name
@@ -450,6 +451,7 @@ class LUNA:
         self.config_data = conf_dat
         self.modules = modules
         self.analyzer = analyzer
+        self.skills = Skill()
         self.messenger = None
         self.messenger_queued_users = []  # These users are waiting for a response
         self.messenger_queue_output = {}
@@ -463,6 +465,7 @@ class LUNA:
         self.continuous_modules = {}
         self.system_name = system_name
         self.path = config_data["Local_storage"]['LUNA_PATH']
+
 
     def messenger_thread(self):
         # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.

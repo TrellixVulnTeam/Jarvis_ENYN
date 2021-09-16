@@ -27,12 +27,12 @@ def handle(text, core, skills):
 
 
 class PhillipsWrapper:
-    def __init__(self, core, skills):
+    def __init__(self, core):
         BRIDGE_IP = core.local_storage["module_storage"]["philips_hue"]["Bridge-Ip"]
         self.bridge = Bridge(BRIDGE_IP)
         self.bridge.connect()
 
-        self.skills = skills
+        self.skills = core.skills
         self.core = core
 
         self.lights = self.bridge.lights
