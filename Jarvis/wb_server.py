@@ -15,7 +15,7 @@ import os
 import sys
 from webserver.helpWrapper import InstallWrapper
 from modules.new_phillips_lights import PhillipsWrapper
-from resources.module_skills import skills
+from main import Modulewrapper
 import mimetypes
 
 # JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
@@ -28,6 +28,7 @@ def Webserver(core):
     webapp.config['JSON_SORT_KEYS'] = False
     installer = InstallWrapper()
     mimetypes.add_type('image/svg+xml', '.svg')
+    helpModuleWrapper = Modulewrapper(core, "", None, None, None)
 
     def getData():
         data = request.args.to_dict()
@@ -145,16 +146,9 @@ def Webserver(core):
 
     # API-like-Calls
 
-    @app.route('/static/svg/weatherIcons/<svgFile>.svg')
+    @webapp.route('/static/svg/weatherIcons/<svgFile>.svg')
     def serve_content(svgFile):
         return file('static/svg/weatherIcons/' + svgFile + '.svg').read()
-
-    @webapp.route("static/svg/weatherIcons/<svgName>", methods=('GET', 'HEAD'))
-    def prerenderSVG(svgName):
-        with open(str(Path(__file__).parent) + "/webserver/static/svg/weatherIcons/" + svgName) as svgFile:
-            output = svgFile.read()
-            print(output)
-            return output
 
     @webapp.route("/api/installer/listPackages")
     @webapp.route("/api/installer/listPackages/<extended>")
@@ -230,8 +224,6 @@ def Webserver(core):
         try:
             with open('config.json', 'w') as config_file:
                 json.dump(config_data, config_file, indent=4)
-                print(
-                    "\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped\n\n\n\n\nconfigs_dumped\nconfigs_dumped\nconfigs_dumped")
             core.reload_system()
         except:
             return "err"
@@ -364,14 +356,6 @@ def Webserver(core):
             data = core.config_data['messenger']
         elif action == "externSystems":
             data = externSystems
-        elif action == "alarmSounds":
-            path = core.path + "/modules/resources/clock_sounds/"
-            names = [os.listdir(path)]
-            for file in names:
-                print(file)
-                # file.replace('./', '')
-                # file.replace('.wav', '')
-            data = {"alarmSounds": names}
         else:
             data = {
                 "users": users,
@@ -413,7 +397,6 @@ def Webserver(core):
             if action == 'color':
                 phueWrapper.light_change_color(name, value)
             elif action == 'powerState':
-                print("change powerstate")
                 phueWrapper.light_set_powerstate(name, value)
             elif action == 'brightness':
                 phueWrapper.light_set_brightness(name, value)
@@ -454,9 +437,7 @@ def Webserver(core):
     def listAlarm(action="*"):
         from modules.wecker import Alarm
         from resources.module_skills import skills
-        from main import Modulewrapper
-        alarm = Alarm(Modulewrapper(core, "", None, None, None), skills())
-        alarm.create_alarm_storage()
+        alarm = Alarm(helpModuleWrapper)
 
         regular_present = False
         single_present = False
@@ -464,35 +445,43 @@ def Webserver(core):
         for item in core.local_storage["alarm"]["regular"]:
             if not core.local_storage["alarm"]["regular"][item] == []:
                 regular_present = True
+                break
         for item in core.local_storage["alarm"]["single"]:
             if not item is []:
                 single_present = True
+                break
 
         alarm_list = {"regular_alarm": core.local_storage["alarm"]["regular"],
                       "single_alarm": core.local_storage["alarm"]["single"],
                       "singlePresent": single_present,
                       "regularPresent": regular_present
                       }
-        print(regular_present)
         if action == "alarms":
             return jsonify(alarm_list)
         elif action == "json_alarms":
             return alarm_list
         elif action == "isPresent":
             return jsonify({"single": single_present, "regular": regular_present})
+        elif action == "alarmSounds":
+            path = core.path + "/modules/resources/clock_sounds/"
+            names = [os.listdir(path)]
+            for file in names:
+                print(file)
+                # file.replace('./', '')
+                # file.replace('.wav', '')
+            data = {"alarmSounds": names}
 
-    @webapp.route("/api/alarm/<action>/<regular>/<day>/<time>")
-    def changeAlarm(action, regular, day, time):
+    @webapp.route("/api/alarm/<action>/<regular>/<day>/<hour>/<minute>")
+    def changeAlarm(action, regular, day, hour, minute):
+        from modules.wecker import Alarm
+        alarmWrapper = Alarm(helpModuleWrapper)
         if action == "delete":
-            if regular:
-                for alarm in core.local_storage["alarm"]["regular"][day]:
-                    if alarm["Zeit"] == time:
-                        core.local_storage["alarm"]["regular"][day].remove(alarm)
-            else:
-                for alarm in core.local_storage["alarm"]["single"][day]:
-                    if alarm["Zeit"] == time:
-                        core.local_storage["alarm"]["single"][day].remove(alarm)
+            alarmWrapper.delete_alarm(day, regular, hour=hour, minute=minute)
             return "ok"
+        elif action == "create":
+            text = request.args.get('text', default=None, type=str)
+            sound = request.args.get('sound', default=None, type=str)
+            alarmWrapper.create_alarm(day, regular, hour=hour, minute=minute, text=text, sound=sound)
 
     @webapp.errorhandler(404)
     def error_404(error):

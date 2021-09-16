@@ -1,4 +1,6 @@
 import datetime
+import json
+import traceback
 
 
 def isValid(text):
@@ -23,7 +25,11 @@ def handle(text, core, skills):
     """
 
     if 'lösch' in text or 'beend' in text or ('schalt' in text and 'ab' in text):
-        alarm.delete_alarm()
+        try:
+            alarm.delete_alarm()
+        except:
+            core.say("Leider habe ich nicht verstanden welchen Wecker ich löschen soll. Bitte versuche es "
+                     "über das online-Portal oder über einen erneuten Sprachbefehl mit Zeitangabe erneut.")
     else:
         alarm.create_alarm()
 
@@ -58,10 +64,10 @@ def get_day(text, skills):
 
 
 class Alarm:
-    def __init__(self, core, skills):
+    def __init__(self, core):
         self.core = core
         self.local_storage = core.local_storage
-        self.skills = skills
+        self.skills = core.skills
         self.create_alarm_storage()
 
         self.time = None
@@ -77,41 +83,62 @@ class Alarm:
         self.days = days
         self.repeat = repeat
 
-        user_name = ' ' if self.user is None else f', {self.user["first_name"].capitalize()}'
-        self.text = f'Alles Gute zum Geburtstag{user_name}!' if self.is_birthday() else f'Guten Morgen{user_name}!'
-        total_seconds = self.time["hour"] * 3600 + self.time["minute"] * 60 + self.time["second"]
-        self.list = {"time": {"hour": self.time["hour"], "minute": self.time["minute"], "second": self.time["second"],
-                              "total_seconds": total_seconds, "time_stamp": self.get_time_stamp()},
-                     "sound": self.user["alarm_sound"], "user": self.user,
-                     "text": self.text, "active": True}
-
-    def create_alarm(self):
+    def create_alarm(self, days, repeat, time=None, hour=None, minute=None, text=None, sound=None):
         # toDo: dont add alarm when exists
-        if not type(self.days) == type([]):
-            self.days = [self.days]
+        if not (time != None or (hour != None and minute != None)):
+            raise ValueError("missing values!")
+        if repeat != "regular" and repeat != "single":
+            raise ValueError("invlaid repeat-value!")
+        if time != None:
+            hour = time.hour
+            minute = time.minute
+        if self.core.user != None:
+            alarm_sound = self.core.user["alarm_sound"]
+            user = self.core.user
+            user_name = ''
+        else:
+            alarm_sound = "standard.wav"
+            user = None
+            user_name = f', {self.core.user["first_name"].capitalize()}'
+        if text == None:
+            text = f'Alles Gute zum Geburtstag{user_name}!' if self.is_birthday() else f'Guten Morgen{user_name}!'
+        if sound != None:
+            alarm_sound = sound
 
-        for _day in self.days:
-            if self.core.local_storage["alarm"][self.repeat][_day] is None or not _day in \
-                                                                                  self.core.local_storage["alarm"][
-                                                                                      "regular"].keys():
-                self.core.local_storage["alarm"][self.repeat][_day] = []
-            self.core.local_storage["alarm"][self.repeat][_day].append(self.list)
-        self.confirm_action()
+        total_seconds = hour * 3600 + minute * 60
+        list = {"time": {"hour": hour, "minute": minute,
+                         "total_seconds": total_seconds, "time_stamp": self.get_time_stamp(hour, minute)},
+                "sound": alarm_sound, "user": user,
+                "text": text, "active": True}
+        if not type(days) == type([]):
+            days = [days]
 
-    def delete_alarm(self):
+        for _day in days:
+            if self.core.local_storage["alarm"][repeat][_day] is None or not _day in self.core.local_storage["alarm"]["regular"].keys():
+                self.core.local_storage["alarm"][repeat][_day] = []
+            self.core.local_storage["alarm"][repeat][_day].append(list)
+
+    def delete_alarm(self, days, repeat, time=None, hour=None, minute=None):
+        if not (time != None or (hour != None and minute != None)):
+            raise ValueError("missing values!")
+        if repeat != "regular" and repeat != "single":
+            raise ValueError("invlaid repeat-value!")
+        if time != None:
+            hour = time.hour
+            minute = time.minute
         # repeat means "regular" or "single"
-        if not type(self.days) == type([]):
-            self.days = [self.days]
-        for item in self.days:
+        if not type(days) == type([]):
+            days = [days]
+        for item in days:
             try:
-                for alarm in self.core.local_storage["alarm"][self.repeat][item]:
+                for alarm in self.core.local_storage["alarm"][repeat][item]:
                     # check every alarm
-                    if self.time.hour == alarm["time"]["hour"] and self.time.minute == alarm["time"]["minute"]:
+                    if hour == alarm["time"]["hour"] and minute == alarm["time"]["minute"]:
                         # if hour and minute matches, remove it
-                        self.core.local_storage["alarm"][self.repeat].remove(alarm)
+                        self.core.local_storage["alarm"][repeat][item].remove(alarm)
+                        print("alarm deleted")
             except:
-                self.core.say("Leider habe ich nicht verstanden welchen Wecker ich löschen soll. Bitte versuche es "
-                              "über das online-Portal oder über einen erneuten Sprachbefehl mit Zeitangabe erneut.")
+                traceback.print_exc()
 
     def is_birthday(self):
         if self.core.user:
@@ -168,22 +195,22 @@ class Alarm:
                 if not day in self.core.local_storage["alarm"][extension].keys():
                     self.core.local_storage["alarm"][extension][day] = []
 
-    def confirm_action(self):
+    def confirm_action(self, days):
         repeatings = 'Regelmäßiger ' if self.repeat == 'regular' else ''
         day_names = []
-        for item in self.days:
+        for item in days:
             day_names.append(self.skills.Statics.weekdays_eng_to_ger[item])
 
         day_enum = self.skills.get_enumerate(day_names)
-        if len(self.days) > 1:
+        if len(days) > 1:
             self.core.say(f'{repeatings}Wecker gestellt für{day_enum} um {self.skills.get_time(self.time)}')
         else:
             self.core.say(
                 f'{repeatings}Wecker gestellt für{self.get_reply()}, {self.time["hour"]} Uhr {self.time["minute"]}')
 
-    def get_time_stamp(self):
-        hour = str(self.time["hour"])
-        minute = str(self.time["minute"])
+    def get_time_stamp(self, hour, minute):
+        hour = str(hour)
+        minute = str(minute)
 
         if len(hour) == 1:
             hour = '0' + hour
@@ -191,19 +218,3 @@ class Alarm:
             minute = '0' + minute
 
         return f'{hour}:{minute}Uhr'
-
-class Core:
-    def __init__(self):
-        self.local_storage = {"module_storage": {
-            "philips_hue": {
-                "Bridge-Ip": "192.168.0.191"
-            }
-        }}
-
-    def module_storage(self, module_name=""):
-        return {"Bridge-Ip": "192.168.0.191"}
-
-
-if __name__ == "__main__":
-    ph = Alarm(Core(), None)
-    ph.light_set_powerstate("Küche", None)
