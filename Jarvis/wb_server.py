@@ -436,8 +436,8 @@ def Webserver(core):
     @webapp.route("/api/alarm/list/<action>")
     def listAlarm(action="*"):
         from modules.wecker import Alarm
-        from resources.module_skills import skills
         alarm = Alarm(helpModuleWrapper)
+        alarm.create_alarm_storage()
 
         regular_present = False
         single_present = False
@@ -470,6 +470,7 @@ def Webserver(core):
                 # file.replace('./', '')
                 # file.replace('.wav', '')
             data = {"alarmSounds": names}
+            return jsonify(data)
 
     @webapp.route("/api/alarm/<action>/<regular>/<day>/<hour>/<minute>")
     def changeAlarm(action, regular, day, hour, minute):
