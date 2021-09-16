@@ -16,6 +16,7 @@ import sys
 from webserver.helpWrapper import InstallWrapper
 from modules.new_phillips_lights import PhillipsWrapper
 from resources.module_skills import skills
+import mimetypes
 
 # JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
 sys.path.append(os.path.join(os.path.dirname(__file__), "/"))
@@ -26,6 +27,7 @@ def Webserver(core):
     webapp = Flask("JARVIS", template_folder="webserver/template", static_folder="webserver/static")
     webapp.config['JSON_SORT_KEYS'] = False
     installer = InstallWrapper()
+    mimetypes.add_type('image/svg+xml', '.svg')
 
     def getData():
         data = request.args.to_dict()
@@ -142,6 +144,17 @@ def Webserver(core):
         return render_template("weatherOverview.html", nav=nav)
 
     # API-like-Calls
+
+    @app.route('/static/svg/weatherIcons/<svgFile>.svg')
+    def serve_content(svgFile):
+        return file('static/svg/weatherIcons/' + svgFile + '.svg').read()
+
+    @webapp.route("static/svg/weatherIcons/<svgName>", methods=('GET', 'HEAD'))
+    def prerenderSVG(svgName):
+        with open(str(Path(__file__).parent) + "/webserver/static/svg/weatherIcons/" + svgName) as svgFile:
+            output = svgFile.read()
+            print(output)
+            return output
 
     @webapp.route("/api/installer/listPackages")
     @webapp.route("/api/installer/listPackages/<extended>")

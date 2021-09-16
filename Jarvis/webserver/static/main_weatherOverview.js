@@ -254,7 +254,7 @@ function fillInformations (data){
     document.getElementById("todayWeatherVision").innerHTML = (data["current"]["visibility"]/1000) + "km";
     document.getElementById("todayWeatherHumidity").innerHTML = data["current"]["humidity"] + "&percnt;";
     document.getElementById("todayWeatherDescription").innerHTML = data["current"]["weather"]["0"]["description"];
-    document.getElementById("todayWeatherIcon").innerHTML = "<img/weatherBackground src=\"static/svg/weatherIcons/"+tempWeather[0]+"\" width=\"175px\">";
+    document.getElementById("todayWeatherIcon").innerHTML = "<g clip-path='' \"url(static/svg/weatherIcons/"+tempWeather[0]+")\" width=\"175px\"></g>";
     document.getElementById("todayWeatherDew").innerHTML = Math.round(data["current"]["dew_point"]).toString() + "&degC";
     document.getElementById("todayWeatherUVIndex").innerHTML = Math.round(data["current"]["uvi"]);
     refreshBackgroundAndText(tempWeather[1]);
