@@ -254,7 +254,7 @@ function fillInformations (data){
     document.getElementById("todayWeatherVision").innerHTML = (data["current"]["visibility"]/1000) + "km";
     document.getElementById("todayWeatherHumidity").innerHTML = data["current"]["humidity"] + "&percnt;";
     document.getElementById("todayWeatherDescription").innerHTML = data["current"]["weather"]["0"]["description"];
-    document.getElementById("todayWeatherIcon").innerHTML = "<g clip-path='' \"url(static/svg/weatherIcons/"+tempWeather[0]+")\" width=\"175px\"></g>";
+    document.getElementById("todayWeatherIcon").innerHTML = "<img src='static/svg/weatherIcons/"+tempWeather[0]+"') width=\"175px\">";
     document.getElementById("todayWeatherDew").innerHTML = Math.round(data["current"]["dew_point"]).toString() + "&degC";
     document.getElementById("todayWeatherUVIndex").innerHTML = Math.round(data["current"]["uvi"]);
     refreshBackgroundAndText(tempWeather[1]);
@@ -629,9 +629,9 @@ function createDailyWeatherWidgets(anzDays, data){
         }
         output += " <div class=\"d-flex flex-column\">";
         output += "<div class=\"day-card-headline\" id=\"day"+i+"-headline\">";
-        if (i == 0){
+        if (i === 0){
             output += "Heute";
-        }else if (i == 1){
+        }else if (i === 1){
             output += "Morgen";
         }else {
             let newDayNumber = (date.getDay()+i) % 7;
@@ -660,19 +660,19 @@ function createDailyWeatherWidgets(anzDays, data){
 }
 
 function getWeekdayName(tempDateNumber){
-    if (tempDateNumber == 1){
+    if (tempDateNumber === 1){
         return "Montag";
-    }else if (tempDateNumber == 2){
+    }else if (tempDateNumber === 2){
         return "Dienstag";
-    }else if (tempDateNumber == 3){
+    }else if (tempDateNumber === 3){
         return "Mittwoch";
-    }else if (tempDateNumber == 4){
+    }else if (tempDateNumber === 4){
         return "Donnerstag";
-    }else if (tempDateNumber == 5){
+    }else if (tempDateNumber === 5){
         return "Freitag";
-    }else if (tempDateNumber == 6){
+    }else if (tempDateNumber === 6){
         return "Samstag";
-    }else if (tempDateNumber == 7){
+    }else if (tempDateNumber === 7){
         return "Sonntag";
     }else {
         throw "invalid parameter!";

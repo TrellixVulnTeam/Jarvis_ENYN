@@ -7,7 +7,7 @@ import shutil
 import socket
 import time
 
-from flask import Flask, render_template, jsonify, request, send_file, make_response, redirect
+from flask import Flask, render_template, jsonify, request, Response, send_file
 from gevent import pywsgi
 from Crypto import Random
 import json
@@ -148,7 +148,7 @@ def Webserver(core):
 
     @webapp.route('/static/svg/weatherIcons/<svgFile>.svg')
     def serve_content(svgFile):
-        return file('static/svg/weatherIcons/' + svgFile + '.svg').read()
+        return send_file(core.path + '/webserver/static/svg/weatherIcons/' + svgFile + '.svg')
 
     @webapp.route("/api/installer/listPackages")
     @webapp.route("/api/installer/listPackages/<extended>")
@@ -433,6 +433,16 @@ def Webserver(core):
             return 'err'
         return 'ok'
 
+    @webapp.route("/api/alarm/getSound/<filename>")
+    def getAlarmSound(filename):
+        def gen():
+            with open(core.path+"/modules/resources/clock_sounds/"+filename, "rb") as fwav:
+                data = fwav.read(1024)
+                while data:
+                    yield data
+                    data = fwav.read(1024)
+        return Response(gen(), mimetype="audio/x-wav")
+
     @webapp.route("/api/alarm/list/<action>")
     def listAlarm(action="*"):
         from modules.wecker import Alarm
@@ -483,6 +493,7 @@ def Webserver(core):
             text = request.args.get('text', default=None, type=str)
             sound = request.args.get('sound', default=None, type=str)
             alarmWrapper.create_alarm(day, regular, hour=hour, minute=minute, text=text, sound=sound)
+            return "ok"
 
     @webapp.errorhandler(404)
     def error_404(error):
