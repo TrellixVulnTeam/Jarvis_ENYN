@@ -382,7 +382,7 @@ def Webserver(core):
                 pass
             elif action == "update":
                 newCode = getData()
-                with open("C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\Jarvis\\modules\\"+modName+".py", 'w') as file:
+                with open(core.path+"/modules/"+modName+".py", 'w') as file:
                     file.write(newCode)
         else:
             return "module not found"
@@ -461,8 +461,14 @@ def Webserver(core):
                 single_present = True
                 break
 
-        alarm_list = {"regular_alarm": core.local_storage["alarm"]["regular"],
-                      "single_alarm": core.local_storage["alarm"]["single"],
+        temp_regular = core.local_storage["alarm"]["regular"]
+        temp_single = core.local_storage["alarm"]["single"]
+
+        new_regular = get_alarms_german("regular")
+        new_single = get_alarms_german("single")
+
+        alarm_list = {"regular_alarm": new_regular,
+                      "single_alarm": new_single,
                       "singlePresent": single_present,
                       "regularPresent": regular_present
                       }
@@ -474,7 +480,7 @@ def Webserver(core):
             return jsonify({"single": single_present, "regular": regular_present})
         elif action == "alarmSounds":
             path = core.path + "/modules/resources/clock_sounds/"
-            names = [os.listdir(path)]
+            names = os.listdir(path)
             for file in names:
                 print(file)
                 # file.replace('./', '')
@@ -485,7 +491,10 @@ def Webserver(core):
     @webapp.route("/api/alarm/<action>/<regular>/<day>/<hour>/<minute>")
     def changeAlarm(action, regular, day, hour, minute):
         from modules.wecker import Alarm
+        day = day.lower()
         alarmWrapper = Alarm(helpModuleWrapper)
+        """if not (day in core.skills.Statics.weekdays_engl):
+            day = core.skills.Statics.weekdays_ger_to_eng[day]"""
         if action == "delete":
             alarmWrapper.delete_alarm(day, regular, hour=hour, minute=minute)
             return "ok"
@@ -518,6 +527,12 @@ def Webserver(core):
         key_encoded = base64.b64encode(key)
         key_string = key_encoded.decode('utf-8')
         return key_string
+
+    def get_alarms_german(repeat):
+        new_list = {}
+        for day in core.skills.Statics.weekdays:
+            new_list[day] = core.local_storage["alarm"][repeat][core.skills.Statics.weekdays_ger_to_eng[day.lower()]]
+        return new_list
 
     ws = pywsgi.WSGIServer(("0.0.0.0", 50500), webapp)
 
