@@ -1,83 +1,123 @@
 <head>
     <title>JARVIS</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        .header_link:hover {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body >
-    <nav class="navbar navbar-inverse navbar-expand-md">
-      <a class="navbar-brand" href="/index">JARVIS</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="mainNav">
-          <ul class="nav">
-          {% for item in nav %}
-              <li class="nav-item"><a class="nav-link" href="{{ item.href }}">{{ item.text }}</a></li>
-          {% endfor %}
-          </ul>
-        </div>
-    </nav>
-
     <div class="container-fluid">
-        <div class="panel panel-default">
+        <div class="card">
+            <div class="card-headerd-flex justify-content-between" data-toggle="collapse" data-target="#regularBody">
+                <div>Reguläre Wecker</div>
+                <button type="button" class="btn" onclick="showCreateAlarmModal('regular')"><span class="material-icons-outlined">add_circle</span></button>
+            </div>
+            <div class="collapse show">
+                <div class="card-body" id="regularCardBody">
 
-        <div class="panel-heading">
-          <h4 class="panel-title">
-              <a data-toggle="collapse" href="#collapseRegular"><b>reguläre Wecker</b></a>
-          </h4>
+                </div>
+                <div class="card-footer" style="align-content:flex-end"><button class="btn btn-danger" onclick="deleteAllAlarms(\"regular\")">alle löschen</button></div>
+            </div>
+
         </div>
 
-        <div id="regularAlarmSection">
-            alter Text
+        <!-- The Modal -->
+        <div class="modal fade" id="editModal" tabindex="-1">
+            <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                <h4 class="modal-title" id="editModalTitle">jeden Freitag:    10:00 Uhr</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="d-flex flex-nowarp form-inline justify-content-between" style="margin-bottom: 10px;">
+                        <div>Uhrzeit:</div>
+                        <div class="form-group">
+                            <input class="form-control" type="number" min="0" max="23" style="max-width: 5em;" id="editModalHours"> <b>:</b> <input class="form-control" id="editModalMinutes" type="number" min="0" max="59" style="max-width: 5em;">
+                        </div>
+                    </div>
+                    <div class="d-flex flex-nowarp justify-content-between" style="margin-bottom: 10px;">
+                        <div>Zu sagender Text:</div>
+                        <input type="text" class="form-control" value="" id="editModalText">
+                    </div>
+                    <div class="d-flex flex-nowarp form-inline justify-content-between">
+                        <div>Weckerton:</div>
+                        <div class="input-group">
+                            <div class="form-group">
+                                <select class="form-control" id="editModalSounds">
+                                </select>
+                            </div>
+                            <button class="btn btn-success input-group-append" id="editModalPlaySound"><span class="material-icons" style="1.2em">play_arrow</span></button>
+                        </div>
+                        <audio id="alarmSoundAudio"></audio>
+                    </div>
+                    <br/><br/>
+                    <div class="form-text text-muted">
+                        <small>Weitere Einstellungsmöglichkeiten sind in Arbeit!</small>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" id="editModalSaveButton">Speichern</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Abbrechen</button>
+                    </div>
+                </div>
+            </div>
+            </div>
         </div>
 
-    </div>
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
 
-    <!-- Modal -->
-    <div id="deleteModal" class="modal fade" role="dialog">
-      <div class="modal-dialog">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                    <h4 class="modal-title">Wecker löschen?</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
 
-        <!-- Modal content-->
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Wecker löschen</h4>
-            <button type="button" class="close" data-dismiss="modal">&times</button>
-          </div>
-          <div class="modal-body" id="deleteModalTime">
-            <p>Möchtest du den Wecker wirklich löschen?</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" id="deleteModalConfirmButton">löschen</button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">abbrechen</button>
-          </div>
-        </div>
-      </div>
-    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        Möchtest du den<span id="deleteModalRepeat"></span> Wecker an <b><span id="deleteModalDay"></span></b> um <b><span id="deleteModalTime"></span></b> Uhr wirklich löschen?
+                    </div>
 
-    <!-- Modal -->
-    <div id="deleteAllModal" class="modal fade" role="dialog">
-      <div class="modal-dialog">
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Abbrechen</button>
+                            <button type="button" class="btn btn-danger" id="deleteModalDelButton">Löschen</button>
+                        </div>
+                    </div>
 
-        <!-- Modal content-->
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Alle Wecker löschen</h4>
-            <button type="button" class="close" data-dismiss="modal">&times</button>
-          </div>
-          <div class="modal-body" id="deleteAllModalTime">
-            <p>Möchtest du wirklich <b>alle</b> Wecker löschen?</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" id="deleteAllModalConfirmButton">löschen</button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">abbrechen</button>
-          </div>
+                </div>
+                </div>
         </div>
 
-      </div>
-    </div>
-    <script src="{{ url_for('static', filename='main_alarm.js')}}"></script>
+        <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true" id="deleteConfirmToast" data-delay="5000" style="position: absolute; left: 45%; top: 5%">
+          <div class="toast-header" id="confirmToastHeader">
+                Wecker wurde erfolgreich gelöscht
+              <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+          </div>
+          <div class="toast-body">
+              Dein <span id="deleteConfirmToastRepeat"></span> Wecker um <span id="deleteConfirmToastTime"></span> <span id="deleteConfirmToastMessageExtension"></span>
+          </div>
+        </div>
+        <script src="{{ url_for('static', filename='main_alarm.js')}}"></script>
 </body>

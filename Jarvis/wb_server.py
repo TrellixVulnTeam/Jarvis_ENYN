@@ -491,10 +491,10 @@ def Webserver(core):
     @webapp.route("/api/alarm/<action>/<regular>/<day>/<hour>/<minute>")
     def changeAlarm(action, regular, day, hour, minute):
         from modules.wecker import Alarm
-        day = day.lower()
         alarmWrapper = Alarm(helpModuleWrapper)
-        """if not (day in core.skills.Statics.weekdays_engl):
-            day = core.skills.Statics.weekdays_ger_to_eng[day]"""
+        if not (day.capitalize() in core.skills.Statics.weekdays_engl):
+            day = core.skills.Statics.weekdays_ger_to_eng[day.lower()]
+        day = day.lower()
         if action == "delete":
             alarmWrapper.delete_alarm(day, regular, hour=hour, minute=minute)
             return "ok"

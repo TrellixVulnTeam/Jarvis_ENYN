@@ -95,17 +95,17 @@ class Alarm:
         if self.core.user != None:
             alarm_sound = self.core.user["alarm_sound"]
             user = self.core.user
-            user_name = ''
+            user_name = f', {self.core.user["first_name"].capitalize()}'
         else:
             alarm_sound = "standard.wav"
             user = None
-            user_name = f', {self.core.user["first_name"].capitalize()}'
+            user_name = ''
         if text == None:
             text = f'Alles Gute zum Geburtstag{user_name}!' if self.is_birthday() else f'Guten Morgen{user_name}!'
         if sound != None:
             alarm_sound = sound
 
-        total_seconds = hour * 3600 + minute * 60
+        total_seconds = int(hour) * 3600 + int(minute) * 60
         list = {"time": {"hour": hour, "minute": minute,
                          "total_seconds": total_seconds, "time_stamp": self.get_time_stamp(hour, minute)},
                 "sound": alarm_sound, "user": user,

@@ -1,94 +1,152 @@
-function deleteAlarm(alarm, regular, day) {
-    // /api/alarm/<action>/<regular>/<day>/<time>
-    $("#deleteModalConfirmButton").addClass("disabled");
-    $.get("/api/alarm/delete/"+regular+day+alarm["Zeit"]);
+
+var editModalTitle = document.getElementById("editModalTitle");
+var editModalHours = document.getElementById("editModalHours");
+var editModalMinute = document.getElementById("editModalMinutes");
+var editModalText = document.getElementById("editModalText");
+var editModalSound = document.getElementById("alarmSoundAudio");
+var playSoundButton = document.getElementById("editModalPlaySound");
+
+var deleteModalRepeat = document.getElementById("deleteModalRepeat");
+var deleteModalDay = document.getElementById("deleteModalDay");
+var deleteModalTime = document.getElementById("deleteModalTime");
+
+var deleteConfirmToast = $("#deleteConfirmToast");
+
+var audio = null;
+
+
+function editAlarmModal(regular, day, hour, minute, time_stamp, text, sound){
+    let reg = "";
+    if (regular){
+        reg = "jeden ";
+    }
+
+    editModalTitle.innerHTML = reg + day + ": " + time_stamp;
+    editModalHours.value = hour;
+    editModalMinute.value = minute;
+    editModalText.value = text;
+    editModalSound.value = sound;
+    $('#editModal').modal('toggle');
 }
 
-function deleteAllAlarms(regular) {}
+function deleteAlarmModal(regular, day, hour, minute, time_stamp){
+    let reg = "";
 
-function getAlarm(regular, alarm_list) {
-    var alarms = "";
-    alarms += "<div id='collapseRegular' class=\"panel-collapse disabled collapse in\" aria-expanded=\"true\">";
-    for (var day in alarm_list){
-        if (day === 0){
-            alarms += "<div class=\"panel-body disable\" id=\"regularAlarmSection\">";
-            alarms += "<div class=\"list-group-item-heading\" href=\"#\" disabled=\"\"> " + day + " </div>";
-            alarms += "</div>";
+    if (regular){
+        reg = " jeden ";
+    }
+    deleteModalRepeat.innerHTML = reg;
+    deleteModalDay.innerHTML = reg + day;
+    deleteModalTime.innerHTML = time_stamp;
+    document.getElementById("deleteModalDelButton").onclick = function (){deleteAlarm(regular, day, hour, minute, time_stamp)};
+    document.getElementById("deleteModalDelButton").addEventListener("click", function (){console.log("clicked"); deleteAlarm(regular, day, hour, minute, time_stamp)});
+    $('#deleteModal').modal('toggle');
+}
+
+function saveAlarmChanges(element){
+
+}
+
+function deleteAlarm(repeat, day, hour, minute){
+    try{
+        $.get("api/alarm/delete/"+repeat+"/"+day+"/"+hour+"/"+minute);
+        createAlarmList();
+        $('#deleteModal').modal('hide');
+        document.getElementById("confirmToastHeader").innerHTML = "Wecker wurde erfolgreich gelöscht";
+        if (repeat == "regular"){
+            document.getElementById("deleteConfirmToastRepeat").innerHTML = "regelmäßiger ";
+        }else{
+            document.getElementById("deleteConfirmToastRepeat").innerHTML = "";
+        }
+        document.getElementById("deleteConfirmToastTime").innerHTML = "<b>"+hour + ":" + minute + "Uhr</b>";
+        document.getElementById("deleteConfirmToastMessageExtension").innerHTML = " wurde <b>erfolgreich</b> gelöscht!";
+        showToastAndClose();
+    } catch (e){
+        console.log(e);
+        document.getElementById("confirmToastHeader").innerHTML = "Wecker konnte nicht gelöscht werden!";
+        if (repeat == "regular"){
+            document.getElementById("deleteConfirmToastRepeat").innerHTML = "regelmäßiger ";
+        }else{
+            document.getElementById("deleteConfirmToastRepeat").innerHTML = " konnte <b>nicht</b> gelöscht werden! Bitte versuche es erneut.";
+        }
+        document.getElementById("deleteConfirmToastTime").innerHTML = "<br>"+hour + ":" + minute + "Uhr</b>";
+        showToastAndClose();
+    }
+}
+
+function showToastAndClose(){
+    deleteConfirmToast.toast('show');
+}
+
+function deleteAllAlarms(){
+
+}
+
+function changeAlarmActivity(repeat, day, hour, minute){
+
+}
+
+function playStopAlarmSound(event){
+    if (event == "click"){
+        let button = document.getElementById("editModalPlaySound");
+        if (button.lastChild.innerHTML == "play_arrow"){
+            audio = new Audio("/api/getAlarmSound/"+editModalSound.innerHTML);
+            audio.play();
+            button.lastChild.innerHTML = "stop";
         } else {
-            alarms += "<a class=\"list-group-item\" data-toggle=\"collapse\" href=\"#collapseDay" + day + "\">";
-            alarms += "<div class=\"list-group-item-heading\" href=\"#\"> " + day + " </div>";
-            alarms += "<div id=\"collapseDay"+ day +"\" class=\"collapse\">";
-            alarms += "<div class=\"list-group\">";
-            for (var time in day){
-                alarms += "<a class=\"list-group-item\">";
-                alarms += "<span class=\"mt-1\"> 10:00 </span>";
-                alarms += "<button type=\"button\" class=\"btn btn-danger\" data-toggle=\"modal\" data-target=\"deleteModal("+alarm+")\">löschen</button>";
-            }
-            alarms += "</a>";
-            alarms += "</div>";
-            alarms += "</div>";
-            alarms += "</a>";
+            audio.pause();
         }
     }
-    alarms += "<div class=\"panel-footer\">";
-    alarms += "<button type=\"button\" class=\"btn badge-danger btn-lg\" data-toggle=\"modal\" data-target=\"deleteAllModal('regular')\">alle regulären Wecker löschen</button>";
-    alarms += "</div>";
-    alarms += "</div>"
-    $("#regularAlarmSection").html(alarms);
 }
 
-$("#deleteModal").onload = function (alarm, regular, day){
-    if (regular){
-        $("#deleteModalTime").html("Möchtest du den regulären Wecker um " + alarm + " an jedem " + day + " wirklich löschen?");
-    }else{
-        $("#deleteModalTime").html("Möchtest du den Wecker um " + alarm + " am " + day + " wirklich löschen?");
-    }
-    $("#deleteModalConfirmButton").onclick("deleteAlarm(alarm, regular, day)");
+function createAlarmList(){
+    $.get("/api/alarm/list/alarms", function(data){
+        let alarm_list = "";
+        let regularCardBody = document.getElementById("regularCardBody");
+        if (data["regularPresent"]){
+            alarm_list += "<ul class=\"list-group\">";
+
+            for (let day in data["regular_alarm"]){
+                if (data["regular_alarm"][day].length == 0){
+                    alarm_list += "<a class=\"list-group-item disabled\">"+day+"</a>";
+                } else {
+                    alarm_list += "<a class=\"list-group-item list-group-item-action list-group-item-info d-flex justify-content-between align-items-center\" href=\"#collapse"+day+"Regular\" data-toggle=\"collapse\">";
+                    alarm_list += day + "<span class=\"badge badge-info badge-pill\">"+data["regular_alarm"][day].length+"</span></a>";
+                    alarm_list += "<ul class=\"collapse\" id=\"collapse"+day+"Regular\">";
+                    for (let alarm in data["regular_alarm"][day]){
+                        alarm_list += "<li class=\"list-group-item d-flex justify-content-between align-items-center\">";
+                        alarm_list += "<div>"+data["regular_alarm"][day][alarm]["time"]["time_stamp"];
+                        alarm_list += "<div><button class=\"btn btn-primary\" onclick=\"editAlarmModal('regular','"+day+"','"+data["regular_alarm"][day][alarm]["time"]["hour"]+"','"+data["regular_alarm"][day][alarm]["time"]["minute"]+"','"+data["regular_alarm"][day][alarm]["time"]["time_stamp"]+"','"+data["regular_alarm"][day][alarm]["text"]+"','"+data["regular_alarm"][day][alarm]["sound"]+"')\"><span class=\"material-icons-outlined\" style=\"font-size: 1.2em;\">edit</span></button>";
+                        alarm_list += "<button class=\"btn btn-danger\" onclick=\"deleteAlarmModal('regular','"+day+"','"+data["regular_alarm"][day][alarm]["time"]["hour"]+"','"+data["regular_alarm"][day][alarm]["time"]["minute"]+"','"+data["regular_alarm"][day][alarm]["time"]["time_stamp"]+"')\"><span class=\"material-icons-outlined\" style=\"font-size: 1.2em;\">delete</span></button>";
+                        alarm_list += "</div></li>";
+                    }
+                    alarm_list += "</ul>";
+                }
+            }
+
+
+        } else {
+            alarm_list += "<div class=\"alert alert-info\"><strong>Info!</strong> Keine regulären Wecker eingerichtet.</div>";
+        }
+        alarm_list += "</div></div>";
+
+        regularCardBody.innerHTML = alarm_list;
+    });
+}
+
+function showCreateAlarmModal(repeat){
+
 }
 
 window.onload = function (){
-    $.get("/api/alarm/list/alarms",
-        function (data){
-        var alarms = "";
-        isPresent = data["regularPresent"];
-        data = data["regular_alarm"];
-        alarms += "<div id='collapseRegular' class=\"panel-collapse disabled collapse in\" aria-expanded=\"true\">";
-        if(isPresent){
-            for (var day in data){
-                if (data[day].length == 0){
-                    alarms += "<div class=\"panel-body disable\" id=\"regularAlarmSection\">";
-                    alarms += "<div class=\"list-group-item-heading\" href=\"#\" disabled=\"\"> " + day + "</div>";
-                    alarms += "</div>";
-                } else {
-                    alarms += "<a class=\"list-group-item\" data-toggle=\"collapse\" href=\"#collapseDay" + day + "\">";
-                    alarms += "<div class=\"list-group-item-heading\" href=\"#\"> " + day + " " + "<span class=\"badge pull-right badge-secondary\">" + data[day].length + "</span> </div>";
-                    alarms += "<div id=\"collapseDay"+ day +"\" class=\"collapse\">";
-                    alarms += "<div class=\"list-group\">";
-                    for (var time in data[day]){
-                        alarms += "<a class=\"list-group-item\">";
-                        alarms += "<span class=\"mt-1\">" + data[day][time]["time"]["time_stamp"] + "</span>";
-                        alarms += "<button type=\"button\" class=\"btn pull-right btn-danger btn-sm\" data-toggle=\"modal\" data-target=\"deleteModal("+time+")\">löschen</button>";
-                    }
-                    alarms += "</a>";
-                    alarms += "</div>";
-                    alarms += "</div>";
-                    alarms += "</a>";
-                }
-            }
-        }else{
-            alarms += "<div class=\"panel-body disable\">"
-            alarms += "<div class=\"alert alert-info\">";
-            alarms += "<strong>Info!</strong> Keine regulären Wecker eingerichtet.";
-            alarms += "</div></div>";
+    $.get("/api/alarm/list/alarmSounds", function(data) {
+        let soundHTML = "";
+        for (sound in data["alarmSounds"]){
+            soundHTML+= "<option>"+ data["alarmSounds"][sound] + "</option>"
         }
-
-        alarms += "<div class=\"panel-footer\">";
-        if(isPresent){
-            alarms += "<button type=\"button\" class=\"btn pull-right badge-danger btn-sm\" data-toggle=\"modal\" data-target=\"deleteAllModal('regular')\">alle regulären Wecker löschen</button>";
-        }
-        alarms += "</div>";
-        alarms += "</div>";
-        $("#regularAlarmSection").html(alarms);
-    }
-    );
+        document.getElementById("editModalSounds").innerHTML = soundHTML;
+    });
+    createAlarmList();
 }
+
+//<input type="checkbox" class="custom-control-input" id="customSwitch1">
