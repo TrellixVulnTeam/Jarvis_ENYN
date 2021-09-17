@@ -1,12 +1,12 @@
-from telepot.loop import MessageLoop
-from tempfile import mkstemp
+import logging
+import os
 import speech_recognition as sr
-from io import BytesIO
 import subprocess
 import telepot
 import wave
-import logging
-import os
+from io import BytesIO
+from telepot.loop import MessageLoop
+from tempfile import mkstemp
 
 
 class TelegramInterface:
@@ -117,7 +117,7 @@ class TelegramInterface:
             # for testing purposes, we're just using the default API key
             # to use another API key, use `self.recognizer.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
             # instead of `self.recognizer.recognize_google(audio)`
-            text = self.recognizer.recognize_google(audio,language='de-DE')
+            text = self.recognizer.recognize_google(audio, language='de-DE')
         except sr.UnknownValueError:
             text = "TIMEOUT_OR_INVALID"
         except sr.RequestError as e:
@@ -130,6 +130,7 @@ class TelegramInterface:
         for user in users:
             if user["uid"] != 0:
                 self.bot.leaveChat(user["uid"])
+
 
 """def main():
     tgi = TelegramInterface()

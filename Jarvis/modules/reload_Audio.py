@@ -1,7 +1,7 @@
-
 def isValid(text):
     if 'lad' in text and 'audio' in text:
         return True
+
 
 def handle(text, core, skills):
     if 'output' in text or 'ausgabe' in text:
@@ -21,6 +21,7 @@ def handle(text, core, skills):
 def restart_output(core):
     core.core.Audio_Output.stop()
     core.core.Audio_Output.start()
+
 
 def restart_input(core):
     core.core.Audio_Input.stop()

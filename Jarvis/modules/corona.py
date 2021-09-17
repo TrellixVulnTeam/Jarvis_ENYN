@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-from urllib.request import urlopen, Request
-import json
 import datetime
+import json
+import requests
 import sys
 from urllib.parse import urljoin
-
-import requests
+from urllib.request import urlopen, Request
 
 API_URL = "https://api.corona-zahlen.org/districts/"
 DISTRICT = ""

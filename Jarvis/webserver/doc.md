@@ -1,4 +1,5 @@
 ### Frontend-Requests "GET"
+
 | URL          | Description |
 |--------------|-------------|
 | `/` or `/index` | On unconfigured setups this endpoint points to `/setup`. Otherwise it shows an overview of all services and configurations. |

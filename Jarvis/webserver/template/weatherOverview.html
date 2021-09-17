@@ -1,333 +1,335 @@
 <html>
-    <head>
-        <?php header("Access-Control-Allow-Origin: *"); ?>
-        <title>Test</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-        <link href="owfont-regular.css" rel="stylesheet" type="text/css">
+<head>
+    <?php header("Access-Control-Allow-Origin: *"); ?>
+    <title>Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="owfont-regular.css" rel="stylesheet" type="text/css">
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-        
-        <style>
-            body {
-                margin: 20px;
-                background-repeat: no-repeat;
-                background-size: cover;
-                background-attachment: fixed;
-                transition: 4s;
-            }
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-            img {
-                -webkit-transition: all .4s ease-in-out;
-                -moz-transition: all .4s ease-in-out;
-                -o-transition: all .4s ease-in-out;
-                transition: all .4s ease-in-out;
-            }
+    <style>
+        body {
+            margin: 20px;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            transition: 4s;
+        }
 
-            .detail-headline{
-                text-transform: uppercase;
-                font-size: 0.7em;
-                display: inline-block;
-            }
+        img {
+            -webkit-transition: all .4s ease-in-out;
+            -moz-transition: all .4s ease-in-out;
+            -o-transition: all .4s ease-in-out;
+            transition: all .4s ease-in-out;
+        }
 
-            .detail-value {
-                font-weight: bold;
-                text-transform: none;
-            }
-            
-            .state-name {
-                font-weight: bold;
-                font-size: 2em;
-            }
+        .detail-headline {
+            text-transform: uppercase;
+            font-size: 0.7em;
+            display: inline-block;
+        }
 
-            #todayWeatherTemp {
-                font-weight: bold;
-                font-size: 6em;
-            }
+        .detail-value {
+            font-weight: bold;
+            text-transform: none;
+        }
 
-            #todayWeatherDescription {
-                font-size: 3em;
-            }
+        .state-name {
+            font-weight: bold;
+            font-size: 2em;
+        }
 
-            .details {
-            }
+        #todayWeatherTemp {
+            font-weight: bold;
+            font-size: 6em;
+        }
 
-            .section-headline{
-                text-transform: uppercase;
-                font-size: 0.7em;
-                margin-top: 3%;
-                margin-bottom: 1%;
-            }
+        #todayWeatherDescription {
+            font-size: 3em;
+        }
 
-            .day-card{
-                font-size: 0.7em;
-                min-width: 50px !important;
-                margin: 4px;
-                background-color: rgba(0, 0, 0, 0.2);
-                border-color: rgba(0, 0, 0, 0);
-                border-radius: 10px;
-                -webkit-box-shadow: 0px 0px 15px -1px rgba(0,0,0,0.46); 
-                box-shadow: 0px 0px 15px -1px rgba(0,0,0,0.46);
-                
-                transition: color 4s;
-            }
+        .details {
+        }
 
-            .day-card + .day-card{
-                border-color: black;
-            }
+        .section-headline {
+            text-transform: uppercase;
+            font-size: 0.7em;
+            margin-top: 3%;
+            margin-bottom: 1%;
+        }
 
-            .day-card:hover {
-                box-shadow: 0px 0px 15px -1px rgba(0,0,0,0.6);
-            }
+        .day-card {
+            font-size: 0.7em;
+            min-width: 50px !important;
+            margin: 4px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-color: rgba(0, 0, 0, 0);
+            border-radius: 10px;
+            -webkit-box-shadow: 0 0 15px -1px rgba(0, 0, 0, 0.46);
+            box-shadow: 0 0 15px -1px rgba(0, 0, 0, 0.46);
 
-            .day-card-headline{
-                top: 10px;
-                align-self: center;
-            }
+            transition: color 4s;
+        }
 
-            .day-card-weather-icon{
-                display: flex;   
-                justify-content: center;
-            }
+        .day-card + .day-card {
+            border-color: black;
+        }
 
-            .day-card-temp-section{
-                bottom: 10px;
-                justify-content: center;
-            }
+        .day-card:hover {
+            box-shadow: 0 0 15px -1px rgba(0, 0, 0, 0.6);
+        }
 
-            .day-card-temp{
-                font-size: 1.5em;
-                align-self: center;
-            }
+        .day-card-headline {
+            top: 10px;
+            align-self: center;
+        }
 
-            .day-card-temp{
-                font-size: 1.5em;
-                align-self: center;
-            }
+        .day-card-weather-icon {
+            display: flex;
+            justify-content: center;
+        }
 
-            .timeStampCard{
-                font-size: 0.7em;
-                min-width: 75px !important;
-                border-color: black;
-                border-radius: 3px;
-                justify-content: ceter;
-                -webkit-box-shadow: 0px 0px 2px 2px rgba(0,0,0,0.8); 
-                box-shadow: 0px 0px 2px 2px rgba(0,0,0,0.8);
-                transition: 4s;
-            }
+        .day-card-temp-section {
+            bottom: 10px;
+            justify-content: center;
+        }
 
-            span {
-                vertical-align:middle;
-            }
+        .day-card-temp {
+            font-size: 1.5em;
+            align-self: center;
+        }
 
-            .time {
-                align-self: center;
-            }
+        .day-card-temp {
+            font-size: 1.5em;
+            align-self: center;
+        }
 
-            div.bg-invisible{
-                background-color: rgba(0, 0, 0, 0);
-            }
+        .timeStampCard {
+            font-size: 0.7em;
+            min-width: 75px !important;
+            border-color: black;
+            border-radius: 3px;
+            justify-content: center;
+            -webkit-box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.8);
+            transition: 4s;
+        }
 
-            #backgorund-image {
-                transition: 4s;
-            }
+        .time {
+            align-self: center;
+        }
 
-            .btn-outline-dark {
-                transition: 0.5s;
-            }
+        div.bg-invisible {
+            background-color: rgba(0, 0, 0, 0);
+        }
 
-            .apexcharts-tooltip {
-                color: "black" !important;
-            }
-        </style>
-    </head>
+        #backgorund-image {
+            transition: 4s;
+        }
 
-    <body>
+        .btn-outline-dark {
+            transition: 0.5s;
+        }
 
-        <div class="container">
-            <div class="row state-name" id="state"></div>
+        .apexcharts-tooltip {
+            color: black !important;
+        }
+    </style>
+</head>
 
-            <div class="row ">
-                <div class="col" id="todayWeatherIcon"></div>
-                <div class="col">
-                    <span id="todayWeatherTemp"></span>
-                </div>
-                <div class="col">
-                    <span id="todayWeatherDescription"></span>
-                </div>
-            </div>
-            <div class="row justify-content-beetween">
-                <div class="col details">
-                    <span class="material-icons-outlined">thermostat</span>
-                    <span class="flex-column detail-headline">
+<body>
+
+<div class="container">
+    <div class="row state-name" id="state"></div>
+
+    <div class="row ">
+        <div class="col" id="todayWeatherIcon"></div>
+        <div class="col">
+            <span id="todayWeatherTemp"></span>
+        </div>
+        <div class="col">
+            <span id="todayWeatherDescription"></span>
+        </div>
+    </div>
+    <div class="row justify-content-beetween">
+        <div class="col details">
+            <span class="material-icons-outlined">thermostat</span>
+            <span class="flex-column detail-headline">
                         <div>Gefühlt</div>
                         <div class="detail-value" id="todayWeatherFeelsLikeTemp"></div>
                     </span>
-                </div>
+        </div>
 
-                <div class="col details">
-                    <span class="material-icons-outlined">air</span>
-                    <span class="flex-column detail-headline">
+        <div class="col details">
+            <span class="material-icons-outlined">air</span>
+            <span class="flex-column detail-headline">
                         <div>Wind</div>
                         <div class="detail-value" id="todayWeatherWindSpeed"></div>
                     </span>
-                </div>
+        </div>
 
-                <div class="col details">
-                    <span class="material-icons-outlined">visibility</span>
-                    <span class="flex-column detail-headline">
+        <div class="col details">
+            <span class="material-icons-outlined">visibility</span>
+            <span class="flex-column detail-headline">
                         <div>Fernsicht</div>
                         <div class="detail-value" id="todayWeatherVision"></div>
                     </span>
-                </div>
+        </div>
 
-                <div class="col details">
-                    <span class="material-icons-outlined">cloud</span>
-                    <span class="flex-column detail-headline">
+        <div class="col details">
+            <span class="material-icons-outlined">cloud</span>
+            <span class="flex-column detail-headline">
                         <div>Wolken</div>
                         <div class="detail-value" id="todayWeatherCloudiness"></div>
                     </span>
-                </div>
+        </div>
 
-                <div class="col details">
-                    <span class="material-icons-outlined">water_drop</span>
-                    <span class="flex-column  detail-headline">
+        <div class="col details">
+            <span class="material-icons-outlined">water_drop</span>
+            <span class="flex-column  detail-headline">
                         <div>Luftfeuchtigkeit</div>
                         <div class="detail-value" id="todayWeatherHumidity"></div>
                     </span>
-                </div>
+        </div>
 
-                <div class="col details">
-                    <span class="material-icons-round">ac_unit</span>
-                    <span class="flex-column detail-headline">
+        <div class="col details">
+            <span class="material-icons-round">ac_unit</span>
+            <span class="flex-column detail-headline">
                         <div>Taupunkt</div>
                         <div class="detail-value" id="todayWeatherDew"></div>
                     </span>
-                </div>
+        </div>
 
-                <div class="col details">
-                    <span class="material-icons-outlined">wb_sunny</span>
-                    <span class="flex-column detail-headline">
+        <div class="col details">
+            <span class="material-icons-outlined">wb_sunny</span>
+            <span class="flex-column detail-headline">
                         <div>UV-Index</div>
                         <div class="detail-value" id="todayWeatherUVIndex"></div>
                     </span>
-                </div>
-
-                <div class="col details">
-                    <span class="material-icons-outlined"></span>
-                </div>
-            </div>
-
-            <div class="section-headline" id="chartForecastHeadline">48-Stunden-Vorhersage</div>
-            <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-outline-dark active" onclick="showChartContenTemp()" id="buttonTempChart">Temperatur</button>
-                <button type="button" class="btn btn-sm btn-outline-dark" onclick="showChartContenPerc()" id="buttonPercChart">Niederschlag</button>
-                <button type="button" class="btn btn-sm btn-outline-dark" onclick="showChartContenHumi()" id="buttonHumiChart">Luftfeuchtigkeit</button>
-            </div>
-            <div id="myChart" style="width:100%;height: 200px;"></div>
-
-            <div class="section-headline">6-Tage-Vorhersage</div>
-            
-            <div class="next-days row" id="nextDaysRow">
-                <button class="day-card btn active col">
-                    <div class="d-flex flex-column">
-                        <div class="day-card-headline" id="day1-headline">
-                            Heute
-                        </div>
-                        <div class="day-card-weather-icon" id="day1-weather-icon">
-                            
-                        </div>
-                        <div class="day-card-temp-section">
-                            <span class="material-icons-round">arrow_drop_up</span><span id="day1-max-temp"></span><br />
-                            <span class="material-icons-round">arrow_drop_down</span><span id="day1-min-temp"></span>
-                        </div>
-                    </div>
-                </button>
-
-                <button class="day-card btn col">
-                    <div class="d-flex flex-column">
-                        <div class="day-card-headline" id="day2-headline">
-                            Morgen
-                        </div>
-                        <div class="day-card-weather-icon" id="day2-weather-icon">
-                            
-                        </div>
-                        <div class="day-card-temp-section">
-                            <span class="material-icons-round">arrow_drop_up</span><span id="day2-max-temp"></span><br />
-                            <span class="material-icons-round">arrow_drop_down</span><span id="day2-min-temp"></span>
-                        </div>
-                    </div>
-                </button>
-
-                <button class="day-card btn col">
-                    <div class="d-flex flex-column">
-                        <div class="day-card-headline" id="day3-headline">
-                            Samstag
-                        </div>
-                        <div class="day-card-weather-icon" id="day3-weather-icon">
-                            
-                        </div>
-                        <div class="day-card-temp-section">
-                            <span class="material-icons-round">arrow_drop_up</span><span id="day3-max-temp"></span><br />
-                            <span class="material-icons-round">arrow_drop_down</span><span id="day3-min-temp"></span>
-                        </div>
-                    </div>
-                </button>
-
-                <button class="day-card btn col">
-                    <div class="d-flex flex-column">
-                        <div class="day-card-headline" id="day4-headline">
-                            Sonntag
-                        </div>
-                        <div class="day-card-weather-icon" id="day4-weather-icon">
-                            
-                        </div>
-                        <div class="day-card-temp-section">
-                            <span class="material-icons-round">arrow_drop_up</span><span id="day4-max-temp"></span><br />
-                            <span class="material-icons-round">arrow_drop_down</span><span id="day4-min-temp"></span>
-                        </div>
-                    </div>
-                </button>
-
-                <button class="day-card btn col">
-                    <div class="d-flex flex-column">
-                        <div class="day-card-headline" id="day5-headline">
-                            Montag
-                        </div>
-                        <div class="day-card-weather-icon" id="day5-weather-icon">
-                            
-                        </div>
-                        <div class="day-card-temp-section">
-                            <span class="material-icons-round">arrow_drop_up</span><span id="day5-max-temp"></span><br />
-                            <span class="material-icons-round">arrow_drop_down</span><span id="day5-min-temp"></span>
-                        </div>
-                    </div>
-                </button>
-
-                <button class="day-card btn col">
-                    <div class="d-flex flex-column">
-                        <div class="day-card-headline" id="day6-headline">
-                            Dienstag
-                        </div>
-                        <div class="day-card-weather-icon" id="day6-weather-icon">
-                            
-                        </div>
-                        <div class="day-card-temp-section">
-                            <span class="material-icons-round">arrow_drop_up</span><span id="day6-max-temp"></span><br />
-                            <span class="material-icons-round">arrow_drop_down</span><span id="day6-min-temp"></span>
-                        </div>
-                    </div>
-                </button>
-            </div>            
         </div>
 
-        <div id="dailyModals"></div>
-        <script src="{{ url_for('static', filename='main_weatherOverview.js')}}"></script>
-    </body>
+        <div class="col details">
+            <span class="material-icons-outlined"></span>
+        </div>
+    </div>
+
+    <div class="section-headline" id="chartForecastHeadline">48-Stunden-Vorhersage</div>
+    <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-outline-dark active" onclick="showChartContenTemp()"
+                id="buttonTempChart">Temperatur
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-dark" onclick="showChartContenPerc()" id="buttonPercChart">
+            Niederschlag
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-dark" onclick="showChartContenHumi()" id="buttonHumiChart">
+            Luftfeuchtigkeit
+        </button>
+    </div>
+    <div id="myChart" style="width:100%;height: 200px;"></div>
+
+    <div class="section-headline">6-Tage-Vorhersage</div>
+
+    <div class="next-days row" id="nextDaysRow">
+        <button class="day-card btn active col">
+            <div class="d-flex flex-column">
+                <div class="day-card-headline" id="day1-headline">
+                    Heute
+                </div>
+                <div class="day-card-weather-icon" id="day1-weather-icon">
+
+                </div>
+                <div class="day-card-temp-section">
+                    <span class="material-icons-round">arrow_drop_up</span><span id="day1-max-temp"></span><br/>
+                    <span class="material-icons-round">arrow_drop_down</span><span id="day1-min-temp"></span>
+                </div>
+            </div>
+        </button>
+
+        <button class="day-card btn col">
+            <div class="d-flex flex-column">
+                <div class="day-card-headline" id="day2-headline">
+                    Morgen
+                </div>
+                <div class="day-card-weather-icon" id="day2-weather-icon">
+
+                </div>
+                <div class="day-card-temp-section">
+                    <span class="material-icons-round">arrow_drop_up</span><span id="day2-max-temp"></span><br/>
+                    <span class="material-icons-round">arrow_drop_down</span><span id="day2-min-temp"></span>
+                </div>
+            </div>
+        </button>
+
+        <button class="day-card btn col">
+            <div class="d-flex flex-column">
+                <div class="day-card-headline" id="day3-headline">
+                    Samstag
+                </div>
+                <div class="day-card-weather-icon" id="day3-weather-icon">
+
+                </div>
+                <div class="day-card-temp-section">
+                    <span class="material-icons-round">arrow_drop_up</span><span id="day3-max-temp"></span><br/>
+                    <span class="material-icons-round">arrow_drop_down</span><span id="day3-min-temp"></span>
+                </div>
+            </div>
+        </button>
+
+        <button class="day-card btn col">
+            <div class="d-flex flex-column">
+                <div class="day-card-headline" id="day4-headline">
+                    Sonntag
+                </div>
+                <div class="day-card-weather-icon" id="day4-weather-icon">
+
+                </div>
+                <div class="day-card-temp-section">
+                    <span class="material-icons-round">arrow_drop_up</span><span id="day4-max-temp"></span><br/>
+                    <span class="material-icons-round">arrow_drop_down</span><span id="day4-min-temp"></span>
+                </div>
+            </div>
+        </button>
+
+        <button class="day-card btn col">
+            <div class="d-flex flex-column">
+                <div class="day-card-headline" id="day5-headline">
+                    Montag
+                </div>
+                <div class="day-card-weather-icon" id="day5-weather-icon">
+
+                </div>
+                <div class="day-card-temp-section">
+                    <span class="material-icons-round">arrow_drop_up</span><span id="day5-max-temp"></span><br/>
+                    <span class="material-icons-round">arrow_drop_down</span><span id="day5-min-temp"></span>
+                </div>
+            </div>
+        </button>
+
+        <button class="day-card btn col">
+            <div class="d-flex flex-column">
+                <div class="day-card-headline" id="day6-headline">
+                    Dienstag
+                </div>
+                <div class="day-card-weather-icon" id="day6-weather-icon">
+
+                </div>
+                <div class="day-card-temp-section">
+                    <span class="material-icons-round">arrow_drop_up</span><span id="day6-max-temp"></span><br/>
+                    <span class="material-icons-round">arrow_drop_down</span><span id="day6-min-temp"></span>
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+
+<div id="dailyModals"></div>
+<script src="{{ url_for('static', filename='main_weatherOverview.js')}}"></script>
+</body>
 </html>

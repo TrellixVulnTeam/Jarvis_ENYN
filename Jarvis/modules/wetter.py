@@ -1,9 +1,10 @@
-from urllib.request import urlopen, Request
-import time
-import datetime
-import urllib.parse
 import ast
+import datetime
 import re
+import time
+import urllib.parse
+from urllib.request import urlopen, Request
+
 
 def get_weather(place):
     place = place.lower()
@@ -50,7 +51,6 @@ def get_weather(place):
     return w
 
 
-
 def get_temperature(pl):
     t = pl - 273.15
     t = str(t)[:2]
@@ -65,7 +65,8 @@ def handle(text, core, skills):
     else:
         o = o
     ort = o.lower()
-    web = 'http://api.openweathermap.org/data/2.5/weather?q=' + urllib.parse.quote(ort) + '&appid=bd4d17c6eedcff6efc70b9cefda99082'
+    web = 'https://api.openweathermap.org/data/2.5/weather?q=' + urllib.parse.quote(
+        ort) + '&appid=bd4d17c6eedcff6efc70b9cefda99082'
     request = Request(web)
     try:
         response = urlopen(request)
@@ -74,7 +75,7 @@ def handle(text, core, skills):
         return
     html = response.read()
     html = str(html)
-    ohneb = html[2:len(html)-1]
+    ohneb = html[2:len(html) - 1]
     dictionary = ast.literal_eval(ohneb)
 
     line = dictionary.get("weather")
@@ -92,6 +93,7 @@ def handle(text, core, skills):
     core.say(wetter)
 
     response.close()
+
 
 def isValid(text):
     text = text.lower()

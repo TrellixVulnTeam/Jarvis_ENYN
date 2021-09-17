@@ -44,7 +44,6 @@
     "python_installs": [
       "telepot"
     ],
-
     "required": "partially",
     "description": "telepot wird nur benötigt, wenn du JARVIS auch über Telegram erreichen möchtest.",
     "install_check": {
@@ -53,7 +52,10 @@
   },
   "pyaudio": {
     "apt_installs": [
-      "portaudio19-dev", "sox", "flac", "ffmpeg"
+      "portaudio19-dev",
+      "sox",
+      "flac",
+      "ffmpeg"
     ],
     "python_installs": [
       "pyaudio"
@@ -66,7 +68,8 @@
   },
   "speechrecognition": {
     "apt_installs": [
-      "libttspico0", "libttspico-utils"
+      "libttspico0",
+      "libttspico-utils"
     ],
     "python_installs": [
       "SpeechRecognition"
@@ -183,5 +186,4 @@
       "import": "phue"
     }
   }
-
 }

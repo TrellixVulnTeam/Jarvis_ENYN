@@ -1,19 +1,21 @@
-
 import os
 import tempfile
 
 WORDS = ['mail', 'e-mail']
 
+
 def isValid(text):
     text = text.lower().strip()
-    if text.startswith('mail ') or text.lower().startswith('e-mail ') or text.lower().startswith('email ') or text.lower().startswith('e mail '):
+    if text.startswith('mail ') or text.lower().startswith('e-mail ') or text.lower().startswith(
+            'email ') or text.lower().startswith('e mail '):
         return True
     return False
 
 
 def handle(text, core, skills):
     text = text.strip()
-    if text.lower().startswith("mail ") or text.lower().startswith('e-mail ') or text.lower().startswith('email ') or text.lower().startswith('e mail '):
+    if text.lower().startswith("mail ") or text.lower().startswith('e-mail ') or text.lower().startswith(
+            'email ') or text.lower().startswith('e mail '):
         subject = text[5:]
         core.say('Vertrau mir deine Mail an. Zum Beenden nutze das Wort fertig.')
         body = []

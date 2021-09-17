@@ -16,12 +16,12 @@ function finalizeEdit(moduleName) {
     });
 }
 
-function saveAndRedirect(oldModuleName, moduleName){
+function saveAndRedirect(oldModuleName, moduleName) {
     finalizeEdit(oldModuleName);
     window.location.replace(moduleName);
 }
 
-function redirectToSite(moduleName){
+function redirectToSite(moduleName) {
     // just  modal if code changed!!!!!!!!!!!!!!!!!!!!!!!!!
     $("#saveModalBody").html("Soll der neue Stand von dem Modul {{ moduleName }} gespeichert werden? Anschließend würde es neu geladen werden.");
     var saveModalFooter = "<div class=\"btn-group\">";

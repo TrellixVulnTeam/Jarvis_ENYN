@@ -20,9 +20,10 @@ data = [
 
 personPattern = re.compile(r'.*?wie kann ich (.*?)\s.*', re.I)
 
+
 def isValid(text):
     text = text.lower()
-    ret =  personPattern.match(text) is not None
+    ret = personPattern.match(text) is not None
     print(ret)
     return ret
 

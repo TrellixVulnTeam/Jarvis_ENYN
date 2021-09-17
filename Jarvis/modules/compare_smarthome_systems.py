@@ -1,5 +1,6 @@
 import random
 
+
 def get_ausgabe(txt, core):
     output = ''
     output_zwei = ''
@@ -23,8 +24,8 @@ def get_ausgabe(txt, core):
     for w in t:
         satz[ind] = w
         ind += 1
-    for i, w in satz.items(): #hier beginnt die Abfrage nach der genannten Sprachassistenz
-        if w == 'cortana': 
+    for i, w in satz.items():  # hier beginnt die Abfrage nach der genannten Sprachassistenz
+        if w == 'cortana':
             sa = w
             if i == 1:
                 if satz.get(2) == 'ist' or satz.get(2) == 'war':
@@ -41,13 +42,13 @@ def get_ausgabe(txt, core):
                     output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
                     rep = False
             elif 'kennst du cortana' in text or 'magst du cortana' in text or 'du mit cortana bekannt' in text:
-                    output = 'Wir kennen uns. '
-                    output_zwei = 'Wir sind Arbeitskollegen.'
-                    rep = False
+                output = 'Wir kennen uns. '
+                output_zwei = 'Wir sind Arbeitskollegen.'
+                rep = False
             elif 'bist du cortana' in text or 'cortana nennen' in text:
-                    output = 'Ich fürchte nicht. '
-                    output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
-                    rep = False
+                output = 'Ich fürchte nicht. '
+                output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
+                rep = False
             elif 'als cortana' in text:
                 if 'besser' or 'intelligenter' or 'cooler' in text:
                     output = 'Vielen Dank. '
@@ -57,7 +58,7 @@ def get_ausgabe(txt, core):
                 output = 'Ich bin mit Cortana bekannt. '
                 output_zwei = 'Wie kann ich dir helfen?'
                 rep = True
-        elif w == 'siri': 
+        elif w == 'siri':
             sa = w
             if i == 1:
                 if satz.get(2) == 'ist' or satz.get(2) == 'war':
@@ -74,13 +75,13 @@ def get_ausgabe(txt, core):
                     output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
                     rep = False
             elif 'kennst du siri' in text or 'magst du siri' in text or 'du mit siri bekannt' in text:
-                    output = 'Wir kennen uns. '
-                    output_zwei = 'Wir sind Arbeitskollegen.'
-                    rep = False
+                output = 'Wir kennen uns. '
+                output_zwei = 'Wir sind Arbeitskollegen.'
+                rep = False
             elif 'bist du siri' in text or 'siri nennen' in text:
-                    output = 'Ich fürchte nicht. '
-                    output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
-                    rep = False
+                output = 'Ich fürchte nicht. '
+                output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
+                rep = False
             elif 'als siri' in text:
                 if 'besser' or 'intelligenter' or 'cooler' in text:
                     output = 'Vielen Dank. '
@@ -107,13 +108,13 @@ def get_ausgabe(txt, core):
                     output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
                     rep = False
             elif 'kennst du alexa' in text or 'magst du alexa' in text or 'du mit alexa bekannt' in text:
-                    output = 'Wir kennen uns. '
-                    output_zwei = 'Wir sind Arbeitskollegen.'
-                    rep = False
+                output = 'Wir kennen uns. '
+                output_zwei = 'Wir sind Arbeitskollegen.'
+                rep = False
             elif 'bist du alexa' in text or 'alexa nennen' in text:
-                    output = 'Ich fürchte nicht. '
-                    output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
-                    rep = False
+                output = 'Ich fürchte nicht. '
+                output_zwei = 'Mein Name ist ' + get_name_string(core) + '.'
+                rep = False
             elif 'als alexa' in text:
                 if 'besser' or 'intelligenter' or 'cooler' in text:
                     output = 'Vielen Dank. '
@@ -134,7 +135,7 @@ def handle(text, core, skill):
     rep = ausgabe.get('rep')
     sa = ausgabe.get('sa')
     for x in range(1):
-        zufallszahl = (random.randint(1,6))
+        zufallszahl = (random.randint(1, 6))
     if sa == 'jarvis':
         o = 'Jarvis war eine Inspiration für meine Entstehung. '
         p = 'Ich bewundere Jarvis sehr. '
@@ -163,14 +164,14 @@ def handle(text, core, skill):
                     core.say(output_drei)
             elif 'helfen' in output_zwei:
                 core.start_module(neuertext)
-            
-                
+
+
 def isValid(text):
     text = text.lower()
     if 'jarvis' in text or 'alexa' in text or 'cortana' in text or 'siri' in text:
         return True
 
-    
+
 def get_name_string(core):
     if core.local_storage['system_name'].lower() == 'core':
         return 'LUNA'

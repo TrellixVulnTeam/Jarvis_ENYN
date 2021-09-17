@@ -41,7 +41,9 @@ class StopWatch:
 
     def stop(self):
         if 'stoppuhr' in self.core.local_storage.keys() and self.core.local_storage['stoppuhr'] != '':
-            self.core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(self.skills.get_time(datetime.now()), self.skills.get_time_differenz(self.core.local_storage["stoppuhr"], self.skills)))
+            self.core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(
+                self.skills.get_time(datetime.now()),
+                self.skills.get_time_differenz(self.core.local_storage["stoppuhr"], self.skills)))
             self.core.local_storage['stoppuhr'] = ''
         else:
             self.core.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')

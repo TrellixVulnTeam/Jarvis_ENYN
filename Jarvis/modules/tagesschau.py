@@ -1,17 +1,16 @@
-
+import os
+import requests
+import subprocess
+import wave
 from bs4 import BeautifulSoup
 from pathlib import Path
-import requests
-from urllib.parse import urlparse
-import subprocess
 from pathlib import Path
-import wave
-import os
-
-#PRIORITY = 6
+# PRIORITY = 6
 from pydub import AudioSegment
+from urllib.parse import urlparse
 
-TAGESSCHAU_URL = "http://www.internetradio-horen.de/podcasts/tagesschau-in-100-sekunden"
+TAGESSCHAU_URL = "https://www.internetradio-horen.de/podcasts/tagesschau-in-100-sekunden"
+
 
 def isValid(text):
     text = text.lower()
@@ -20,8 +19,8 @@ def isValid(text):
     if ('sage' in text or 'erzähl' in text or 'erzähle' in text or 'sprich' in text) and 'nachrichten' in text:
         return True
 
-def handle(text, core, skills):
 
+def handle(text, core, skills):
     DOWNLOAD_PATH = Path(core.path + "/modules/resources")
     try:
         DOWNLOAD_PATH = Path(core.path + "/modules/resources")
@@ -30,19 +29,21 @@ def handle(text, core, skills):
 
         sound = AudioSegment.from_mp3(core.path + "/modules/resources" + "/tagesschau_100sec.mp3")
         sound.export(core.path + "/modules/resources/tagesschau_100sec.wav", format="wav")
-        #wav = wave.open(core.path + "/modules/resources/tagesschau_100sec.wav", 'rb')
+        # wav = wave.open(core.path + "/modules/resources/tagesschau_100sec.wav", 'rb')
         core.play(path=core.path + "/modules/resources/tagesschau_100sec.wav")
-        #text = core.recognize(wav)
+        # text = core.recognize(wav)
         os.remove(path)
-        #core.say(text)
+        # core.say(text)
 
     except Exception as e:
         print(f"Abbruch durch Fehler: {e}")
+
 
 def get_content(url):
     response = requests.get(url)
     response.raise_for_status()
     return response.content
+
 
 def get_audio_url():
     soup = BeautifulSoup(get_content(TAGESSCHAU_URL), "html.parser")
@@ -50,6 +51,7 @@ def get_audio_url():
     if not meta or not meta.has_attr("src"):
         raise ValueError("Konnte keine Infos zur Audio-URL finden")
     return meta["src"]
+
 
 def download_audio(url, DOWNLOAD_PATH):
     filename = 'tagesschau_100sec.mp3'
@@ -59,4 +61,3 @@ def download_audio(url, DOWNLOAD_PATH):
     except:
         pass
     return path
-

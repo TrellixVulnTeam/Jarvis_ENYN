@@ -1,12 +1,18 @@
-import math # Wird wegen eval gebraucht
+import math  # Wird wegen eval gebraucht
 import re
 
 PRIORITY = 5
-SECURE = False # Verstößt gegen Punkt 1
+SECURE = False  # Verstößt gegen Punkt 1
 
-termFinder = re.compile(r'.*?((\d|\(|-|minus|sinus|pi|cosinus|kosinus|tangens|kubikwurzel|quadratwurzel|wurzel|ein|null|antwort|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf).*)', re.I)
-bruchFinder = re.compile(r'^(.*?)(\d+|ein|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf) (ganzes|ganze|halbes|halbe|halb|drittel|viertel|fünftel|sechstel|siebtel|achtel|neuntel|zehntel|elftel|zwölftel|4tel|5tel|6tel|8tel|9tel|10tel|11tel|12tel)(.*?)$', re.I)
-funktionsFinder = re.compile(r'^(.*?)(der tangens von|tangens von|tangens|der cosinus von|cosinus von|cosinus|der kosinus von|kosinus von|kosinus|der sinus von|sinus von|sinus|die kubikwurzel von|kubikwurzel von|die kubikwurzel aus|kubikwurzel aus|kubikwurzel|die quadratwurzel von|quadratwurzel von|die quadratwurzel aus|quadratwurzel aus|quadratwurzel|die wurzel von|wurzel von|die wurzel aus|wurzel aus|wurzel)\s+(-?\d+\.?\d*)(.*?)$', re.I)
+termFinder = re.compile(
+    r'.*?((\d|\(|-|minus|sinus|pi|cosinus|kosinus|tangens|kubikwurzel|quadratwurzel|wurzel|ein|null|antwort|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf).*)',
+    re.I)
+bruchFinder = re.compile(
+    r'^(.*?)(\d+|ein|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf) (ganzes|ganze|halbes|halbe|halb|drittel|viertel|fünftel|sechstel|siebtel|achtel|neuntel|zehntel|elftel|zwölftel|4tel|5tel|6tel|8tel|9tel|10tel|11tel|12tel)(.*?)$',
+    re.I)
+funktionsFinder = re.compile(
+    r'^(.*?)(der tangens von|tangens von|tangens|der cosinus von|cosinus von|cosinus|der kosinus von|kosinus von|kosinus|der sinus von|sinus von|sinus|die kubikwurzel von|kubikwurzel von|die kubikwurzel aus|kubikwurzel aus|kubikwurzel|die quadratwurzel von|quadratwurzel von|die quadratwurzel aus|quadratwurzel aus|quadratwurzel|die wurzel von|wurzel von|die wurzel aus|wurzel aus|wurzel)\s+(-?\d+\.?\d*)(.*?)$',
+    re.I)
 
 numeratorMap = {
     'ein': '1',
@@ -50,6 +56,7 @@ denomintorMap = {
     '12tel': '12',
 }
 
+
 def handle(text, core, skills):
     text = text.lower()
     match = termFinder.match(text)
@@ -77,7 +84,8 @@ def handle(text, core, skills):
 
     match = bruchFinder.match(text)
     while match is not None:
-        replacement = '(' + numeratorMap.get(match.group(2), match.group(2)) + '/' + denomintorMap.get(match.group(3), '1') + ')'
+        replacement = '(' + numeratorMap.get(match.group(2), match.group(2)) + '/' + denomintorMap.get(match.group(3),
+                                                                                                       '1') + ')'
         text = match.group(1) + replacement + match.group(4)
         match = bruchFinder.match(text)
 
@@ -147,6 +155,7 @@ def handle(text, core, skills):
     if (resultStr.startswith('-')):
         resultStr = 'minus ' + resultStr[1:]
     core.say(resultStr)
+
 
 def isValid(text):
     text = text.lower()

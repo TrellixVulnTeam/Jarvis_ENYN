@@ -186,6 +186,9 @@ class PhillipsWrapper:
 
 
 class Logic:
+    def __init__(self):
+        pass
+
     @staticmethod
     def get_lights(text, wrapper):
         lights = []
@@ -222,20 +225,3 @@ class Logic:
                 # color[1] = converter.hex_to_xy(farbe)[1]
                 named_colors.append(color_code[i])
         return named_colors
-
-
-class Core:
-    def __init__(self):
-        self.local_storage = {"module_storage": {
-            "philips_hue": {
-                "Bridge-Ip": "192.168.0.191"
-            }
-        }}
-
-    def module_storage(self, module_name=""):
-        return {"Bridge-Ip": "192.168.0.191"}
-
-
-if __name__ == "__main__":
-    ph = PhillipsWrapper(Core(), None)
-    ph.light_set_powerstate("Küche", None)

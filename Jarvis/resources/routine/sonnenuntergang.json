@@ -1,29 +1,37 @@
 {
-    "description": "Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an",
-    "retakes": {
-      "days": {
-        "daily": true,
-        "monday": false,
-        "tuesday": false,
-        "wednesday": false,
-        "thursday": false,
-        "friday": false,
-        "saturday": false,
-        "sunday": false,
-        "date_of_day": [""]
-      },
-      "activation": {
-        "clock_time": [""],
-        "after_alarm": false,
-        "after_sunrise": false,
-        "after_sunset": true
-      }
-    },
-    "actions": {
-      "commands": [
-          { "module_name": "phillips_hue",
-            "text": ["Mach den Schreibtisch blau", "Mach das Bett grün"]
-          }
+  "description": "Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an",
+  "retakes": {
+    "days": {
+      "daily": true,
+      "monday": false,
+      "tuesday": false,
+      "wednesday": false,
+      "thursday": false,
+      "friday": false,
+      "saturday": false,
+      "sunday": false,
+      "date_of_day": [
+        ""
       ]
+    },
+    "activation": {
+      "clock_time": [
+        ""
+      ],
+      "after_alarm": false,
+      "after_sunrise": false,
+      "after_sunset": true
     }
+  },
+  "actions": {
+    "commands": [
+      {
+        "module_name": "phillips_hue",
+        "text": [
+          "Mach den Schreibtisch blau",
+          "Mach das Bett grün"
+        ]
+      }
+    ]
+  }
 }

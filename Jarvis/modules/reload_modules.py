@@ -1,7 +1,9 @@
 import time
 
 SECURE = False
-#toDo Asynchronus say
+
+
+# toDo Asynchronus say
 def reload_own(core):
     print('\n\n--------- RELOAD ---------')
     # Eigene Module neu laden
@@ -9,8 +11,9 @@ def reload_own(core):
     core.core.modules.load_modules()
     core.core.modules.start_continuous()
 
+
 def handle(text, core, skills):
-    #core.say('Okay, warte einen Moment')
+    # core.say('Okay, warte einen Moment')
     reload_own(core)
     print('--------- FERTIG ---------\n\n')
     core.say('Die Module wurden neu geladen.')

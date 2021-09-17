@@ -1,36 +1,36 @@
 {
-    "established": false,
-    "Local_storage": {
-        "LUNA_Modules_defined_Vocabulary": [],
-        "home_location": "",
-        "actual_location": "",
-        "keys_to_distribute": [
-            "users",
-            "server_name",
-            "system_name",
-            "activation_phrase"
-        ],
-        "users": {},
-        "messenger_allowed_id_table": [],
-        "rejected_messenger_messages": [],
-        "module_storage": {
-            "philips_hue":{
-                "Bridge-IP": ""
-            },
-            "philips-tv": {
-                "user": "",
-                "pass": "",
-                "host": ""
-            }
-	    },
-        "user": ""
+  "established": false,
+  "Local_storage": {
+    "LUNA_Modules_defined_Vocabulary": [],
+    "home_location": "",
+    "actual_location": "",
+    "keys_to_distribute": [
+      "users",
+      "server_name",
+      "system_name",
+      "activation_phrase"
+    ],
+    "users": {},
+    "messenger_allowed_id_table": [],
+    "rejected_messenger_messages": [],
+    "module_storage": {
+      "philips_hue": {
+        "Bridge-IP": ""
+      },
+      "philips-tv": {
+        "user": "",
+        "pass": "",
+        "host": ""
+      }
     },
-    "messenger_key": "",
-    "System_name": "JARVIS",
-    "messenger": true,
-    "voice": "male",
-    "Network_Key": "",
-    "use_cameras": false,
-    "use_facerec": false,
-    "use_interface": false
+    "user": ""
+  },
+  "messenger_key": "",
+  "System_name": "JARVIS",
+  "messenger": true,
+  "voice": "male",
+  "Network_Key": "",
+  "use_cameras": false,
+  "use_facerec": false,
+  "use_interface": false
 }

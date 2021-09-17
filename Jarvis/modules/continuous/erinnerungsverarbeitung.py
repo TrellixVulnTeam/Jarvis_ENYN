@@ -2,6 +2,7 @@ import datetime
 
 INTERVALL = 2
 
+
 def run(core, profile):
     now = datetime.datetime.now()
     if 'Erinnerungen' in core.local_storage.keys():

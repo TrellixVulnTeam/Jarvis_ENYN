@@ -1,9 +1,9 @@
 import json
 import logging
 import math
+import requests
 import traceback
 from datetime import datetime
-import requests
 
 INTERVALL = 2
 
@@ -118,7 +118,8 @@ class sunset_times(object):
         lat = math.radians(lat_d)
         lon = math.radians(lon_d)
         frac_year = ((math.pi * 2) / (365)) * (day_of_year - 1)  # radians
-        eq_time = 229.18 * (0.000075 + (0.001868 * math.cos(frac_year)) - (0.032077 * math.sin(frac_year)) - (0.014615 * math.cos(2 * frac_year)) - (0.040849 * math.sin(2 * frac_year)))  # minutes
+        eq_time = 229.18 * (0.000075 + (0.001868 * math.cos(frac_year)) - (0.032077 * math.sin(frac_year)) - (
+                    0.014615 * math.cos(2 * frac_year)) - (0.040849 * math.sin(2 * frac_year)))  # minutes
         decl = 0.006918 - (0.399912 * math.cos(frac_year)) + (0.070257 * math.sin(frac_year)) \
                - (0.006758 * math.cos(2 * frac_year)) + (0.000907 * math.sin(2 * frac_year)) \
                - (0.002697 * math.cos(3 * frac_year)) + (0.00148 * math.sin(3 * frac_year))  # radians

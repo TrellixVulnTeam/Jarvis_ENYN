@@ -8,6 +8,7 @@ SECURE = True
 Dieses Modul fragt die Distanz und Fahrzeit zwischen zwei Orten von Google Maps ab.
 '''
 
+
 # Python Client Library: https://github.com/googlemaps/google-maps-services-python
 # Requirements: pip install -U googlemaps
 # API Doc: https://developers.google.com/maps/documentation/distance-matrix/intro
@@ -19,6 +20,7 @@ def isValid(text):
         return True
     else:
         return False
+
 
 def handle(text, core, skills):
     text = text.lower()
@@ -41,7 +43,7 @@ def handle(text, core, skills):
     destination = text[endMiddle:length]
 
     # get distance and duration
-    directions_result = gmaps.distance_matrix(origin,destination,language='de')
+    directions_result = gmaps.distance_matrix(origin, destination, language='de')
 
     durationTxt = directions_result['rows'][0]['elements'][0]['duration']['text']
     distanceTxt = directions_result['rows'][0]['elements'][0]['distance']['text']
@@ -53,4 +55,5 @@ def handle(text, core, skills):
 
         distance = float(re.sub(",", ".", distanceTxt))
 
-    core.say('Von '+origin+' nach '+destination+' sind es '+distanceTxt+' Kilometer. Die Fahrt dauert '+durationTxt)
+    core.say(
+        'Von ' + origin + ' nach ' + destination + ' sind es ' + distanceTxt + ' Kilometer. Die Fahrt dauert ' + durationTxt)

@@ -7,12 +7,14 @@ In diesem Spiel geht es darum, eine Zufallszahl in möglichst wenigen Schritten 
 
 SECURE = True
 
+
 def isValid(text):
     text = text.lower()
     if 'spiel' in text and ('zahl' in text or 'erraten' in text):
         return True
     else:
         return False
+
 
 def handle(text, core, skills):
     if core.messenger_call:

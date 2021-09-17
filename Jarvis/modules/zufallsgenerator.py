@@ -9,18 +9,19 @@ zwischenPattern = re.compile(r'.*(von|zwischen) (-?\d+) (und|bis) (-?\d+).*', re
 bisPattern = re.compile(r'.*(bis|kleiner gleich) (-?\d+).*', re.I)
 kleinerPattern = re.compile(r'.*(unter|kleiner) (als)? (-?\d+).*', re.I)
 
+
 def output(txt, core):
     output = ''
     text = tt.lower()
     t = str.split(text)
     if 'münze' in text or ('kopf' in text and 'oder' in text and 'zahl' in text):
-        q = random.randint(1,2)
+        q = random.randint(1, 2)
         if q == 1:
             output = 'kopf'
         else:
             output = 'zahl'
     elif 'würfel' in text or 'alea iacta est' in text:
-        q = random.randint(1,6)
+        q = random.randint(1, 6)
         if q == 1:
             output = 'eins'
         elif q == 2:
@@ -52,20 +53,19 @@ def output(txt, core):
                 output = str(random.randrange(1, int(match.group(3))))
             else:
                 output = str(random.randrange(int(match.group(3)), 1))
-                
+
     elif 'schere' in text or 'stein' in text or 'papier' in text:
         possibilities = ['Schere', 'Stein', 'Papier']
         output = 'Da ist wohl was schief gelaufen'
         zufall = random.randint(0, 2)
         output = possibilities[zufall]
-    
+
     elif 'grade' in text and 'ungerade' in text:
         possibilities = ['grade', 'ungerade']
         output = random.choice(possibilities)
-        
 
     if (output == ''):
-        output = str(random.randint(1,100))
+        output = str(random.randint(1, 100))
     return output
 
 
@@ -81,11 +81,13 @@ def handle(text, core, skills):
     sleep(1)
     core.say(ausgabe)
 
+
 def isValid(text):
     text = text.lower()
-    if 'münze' in text or ('kopf' in text and 'oder' in text and 'zahl' in text) or 'würfel' in text or (('zufall' in text or 'zufällig' in text) and 'zahl' in text):
+    if 'münze' in text or ('kopf' in text and 'oder' in text and 'zahl' in text) or 'würfel' in text or (
+            ('zufall' in text or 'zufällig' in text) and 'zahl' in text):
         return True
-    elif 'schere' in text and 'stein' in text and 'papier' in text:  
+    elif 'schere' in text and 'stein' in text and 'papier' in text:
         return True
     elif 'grade' in text and 'ungerade' in text:
         return True

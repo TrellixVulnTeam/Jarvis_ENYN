@@ -2,6 +2,7 @@ import datetime
 
 INTERVALL = 2
 
+
 def run(core, profile):
     now = datetime.datetime.now()
     if 'Timer' in core.local_storage.keys():

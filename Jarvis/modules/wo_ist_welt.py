@@ -8,13 +8,15 @@ _PATTERNS = [
     (re.compile(r'^(.+?) (liegt|ist) wo[.?]?$', re.I), 1)
 ]
 
+
 def isValid(text):
     text = text.lower()
     for pattern, groupId in _PATTERNS:
-            match = pattern.match(text)
-            if match is not None:
-                return True
+        match = pattern.match(text)
+        if match is not None:
+            return True
     return False
+
 
 def handle(text, core, skills):
     # Wenn es ein direkter aufruf von wo_ist.py ist, muss der prefix
@@ -36,11 +38,13 @@ def handle(text, core, skills):
     if ort is None:
         core.say('Entschuldigung, das habe ich nicht verstanden.')
     else:
-        request = Request('https://nominatim.openstreetmap.org/search?q=' + quote(ort) + '&format=json&addressdetails=1&extratags=1&namedetails=1&accept-language=de-DE&dedupe=1')
+        request = Request('https://nominatim.openstreetmap.org/search?q=' + quote(
+            ort) + '&format=json&addressdetails=1&extratags=1&namedetails=1&accept-language=de-DE&dedupe=1')
         response = urlopen(request)
         answer = json.loads(response.read())
         if (len(answer) == 0):
-            core.say('Diesen Ort kenne ich nicht. Wenn du weißt, wo er liegt, hilf mir doch und trage ihn auf Open Street Map ein.')
+            core.say(
+                'Diesen Ort kenne ich nicht. Wenn du weißt, wo er liegt, hilf mir doch und trage ihn auf Open Street Map ein.')
         else:
             strMap = {
                 # Format values:
@@ -86,15 +90,19 @@ def handle(text, core, skills):
                 type = answer['type']
                 if type.lower() == 'administrative' and 'linked_place' in answer['extratags']:
                     type = answer['extratags']['linked_place']
-                elif (type.lower() == 'city' or type.lower() == 'town' or type.lower() == 'administrative') and 'place' in answer['extratags']:
+                elif (
+                        type.lower() == 'city' or type.lower() == 'town' or type.lower() == 'administrative') and 'place' in \
+                        answer['extratags']:
                     type = answer['extratags']['place']
-                elif type.lower() == 'administrative' and len(data) == 2 and 'country' in data and 'country_code' in data:
+                elif type.lower() == 'administrative' and len(
+                        data) == 2 and 'country' in data and 'country_code' in data:
                     type = 'country'
                 elif type.lower() == 'administrative' and len(data) == 1 and 'country' in data:
                     type = 'country'
 
                 if not type.lower() in strMap:
-                    core.say('Da fällt mir etwas zu ein, aber es ist besser du suchst es selbst. Ich vermute mein Ergebnis ist nicht das, was du suchst.')
+                    core.say(
+                        'Da fällt mir etwas zu ein, aber es ist besser du suchst es selbst. Ich vermute mein Ergebnis ist nicht das, was du suchst.')
                     return
 
                 f1 = answer['namedetails']['name']

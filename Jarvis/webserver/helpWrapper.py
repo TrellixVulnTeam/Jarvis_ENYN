@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-import time
+import importlib
 import json
 import subprocess
-import importlib
+import time
 from pathlib import Path
 from threading import Thread
 
@@ -14,6 +14,7 @@ class InstallWrapper:
     The install wrapper class initiates a thread and enables a few helper functions
     to install components described in the services.json file
     """
+
     def __init__(self):
         self.readConfig()
         self.installQueue = []
@@ -23,7 +24,6 @@ class InstallWrapper:
         self._runThread = True
         self._thread = Thread(target=self._threadedLoop)
         self._thread.start()
-
 
     def __del__(self):
         # stop thread
@@ -50,7 +50,6 @@ class InstallWrapper:
             "log": self.installLog
         }
         return state
-
 
     def startInstallation(self, packageName):
         if packageName in self.packagesRaw:
@@ -79,7 +78,7 @@ class InstallWrapper:
                     proc = subprocess.Popen(["apt-get", "update", "-y"])
                     proc.wait()
                     n = time.time() - t_1
-                    self.installLog += "\n took " + str(round(n*10,1)) + " seconds."
+                    self.installLog += "\n took " + str(round(n * 10, 1)) + " seconds."
                     for ai in data["apt_installs"]:
                         self._installRaw(ai, "apache")
                 if "python_installs" in data:
@@ -110,10 +109,10 @@ class InstallWrapper:
                 self.installLog += "\n " + str(packageName) + " got installed properly."
                 self.installLog += " Took " + str(round(time.time() - t_2, 1)) + " seconds."
             else:
-                self.installLog += "\n Installation for " + str(packageName) + " failed. (apt returned a non-zero code: " + str(process.returncode) + ")"
+                self.installLog += "\n Installation for " + str(
+                    packageName) + " failed. (apt returned a non-zero code: " + str(process.returncode) + ")"
         except OSError as e:
             self.installLog += "\n Installation for " + str(packageName) + " failed. (" + str(e) + ")"
-
 
     def readConfig(self):
         """

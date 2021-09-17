@@ -1,5 +1,6 @@
 import random
 
+
 def handle(text, core, skills):
     '''
     if core.user is not None:
@@ -15,6 +16,7 @@ def handle(text, core, skills):
                  'Entschuldige, aber das kann ich leider gerade nicht beurteilen']
     core.say(random.choice(responses))'''
     core.say("Die Nutzererkennung ist leider derzeit in Arbeit, daher kann ich das noch nicht sagen.")
+
 
 def isValid(text):
     text = text.lower()

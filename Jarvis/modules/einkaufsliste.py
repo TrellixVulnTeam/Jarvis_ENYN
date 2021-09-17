@@ -7,7 +7,7 @@ PRIORITY = 2
 def isValid(text):
     text = text.lower()
     if 'to' in text and 'do' in text and 'liste' in text:
-            return False
+        return False
     if 'einkaufsliste' in text:
         if 'setz' in text or 'setzte' in text or 'schreib' in text or 'schreibe' in text or 'füg' in text or 'füge' in text:
             return True
@@ -21,7 +21,7 @@ def isValid(text):
             return True
     else:
         return False
-        
+
 
 def get_item(core, skills):
     text = core.text
@@ -51,7 +51,8 @@ def get_item(core, skills):
         founded = False
         i = 0
         for i in range(len(text)):
-            if text[i-1] == 'setz' or text[i-1] == 'setzte' or text[i-1] == 'schreib' or text[i-1] == 'schreibe':
+            if text[i - 1] == 'setz' or text[i - 1] == 'setzte' or text[i - 1] == 'schreib' or text[
+                i - 1] == 'schreibe':
                 index = i + 1
                 break
 
@@ -129,13 +130,13 @@ def get_item(core, skills):
         item = skills.assamble_array(item)
     return item
 
+
 def get_aussage_gemeinsam(text, core, skills):
     aussage = ''
     if 'einkaufsliste' in core.local_storage.keys():
         einkaufsliste = core.local_storage.get('einkaufsliste')
         aussage = skills.get_enumerate(einkaufsliste)
     return aussage
-
 
 
 def handle(text, core, skills):
@@ -202,7 +203,7 @@ def handle(text, core, skills):
         # Bevor wir die Einkaufsliste so abspeichern, werden wir gleich auch noch die Dopplungen in der Liste, die durch
         # das Hinzufügen gerade enstanden sind, zusammenzählen.
         einkaufsliste = skills.assamble_array(einkaufsliste)
-        
+
         # Und noch die Liste im Local_storage, bzw. die des Nutzers aktualisieren
         core.say("Alles klar. Ich habe {} auf die Einkaufsliste gesetzt.".format(skills.get_enumerate(item)))
         core.local_storage['einkaufsliste'] = einkaufsliste
@@ -317,4 +318,3 @@ def get_double_items(items, einkaufsliste):
             if item in einkaufsliste:
                 double.append(item)
     return double
-    

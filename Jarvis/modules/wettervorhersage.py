@@ -1,9 +1,9 @@
-from urllib.request import urlopen, Request
-import time
-import datetime
-import urllib.parse
 import ast
+import datetime
 import re
+import time
+import urllib.parse
+from urllib.request import urlopen, Request
 
 
 def get_weather(place):
@@ -51,18 +51,18 @@ def get_weather(place):
     return w
 
 
-
 def get_temperature(pl):
     t = pl - 272.15
     t = str(t)[:2]
     return t
 
+
 def zeitabfrage(dic):
     now = datetime.datetime.now()
     time = dic.get('datetime')
     differenz = time - now
-    if differenz.total_seconds() >= 40*10800:
-        time = 'Ich kann leider nicht so weit in die Zukunft sehen.' #Möchtest du wissen, wie das Wetter in 5 Tagen wird?
+    if differenz.total_seconds() >= 40 * 10800:
+        time = 'Ich kann leider nicht so weit in die Zukunft sehen.'  # Möchtest du wissen, wie das Wetter in 5 Tagen wird?
     return time
 
 
@@ -98,19 +98,20 @@ def handle(text, core, skills):
                         falsches_in = falsches_in + iindex
                 if falsches_in >= 1:
                     del satz[falsches_in]
-                for iindex, word in satz.items(): #findet Wort 'in''s key
+                for iindex, word in satz.items():  # findet Wort 'in''s key
                     if word == 'in':
                         in_index = iindex
                         myind = in_index + 1
                         o = satz.get(myind)
                     elif word == 'für':
-                        für_index = iindex
-                        myind = für_index + 1
+                        for_index = iindex
+                        myind = for_index + 1
                         o = satz.get(myind)
     else:
         o = o
     ort = o.lower()
-    web = 'http://api.openweathermap.org/data/2.5/forecast?q=' + urllib.parse.quote(ort) + '&appid=bd4d17c6eedcff6efc70b9cefda99082'
+    web = 'https://api.openweathermap.org/data/2.5/forecast?q=' + urllib.parse.quote(
+        ort) + '&appid=bd4d17c6eedcff6efc70b9cefda99082'
     request = Request(web)
     try:
         response = urlopen(request)
@@ -119,10 +120,10 @@ def handle(text, core, skills):
         return
     html = response.read()
     html = str(html)
-    ohneb = html[2:len(html)-1]
+    ohneb = html[2:len(html) - 1]
     wetterdictionary = ast.literal_eval(ohneb)
-    zeit = zeitabfrage(core.analysis) #dt_txt = zeit
-    if zeit == 'Ich kann leider nicht so weit in die Zukunft sehen.': #Möchtest du wissen, wie das Wetter in 5 Tagen wird muss ich noch rauslassen, weil ich nicht weiÃŸ, wie ich dann mit der Antwort umgehen muss
+    zeit = zeitabfrage(core.analysis)  # dt_txt = zeit
+    if zeit == 'Ich kann leider nicht so weit in die Zukunft sehen.':  # Möchtest du wissen, wie das Wetter in 5 Tagen wird muss ich noch rauslassen, weil ich nicht weiÃŸ, wie ich dann mit der Antwort umgehen muss
         core.say(zeit)
         '''antwort = core.listen()
         antwort = antwort.lower()
@@ -142,10 +143,10 @@ def handle(text, core, skills):
                 temperaturzeile = item.get("main")
                 temp_min = temperaturzeile.get("temp_min")
                 temp_max = temperaturzeile.get("temp_max")
-                minimum = get_temperature(int(temp_min)) #
+                minimum = get_temperature(int(temp_min))  #
                 if minimum[1] == '.':
                     minimum = minimum[0]
-                maximum = get_temperature(int(temp_max)) #
+                maximum = get_temperature(int(temp_max))  #
                 if maximum[1] == '.':
                     maximum = maximum[0]
                 wetterzeile = item.get("weather")
@@ -169,9 +170,9 @@ def handle(text, core, skills):
 
     response.close()
 
+
 def isValid(text):
     text = text.lower()
     if 'wird' in text:
         if 'wetter' in text or 'temperatur' in text or ' warm ' in text or ' kalt ' in text:
             return True
-

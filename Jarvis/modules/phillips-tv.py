@@ -1,14 +1,13 @@
-import platform
-import subprocess
-
-import requests
 import json
-import string
-import random
-from base64 import b64encode, b64decode
-from Crypto.Hash import SHA, HMAC
-from requests.auth import HTTPDigestAuth
 import os
+import platform
+import random
+import requests
+import string
+import subprocess
+from Crypto.Hash import SHA, HMAC
+from base64 import b64encode, b64decode
+from requests.auth import HTTPDigestAuth
 
 user = ''
 password = ''
@@ -22,18 +21,20 @@ color_in_hsb = {
     "magenta": [300, 100, 100]
 }
 
+
 def isValid(text):
     text = text.lower()
     if 'fernseh' in text:
         return True
 
+
 def handle(text, core, skills):
     text = text.lower()
 
     if "hdmi" in text:
-        core.say("Diese Funktion ist leider noch in der Entwicklung.") #ToDo
+        core.say("Diese Funktion ist leider noch in der Entwicklung.")  # ToDo
     elif 'mach' in text and 'lauter' in text:
-        core.say("Diese Funktion ist leider noch in der Entwicklung.") #ToDo
+        core.say("Diese Funktion ist leider noch in der Entwicklung.")  # ToDo
     elif ("schalte" in text or 'mach' in text) and "aus" in text:
         # it is not really "switch off" but "stand by"
         run_command('standby', core)
@@ -144,7 +145,7 @@ def handle(text, core, skills):
             run_command('watch_tv', core)
 
     else:
-           run_command('google_assistant', core, body={"query": text})
+        run_command('google_assistant', core, body={"query": text})
 
 
 def run_command(command, core, body=None):
@@ -172,6 +173,7 @@ def send_color_key(color, core):
 
 def get_powerstate(core):
     return run_command('powerstate', core)
+
 
 def get_current_channel(core):
     return run_command('current_channel', core)
@@ -221,7 +223,7 @@ class Pylips:
 
     def run(self, host=None, user=None, password=None, body=None, command=None, verbose=None, apiv=None):
         print("start")
-        ini_file = os.path.dirname(os.path.realpath(__file__))+os.path.sep+"settings.ini"
+        ini_file = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "settings.ini"
         self.args = {}
         self.args["host"] = host
         self.args["user"] = user
@@ -246,7 +248,7 @@ class Pylips:
                     print("No valid credentials found, starting pairing process...")
                     self.pair()
             else:
-                if self.is_online(self.args["host"]):
+                if Pylips.is_online(self.args["host"]):
                     return print("IP", self.args["host"], "is online, but no known API is found. Exiting...")
                 else:
                     return print("IP", self.args["host"], "seems to be offline. Exiting...")
@@ -267,7 +269,8 @@ class Pylips:
         else:
             print("Please provide a valid command with a '--command' argument")
 
-    def is_online(self, host):
+    @staticmethod
+    def is_online(host):
         """
         Returns True if host (str) responds to a ping request.
         """
@@ -283,7 +286,7 @@ class Pylips:
     def find_api_version(self, verbose=True, possible_ports=[1925], possible_api_versions=[6, 5, 1]):
         if verbose:
             print("Checking API version and port...")
-        protocol = "http://"
+        protocol = "https://"
         for port in possible_ports:
             for api_version in possible_api_versions:
                 try:
@@ -307,7 +310,7 @@ class Pylips:
                         self.args["protocol"] = "https://"
                         self.args["port"] = "1926"
                     else:
-                        self.args["protocol"] = "http://"
+                        self.args["protocol"] = "https://"
                         self.args["port"] = "1925"
                     return True
         return False
@@ -392,7 +395,7 @@ class Pylips:
             try:
                 r = self.sess.post("https://" + str(self.args["host"]) + ":1926/" + str(
                     self.args["apiv"]) + "/pair/grant", json=data, verify=False,
-                                 auth=HTTPDigestAuth(self.args["user"], self.args["pass"]), timeout=2)
+                                   auth=HTTPDigestAuth(self.args["user"], self.args["pass"]), timeout=2)
                 print("Username for subsequent calls is: " + str(self.args["user"]))
                 print("Password for subsequent calls is: " + str(self.args["pass"]))
                 return print("The credentials are saved in the settings.ini file.")
@@ -413,8 +416,8 @@ class Pylips:
             try:
                 r = self.sess.get(str(self.args["protocol"]) + str(self.args["host"]) + ":" + str(
                     self.args["port"]) + "/" + str(self.args["apiv"]) + "/" + str(path), verify=False,
-                                auth=HTTPDigestAuth(str(self.args["user"]), str(self.args["pass"])),
-                                timeout=2)
+                                  auth=HTTPDigestAuth(str(self.args["user"]), str(self.args["pass"])),
+                                  timeout=2)
             except Exception:
                 err_count += 1
                 continue
@@ -433,10 +436,11 @@ class Pylips:
             print("Sending POST request to",
                   'https://' + self.args['host'] + ":" + '1926' + "/" + str(6) + "/" + str(path))
         try:
-            r = self.sess.post('https://' + self.args['host'] + ":" + '1926' + "/" + str(6) + "/" + str(path), json=body,
-                             verify=False,
-                             auth=HTTPDigestAuth(str(self.args["user"]), str(self.args["password"])),
-                             timeout=2)
+            r = self.sess.post('https://' + self.args['host'] + ":" + '1926' + "/" + str(6) + "/" + str(path),
+                               json=body,
+                               verify=False,
+                               auth=HTTPDigestAuth(str(self.args["user"]), str(self.args["password"])),
+                               timeout=2)
         except Exception:
             err_count += 1
         if verbose:
@@ -482,7 +486,7 @@ class Pylips:
                 return self.post(self.available_commands["post"][command]["path"], body, verbose, callback)
         elif command in self.available_commands["power"]:
             return self.sess.post(
-                "http://" + str(self.args["host"]) + ":8008/" + self.available_commands["power"][command][
+                "https://" + str(self.args["host"]) + ":8008/" + self.available_commands["power"][command][
                     "path"], verify=False, timeout=2)
         else:
             print("Unknown command")

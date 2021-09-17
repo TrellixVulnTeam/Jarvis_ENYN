@@ -1,4 +1,3 @@
-
 def isValid(text):
     text = text.lower()
     if 'transkribier' in text or 'schreib mit' in text:

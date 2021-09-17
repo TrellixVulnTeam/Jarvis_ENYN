@@ -2,21 +2,21 @@
 # -*- coding: utf-8 -*-
 #
 import base64
+import json
 import logging
+import mimetypes
+import os
 import shutil
 import socket
+import sys
 import time
-
+from Crypto import Random
 from flask import Flask, render_template, jsonify, request, Response, send_file
 from gevent import pywsgi
-from Crypto import Random
-import json
-import os
-import sys
-from webserver.helpWrapper import InstallWrapper
-from modules.new_phillips_lights import PhillipsWrapper
+
 from main import Modulewrapper
-import mimetypes
+from modules.new_phillips_lights import PhillipsWrapper
+from webserver.helpWrapper import InstallWrapper
 
 # JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
 sys.path.append(os.path.join(os.path.dirname(__file__), "/"))
@@ -382,7 +382,7 @@ def Webserver(core):
                 pass
             elif action == "update":
                 newCode = getData()
-                with open(core.path+"/modules/"+modName+".py", 'w') as file:
+                with open(core.path + "/modules/" + modName + ".py", 'w') as file:
                     file.write(newCode)
         else:
             return "module not found"
@@ -436,11 +436,12 @@ def Webserver(core):
     @webapp.route("/api/alarm/getSound/<filename>")
     def getAlarmSound(filename):
         def gen():
-            with open(core.path+"/modules/resources/clock_sounds/"+filename, "rb") as fwav:
+            with open(core.path + "/modules/resources/clock_sounds/" + filename, "rb") as fwav:
                 data = fwav.read(1024)
                 while data:
                     yield data
                     data = fwav.read(1024)
+
         return Response(gen(), mimetype="audio/x-wav")
 
     @webapp.route("/api/alarm/list/<action>")

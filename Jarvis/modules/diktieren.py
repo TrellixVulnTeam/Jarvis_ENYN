@@ -1,13 +1,15 @@
 import os
-import tempfile
-import subprocess
 import re
+import subprocess
+import tempfile
 
 TEXT_EDITOR = 'xdotool'
 
-DELETE = re.compile(r'(lösch|entfern)e?n? (\d+|eins?|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf) zeichen', re.I)
+DELETE = re.compile(
+    r'(lösch|entfern)e?n? (\d+|eins?|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf) zeichen', re.I)
 
 WORDS = ['diktier', 'text']
+
 
 def isValid(text):
     text = text.lower().strip()
@@ -24,6 +26,7 @@ def isValid(text):
         return True
     else:
         return False
+
 
 def getnum(str):
     map = {
@@ -42,6 +45,7 @@ def getnum(str):
         'zwölf': '12'
     }
     return map.get(str.lower(), str)
+
 
 def handle(text, core, skill):
     core.say('Dann leg mal los.')
@@ -63,7 +67,7 @@ def handle(text, core, skill):
                         text = text[0].upper() + text[1:]
                     subprocess.call(['xdotool', 'type', '--delay', '0', text])
         else:
-              body.append(text)
+            body.append(text)
         text = core.listen().strip()
     if TEXT_EDITOR is 'xdotool':
         core.say('Es war mir eine Freude, dir zu helfen.')
@@ -77,4 +81,3 @@ def handle(text, core, skill):
             os.system(TEXT_EDITOR + ' "' + file.name + '"')
         except IOError:
             core.say('Es ist ein Fehler aufgetreten.')
-            

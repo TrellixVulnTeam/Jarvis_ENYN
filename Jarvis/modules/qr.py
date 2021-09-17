@@ -4,6 +4,7 @@ import urllib.request
 
 SECURE = True
 
+
 def isValid(text):
     text = text.lower()
     if 'qr' in text:
@@ -11,8 +12,8 @@ def isValid(text):
     else:
         return False
 
-def handle(text, core, skills):
 
+def handle(text, core, skills):
     core.say('Was möchtest du in den qr-code schreiben?')
 
     # Frage den Nutzer nach Inhalt

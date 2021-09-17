@@ -1,12 +1,12 @@
+import pyperclip
 import time
 import traceback
 from pathlib import Path
-from threading import Thread
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
-from pyvirtualdisplay import Display
-import pyperclip
+from threading import Thread
 
 
 class Text_to_Speech:
@@ -55,9 +55,11 @@ class Text_to_Speech:
             traceback.print_exc()
 
     def state_of_button(self):
-        if 'M7,28a1,1,0,0,1-1-1V5a1,1,0,0,1,.5-.87,1,1,0,0,1,1,0l19,11a1,1,0,0,1,0,1.74l-19,11A1,1,0,0,1,7,28ZM8,6.73V25.27L24,16Z' in self.play_button.get_attribute('innerHTML'):
+        if 'M7,28a1,1,0,0,1-1-1V5a1,1,0,0,1,.5-.87,1,1,0,0,1,1,0l19,11a1,1,0,0,1,0,1.74l-19,11A1,1,0,0,1,7,28ZM8,6.73V25.27L24,16Z' in self.play_button.get_attribute(
+                'innerHTML'):
             return 'waiting'
-        elif 'M24,8V24H8V8H24m0-2H8A2,2,0,0,0,6,8V24a2,2,0,0,0,2,2H24a2,2,0,0,0,2-2V8a2,2,0,0,0-2-2Z' in self.play_button.get_attribute('innerHTML'):
+        elif 'M24,8V24H8V8H24m0-2H8A2,2,0,0,0,6,8V24a2,2,0,0,0,2,2H24a2,2,0,0,0,2-2V8a2,2,0,0,0-2-2Z' in self.play_button.get_attribute(
+                'innerHTML'):
             return 'playing'
         else:
             return 'creating'
@@ -71,15 +73,14 @@ class Text_to_Speech:
 
     def select_german(self):
         self.driver.find_element_by_id('downshift-0-toggle-button').click()
-        #self.driver.find_element_by_xpath("//div[@aria-activedescendant='downshift-0-item-5' and @id='downshift-0-menu']").click()
-        #self.driver.find_element_by_xpath("//div[text() = 'German]").click()
+        # self.driver.find_element_by_xpath("//div[@aria-activedescendant='downshift-0-item-5' and @id='downshift-0-menu']").click()
+        # self.driver.find_element_by_xpath("//div[text() = 'German]").click()
         elements = self.driver.find_elements_by_class_name('bx--list-box__label')
         print(elements)
         for element in elements:
             print(element.text)
             if element.text == 'German':
                 element.click()
-
 
     def select_voice(self, gender):
         if gender == "male":
@@ -99,7 +100,6 @@ class Text_to_Speech:
             if element.text == voice:
                 element.click()"""
 
-
     def play_audio(self):
         self.play_button.click()
 
@@ -115,7 +115,7 @@ class Text_to_Speech:
         self.text_area = self.driver.find_element_by_id('text-area')
         time.sleep(1)
         self.play_button = self.driver.find_element_by_id('btn')
-        #self.select_german()
+        # self.select_german()
         self.select_voice(self.gender)
 
     def get_opt(self):

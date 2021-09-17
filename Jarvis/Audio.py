@@ -1,22 +1,22 @@
+import io
 import logging
 import os
+import pafy
+import pvporcupine
+import pyaudio
 import random
 import re
+import speech_recognition as sr
 import struct
 import time
 import traceback
 import urllib.request
-from datetime import datetime
-from threading import Thread
-import io
-
 import vlc
-import pafy
-from resources.tts import Text_to_Speech
-import speech_recognition as sr
-import pyaudio
-import pvporcupine
+from datetime import datetime
 from pygame import mixer as audio
+from threading import Thread
+
+from resources.tts import Text_to_Speech
 
 
 class AudioInput:
@@ -116,7 +116,8 @@ class AudioInput:
                     if keyword_index > 0:
                         self.core.hotword_detected("wrong assistant!")
                     else:
-                        logging.info(f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
+                        logging.info(
+                            f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
                         self.recognize_input()
 
         except MemoryError:

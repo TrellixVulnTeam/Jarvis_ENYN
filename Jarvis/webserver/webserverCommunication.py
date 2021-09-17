@@ -1,13 +1,14 @@
 import json
-import sys
-import os
-from threading import Thread
 import mmap
+import os
 import pickle
+import sys
 from pathlib import Path
+from threading import Thread
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 import main
+
 
 class mThr():
     """
@@ -16,12 +17,12 @@ class mThr():
     the JARVIS-Part. The communication runs via two memory-maps which can be
     accessed by both processes.
     """
+
     def __init__(self):
         self.thr = None
         self.core = main
         with open("../config.json", "r") as config_file:
             self.config_data = json.load(config_file)
-
 
     def start(self):
         self.thr = Thread(target=self.core.start(self.config_data))

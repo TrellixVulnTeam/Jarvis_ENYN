@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
+import datetime
+import json
 import random
 import requests
-import json
-import datetime
-from bs4 import BeautifulSoup  # needs html5lib
 import time
 import traceback
+from bs4 import BeautifulSoup  # needs html5lib
 
 SECURE = True
 
@@ -89,9 +89,9 @@ class MainBlock(object):
         else:
             self.time = datetime.datetime.now()
         if len(start) > 0 and len(end) > 0:
-            self.setTrainStationsByString(start, end, self.time)
+            self.set_train_station_by_string(start, end, self.time)
 
-    def setTrainStationsByString(self, start, end, timeStamp):
+    def set_train_station_by_string(self, start, end, timeStamp):
         self.start = TrainStation(start)
         self.end = TrainStation(end)
         self.time = timeStamp

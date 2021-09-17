@@ -9,77 +9,80 @@
     <script src="{{ url_for('static', filename='timeDisplay.js')}}"></script>
 </head>
 <body onload="uhr();">
-    <nav class="navbar navbar-dark bg-dark navbar-expand-sm">
-      <a class="navbar-brand" href="/index">JARVIS</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="mainNav">
-          <ul class="nav">
-          {% for item in nav %}
-              <li class="nav-item"><a class="nav-link" href="{{ item.href }}">{{ item.text }}</a></li>
-          {% endfor %}
-          </ul>
-        </div>
-        <span class="navbar-text"><div id="uhr" style="display:none;"></div></span>
-    </nav>
+<nav class="navbar navbar-dark bg-dark navbar-expand-sm">
+    <a class="navbar-brand" href="/index">JARVIS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="nav">
+            {% for item in nav %}
+            <li class="nav-item"><a class="nav-link" href="{{ item.href }}">{{ item.text }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <span class="navbar-text"><div id="uhr" style="display:none;"></div></span>
+</nav>
 
-    <div class="col-md-10 col-sm-12">
+<div class="col-md-10 col-sm-12">
     <h2>Neuen Alarm einrichten</h2>
     <p>
-      Hier kannst du einen neuen Alarm anlegen oder bearbeiten.
-      Mehrere Alarms <b>der selben Art</b> (regelmäßig / einfach)
-      sind nicht vorhergesehen und daher uach nicht möglich.
+        Hier kannst du einen neuen Alarm anlegen oder bearbeiten.
+        Mehrere Alarms <b>der selben Art</b> (regelmäßig / einfach)
+        sind nicht vorhergesehen und daher uach nicht möglich.
     </p>
 
     <div class="container-fluid">
-      <div class="row justify-content-md-center">
-        <ul class="list-group">
-            <li class="list-goup-item list-group-item-secondary">
-                <h5>Regelmäßigkeit</h5>
-            </li>
-            <li class="list-group-item">
-                <div class="form-group">
-                    <label for="repeat">Soll der Wecker regelmäßig (jede Woche) oder nur einmal abgespielt werden?</label>
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input type="radio" class="form-check-input" name="optradio">regelmäßig
-                      </label>
+        <div class="row justify-content-md-center">
+            <ul class="list-group">
+                <li class="list-goup-item list-group-item-secondary">
+                    <h5>Regelmäßigkeit</h5>
+                </li>
+                <li class="list-group-item">
+                    <div class="form-group">
+                        <label for="repeat">Soll der Wecker regelmäßig (jede Woche) oder nur einmal abgespielt
+                            werden?</label>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="optradio">regelmäßig
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="optradio">nur ein Mal
+                            </label>
+                        </div>
                     </div>
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input type="radio" class="form-check-input" name="optradio">nur ein Mal
-                      </label>
+                </li>
+                <li class="list-group-item">
+                    <div class="form-group">
+                        <label>Wann soll ich dich Wecken?</label>
+                        <button class="btn-default" data-toggle="modal" data-target="#showCalendar">Kalender anzeigen
+                        </button>
                     </div>
-                </div>
-            </li>
-            <li class="list-group-item">
-                <div class="form-group">
-                    <label>Wann soll ich dich Wecken?</label>
-                    <button class="btn-default" data-toggle="modal" data-target="#showCalendar">Kalender anzeigen</button>
-                </div>
-            </li>
-        </ul>
-      </div>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <div id="showCalendar" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Datum auswählen</h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-          <div class="input-group date" data-provide="datepicker">
-            <input type="text" class="form-control">
-            <div class="input-group-addon">
-                <span class="glyphicon glyphicon-th"></span>
+                <div class="modal-header">
+                    <h4 class="modal-title">Datum auswählen</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="input-group date" data-provide="datepicker">
+                    <input type="text" class="form-control">
+                    <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-th"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">abbrechen</button>
+                </div>
             </div>
-        </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">abbrechen</button>
-          </div>
-        </div>
         </div>
     </div>
     <script src="{{ url_for('static', filename='main_createAlarm.js')}}"></script>

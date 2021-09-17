@@ -12,7 +12,7 @@ def isValid(text):
 def handle(text, core, skills):
     text = text.lower()
     if 'wann' in text and ('nächste' in text or 'wieder' in text):
-        year = datetime.date.today().year+1
+        year = datetime.date.today().year + 1
         while True:
             if leap_year(year) is True:
                 core.say('Das nächste Schaltjahr ist {}'.format(year))
@@ -29,6 +29,7 @@ def handle(text, core, skills):
         core.say('Das Jahr {} ist {} Schaltjahr.'.format(get_year(text), output))
     else:
         core.say('Ich habe nicht verstanden, was du im Zusammenhang mit Schaltjahren wissen möchtest.')
+
 
 def get_year(text):
     year = -1

@@ -2,15 +2,14 @@ import base64
 import io
 import json
 import os
+import speech_recognition as sr
 import subprocess
 import time
 import traceback
-from pathlib import Path
-
 from Crypto import Random
-import speech_recognition as sr
-from resources.tts import Text_to_Speech
+from pathlib import Path
 from pygame import mixer as audio
+from resources.tts import Text_to_Speech
 
 
 class FirstStart:

@@ -1,10 +1,12 @@
 PRIORITY = 0
 
+
 def isValid(text):
     text = text.lower()
     if 'spiel ' in text or 'spiele ' in text:
         return True
     return False
+
 
 def handle(text, core, skills):
     core.say("Alles klar.")

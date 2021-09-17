@@ -11,7 +11,7 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    alarm = Alarm(core, skills)
+    alarm = Alarm(core)
     alarm.with_values(core.analysis["time"], get_day(text, skills), get_repeat(text))
 
     """
@@ -63,6 +63,18 @@ def get_day(text, skills):
     return days
 
 
+def get_time_stamp(hour, minute):
+    hour = str(hour)
+    minute = str(minute)
+
+    if len(hour) == 1:
+        hour = '0' + hour
+    if len(minute) == 1:
+        minute = '0' + minute
+
+    return f'{hour}:{minute}Uhr'
+
+
 class Alarm:
     def __init__(self, core):
         self.core = core
@@ -107,14 +119,15 @@ class Alarm:
 
         total_seconds = int(hour) * 3600 + int(minute) * 60
         list = {"time": {"hour": hour, "minute": minute,
-                         "total_seconds": total_seconds, "time_stamp": self.get_time_stamp(hour, minute)},
+                         "total_seconds": total_seconds, "time_stamp": get_time_stamp(hour, minute)},
                 "sound": alarm_sound, "user": user,
                 "text": text, "active": True}
         if not type(days) == type([]):
             days = [days]
 
         for _day in days:
-            if self.core.local_storage["alarm"][repeat][_day] is None or not _day in self.core.local_storage["alarm"]["regular"].keys():
+            if self.core.local_storage["alarm"][repeat][_day] is None or not _day in self.core.local_storage["alarm"][
+                "regular"].keys():
                 self.core.local_storage["alarm"][repeat][_day] = []
             self.core.local_storage["alarm"][repeat][_day].append(list)
 
@@ -151,33 +164,22 @@ class Alarm:
     def get_reply(self):
         # toDo: Mehrere Tage
         now = datetime.datetime.today().day
-        monat = str(self.time["month"])
-        tag = str(self.time["day"])
-        if int(monat) <= 9:
-            monat = '0' + monat
-        if len(tag) == 1:
-            tag = '0' + tag
-        tage = {'01': 'ersten', '02': 'zweiten', '03': 'dritten', '04': 'vierten', '05': 'fünften',
-                '06': 'sechsten', '07': 'siebten', '08': 'achten', '09': 'neunten', '10': 'zehnten',
-                '11': 'elften', '12': 'zwölften', '13': 'dreizehnten', '14': 'vierzehnten', '15': 'fünfzehnten',
-                '16': 'sechzehnten', '17': 'siebzehnten', '18': 'achtzehnten', '19': 'neunzehnten', '20': 'zwanzigsten',
-                '21': 'einundzwanzigsten', '22': 'zweiundzwanzigsten', '23': 'dreiundzwanzigsten',
-                '24': 'vierundzwanzigsten',
-                '25': 'fünfundzwanzigsten', '26': 'sechsundzwanzigsten', '27': 'siebenundzwanzigsten',
-                '28': 'achtundzwanzigsten',
-                '29': 'neunundzwanzigsten', '30': 'dreißigsten', '31': 'einunddreißigsten', '32': 'zweiunddreißigsten'}
-        monate = {'01': 'Januar', '02': 'Februar', '03': 'März', '04': 'April', '05': 'Mai', '06': 'Juni',
-                  '07': 'Juli', '08': 'August', '09': 'September', '10': 'Oktober', '11': 'November',
-                  '12': 'Dezember'}
-        if int(tag) == int(now):
+        month = str(self.time["month"])
+        day = str(self.time["day"])
+        if int(month) <= 9:
+            month = '0' + month
+        if len(day) == 1:
+            day = '0' + day
+        if int(day) == int(now):
             return 'heute'
-        elif tag == now + 1:
+        elif day == now + 1:
             return 'morgen'
-        elif tag == now + 2:
+        elif day == now + 2:
             return 'übermorgen'
         else:
-            core_output = tage.get(tag) + monate.get(monat)
-            messenger_output = tag + '. ' + monat
+            core_output = self.core.skills.Statics.numb_to_day_numb.get(
+                day) + self.core.skills.Statics.numb_to_month.get(month)
+            messenger_output = day + '. ' + month
             return ' den ' + self.core.correct_output(core_output, messenger_output)
 
     def create_alarm_storage(self):
@@ -207,14 +209,3 @@ class Alarm:
         else:
             self.core.say(
                 f'{repeatings}Wecker gestellt für{self.get_reply()}, {self.time["hour"]} Uhr {self.time["minute"]}')
-
-    def get_time_stamp(self, hour, minute):
-        hour = str(hour)
-        minute = str(minute)
-
-        if len(hour) == 1:
-            hour = '0' + hour
-        if len(minute) == 1:
-            minute = '0' + minute
-
-        return f'{hour}:{minute}Uhr'

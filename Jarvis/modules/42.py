@@ -1,11 +1,12 @@
 PRIORITY = -1
 SECURE = True
 
+
 def isValid(text):
     text = text.lower()
     if ('was' in text or 'wie' in text) and 'die antwort' in text:
         return True
-    
+
     text = text.lower()
     batch = ["[was|wie] ist die antwort"]
     if batchMatch(batch, text):
@@ -43,6 +44,7 @@ def batchGen(batch):
                 rebuild += "]".join(piece.split("]")[1:])
                 batch.append(rebuild)
     return outlist
+
 
 def batchMatch(batch, match):
     t = False

@@ -1,23 +1,27 @@
-import traceback
-
 import requests
 import speedtest
+import traceback
+
 
 def isValid(text):
     text = text.lower()
-    if "speedtest" in text or ("geschwindigkeit" in text and "internet" in text) or ("schnell" in text and "verbindung" in text):
+    if "speedtest" in text or ("geschwindigkeit" in text and "internet" in text) or (
+            "schnell" in text and "verbindung" in text):
         return True
     elif "besteht" in text and "verbindung" in text and "internet" in text:
         return True
     else:
         return False
 
+
 def handle(text, core, skills):
     text = text.lower()
-    if "speedtest" in text or ("geschwindigkeit" in text and "internet" in text) or ("schnell" in text and "verbindung" in text):
+    if "speedtest" in text or ("geschwindigkeit" in text and "internet" in text) or (
+            "schnell" in text and "verbindung" in text):
         run_speedtest(core)
     elif "besteht" in text and "verbindung" in text and "internet" in text:
         internet_availability(core)
+
 
 def run_speedtest(core):
     """
@@ -34,14 +38,14 @@ def run_speedtest(core):
 
         downlink_bps = st.download()
         uplink_bps = st.upload()
-        ping = st.results.ping /1000
+        ping = st.results.ping / 1000
         up_mbps = uplink_bps / 1000000
         down_mbps = downlink_bps / 1000000
 
         core.say("Der Ping beträgt %s ms,\n"
                  "der Upload %0.2f Mbps\n"
-                "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
-                )
+                 "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
+                 )
 
     except Exception:
         traceback.print_exc()
@@ -57,7 +61,8 @@ def internet_availability(core):
     else:
         core.say("Derzeit besteht keine Verbingung zum Internet.")
 
-def internet_connectivity_check(url='http://www.google.com/', timeout=2):
+
+def internet_connectivity_check(url='https://www.google.com/', timeout=2):
     """
     Checks for internet connection availability based on google page.
     """

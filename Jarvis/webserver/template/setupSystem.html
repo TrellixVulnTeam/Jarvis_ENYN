@@ -1,112 +1,141 @@
 <head>
-  <title>JARVIS - System einrichten</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <title>JARVIS - System einrichten</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark navbar-expand-sm">
-  <a class="navbar-brand" href="/index">JARVIS</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+    <a class="navbar-brand" href="/index">JARVIS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="nav">
-      {% for item in nav %}
-          <li class="nav-item text-muted"><a class="nav-link" href="{{item.href}}">{{ item.text }}</a></li>
-      {% endfor %}
-      </ul>
+        <ul class="nav">
+            {% for item in nav %}
+            <li class="nav-item text-muted"><a class="nav-link" href="{{item.href}}">{{ item.text }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 </nav>
 <div class="container-fluid">
-  <div class="row justify-content-md-center">
-    <div class="col-md-10 col-sm-12">
-    <h2>System einrichten</h2>
-    <p>
-      Jetzt kannst du deinen neuen Sprachassistenten JARVIS einrichten. In diesem
-      Menü geht es explizit um grundlegende Eintellungen für <b>JARVIS</b>.
-    </p>
-    {% if gold %}
-    <ul class="list-group" id="mainContentBox">
-      <li class="list-group-item list-group-item-secondary">
-        <h5>Einstellungen</h5>
-      </li>
-      <li class="list-group-item">
-        <label for="speech">Soll meine Sprachcodierung männlich oder weiblich sein?</label>
-        <div class="input-group">
-          <button class="btn btn-success mr-3" id="speechMale" onclick="$('#speech').val('male')">männlich</button>
-          <button class="btn btn-danger mr-3" id="speechFemale" onclick="$('#speech').val('female')">weiblich</button>
-          <input type="text" class="form-control disabled" disabled id="speech" value="male"></input>
-        </div>
-        <small class="form-text text-muted">Die Sprachcodierung bestimmt den Klang der Stimme</small>
-      </li>
-      <li class="list-group-item list-group-item-secondary">
-        <h5>Weitere Funktionen</h5>
-      </li>
-      <li class="list-group-item">
-        <div class="form-group">
-          <label for="homeLocation">Bitte gib hier den <b>Standort</b> deines JARVIS-Systems ein.</label>
-          <span><b>Hinweis:</b> Diese Angabe ist optional, erleichtert dir und JARVIS aber die Arbeit zum Beispiel bei Wettervorhersagen.</span>
-          <input type="text" class="form-control" id="homeLocation" placeholder="z.B. 'Hamburg', 'München', 'Würzburg'" value="">
-          <small class="form-text text-muted">Wenn nichts in diesem Feld steht, wird '"{{st["homeLocation"]}}"' in die Konfiguration eingetragen.</small>
-        </div>
-      </li>
-      <li class="list-group-item">
-        <div class="form-group">
-          <label for="telegramSupport">Bitte gib hier das Bot-Token deines <b>Telegram-Bots</b> ein.</label>
-          <span><b>Hinweis:</b> Diese Angabe ist optional, sie ermöglicht JARVIS, mit dir über den Telegram-Messenger zu kommunizieren.</span>
-          <input type="text" class="form-control" id="telegramSupport" placeholder="Format: '123456789:AbCdEfGhIjKlMnOpQrSt-UvWxyzabdefgh3ai'" value="">
-          <small class="form-text text-muted">Wenn nichts in diesem Feld steht, bleibt die Telegram-Funktion ausgeschaltet.</small>
-        </div>
-      </li>
-      <li class="list-group-item list-group-item-secondary">
-        <h5>Kamera-Einstellungen</h5>
-      </li>
-      <li class="list-group-item">
-        <label for="useCameras">Soll dein Sprachassistent <b>Kameras verwenden</b>?</label>
-        <div class="input-group">
-          <button class="btn btn-success mr-3" id="useCamerasButtonTrue" onclick="$('#useCameras').val('Ja')">Ja</button>
-          <button class="btn btn-danger mr-3" id="useCamerasButtonFalse" onclick="$('#useCameras').val('Nein')">Nein</button>
-          <input type="text" class="form-control disabled" disabled id="useCameras" value="{{ "Ja" if st["useCameras"] else "Nein"  }}"></input>
-        </div>
-        <small class="form-text text-muted">Die Kamerafunktion solltest du zum Beispiel aktivieren, wenn du die Gesichtserkennungsfunktion benutzen möchtest.</small>
-      </li>
-      <li class="list-group-item">
-        <label for="useFaceRec">Soll das Modul für <b>Gesichtserkennung</b> geladen werden?</label>
-        <div class="input-group">
-          <button class="btn btn-success mr-3" id="useFaceRecButtonTrue" onclick="$('#useFaceRec').val('Ja')">Ja</button>
-          <button class="btn btn-danger mr-3" id="useFaceRecButtonFalse" onclick="$('#useFaceRec').val('Nein')">Nein</button>
-          <input type="text" class="form-control disabled" disabled id="useFaceRec" value="{{ "Ja" if st["useFaceRec"] else "Nein"  }}"></input>
-        </div>
-      </li>
-      <li class="list-group-item">
-        <label for="useInterface">Sofern du die oberen beiden Funktionen aktiviert hast: Soll dein Sprachassistent ein <b>grafisches Interface</b> zur Anzeige der Kamerabilder verwenden?</label>
-        <div class="input-group">
-          <button class="btn btn-success mr-3" id="useFaceRecButtonTrue" onclick="$('#useInterface').val('Ja')">Ja</button>
-          <button class="btn btn-danger mr-3" id="useFaceRecButtonFalse" onclick="$('#useInterface').val('Nein')">Nein</button>
-          <input type="text" class="form-control disabled" disabled id="useInterface" value="{{ "Ja" if st["useInterface"] else "Nein"  }}"></input>
-        </div>
-        <small class="form-text text-muted">mit dem Modul "POI_Interface.py" kannst du dann auf einem Computer Kamerabilder und sonstige Daten in einem grafischen Interface anzeigen lassen.</small>
-      </li>
-    </ul>
-    <br />
-    <a class="btn btn-success btn-lg float-right mb-3 ml-3" role="button" id="button_execute" onclick="finalizeConfig()">Speichern und zurück zur Übersicht</a>
+    <div class="row justify-content-md-center">
+        <div class="col-md-10 col-sm-12">
+            <h2>System einrichten</h2>
+            <p>
+                Jetzt kannst du deinen neuen Sprachassistenten JARVIS einrichten. In diesem
+                Menü geht es explizit um grundlegende Eintellungen für <b>JARVIS</b>.
+            </p>
+            {% if gold %}
+            <ul class="list-group" id="mainContentBox">
+                <li class="list-group-item list-group-item-secondary">
+                    <h5>Einstellungen</h5>
+                </li>
+                <li class="list-group-item">
+                    <label for="speech">Soll meine Sprachcodierung männlich oder weiblich sein?</label>
+                    <div class="input-group">
+                        <button class="btn btn-success mr-3" id="speechMale" onclick="$('#speech').val('male')">
+                            männlich
+                        </button>
+                        <button class="btn btn-danger mr-3" id="speechFemale" onclick="$('#speech').val('female')">
+                            weiblich
+                        </button>
+                        <input type="text" class="form-control disabled" disabled id="speech" value="male"></input>
+                    </div>
+                    <small class="form-text text-muted">Die Sprachcodierung bestimmt den Klang der Stimme</small>
+                </li>
+                <li class="list-group-item list-group-item-secondary">
+                    <h5>Weitere Funktionen</h5>
+                </li>
+                <li class="list-group-item">
+                    <div class="form-group">
+                        <label for="homeLocation">Bitte gib hier den <b>Standort</b> deines JARVIS-Systems ein.</label>
+                        <span><b>Hinweis:</b> Diese Angabe ist optional, erleichtert dir und JARVIS aber die Arbeit zum Beispiel bei Wettervorhersagen.</span>
+                        <input type="text" class="form-control" id="homeLocation"
+                               placeholder="z.B. 'Hamburg', 'München', 'Würzburg'" value="">
+                        <small class="form-text text-muted">Wenn nichts in diesem Feld steht, wird
+                            '"{{st["homeLocation"]}}"' in die Konfiguration eingetragen.</small>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="form-group">
+                        <label for="telegramSupport">Bitte gib hier das Bot-Token deines <b>Telegram-Bots</b>
+                            ein.</label>
+                        <span><b>Hinweis:</b> Diese Angabe ist optional, sie ermöglicht JARVIS, mit dir über den Telegram-Messenger zu kommunizieren.</span>
+                        <input type="text" class="form-control" id="telegramSupport"
+                               placeholder="Format: '123456789:AbCdEfGhIjKlMnOpQrSt-UvWxyzabdefgh3ai'" value="">
+                        <small class="form-text text-muted">Wenn nichts in diesem Feld steht, bleibt die
+                            Telegram-Funktion ausgeschaltet.</small>
+                    </div>
+                </li>
+                <li class="list-group-item list-group-item-secondary">
+                    <h5>Kamera-Einstellungen</h5>
+                </li>
+                <li class="list-group-item">
+                    <label for="useCameras">Soll dein Sprachassistent <b>Kameras verwenden</b>?</label>
+                    <div class="input-group">
+                        <button class="btn btn-success mr-3" id="useCamerasButtonTrue"
+                                onclick="$('#useCameras').val('Ja')">Ja
+                        </button>
+                        <button class="btn btn-danger mr-3" id="useCamerasButtonFalse"
+                                onclick="$('#useCameras').val('Nein')">Nein
+                        </button>
+                        <input type="text" class="form-control disabled" disabled id="useCameras" value="{{ " Ja" if
+                        st["useCameras"] else "Nein" }}"></input>
+                    </div>
+                    <small class="form-text text-muted">Die Kamerafunktion solltest du zum Beispiel aktivieren, wenn du
+                        die Gesichtserkennungsfunktion benutzen möchtest.</small>
+                </li>
+                <li class="list-group-item">
+                    <label for="useFaceRec">Soll das Modul für <b>Gesichtserkennung</b> geladen werden?</label>
+                    <div class="input-group">
+                        <button class="btn btn-success mr-3" id="useFaceRecButtonTrue"
+                                onclick="$('#useFaceRec').val('Ja')">Ja
+                        </button>
+                        <button class="btn btn-danger mr-3" id="useFaceRecButtonFalse"
+                                onclick="$('#useFaceRec').val('Nein')">Nein
+                        </button>
+                        <input type="text" class="form-control disabled" disabled id="useFaceRec" value="{{ " Ja" if
+                        st["useFaceRec"] else "Nein" }}"></input>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <label for="useInterface">Sofern du die oberen beiden Funktionen aktiviert hast: Soll dein
+                        Sprachassistent ein <b>grafisches Interface</b> zur Anzeige der Kamerabilder verwenden?</label>
+                    <div class="input-group">
+                        <button class="btn btn-success mr-3" id="useFaceRecButtonTrue"
+                                onclick="$('#useInterface').val('Ja')">Ja
+                        </button>
+                        <button class="btn btn-danger mr-3" id="useFaceRecButtonFalse"
+                                onclick="$('#useInterface').val('Nein')">Nein
+                        </button>
+                        <input type="text" class="form-control disabled" disabled id="useInterface" value="{{ " Ja" if
+                        st["useInterface"] else "Nein" }}"></input>
+                    </div>
+                    <small class="form-text text-muted">mit dem Modul "POI_Interface.py" kannst du dann auf einem
+                        Computer Kamerabilder und sonstige Daten in einem grafischen Interface anzeigen lassen.</small>
+                </li>
+            </ul>
+            <br/>
+            <a class="btn btn-success btn-lg float-right mb-3 ml-3" role="button" id="button_execute"
+               onclick="finalizeConfig()">Speichern und zurück zur Übersicht</a>
 
-    {% else %}
-    <div class="alert alert-danger" role="alert">
-      <h5>Achtung!</h5>
-      <p>
-        Die <b>nötigen Dateien</b> für diesen Setup-Schritt konnten <b>nicht gefunden</b> werden.
-        Bitte lade das System erneut herunter und starte die Einrichtung neu!
-      </p>
+            {% else %}
+            <div class="alert alert-danger" role="alert">
+                <h5>Achtung!</h5>
+                <p>
+                    Die <b>nötigen Dateien</b> für diesen Setup-Schritt konnten <b>nicht gefunden</b> werden.
+                    Bitte lade das System erneut herunter und starte die Einrichtung neu!
+                </p>
+            </div>
+            <br/>
+            {% endif %}
+        </div>
     </div>
-    <br />
-    {% endif %}
-  </div>
-</div>
-<script src="{{ url_for('static', filename='main_setupSystem.js')}}"></script>
+    <script src="{{ url_for('static', filename='main_setupSystem.js')}}"></script>
 </div>
 </body>

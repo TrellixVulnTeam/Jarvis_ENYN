@@ -1,8 +1,8 @@
-from typing import List, Any
 import random
+import time
 from phue import Bridge
 from rgbxy import Converter
-import time
+from typing import List, Any
 
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']
 # code = ['0000ff', 'ff0000', 'ffff00', '00FF00', 'ff1493', '9400d3', '00ffff', 'ffffff', '006400', '8b4513', 'ff8c00',
@@ -54,7 +54,8 @@ def handle(text, core, skills):
         if core.messenger_call:
             # Den Output müsste man eigentlich nicht setzten, da im Normalfall sowieso per Telegram
             # geantwortet werden würde, aber wir gehen mal auf Nummer sicher
-            core.say('Wenn du das Licht über Telegram steuern möchtest, musst du einen Raum nennen.', output='messenger')
+            core.say('Wenn du das Licht über Telegram steuern möchtest, musst du einen Raum nennen.',
+                     output='messenger')
             return
         else:
             room = core.room
@@ -130,6 +131,7 @@ def light_change_color(bridge, lights, core, text):
         bridge.set_light(lights, 'bri', 254)
     else:
         core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
+
 
 # lamp_brighter and lamp_darker are realy redundant...
 def light_brighter(bridge, lights, value, core):

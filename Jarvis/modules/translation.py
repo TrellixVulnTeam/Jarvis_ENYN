@@ -1,15 +1,17 @@
-
-from urllib.request import urlopen, Request
-import urllib.parse
 import json
+import urllib.parse
+from urllib.request import urlopen, Request
+
 
 def isValid(text):
-        return False
+    return False
+
 
 def handle(text, core, skills):
     traslation_text = skills.get_text_beetween('übersetz', text, end_word='ins', output='String')
     targetLang = skills.get_text_beetween('ins', output='String')
     core.translate(traslation_text, targetLang=targetLang)
+
 
 def get_text_beetween(start_word, text, end_word='', output='array'):
     ausgabe = []

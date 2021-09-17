@@ -6,6 +6,7 @@ Mit diesem Modul kann man sich Nachrichten per Telegram zuschicken lassen.
 Dazu sagt man "Sende <text> an mein Smartphone" oder "Smartphone Nachricht <text>".
 '''
 
+
 def isValid(text):
     text = text.lower()
     if 'smartphone' in text and ('nachricht' in text or 'sende' in text):
@@ -13,8 +14,8 @@ def isValid(text):
     else:
         return False
 
+
 def get_aussage_gemeinsam():
-    
     liste = core.local_storage.get('einkaufsliste')
     i = 0
     aussage = ''
@@ -24,17 +25,18 @@ def get_aussage_gemeinsam():
             i += 1
         else:
             aussage = liste[i]
-            
+
     aussage = aussage + ' und ' + liste[len(liste)]
     return aussage
+
 
 def handle(text, core, skills):
     text = text.lower()
     length = len(text)
-    
+
     if 'einkaufsliste' in text:
         if 'gemeinsam' in text or 'gemeinsame' in text:
-            core.say(get_aussage_gemeinsam(txt, core), output='messenger')
+            core.say(get_aussage_gemeinsam(), output='messenger')
         else:
             core.say(get_aussage(txt, core), output='messenger')
     else:
@@ -46,10 +48,10 @@ def handle(text, core, skills):
         else:
             liste = re.split('\s', text)
             elements = len(liste)
-            if liste[0] == 'sende' and liste[elements-1] == 'smartphone':
+            if liste[0] == 'sende' and liste[elements - 1] == 'smartphone':
                 nachricht = ''
-                for i in range(1,elements):
-                    if liste[i] == 'an' and liste[i+1] == 'mein':
+                for i in range(1, elements):
+                    if liste[i] == 'an' and liste[i + 1] == 'mein':
                         break
                     else:
                         nachricht += liste[i]

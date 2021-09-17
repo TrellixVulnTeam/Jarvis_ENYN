@@ -1,22 +1,22 @@
+import io
 import json
+import logging
+import os
+import pkgutil
+import random
 import subprocess
 import sys
-import traceback
-from pathlib import Path
-
-import os
-import random
 import time
+import traceback
 import urllib
+from pathlib import Path
+from threading import Thread
 from urllib.request import Request, urlopen
+
+import wb_server as ws
 from Audio import AudioOutput, AudioInput
 from resources.analyze import Sentence_Analyzer
-import pkgutil
-from threading import Thread
 from resources.module_skills import skills as Skill
-import io
-import wb_server as ws
-import logging
 
 
 class Modules:
@@ -466,7 +466,6 @@ class LUNA:
         self.system_name = system_name
         self.path = config_data["Local_storage"]['LUNA_PATH']
 
-
     def messenger_thread(self):
         # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.
         while True:
@@ -478,7 +477,7 @@ class LUNA:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
                     self.local_storage['rejected_messenger_messages'].append(msg)
                     try:
-                        logging.warning('Message from unknown Telegram user {} ({}). Access denied.'.format(
+                        logging.warning('Message from unknown Telegram user {}. Access denied.'.format(
                             msg['from']['first_name']))
                     except KeyError:
                         logging.warning('Nachricht von unbekanntem Telegram-Nutzer ({}). Zugriff verweigert.'.format(
@@ -537,9 +536,6 @@ class LUNA:
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
         self.modules.query_threaded(name, text, user, direct=False)
-
-    def reload_webserver(self):
-        webThr
 
 
 class Users:

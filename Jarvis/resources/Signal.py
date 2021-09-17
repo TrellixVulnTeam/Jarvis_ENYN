@@ -1,5 +1,6 @@
 import requests
 
+
 class SignalBot:
     def __init__(self, core, api_key):
         self.core = core

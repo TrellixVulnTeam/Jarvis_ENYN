@@ -1,5 +1,7 @@
 from resources.akinator.akinator import Akinator
+
 PRIORITY = 3
+
 
 def isValid(text):
     text = text.lower()
@@ -53,20 +55,6 @@ def assign_user_input(user_input, core):
     elif ('keine' in user_input and 'ahnung' in user_input) or ('weiß' in user_input and 'nicht' in user_input):
         return 'idk'
     else:
-        core.say('Das habe ich leider nicht verstanden. Versuche es bitte noch einmal mit den Antwortmöglichkeiten \n"Ja"\n"Nein"\n"wahrscheinlich"\n"wahrscheinlich nicht"\noder "keine Ahnung"!')
+        core.say(
+            'Das habe ich leider nicht verstanden. Versuche es bitte noch einmal mit den Antwortmöglichkeiten \n"Ja"\n"Nein"\n"wahrscheinlich"\n"wahrscheinlich nicht"\noder "keine Ahnung"!')
         assign_user_input(core.listen(), core)
-
-
-class Core():
-    def __init__(self):
-        pass
-
-    def say(self, text):
-        print(text)
-
-    def listen(self):
-        return input()
-
-
-if __name__ == "__main__":
-    handle("", Core(), None)

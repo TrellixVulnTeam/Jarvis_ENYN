@@ -1,4 +1,3 @@
-
 def isValid(text):
     """
     text = text.lower()
@@ -22,12 +21,14 @@ def handle(text, core, skill):
     else:
         core.say('Ich konnte die Zahl leider nicht herausfiltern.')
 
+
 def binary(n):
     output = ""
     while n > 0:
         output = "{}{}".format(n % 2, output)
         n = n // 2
     return str(output)
+
 
 def getNumber(text):
     answer = 'UNDO'
@@ -42,6 +43,7 @@ def getNumber(text):
     if index != -1:
         answer = sentence[index]
     return answer
+
 
 def batchGen(batch):
     """
@@ -68,6 +70,7 @@ def batchGen(batch):
                 rebuild += "]".join(piece.split("]")[1:])
                 batch.append(rebuild)
     return outlist
+
 
 def batchMatch(batch, match):
     t = False
