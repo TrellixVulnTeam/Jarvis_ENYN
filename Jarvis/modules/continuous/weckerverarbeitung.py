@@ -8,18 +8,20 @@ def run(core, skills):
         alarms = core.local_storage.get('alarm')
         for repeat in alarms:
             # iterate over 'regular' and 'single'
-            for day in repeat:
-                for alarm in day:
+            for day in alarms[repeat]:
+                for alarm in alarms[repeat][day]:
                     # iterate over each weekday
-                    if is_day_correct(day) and get_total_seconds(alarm["time"]) <= 0 and alarms["active"]:
+                    print(f"alarm: {alarm}")
+                    print(f"day_correct: {is_day_correct(day)}, total_seconds: {get_total_seconds(alarm['time'])} active: {alarm['active']}")
+                    if is_day_correct(day) and get_total_seconds(alarm["time"]) <= 0 and alarm["active"]:
                         dic = {'Text': alarm["text"], 'Ton': alarm["sound"], 'User': alarm["user"]}
                         core.start_module(name='weckerausgabe', text=dic)
-                        alarms.remove(alarm)
+                        alarms[repeat][day].remove(alarm)
                         core.local_storage['alarm'] = alarms
 
 
 def is_day_correct(day):
-    if day == datetime.datetime.today().strftime("%A").lower():
+    if day.lower() == datetime.datetime.today().strftime("%A").lower():
         return True
     return False
 

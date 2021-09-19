@@ -12,7 +12,6 @@ def isValid(text):
 
 def handle(text, core, skills):
     alarm = Alarm(core)
-    alarm.with_values(core.analysis["time"], get_day(text, skills), get_repeat(text))
 
     """
             if core.analysis["time"] is None:
@@ -24,15 +23,20 @@ def handle(text, core, skills):
             response_time = text
     """
 
+    repeat = get_repeat(text)
+    days = get_day(text, skills)
+    time = core.analysis["time"]
+
+
     if 'lösch' in text or 'beend' in text or ('schalt' in text and 'ab' in text):
         try:
-            alarm.delete_alarm()
+            alarm.delete_alarm(days, repeat, time=time)
         except:
             core.say("Leider habe ich nicht verstanden welchen Wecker ich löschen soll. Bitte versuche es "
                      "über das online-Portal oder über einen erneuten Sprachbefehl mit Zeitangabe erneut.")
     else:
-        alarm.create_alarm()
-
+        # days, repeat, time=None, hour=None, minute=None, text=None, sound=None
+        alarm.create_alarm(days, repeat, time=time)
 
 def get_repeat(text):
     text = text.lower()
@@ -89,21 +93,16 @@ class Alarm:
         self.text = None
         self.list = None
 
-    def with_values(self, time, days, repeat):
-        self.time = time
-        self.user = self.core.user
-        self.days = days
-        self.repeat = repeat
-
-    def create_alarm(self, days, repeat, time=None, hour=None, minute=None, text=None, sound=None):
+    def create_alarm(self, days, repeat, time=None, hour=None, minute=None, seconds=0, text=None, sound=None):
         # toDo: dont add alarm when exists
         if not (time != None or (hour != None and minute != None)):
             raise ValueError("missing values!")
         if repeat != "regular" and repeat != "single":
             raise ValueError("invlaid repeat-value!")
         if time != None:
-            hour = time.hour
-            minute = time.minute
+            hour = time["hour"]
+            minute = time["minute"]
+            seconds = time["second"]
         if self.core.user != None:
             alarm_sound = self.core.user["alarm_sound"]
             user = self.core.user
