@@ -5,7 +5,7 @@ def handle(text, core, skills):
     user = text.get('User')
     path = core.path + "/modules/resources/clock_sounds/" + ton
 
-    if core.local_storage['module_storage']['philips_hue']['Bridge-IP'] != '':
+    if core.local_storage['module_storage']['philips_hue']['Bridge-Ip'] != '':
         pw = PhillipsWrapper(core)
         pw.wrapper("mach das Licht weiß")
     try:

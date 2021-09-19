@@ -9,7 +9,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="index.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="piProgress.css" rel="stylesheet">
     <style>
 
         body {
@@ -49,38 +48,18 @@
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">JARVIS</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-dark bg-dark navbar-expand-sm">
+    <a class="navbar-brand" href="/index">JARVIS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false"
+            aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
-                    Dropdown
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-            </li>
+    <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="nav">
+            {% for item in nav %}
+            <li class="nav-item"><a class="nav-link" href="{{ item.href }}">{{ item.text }}</a></li>
+            {% endfor %}
         </ul>
-        <form class="form-inline my-2" id="titleTime" style="color: white">
-            <span class="spinner-border spinner-border-sm"></span>
-            Loading..
-        </form>
     </div>
 </nav>
 <br/>
@@ -94,23 +73,23 @@
         </div>
         <div class="col card-body" id="blueBody">
             <div class="row justify-content-md-center">
-                <button class="col btn btn-lg btn-primary" href="#">
+                <button class="col btn btn-lg btn-primary" onclick="window.location.replace('/setup');">
                     <i class="material-icons icon">settings</i>
                 </button>
 
-                <button class="col btn btn-lg btn-primary" href="#">
+                <button class="col btn btn-lg btn-primary" onclick="window.location.replace('/setupUser');">
                     <i class="material-icons icon">person</i>
                 </button>
 
-                <button class="col btn btn-lg btn-primary" href="#">
+                <button class="col btn btn-lg btn-primary" onclick="window.location.replace('/alarm');">
                     <i class="material-icons icon">alarm</i>
                 </button>
 
-                <button class="col btn btn-lg btn-primary" href="#">
+                <button class="col btn btn-lg btn-primary" onclick="window.location.replace('/weatherOverview');">
                     <i class="material-icons icon">cloud</i>
                 </button>
 
-                <button class="col btn btn-lg btn-primary" href="#">
+                <button class="col btn btn-lg btn-primary" disabled>
                     <i class="material-icons icon">audiotrack</i>
                 </button>
             </div>
@@ -122,7 +101,7 @@
             <i class="material-icons">error</i> Warnings
         </div>
         <div class="col card-body text-danger" id="redBody">
-            Warnungen
+            <b>Work in Progress</b>
         </div>
     </div>
 
@@ -131,7 +110,7 @@
             <i class="material-icons">analytics</i> System Daten
         </div>
         <div class="col card-body text-success" id="greenBody">
-
+            <b>Work in Progress</b>
         </div>
     </div>
 
@@ -141,11 +120,11 @@
         </div>
         <div class="col card-body text-success" id="cyanBody">
             <div class="row">
-                <button class="col btn btn-lg btn-info" href="#">
+                <button class="col btn btn-lg btn-info" disabled>
                     <i class="material-icons icon">live_tv</i>
                 </button>
 
-                <button class="col btn btn-lg btn-info flex-item" href="#">
+                <button class="col btn btn-lg btn-info flex-item" onclick="window.location.replace('/phue');">
                     <i class="material-icons icon">tungsten</i>
                 </button>
             </div>
@@ -221,5 +200,6 @@
         </div>
     </div>
 </div>
+<script src="{{ url_for('static', filename='main_index.js')}}"></script>
 </body>
 </html>

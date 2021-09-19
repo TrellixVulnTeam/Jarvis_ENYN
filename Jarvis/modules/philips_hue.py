@@ -101,7 +101,7 @@ class PhillipsWrapper:
 
     def light_change_color(self, lights, text):
         color = Logic.get_named_color(text)
-        if color[0] != -1 and color[1] != -1:
+        if color != None:
             self.light_on(lights)
             self.bridge.set_light(lights, 'xy', [color[0], color[1]])
             self.bridge.set_light(lights, 'bri', 254)
@@ -196,7 +196,7 @@ class Logic:
             if item.lower() in text:
                 lights.append(item)
         for group in wrapper.bridge.get_group():
-            if group.name.lower() in text:
+            if wrapper.bridge.get_group(int(group), 'name').lower() in text:
                 for light in group.lights:
                     lights.append(light)
         if not lights:
@@ -222,5 +222,5 @@ class Logic:
                 # folgende 2 Zeilen werden nur dann verwendet, wenn man die Farben als hex-Code angibt
                 # color[0] = converter.hex_to_xy(farbe)[0]
                 # color[1] = converter.hex_to_xy(farbe)[1]
-                named_colors.append(color_code[i])
-        return named_colors
+                return color_code[i]
+        return None

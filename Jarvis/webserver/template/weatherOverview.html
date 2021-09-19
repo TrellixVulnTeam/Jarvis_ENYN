@@ -145,7 +145,20 @@
 </head>
 
 <body>
-
+<nav class="navbar navbar-dark bg-dark navbar-expand-sm">
+    <a class="navbar-brand" href="/index">JARVIS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="nav">
+            {% for item in nav %}
+            <li class="nav-item"><a class="nav-link" href="{{ item.href }}">{{ item.text }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</nav>
 <div class="container">
     <div class="row state-name" id="state"></div>
 

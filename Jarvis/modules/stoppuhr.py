@@ -2,14 +2,16 @@ from datetime import datetime
 
 
 def isValid(text):
-    if 'timer' in text.lower():
+    if 'stoppuhr' in text.lower():
+        return True
+    elif 'stopp' in text and 'zeit' in text:
         return True
     return False
 
 
 def handle(text, core, skills):
     stop_watch = StopWatch(core, skills)
-    core.say('Die Stoppuhr befindet sich derzeit in der Entwicklung. Bitte probiere es später erneut.')
+    core.say('Die Stoppuhr befindet sich derzeit in der Entwicklung. Bitte melde auftretende Fehler.')
     if 'start' in text:
         stop_watch.start()
     elif 'stop' in text or 'beend' in text:

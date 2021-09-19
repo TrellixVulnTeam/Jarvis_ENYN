@@ -11,8 +11,6 @@ def run(core, skills):
             for day in alarms[repeat]:
                 for alarm in alarms[repeat][day]:
                     # iterate over each weekday
-                    print(f"alarm: {alarm}")
-                    print(f"day_correct: {is_day_correct(day)}, total_seconds: {get_total_seconds(alarm['time'])} active: {alarm['active']}")
                     if is_day_correct(day) and get_total_seconds(alarm["time"]) <= 0 and alarm["active"]:
                         dic = {'Text': alarm["text"], 'Ton': alarm["sound"], 'User': alarm["user"]}
                         core.start_module(name='weckerausgabe', text=dic)

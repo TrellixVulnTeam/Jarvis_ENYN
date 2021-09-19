@@ -40,10 +40,11 @@ def Webserver(core):
     # ------------------------------------------------------------------------------
 
     nav = [
-        {"href": "/setup", "text": "\"Erste Schritte\""},
-        {"href": "/setupSystem", "text": "Server einrichten"},
-        {"href": "/setupUser", "text": "Benutzer erstellen"},
+        {"href": "/setup", "text": "\"Einrichtung\""},
+        {"href": "/alarm", "text": "Wecker"},
+        {"href": "/weatherOverview", "text": "Wetter"},
         {"href": "/setupModules", "text": "Module bearbeiten (WIP)"},
+        {"href": "/phue", "text": "Philips-HUE"}
     ]
 
     @webapp.route("/")

@@ -7,9 +7,3 @@ function reloadTime() {
     timeView += hours + ":" + minutes;
     $("#titleTime").html(timeView);
 }
-
-window.onload = function () {
-    reloadTime();
-    setInterval(reloadTime, 2000);
-    $
-}
