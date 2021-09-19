@@ -13,7 +13,6 @@
 # werden. Diese Datei muss dann aber auch in den Ordner gespeichert werden
 # !!!ACHTUNG!!! Bei den Audio-Dateien muss es sich um wav-Dateien handeln
 import json
-import random
 
 ALPHABET = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
             "v", "w", "x", "y", "z"]

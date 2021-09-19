@@ -1,5 +1,3 @@
-import json
-
 from phue import Bridge
 
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']

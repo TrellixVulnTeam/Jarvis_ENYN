@@ -3,7 +3,6 @@
 #
 PRIORITY = -1
 SECURE = True
-import re
 import wikipedia
 
 wikipedia.set_lang("de")

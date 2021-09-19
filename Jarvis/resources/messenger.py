@@ -1,12 +1,13 @@
 import logging
 import os
-import speech_recognition as sr
 import subprocess
-import telepot
 import wave
 from io import BytesIO
-from telepot.loop import MessageLoop
 from tempfile import mkstemp
+
+import speech_recognition as sr
+import telepot
+from telepot.loop import MessageLoop
 
 
 class TelegramInterface:

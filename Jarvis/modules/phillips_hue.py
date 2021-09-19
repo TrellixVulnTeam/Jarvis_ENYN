@@ -1,8 +1,6 @@
 import random
-import time
+
 from phue import Bridge
-from rgbxy import Converter
-from typing import List, Any
 
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']
 # code = ['0000ff', 'ff0000', 'ffff00', '00FF00', 'ff1493', '9400d3', '00ffff', 'ffffff', '006400', '8b4513', 'ff8c00',

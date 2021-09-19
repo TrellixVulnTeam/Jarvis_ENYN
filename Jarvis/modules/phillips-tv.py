@@ -2,11 +2,12 @@ import json
 import os
 import platform
 import random
-import requests
 import string
 import subprocess
-from Crypto.Hash import SHA, HMAC
 from base64 import b64encode, b64decode
+
+import requests
+from Crypto.Hash import SHA, HMAC
 from requests.auth import HTTPDigestAuth
 
 user = ''

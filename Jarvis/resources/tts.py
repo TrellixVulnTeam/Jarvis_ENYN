@@ -1,12 +1,13 @@
-import pyperclip
 import time
 import traceback
 from pathlib import Path
+from threading import Thread
+
+import pyperclip
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
-from threading import Thread
 
 
 class Text_to_Speech:

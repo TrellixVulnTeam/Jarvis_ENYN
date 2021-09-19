@@ -1,7 +1,4 @@
 import ast
-import datetime
-import re
-import time
 import urllib.parse
 from urllib.request import urlopen, Request
 

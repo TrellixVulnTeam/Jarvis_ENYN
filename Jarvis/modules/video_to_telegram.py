@@ -5,8 +5,9 @@
 # Daher nur für Telegram vorgesehen
 
 import os
-import pytube
 import traceback
+
+import pytube
 
 
 def isValid(text):

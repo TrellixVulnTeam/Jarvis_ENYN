@@ -1,9 +1,9 @@
 import json
-import logging
 import math
-import requests
 import traceback
 from datetime import datetime
+
+import requests
 
 INTERVALL = 2
 

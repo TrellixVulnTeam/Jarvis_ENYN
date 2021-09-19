@@ -4,8 +4,6 @@ import logging
 import os
 import pkgutil
 import random
-import subprocess
-import sys
 import time
 import traceback
 import urllib

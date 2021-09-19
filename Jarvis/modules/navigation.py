@@ -1,5 +1,6 @@
-import googlemaps
 import re
+
+import googlemaps
 
 SECURE = True
 

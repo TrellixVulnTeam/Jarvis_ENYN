@@ -1,6 +1,3 @@
-import random
-
-
 def handle(text, core, skills):
     '''
     if core.user is not None:

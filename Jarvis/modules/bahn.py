@@ -4,9 +4,10 @@
 import datetime
 import json
 import random
-import requests
 import time
 import traceback
+
+import requests
 from bs4 import BeautifulSoup  # needs html5lib
 
 SECURE = True

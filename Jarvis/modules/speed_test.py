@@ -1,6 +1,7 @@
+import traceback
+
 import requests
 import speedtest
-import traceback
 
 
 def isValid(text):

@@ -1,20 +1,21 @@
 import io
 import logging
 import os
-import pafy
-import pvporcupine
-import pyaudio
 import random
 import re
-import speech_recognition as sr
 import struct
 import time
 import traceback
 import urllib.request
-import vlc
 from datetime import datetime
-from pygame import mixer as audio
 from threading import Thread
+
+import pafy
+import pvporcupine
+import pyaudio
+import speech_recognition as sr
+import vlc
+from pygame import mixer as audio
 
 from resources.tts import Text_to_Speech
 

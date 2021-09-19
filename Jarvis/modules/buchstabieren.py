@@ -1,6 +1,3 @@
-import time
-
-
 def isValid(text):
     text = text.lower()
     if 'buchstabier' in text or 'diktier' in text or ('wie' in text and ('geschrieben' in text or 'schreibt' in text)):

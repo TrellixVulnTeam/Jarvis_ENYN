@@ -2,12 +2,13 @@ import base64
 import io
 import json
 import os
-import speech_recognition as sr
 import subprocess
 import time
 import traceback
-from Crypto import Random
 from pathlib import Path
+
+import speech_recognition as sr
+from Crypto import Random
 from pygame import mixer as audio
 from resources.tts import Text_to_Speech
 

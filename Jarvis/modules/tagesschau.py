@@ -1,13 +1,10 @@
 import os
+from pathlib import Path
+
 import requests
-import subprocess
-import wave
 from bs4 import BeautifulSoup
-from pathlib import Path
-from pathlib import Path
 # PRIORITY = 6
 from pydub import AudioSegment
-from urllib.parse import urlparse
 
 TAGESSCHAU_URL = "https://www.internetradio-horen.de/podcasts/tagesschau-in-100-sekunden"
 

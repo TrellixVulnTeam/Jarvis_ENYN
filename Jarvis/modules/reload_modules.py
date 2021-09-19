@@ -1,5 +1,3 @@
-import time
-
 SECURE = False
 
 

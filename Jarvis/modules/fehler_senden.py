@@ -1,9 +1,3 @@
-import os
-import re
-import subprocess
-import tempfile
-
-
 def isValid(text):
     text = text.lower()
     if 'fehler' in text and ('senden' in text or 'schicken' in text):

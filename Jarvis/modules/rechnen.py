@@ -1,4 +1,3 @@
-import math  # Wird wegen eval gebraucht
 import re
 
 PRIORITY = 5

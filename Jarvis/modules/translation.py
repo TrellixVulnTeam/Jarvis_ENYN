@@ -1,8 +1,3 @@
-import json
-import urllib.parse
-from urllib.request import urlopen, Request
-
-
 def isValid(text):
     return False
 
