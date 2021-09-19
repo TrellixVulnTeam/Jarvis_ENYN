@@ -1,10 +1,13 @@
+from philips_hue import PhillipsWrapper
+
 def handle(text, core, skills):
     ton = text.get('Ton')
     user = text.get('User')
     path = core.path + "/modules/resources/clock_sounds/" + ton
 
     if core.local_storage['module_storage']['philips_hue']['Bridge-IP'] != '':
-        core.start_module(name='philips_hue', text='Mach das Licht weiß', user=core.user)
+        pw = PhillipsWrapper(core)
+        pw.wrapper("mach das Licht weiß")
     try:
         core.play(path=path, next=True)
     except FileNotFoundError:
