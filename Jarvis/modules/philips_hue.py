@@ -21,13 +21,14 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    pass
+    pw = PhillipsWrapper(core)
+    pw.wrapper(text)
 
 
 class PhillipsWrapper:
     def __init__(self, core):
-        BRIDGE_IP = core.local_storage["module_storage"]["philips_hue"]["Bridge-Ip"]
-        self.bridge = Bridge(BRIDGE_IP)
+        bridge_ip = core.local_storage["module_storage"]["philips_hue"]["Bridge-Ip"]
+        self.bridge = Bridge(bridge_ip)
         self.bridge.connect()
 
         self.skills = core.skills
@@ -36,9 +37,9 @@ class PhillipsWrapper:
         self.lights = self.bridge.lights
         self.light_names = self.bridge.get_light_objects('name')
 
-    def wrapper(self, text, core):
+    def wrapper(self, text):
         lights = Logic.get_lights(text, self)
-        # core.say("Okay.")
+        # self.core.say("Okay.")
         if 'aus' in text:
             self.light_off(lights)
             return
@@ -75,7 +76,7 @@ class PhillipsWrapper:
                     self.light_change_color(lights, text)
                     return
 
-        core.say('Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.')
+        self.core.say('Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.')
 
     def light_set_powerstate(self, lights, powerstate):
 

@@ -15,7 +15,7 @@ from flask import Flask, render_template, jsonify, request, Response, send_file
 from gevent import pywsgi
 
 from main import Modulewrapper
-from modules.new_phillips_lights import PhillipsWrapper
+from modules.philips_hue import PhillipsWrapper
 from webserver.helpWrapper import InstallWrapper
 
 # JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
