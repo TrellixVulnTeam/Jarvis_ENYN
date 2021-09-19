@@ -41,7 +41,7 @@ function changePowerstate(lightname, element) {
         } else {
             element.classList = "btn btn-outline-danger";
         }
-        console.log("changed");
+        refreshInfs();
     });
 }
 
