@@ -93,6 +93,10 @@ class PhillipsWrapper:
             return 'err'
 
     def light_on(self, lights):
+        print(lights)
+        if type(lights) != type([]) and type(lights) != type("") and type(lights) != (1):
+            lights = self.bridge.get_light(lights)
+            # toDO: possibility that lights is an array of Objects
         self.bridge.set_light(lights, 'on', True)
         self.bridge.set_light(lights, 'bri', 254)
 
@@ -198,9 +202,11 @@ class Logic:
         for group in wrapper.bridge.get_group():
             if wrapper.bridge.get_group(int(group), 'name').lower() in text:
                 for light in group.lights:
-                    lights.append(light)
+                    lights.append(light.lower())
         if not lights:
-            lights = wrapper.lights
+            for item in wrapper.light_names:
+                lights.append(item)
+        print(lights)
         return lights
 
     @staticmethod
