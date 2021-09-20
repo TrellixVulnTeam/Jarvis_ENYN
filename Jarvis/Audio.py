@@ -29,6 +29,7 @@ class AudioInput:
     """
 
     def __init__(self):
+        logging.getLogger().setLevel(logging.INFO)
         self.stopped = False
         # load microphone
         self.speech_engine = sr.Recognizer()
@@ -215,7 +216,7 @@ class AudioOutput:
                         2).get_volume != 1:
                     audio.Channel(1).set_volume(1)
                     audio.Channel(2).set_volume(1)
-                time.sleep(0.3)
+                time.sleep(0.2)
             except:
                 traceback.print_exc()
 
@@ -323,7 +324,6 @@ class MusicPlayer:
         while self.playlist == []:
             # wait until song is loaded in playlist
             time.sleep(0.2)
-        time.sleep(1)
         while self.playlist != []:
             self.player.set_media(self.playlist[0])
             self.player.play()

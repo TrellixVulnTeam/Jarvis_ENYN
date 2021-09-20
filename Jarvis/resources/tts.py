@@ -22,14 +22,13 @@ class Text_to_Speech:
         self.gender = 'male'
 
     def start(self, gender):
-        print("\n\n")
         tts_thread = Thread(target=self.run(gender))
         tts_thread.daemon = True
         tts_thread.start()
 
     def run(self, gender):
         print("[LOADING] Speechmodule")
-        self.display = Display(visible=False, size=(800, 600))
+        self.display = Display(size=(800, 600))
         self.display.start()
         self.gender = gender
         # start browser
@@ -43,7 +42,7 @@ class Text_to_Speech:
             # wait until the text has been changed
             while self.text_area.get_attribute('value') != text:
                 time.sleep(0.1)
-            time.sleep(0.3)
+            time.sleep(0.25)
             self.play_audio()
             # wait until the text starts to say
             while self.state_of_button() == 'creating' or self.state_of_button() == 'waiting':

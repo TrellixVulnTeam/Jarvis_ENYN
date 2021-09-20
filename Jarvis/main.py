@@ -19,6 +19,7 @@ from resources.module_skills import skills as Skill
 
 class Modules:
     def __init__(self, core, local_storage):
+        logging.getLogger().setLevel(logging.INFO)
         self.core = core
         self.local_storage = local_storage
         self.modules = []
@@ -561,7 +562,7 @@ class Users:
             if not username == 'README.txt' and not username == 'README.md':
                 userpath = os.path.join(location, username)
                 self.add_user(userpath)
-                logging.info('Nutzer {} geladen'.format(username), show=True)
+                logging.info('Nutzer {} geladen'.format(username))
         if self.users == []:
             # self.core.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
             pass
@@ -648,7 +649,7 @@ def start(config_data):
     webThr.daemon = True
     webThr.start()
 
-    logging.info('', '--------- FERTIG ---------\n\n', show=True)
+    logging.info('--------- FERTIG ---------\n\n')
     core.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
 
     # Starting the main-loop
