@@ -547,5 +547,5 @@ def handle(text, core, skills):
                 ]
         else:
             answer = ['Leider weiß ich nicht was ich sagen soll.']
-
-    core.say(random.choice(answer))
+    if answer is not None:
+        core.say(random.choice(answer))
