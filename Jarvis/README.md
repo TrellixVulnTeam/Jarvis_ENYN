@@ -114,5 +114,5 @@ um eine neue Benachrichtigung hinzuzufügen benutzt man folgende Syntax: <br/>
 | /api/alarm/list/alarms | Gibt alle Wecker zurück. <br/>Format: {"regular_alarm": List, "single_alarm": List, "singlePresent": Boolean, "regularPresent": Boolean} |
 | /api/alarm/isPresent | Gibt zurück, ob reguläre und einzelne Wecker gestellt sind <br/>Format: {"single", "regular"} |
 | /api/alarm/alarmSounds | Gibt alle AlarmSounds zurück.<br/>Format: {"alarmSounds": Array}
-| /api/alarm/delete/`repeat`/`day`/`hour`/`minute` | löscht den >repeat< Wecker an dem `day` um `hour` <b>:</b> `minute` Uhr |
-| /api/alarm/create/`repeat`/`day`/`hour`/`minute` | erstellt einen >repeat< Wecker an dem `day` um `hour` <b>:</b> `minute` Uhr |
+| /api/alarm/delete/`repeat`/`day`/`hour`/`minute` | löscht den `repeat` Wecker an dem `day` um `hour` <b>:</b> `minute` Uhr |
+| /api/alarm/create/`repeat`/`day`/`hour`/`minute` | erstellt einen `repeat` Wecker an dem `day` um `hour` <b>:</b> `minute` Uhr |
