@@ -71,6 +71,7 @@ um eine neue Benachrichtigung hinzuzufügen benutzt man folgende Syntax: <br/>
 |def get_value_number(item)| **return:** <br/>- value: String<br/>- number: int<br/>**Parametertyp:** String<br/>Es werden Zahl und Einheit voneinander getrennt und einzeln zurückgegeben.<br/>Dabei wird aus<br/>- kg -> g<br/>|
 |def get_time(i) | **return:** String<br/>**Parametertyp:** datetime-Object<br/>Wandelt ein Datetime-Object in eine textuelle Form um|
 |def is_desired(text) | **return:** boolean<br/>**Parametertyp:** String<br/>Gibt als boolean zurück, ob im Text ein Ausdruck des Wollens vorkommt:<br/>Ja bitte! -> return true<br/>gerne -> return true<br/>nein, danke! -> return false|
+|def get_word_index(text, word) | **return:** int<br/>**Parametertyp:** <br/>text: String<br/>word: String<br/>Gibt den Index des Wortes im text als int zurück. Wenn das Wort nicht im Text enthalten ist, wird -1 zurückgegeben.|
 | class Statistics | Hier sind staitsche Werte häufig als Map oder Array gespeichert. <br/>Derzeit sind folgende Punkte vorhanden: <br/> - **color_ger_to_eng:** "blau"->"blue", "rot"->"red"<br/> - **color_eng_to_ger:** "blue"->"blau", "red"->"rot"<br/> - **weekdays:** `["Montag", "Dienstag", ...]`<br/> - **weekdays_engl:** `["Monday", "Tuesday", ...]`<br/> - **weekdays_ger_to_eng:** "montag"->"monday", "dienstag"->"tuesday"<br/>**weekdays_eng_to_ger:** "monday"->"montag", "tuesday"->"dienstag"<br/>**numb_to_day:** "1"->"monday", "2"->"dienstag"
 
 ## Webserver

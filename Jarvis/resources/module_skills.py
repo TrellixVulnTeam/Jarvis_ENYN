@@ -233,6 +233,15 @@ class skills:
         return output
 
     @staticmethod
+    def get_word_index(text, word):
+        text = text.split(' ')
+        for i in range(len(text)):
+            if text[i] == word:
+                return i
+        return -1
+
+
+    @staticmethod
     def is_desired(text):
         # returns True, if user want this option
         approvals = ['ja', 'gerne']
