@@ -316,7 +316,7 @@ class Modulewrapper:
                                             announce=announce)
 
     def listen(self, text=None, messenger=False):
-        if text != None:
+        if text is not None:
             self.say(text)
         if messenger:
             return self.core.messenger_listen(self.user)
