@@ -181,18 +181,18 @@ class Alarm:
             return ' den ' + self.core.correct_output(core_output, messenger_output)
 
     def create_alarm_storage(self):
-        if not 'alarm' in self.core.local_storage.keys():
+        if 'alarm' not in self.core.local_storage.keys():
             self.core.local_storage["alarm"] = {}
 
-        if not 'regular' in self.core.local_storage["alarm"].keys():
+        if 'regular' not in self.core.local_storage["alarm"].keys():
             self.core.local_storage["alarm"]["regular"] = {}
 
-        if not 'single' in self.core.local_storage["alarm"].keys():
+        if 'single' not in self.core.local_storage["alarm"].keys():
             self.core.local_storage["alarm"]["single"] = {}
 
         for extension in ['regular', 'single']:
             for day in [each_day.lower() for each_day in self.skills.Statics.weekdays_engl]:
-                if not day in self.core.local_storage["alarm"][extension].keys():
+                if day not in self.core.local_storage["alarm"][extension].keys():
                     self.core.local_storage["alarm"][extension][day] = []
 
     def confirm_action(self, days):
