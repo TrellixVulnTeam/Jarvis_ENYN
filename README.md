@@ -29,10 +29,10 @@ For all further steps, a setup wizard is currently in work, but it will take som
 `sudo apt-get upgrade`
 
 2. Then install the applications:
-- `sudo apt-get installpython3.5-dev python3.4-dev libatlas-base-dev`.
+- `sudo apt-get install libatlas-base-dev portaudio19-dev sox flac`.
 
 3. after that we install all the packages we work with:
-- `sudo pip3 install pywhatkit pafy youtube-dl SpeechRecognition PyVirtualDisplay selenium androidtv wikipedia googlemapsspacex_pyhtml5lib python_dateutilpytube3`
+- `sudo pip3 install pvporcupine pyaudio SpeechRecognition pyvirtualdisplay selenium phue pywhatkit pafy youtube-dl SpeechRecognition PyVirtualDisplay selenium androidtv wikipedia googlemaps spacex_py html5lib python_dateutil pytube3 gevent youtube-dl pafy python-vlc pyperclip`
 - `sudo pip install phue xycolor`
 
 4. Once that's all done, you can take a look at config.json and fill in everything you know. In the part the following points should be entered: 
