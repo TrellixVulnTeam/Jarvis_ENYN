@@ -244,8 +244,7 @@ class skills:
     @staticmethod
     def is_desired(text):
         # returns True, if user want this option
-        approvals = ['ja', 'gerne']
-        if any(approvals) in text:
+        if 'ja' in text or 'gerne' in text or ('bitte' in text and not 'nicht' in text):
             return True
         elif 'bitte' in text and not 'nicht' in text:
             return True

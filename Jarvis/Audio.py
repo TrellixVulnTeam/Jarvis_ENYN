@@ -77,7 +77,7 @@ class AudioInput:
                 try:
                     # translate audio to text
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
-                    logging.info("[USER INPUT]\t", text)
+                    logging.info("[USER INPUT]\t" + text)
                 except:
                     try:
                         # if it didn´t worked, adjust the ambient-noise and try again

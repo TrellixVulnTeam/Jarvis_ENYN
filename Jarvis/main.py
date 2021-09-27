@@ -316,7 +316,7 @@ class Modulewrapper:
                                             announce=announce)
 
     def listen(self, text=None, messenger=False):
-        if text is not None:
+        if text != None:
             self.say(text)
         if messenger:
             return self.core.messenger_listen(self.user)
@@ -383,26 +383,18 @@ class Modulewrapper:
     def stopp_hotword_detection(self):
         self.Audio_Input.stop()
 
-    def speechVariation(self, input):
-        """
-        This function is the counterpiece to the batchGen-function. It compiles the same
-        sentence-format as given there but it only picks one random variant and directly
-        pushes it into tiane. It returns the generated sentence.
-        """
+    def speechVariation(self, userInput):
         if not isinstance(input, str):
-            parse = random.choice(input)
+            parse = random.choice(userInput)
         else:
-            parse = input
+            parse = userInput
         while "[" in parse and "]" in parse:
-            t_a = time.time()
             sp0 = parse.split("[", 1)
             front = sp0[0]
             sp1 = sp0[1].split("]", 1)
             middle = sp1[0].split("|", 1)
             end = sp1[1]
-            t_b = time.time()
             parse = front + random.choice(middle) + end
-        return parse
 
 
 class Modulewrapper_continuous:

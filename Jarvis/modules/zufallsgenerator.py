@@ -10,9 +10,9 @@ bisPattern = re.compile(r'.*(bis|kleiner gleich) (-?\d+).*', re.I)
 kleinerPattern = re.compile(r'.*(unter|kleiner) (als)? (-?\d+).*', re.I)
 
 
-def output(txt, core):
+def output(text, core):
     output = ''
-    text = tt.lower()
+    text = text.lower()
     t = str.split(text)
     if 'münze' in text or ('kopf' in text and 'oder' in text and 'zahl' in text):
         q = random.randint(1, 2)
@@ -36,19 +36,19 @@ def output(txt, core):
             output = 'sechs'
     elif ('zufall' in text or 'zufällig' in text) and 'zahl' in text:
         match = zwischenPattern.match(text)
-        if (output == '' and match is not None):
+        if output == '' and match is not None:
             if (int(match.group(2)) < int(match.group(4))):
                 output = str(random.randint(int(match.group(2)), int(match.group(4))))
             else:
                 output = str(random.randint(int(match.group(4)), int(match.group(2))))
         match = bisPattern.match(text)
-        if (output == '' and match is not None):
+        if output == '' and match is not None:
             if (match.group(2) > 0):
                 output = str(random.randint(1, int(match.group(2))))
             else:
                 output = str(random.randint(int(match.group(2)), 1))
         match = kleinerPattern.match(text)
-        if (output == '' and match is not None):
+        if output == '' and match is not None:
             if (match.group(3) > 0):
                 output = str(random.randrange(1, int(match.group(3))))
             else:
@@ -56,7 +56,6 @@ def output(txt, core):
 
     elif 'schere' in text or 'stein' in text or 'papier' in text:
         possibilities = ['Schere', 'Stein', 'Papier']
-        output = 'Da ist wohl was schief gelaufen'
         zufall = random.randint(0, 2)
         output = possibilities[zufall]
 
@@ -64,14 +63,14 @@ def output(txt, core):
         possibilities = ['grade', 'ungerade']
         output = random.choice(possibilities)
 
-    if (output == ''):
+    if output == '':
         output = str(random.randint(1, 100))
     return output
 
 
 def handle(text, core, skills):
     ausgabe = output(text, core).strip()
-    if (ausgabe.startswith('-')):
+    if ausgabe.startswith('-'):
         ausgabe = 'minus ' + ausgabe[1:]
     core.say('drei')
     sleep(1)

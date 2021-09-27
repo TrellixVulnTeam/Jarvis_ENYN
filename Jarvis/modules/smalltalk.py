@@ -189,6 +189,7 @@ def isValid(text):
 
 def handle(text, core, skills):
     text = text.lower()
+    answer = None
     if 'wie' in text and 'heißt' in text and 'du' in text:
         sys_name = core.system_name
         answer = ['Ich bin {}, ein Sprachassistent, der auf Datenschutz achtet.'.format(sys_name)]
@@ -250,7 +251,7 @@ def handle(text, core, skills):
     elif 'was' in text and 'geht' in text:
         answer = ['Ich habe mal gehört, dass Hunde gehen können. Nasen können meines Wissens nach nur laufen.']
     elif 'wo' in text and ('wohnst' in text or 'bist' in text or 'hälst' in text) and 'du' in text:
-        asnwer = [
+        answer = [
             'Anders als andere Sprachassistenten wohnt nicht nur mein Körper in deinem Haus, sondern auch mein Kopf']
     elif 'wo' in text and 'leiche' in text and (
             'vergraben' in text or 'vergrabe' in text or 'los' in text or 'verstecke' in text):
@@ -323,10 +324,10 @@ def handle(text, core, skills):
             ts = datetime.datetime.now()
             if not has_dateutil:
                 heute = ts.strftime('%d %b %Y')
-                diff = datetime.datetime.strptime(heute, '%d %b %Y') - datetime.datetime.strptime('6 Mai 2020',
+                diff = datetime.datetime.strptime(heute, '%d %b %Y') - datetime.datetime.strptime('6 Feb 2020',
                                                                                                   '%d %b %Y')
                 daynr = diff.days
-                core.say('{} Tage seit den ersten Tests.'.format(daynr))
+                answer = ['{} Tage seit den ersten Tests.'.format(daynr)]
             else:
                 geburtsdatum = datetime.datetime.strptime('6 Mai 2020', '%d %b %Y')
                 heute = datetime.datetime.strptime(ts.strftime('%d %b %Y'), '%d %b %Y')
@@ -394,8 +395,8 @@ def handle(text, core, skills):
             answer = ['Dann geh doch zu Netto!']
         else:
             answer = ['Ich wünsche dir viel Spaß', 'dann geh doch zu Netto', 'Ich hoffe du kommst bald wieder']
-    elif 'liebst' in text and 'du' in text and 'mich' in text:
-        core.say('Ja natürlich.')
+    elif 'lieb' in text and 'du' in text and 'mich' in text:
+        answer = ['Ja natürlich.']
     elif ('willst' in text and 'heiraten' in text) or 'heirate' in text:
         answer = ['Aber ich bin doch schon mit meiner Arbeit verheiratet.',
                   'Ich möchte vierundzwanzig sieben zur Verfügung stehen, da ist leider wenig Zeit für einen Partner oder eine Beziehung.']
@@ -416,8 +417,7 @@ def handle(text, core, skills):
     elif 'aha' in text or 'aha?' in text:
         answer = ['Frag mal was vernünftiges!']
     elif '😂' in text or 'haha' in text:
-        core.say('Warum lachst du? 😂')
-        response = core.listen()
+        core.listen(text='Warum lachst du?')
         answer = ['Aha...', 'In Ordnung']
     elif 'gibt' in text:
         if 'osterhase' in text or 'osterhasen' in text:
@@ -479,7 +479,7 @@ def handle(text, core, skills):
                 ''
                 ]
         elif 'witz' in text:
-            jokes = ['Donald Trump ist ein guter Präsident',
+            answer = ['Donald Trump ist ein guter Präsident',
                      'Genießen Sie Ihren Urlaub in vollen Zügen. Fahren Sie mit der Deutschen Bahn!',
                      'Wie nennt man ein Kondom auf Schwedisch? - Pippi Langstrumpf.',
                      'Sitzen ein Pole und ein Russe im Auto. Wer fährt? Die Polizei!',
@@ -494,7 +494,6 @@ def handle(text, core, skills):
                      'Wenn mein Sohn Pfarrer wird, spreche ich ihn dann mit Sohn oder mit Vater an?',
                      'Hab heute eine Prostituierte getroffen. Sie sagte, dass sie alles für zwanzig Euro macht. Ratet mal, wer jetzt ein aufgeräumtes Zimmer hat.'
                      ]
-            core.say(random.choice(jokes))
 
         elif 'nettes' in text:
             answer = [
@@ -547,5 +546,5 @@ def handle(text, core, skills):
                 ]
         else:
             answer = ['Leider weiß ich nicht was ich sagen soll.']
-    if answer is not None:
+    if answer:
         core.say(random.choice(answer))
