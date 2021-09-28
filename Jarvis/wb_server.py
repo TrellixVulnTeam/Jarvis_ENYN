@@ -412,8 +412,7 @@ def Webserver(core):
         elif groupAction == 'list':
             phueWrapper = PhillipsWrapper(core)
             if action == "lights":
-                print(request.args.get('id'))
-                if request.args.get('id'):
+                if request.args.get('id') is True:
                     lights = phueWrapper.get_lights_in_json(order_by_id=True)
                 else:
                     lights = phueWrapper.get_lights_in_json()
