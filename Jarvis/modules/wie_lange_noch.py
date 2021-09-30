@@ -14,19 +14,19 @@ def handle(text, core, skills):
     if 'weihnachten' in text:
         target_date = date(now.year, 12, 24)
         targets_name = "Weihnachten"
-    elif 'geburtstag' in text and 'mein' in text:
+    elif 'geburtstag' in text:
         if 'von' in text:
             user = text.split(' ')[skills.get_word_index(text, 'von')+1]
-            target_date = get_birthday_date_from_name(user, core)
+            target_date = get_birthday_date_from_name(core.local_storage["birthdays"].get(user))
             targets_name = user.capitalize() + " Geburtstag"
         elif core.user is None:
             user = core.listen(text="Von wessen Geburtstag sprichst du? Antworte bitte nicht im Genitiv und nur den "
                                     "Namen!")
-            target_date = get_birthday_date_from_name(user, core)
+            target_date = get_birthday_date_from_name(user["date_of_birth"])
             targets_name = user.capitalize() + " Geburtstag"
         else:
             user_birthday = core.user["date_of_birth"]
-            target_date = get_birthday_date_from_name(user_birthday, core)
+            target_date = get_birthday_date_from_name(user_birthday)
             targets_name = "zu deinem Geburtstag"
     elif 'silvester' in text or ('neu' in text and 'jahr' in text):
         target_date = date(now.year, 12, 31)
@@ -40,8 +40,7 @@ def handle(text, core, skills):
     core.say("Bis " + targets_name + " sind es noch " + str(time_delta.days) + " Tage!")
 
 
-def get_birthday_date_from_name(name, core):
-    user_birthday = core.local_storage["birthdays"].get(name)
+def get_birthday_date_from_name(user_birthday):
     year = user_birthday["year"]
     month = user_birthday["month"]
     day = user_birthday["day"]
