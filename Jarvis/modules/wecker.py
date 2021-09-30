@@ -26,7 +26,6 @@ def handle(text, core, skills):
     days = get_day(text, skills)
     time = core.analysis["time"]
 
-
     if 'lösch' in text or 'beend' in text or ('schalt' in text and 'ab' in text):
         try:
             alarm.delete_alarm(days, repeat, time=time)
@@ -36,6 +35,7 @@ def handle(text, core, skills):
     else:
         # days, repeat, time=None, hour=None, minute=None, text=None, sound=None
         alarm.create_alarm(days, repeat, time=time)
+
 
 def get_repeat(text):
     text = text.lower()
