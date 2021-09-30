@@ -62,15 +62,12 @@ def handle(text, core, skills):
             core.say('Gute Nacht.')
         else:
             core.say('Eine sehr interessante Definition der derzeitigen Uhrzeit.')
-        core.say('Soll ich dich morgen wecken?')
-        response = core.listen()
+        response = core.listen(text='Soll ich dich morgen wecken?')
         if skills.is_desired(response):
             if core.analysis['datetime'] is None:
-                core.say('Wann soll ich dich denn wecken?')
-                response_two = core.listen()
-                text = 'weck ' + response_two
-                core.start_module(text=text)
+                response_two = core.listen('Wann soll ich dich denn wecken?')
+                core.start_module(text='weck mich ' + response_two)
             else:
-                core.start_module(text=text)
+                core.start_module(text='weck mich ' + response)
         else:
             core.say('Okay.')
