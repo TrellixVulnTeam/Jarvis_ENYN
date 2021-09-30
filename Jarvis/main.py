@@ -25,8 +25,8 @@ class Modules:
         self.modules = []
         self.continuous_modules = []
 
-        self.modulewrapper = Modulewrapper
-        self.modulewrapper_continuous = Modulewrapper_continuous
+        self.module_wrapper = Modulewrapper
+        self.module_wrapper_continuous = Modulewrapper_continuous
 
         self.continuous_stopped = False
         self.continuous_threads_running = 0
@@ -38,11 +38,11 @@ class Modules:
         time.sleep(1)
         print('---------- MODULES...  ----------')
         self.modules = self.get_modules('modules')
-        if self.modules == []:
+        if self.modules is []:
             print('[INFO] -- (None present)')
         print('\n----- Continuous MODULES... -----')
         self.continuous_modules = self.get_modules('modules/continuous', continuous=True)
-        if self.continuous_modules == []:
+        if self.continuous_modules is []:
             print('[INFO] -- (None present)')
 
     def get_modules(self, directory, continuous=False):
@@ -73,7 +73,7 @@ class Modules:
 
     def query_threaded(self, name, text, user, direct, messenger=False):
         mod_skill = self.core.skills
-        if text == None:
+        if text is None:
             # generate a random text
             text = random.randint(0, 1000000000)
             analysis = {}
@@ -85,23 +85,24 @@ class Modules:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')
                 analysis = {}
-        if not name == None:
+        if name is not None:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger, user)
+                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
+                                                                              user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
                     return True
             print('[ERROR] Modul {} could not be found!'.format(name))
-        elif not text == None:
+        elif text is not None:
             # Search the modules normally
             for module in self.modules:
                 try:
-                    if module.isValid(text.lower()):
-                        self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger,
-                                                                                 user)
+                    if module.isValid(str(text).lower()):
+                        self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
+                                                                                  user)
                         mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                         mt.daemon = True
                         mt.start()
@@ -122,7 +123,7 @@ class Modules:
             print('[INFO] -- (None present)')
         return
 
-    def start_module(self, user=None, text=None, name=None, direct=True, messenger=False):
+    def start_module(self, user=None, text=None, name=None, messenger=False):
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill = self.core.skills
         analysis = {}
@@ -141,7 +142,8 @@ class Modules:
             for module in self.modules:
                 if module.__name__ == name:
                     logging.info('--Modul {} was called directly (Parameter: {})--'.format(name, text))
-                    self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger, user)
+                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
+                                                                              user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
@@ -155,14 +157,13 @@ class Modules:
             for module in self.modules:
                 try:
                     if module.isValid(text.lower()):
-                        self.core.active_modules[str(text)] = self.modulewrapper(self.core, text, analysis, messenger,
-                                                                                 user)
+                        self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
+                                                                                  user)
                         mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                         mt.daemon = True
                         mt.start()
                         mt.join()  # wait until Module is done...
-                        if not 'wartende_benachrichtigung' in module.__name__:  # dont say, that there was a mistake in this module
-                            self.start_module(user=user, name='wartende_benachrichtigung')
+                        self.start_module(user=user, name='wartende_benachrichtigung')
                 except:
                     traceback.print_exc()
                     print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
@@ -184,20 +185,20 @@ class Modules:
                 pass
             return
 
-    def run_module(self, text, modulewrapper, mod_skill):
+    def run_module(self, text, module_wrapper, mod_skill):
         for module in self.modules:
             if module.isValid(text):
-                module.handle(text, modulewrapper, mod_skill)
+                module.handle(text, module_wrapper, mod_skill)
 
     def run_continuous(self):
         # Runs the continuous_modules. Continuous_modules always run in the background,
         # to wait for events other than voice commands (e.g. sensor values, data etc.).
         self.core.continuous_modules = {}
         for module in self.continuous_modules:
-            intervalltime = module.INTERVALL if hasattr(module, 'INTERVALL') else 0
+            intervall_time = module.INTERVALL if hasattr(module, 'INTERVALL') else 0
             if __name__ == '__main__':
-                self.core.continuous_modules[module.__name__] = self.modulewrapper_continuous(self.core, intervalltime,
-                                                                                              self)
+                self.core.continuous_modules[module.__name__] = self.module_wrapper_continuous(self.core, intervall_time,
+                                                                                               self)
             try:
                 module.start(self.core.continuous_modules[module.__name__], self.core.local_storage)
                 logging.info('Modul {} started'.format(module.__name__))
@@ -296,12 +297,12 @@ class Modulewrapper:
         return
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
-        if path != None:
-            with open(path, "rb") as wavfile:
-                input_wav = wavfile.read()
+        if path is not None:
+            with open(path, "rb") as wav_file:
+                input_wav = wav_file.read()
         if audiofile is not None:
             with open(audiofile, "rb"):
-                input_wav = wavfile.read()
+                input_wav = wav_file.read()
         data = io.BytesIO(input_wav)
         if notification:
             self.Audio_Output.play_notification(data, next)
@@ -309,14 +310,14 @@ class Modulewrapper:
             self.Audio_Output.play_playback(data, next)
 
     def play_music(self, by_name=None, url=None, path=None, next=None, now=None, playlist=None, announce=None):
-        if by_name != None:
+        if by_name is not None:
             by_name = "'" + by_name + "'"
         # simply forward information
         self.Audio_Output.music_player.play(by_name=by_name, url=url, path=path, next=next, now=now, playlist=playlist,
                                             announce=announce)
 
     def listen(self, text=None, messenger=False):
-        if text != None:
+        if text is not None:
             self.say(text)
         if messenger:
             return self.core.messenger_listen(self.user)
@@ -384,6 +385,7 @@ class Modulewrapper:
         self.Audio_Input.stop()
 
     def speechVariation(self, userInput):
+        """
         if not isinstance(input, str):
             parse = random.choice(userInput)
         else:
@@ -395,6 +397,9 @@ class Modulewrapper:
             middle = sp1[0].split("|", 1)
             end = sp1[1]
             parse = front + random.choice(middle) + end
+            """
+        #toDo
+        return userInput
 
 
 class Modulewrapper_continuous:
@@ -402,8 +407,8 @@ class Modulewrapper_continuous:
     # are missing (so exactly what the module wrapper was actually there for xD), because continuous_-
     # modules are not supposed to make calls to the outside. For this there is a
     # parameter for the time between two calls of the module.
-    def __init__(self, core, intervalltime, modules):
-        self.intervall_time = intervalltime
+    def __init__(self, core, intervall_time, modules):
+        self.intervall_time = intervall_time
         self.last_call = 0
         self.counter = 0
         self.messenger = core.messenger
@@ -484,13 +489,13 @@ class LUNA:
                 #    self.messenger.say('Leider kann ich noch nichts mit Bildern anfangen.', self.users.get_user_by_name(user))
                 # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
                 if msg['text'].lower().startswith("Jarvis"):
-                    self.modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
+                    self.modules.start_module(text=msg['text'], user=user, messenger=True)
                 # Message is not a request at all, but a response (or a module expects such a response)
                 elif user in self.messenger_queued_users:
                     self.messenger_queue_output[user] = msg
                 # Message is a normal request
                 else:
-                    self.modules.start_module(text=msg['text'], user=user, messenger=True, direct=False)
+                    self.modules.start_module(text=msg['text'], user=user, messenger=True)
                 '''if response == False:
                     self.messenger.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['messenger_id'])'''
                 self.messenger.messages.remove(msg)
