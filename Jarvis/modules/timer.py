@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+PRIORITY = 2 #Konflikte mit modul wie_lange_noch
 
 def isValid(text):
     text = text.lower()
@@ -28,6 +29,7 @@ class Timer:
     def __init__(self, core, skills):
         self.core = core
         self.skills = skills
+        self.create_timer_storage()
 
     def create_timer(self, text):
         # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
@@ -64,38 +66,19 @@ class Timer:
     def get_remain_duration(self):
         # Begrenzt Timer auf die des Benutzers
         user_timer = self.core.local_storage['Timer']
-        timer_enum = ''
+        output = ''
 
         if len(user_timer) == 0:
-            timer_enum = "Du hast keinen aktiven Timer!"
+            output = "Du hast keinen aktiven Timer!"
         else:
             for item in user_timer:
                 self.delete_timer_if_passed(user_timer, item)
 
-                # Verbleibende Zeit runden
-                specific_time = item['Zeit'] - datetime.datetime.now()
-
-                days = specific_time.days
-                seconds = specific_time.seconds
-
-                # Wenn Timer kurz vor Ende, dann überspringen
-                if days == 0 and seconds < 3:
-                    continue
-
-                seconds = specific_time.seconds
-
-                if (seconds % 60) >= 30:
-                    seconds += 60 - (seconds % 60)
-                if seconds > 30:
-                    seconds += 60 - (seconds % 60)
-
-                remaining_time = datetime.timedelta()
-
-                timer_enum += 'Du hast einen '.join([item['Dauer'], ' mit noch etwa ',
-                                                     self.skills.get_time_differenz(remaining_time), ' verbleibend.\n'])
+                output += item["Dauer"] + 'Timer mit ' + self.skills.get_time_differenz(datetime.datetime.now(), item['Zeit']) + ' verbleibend.'
 
             if len(user_timer) > 1:
-                output = 'Du hast '.join([str(len(self.core.local_storage['Timer'])), ' Timer gestellt.\n', timer_enum])
+                output = 'Du hast '.join([str(len(self.core.local_storage['Timer'])), ' Timer gestellt.\n', output])
+            
         return output
 
     def delete_timer_if_passed(self, user_timer, item):
@@ -103,13 +86,17 @@ class Timer:
             # erst einmal checken, ob der Timer vlt eigentlich schon abgelaufen ist,
             # was eigentlich nicht passieren sollte.
             now = datetime.datetime.now()
-            timer_abgelaufen = (now - item["Zeit"])
+            timer_abgelaufen = (item["Zeit"] - now)
             if timer_abgelaufen:
                 user_timer.remove(item)
                 self.core.local_storage["Timer"].remove(item)
         except:
             # local_storage doesn´t extend this timer. Just write this into the Log
-            logging.info("WARNING", 'Not existing timer could not be deleted')
+            logging.warning('[WARNING] Not existing timer could not be deleted')
 
     def delete_timer(self):
         self.core.say('Diese Funktion wird derzeit auf das Webinterface ausgelagert.')
+
+    def create_timer_storage(self):
+        if 'Timer' not in self.core.local_storage.keys():
+            self.core.local_storage["Timer"] = []

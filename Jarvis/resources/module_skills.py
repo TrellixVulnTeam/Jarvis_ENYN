@@ -234,7 +234,7 @@ class skills:
             output = hour + ':' + minute + ' Uhr'
         return output
 
-    def get_time_differenz(self, start_time, time):
+    def get_time_differenz(self, start_time, time=None):
         aussage = []
         if time is None:
             dz = start_time
