@@ -92,7 +92,7 @@ class Timer:
                 remaining_time = datetime.timedelta()
 
                 timer_enum += 'Du hast einen '.join([item['Dauer'], ' mit noch etwa ',
-                                                     self.get_time_differenz(remaining_time), ' verbleibend.\n'])
+                                                     self.skills.get_time_differenz(remaining_time), ' verbleibend.\n'])
 
             if len(user_timer) > 1:
                 output = 'Du hast '.join([str(len(self.core.local_storage['Timer'])), ' Timer gestellt.\n', timer_enum])
@@ -113,51 +113,3 @@ class Timer:
 
     def delete_timer(self):
         self.core.say('Diese Funktion wird derzeit auf das Webinterface ausgelagert.')
-
-    def get_time_differenz(self, start_time, time=datetime.datetime.now()):
-        aussage = []
-        if time == None:
-            dz = start_time
-        else:
-            dz = start_time - time
-        days = dz.days
-        seconds = dz.seconds
-        microseconds = dz.microseconds
-
-        years = 0
-        hours = 0
-        minutes = 0
-
-        if days >= 365:
-            years = int(days / 365)
-            days = days % 365
-        if seconds >= 3600:
-            hours = int(seconds / 3600)
-            seconds = seconds % 3600
-        if seconds >= 60:
-            minutes = int(seconds / 60)
-            seconds = seconds % 60
-        if microseconds >= 5:
-            seconds += 1
-
-        if years == 1:
-            aussage.append('einem Jahr')
-        elif years > 1:
-            aussage.append(str(years) + ' Jahren')
-        if days == 1:
-            aussage.append('einem Tag')
-        elif days > 1:
-            aussage.append(str(days) + ' Tagen')
-        if hours == 1:
-            aussage.append('einer Stunde')
-        elif hours > 1:
-            aussage.append(str(hours) + ' Stunden')
-        if minutes == 1:
-            aussage.append('einer Minute')
-        elif minutes > 1:
-            aussage.append(str(minutes) + ' Minuten')
-        if seconds == 1:
-            aussage.append('einer Sekunde')
-        elif seconds > 1:
-            aussage.append(str(seconds) + ' Sekunden')
-        return self.skills.get_enumerate(aussage)
