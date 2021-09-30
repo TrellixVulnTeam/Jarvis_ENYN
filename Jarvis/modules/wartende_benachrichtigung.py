@@ -14,7 +14,6 @@ def handle(text, core, skills):
     try:
         if not "waiting_notifications" in core.user.keys():
             core.user["waiting_notifications"] = []
-            return
 
         if not "elapsed_awaiting_notifications" in core.user.keys():
             core.user["elapsed_awaiting_notifications"] = []
