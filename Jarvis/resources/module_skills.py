@@ -1,3 +1,5 @@
+
+
 class skills:
     def __init__(self):
         pass
@@ -232,6 +234,54 @@ class skills:
             output = hour + ':' + minute + ' Uhr'
         return output
 
+    def get_time_differenz(self, start_time, time):
+        aussage = []
+        if time is None:
+            dz = start_time
+        else:
+            dz = time - start_time
+        days = dz.days
+        seconds = dz.seconds
+        microseconds = dz.microseconds
+
+        years = 0
+        hours = 0
+        minutes = 0
+
+        if days >= 365:
+            years = int(days / 365)
+            days = days % 365
+        if seconds >= 3600:
+            hours = int(seconds / 3600)
+            seconds = seconds % 3600
+        if seconds >= 60:
+            minutes = int(seconds / 60)
+            seconds = seconds % 60
+        if microseconds >= 5:
+            seconds += 1
+
+        if years == 1:
+            aussage.append('einem Jahr')
+        elif years > 1:
+            aussage.append(str(years) + ' Jahren')
+        if days == 1:
+            aussage.append('einem Tag')
+        elif days > 1:
+            aussage.append(str(days) + ' Tagen')
+        if hours == 1:
+            aussage.append('einer Stunde')
+        elif hours > 1:
+            aussage.append(str(hours) + ' Stunden')
+        if minutes == 1:
+            aussage.append('einer Minute')
+        elif minutes > 1:
+            aussage.append(str(minutes) + ' Minuten')
+        if seconds == 1:
+            aussage.append('einer Sekunde')
+        elif seconds > 1:
+            aussage.append(str(seconds) + ' Sekunden')
+        return self.get_enumerate(aussage)
+
     @staticmethod
     def get_word_index(text, word):
         text = text.split(' ')
@@ -244,7 +294,8 @@ class skills:
     @staticmethod
     def is_desired(text):
         # returns True, if user want this option
-        if 'ja' in text or 'gerne' in text or ('bitte' in text and not 'nicht' in text):
+        text = text.lower()
+        if 'ja' in text or 'gern' in text or ('bitte' in text and not 'nicht' in text):
             return True
         elif 'bitte' in text and not 'nicht' in text:
             return True

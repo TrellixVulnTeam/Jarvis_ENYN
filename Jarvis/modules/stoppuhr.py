@@ -11,7 +11,6 @@ def isValid(text):
 
 def handle(text, core, skills):
     stop_watch = StopWatch(core, skills)
-    core.say('Die Stoppuhr befindet sich derzeit in der Entwicklung. Bitte melde auftretende Fehler.')
     if 'start' in text:
         stop_watch.start()
     elif 'stop' in text or 'beend' in text:
@@ -45,7 +44,7 @@ class StopWatch:
         if 'stoppuhr' in self.core.local_storage.keys() and self.core.local_storage['stoppuhr'] != '':
             self.core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(
                 self.skills.get_time(datetime.now()),
-                self.skills.get_time_differenz(self.core.local_storage["stoppuhr"], self.skills)))
+                self.skills.get_time_differenz(self.core.local_storage["stoppuhr"], datetime.now())))
             self.core.local_storage['stoppuhr'] = ''
         else:
             self.core.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')
