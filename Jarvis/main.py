@@ -71,7 +71,7 @@ class Modules:
         modules.sort(key=lambda mod: mod.PRIORITY if hasattr(mod, 'PRIORITY') else 0, reverse=True)
         return modules
 
-    def query_threaded(self, name, text, user, direct, messenger=False):
+    def query_threaded(self, name, text, user, messenger=False):
         mod_skill = self.core.skills
         if text is None:
             # generate a random text
@@ -89,8 +89,7 @@ class Modules:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
-                                                                              user)
+                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger, user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
@@ -274,7 +273,7 @@ class Modulewrapper:
         self.path = core.path
         self.user = user
 
-    def say(self, text, output='auto', wait=True):
+    def say(self, text, output='auto'):
         text = self.speechVariation(text)
         if output == 'auto':
             if self.messenger_call:
@@ -316,11 +315,14 @@ class Modulewrapper:
         self.Audio_Output.music_player.play(by_name=by_name, url=url, path=path, next=next, now=now, playlist=playlist,
                                             announce=announce)
 
-    def listen(self, text=None, messenger=False):
+    def listen(self, text=None, messenger=None):
+        print(f"messenger: {messenger}, self.messenger: {self.messenger_call}")
+        if messenger is None:
+            messenger = self.messenger_call
         if text is not None:
             self.say(text)
         if messenger:
-            return self.core.messenger_listen(self.user)
+            return self.core.messenger_listen(self.user["first_name"].lower())
         else:
             return self.Audio_Input.recognize_input(listen=True)
 
@@ -335,7 +337,7 @@ class Modulewrapper:
         return True
 
     def start_module(self, name, text, user):
-        self.core.start_module(text, name, user)
+        self.core.start_module(text, name, user, messenger=self.messenger)
 
     def start_module_and_confirm(self, name=None, text=None, user=None):
         return self.core.start_module(text, name, user)
@@ -468,7 +470,7 @@ class LUNA:
             for msg in self.messenger.messages.copy():
                 # Load the user name from the corresponding table
                 try:
-                    user = self.users.get_user_by_name(msg['from']['first_name'])
+                    user = self.users.get_user_by_name(msg['from']['first_name'].lower())
                 except KeyError:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
                     self.local_storage['rejected_messenger_messages'].append(msg)
@@ -491,11 +493,14 @@ class LUNA:
                 if msg['text'].lower().startswith("Jarvis"):
                     self.modules.start_module(text=msg['text'], user=user, messenger=True)
                 # Message is not a request at all, but a response (or a module expects such a response)
-                elif user in self.messenger_queued_users:
-                    self.messenger_queue_output[user] = msg
+                elif msg['from']['first_name'].lower() in self.messenger_queued_users:
+                    self.messenger_queue_output[msg['from']['first_name'].lower()] = msg
                 # Message is a normal request
                 else:
-                    self.modules.start_module(text=msg['text'], user=user, messenger=True)
+                    # self.modules.start_module(text=msg['text'], user=user, messenger=True)
+                    th = Thread(target=self.modules.start_module, args=(user, msg['text'], None, True,))
+                    th.daemon = True
+                    th.start()
                 '''if response == False:
                     self.messenger.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['messenger_id'])'''
                 self.messenger.messages.remove(msg)
@@ -504,10 +509,16 @@ class LUNA:
     def messenger_listen(self, user):
         # Tell the Telegram thread that you are waiting for a reply,
         # But only when no one else is waiting
+        if user not in self.messenger_queued_users:
+            self.messenger_queued_users.append(user)
+
         while True:
-            if not user in self.messenger_queued_users:
-                self.messenger_queued_users.append(user)
-                break
+            # Schauen, ob die Telegram-Antwort eingegangen ist
+            response = self.messenger_queue_output.pop(user, None)
+            if response is not None:
+                self.messenger_queued_users.remove(user)
+                logging.info('[ACTION] --{}-- (Messenger): {}'.format(user.upper(), response['text']))
+                return response["text"]
             time.sleep(0.03)
 
     def webserver_action(self, action):
@@ -531,7 +542,7 @@ class LUNA:
     def start_module(self, text, name, user):
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
-        self.modules.query_threaded(name, text, user, direct=False)
+        self.modules.query_threaded(name, text, user)
 
 
 class Users:
