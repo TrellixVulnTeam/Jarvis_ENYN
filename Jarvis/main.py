@@ -146,6 +146,7 @@ class Modules:
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
+                    break
         else:
             try:
                 analysis = self.core.analyzer.analyze(str(text))
@@ -163,6 +164,7 @@ class Modules:
                         mt.start()
                         mt.join()  # wait until Module is done...
                         self.start_module(user=user, name='wartende_benachrichtigung')
+                        break
                 except:
                     traceback.print_exc()
                     print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
