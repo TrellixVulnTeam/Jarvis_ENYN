@@ -3,7 +3,9 @@ from datetime import date, datetime
 
 def isValid(text):
     text = text.lower()
-    if 'wie' in text and ('weit' in text or 'lange') in text and ('noch' in text or 'bis' in text):
+    if 'timer' in text:
+        return False
+    elif 'wie' in text and ('weit' in text or 'lange') in text and ('noch' in text or 'bis' in text):
         return True
     return False
 
