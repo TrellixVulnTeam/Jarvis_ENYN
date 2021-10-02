@@ -174,6 +174,6 @@ def isValid(text):
 
 def get_name_string(core):
     if core.local_storage['system_name'].lower() == 'core':
-        return 'LUNA'
+        return 'Jarvis'
     else:
-        return core.local_storage['system_name'] + '. Ich bin eine Tochter von LUNA'
+        return core.local_storage['system_name'] + '. Ich bin eine Tochter von JARVIS'

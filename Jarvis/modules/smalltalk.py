@@ -140,7 +140,7 @@ def isValid(text):
             return True
         elif ('geh' in text or 'mach' in text) and 'jetzt' in text:
             return True
-        elif 'liebe' in text and 'dich' in text:
+        elif 'liebe' in text and 'dich' in text or 'hab' in text and 'lieb' in text:
             return True
         elif 'will' in text and 'dich' in text and 'heiraten' in text:
             return True
@@ -196,7 +196,16 @@ def handle(text, core, skills):
     elif 'danke' in text or 'thx' in text or 'thanks' in text:
         answer = ['Gerne doch.', 'Keine Ursache.']
     elif 'wie' in text and 'geht' in text and 'dir' in text:
-        answer = ['Mir geht es gut, danke der Nachfrage.', 'Gut.']
+        answers = ['Danke, gut!',
+                   'Mir gehts gut, {}.'.format(core.user["name"]),
+                   'Alles gut, {}.'.format(core.user["name"])]
+        reply = core.listen(text=random.choice(answers) + 'Und wie geht es dir?').lower()
+        if 'nicht so' in reply or 'schlecht' in reply or 'müde' in reply or 'mies' in reply or 'suboptimal' in reply:
+            answer = ['Das ist blöd, aber denk immer daran: Alles hat ein Ende nur die Wurst hat zwei!']
+        elif 'gut' in reply or 'besser' in reply or 'bestens' in reply or 'super' in reply or 'wundervoll' in reply or 'glücklich' in reply or 'froh' in reply:
+            answer = ['Das freut mich!']
+        else:
+            answer = ['Ich fürchte, ich konnte dich nicht verstehen. Geht es dir so schlecht?']
     elif ('wie' in text and 'groß' in text and 'du' in text) or 'größe' in text:
         answer = ['Mein äußeres ist nicht groß, aber mein Geist ist aber riesig.',
                   'Ich bin vier komma sieben Gigabyte groß.']
