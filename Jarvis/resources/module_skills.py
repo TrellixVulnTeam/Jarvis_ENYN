@@ -192,7 +192,8 @@ class skills:
 
         return temp3_array
 
-    def get_time(self, i):
+    @staticmethod
+    def get_time(i):
         try:
             hour = i["hour"]
         except:
@@ -295,11 +296,11 @@ class skills:
     def is_desired(text):
         # returns True, if user want this option
         text = text.lower()
-        if 'ja' in text or 'gern' in text or ('bitte' in text and not 'nicht' in text):
+        if 'ja' in text or 'gern' in text or ('bitte' in text and 'nicht' not in text):
             return True
-        elif 'bitte' in text and not 'nicht' in text:
+        elif 'bitte' in text and 'nicht' not in text:
             return True
-        elif 'danke' in text and not 'nein' in text:
+        elif 'danke' in text and 'nein' not in text:
             return True
         return False
 
