@@ -71,14 +71,15 @@ class Timer:
         if len(user_timer) == 0:
             output = "Du hast keinen aktiven Timer!"
         else:
-            for item in user_timer:
-                self.delete_timer_if_passed(user_timer, item)
-
-                output += item["Dauer"] + 'Timer mit ' + self.skills.get_time_differenz(datetime.datetime.now(), item['Zeit']) + ' verbleibend.'
-
             if len(user_timer) > 1:
-                output = 'Du hast '.join([str(len(self.core.local_storage['Timer'])), ' Timer gestellt.\n', output])
-            
+                output = f'Du hast {str(len(self.core.local_storage["Timer"]))} Timer gestellt.\n  '
+
+            for timer in user_timer:
+                self.delete_timer_if_passed(user_timer, timer)
+
+            for timer in user_timer:
+                output += timer["Dauer"] + 'Timer mit ' + self.skills.get_time_differenz(datetime.datetime.now(), timer[
+                    'Zeit']) + ' verbleibend.\n  '
         return output
 
     def delete_timer_if_passed(self, user_timer, item):
@@ -86,7 +87,7 @@ class Timer:
             # erst einmal checken, ob der Timer vlt eigentlich schon abgelaufen ist,
             # was eigentlich nicht passieren sollte.
             now = datetime.datetime.now()
-            timer_abgelaufen = (item["Zeit"] - now)
+            timer_abgelaufen = (item["Zeit"] - now).total_seconds() < 0
             if timer_abgelaufen:
                 user_timer.remove(item)
                 self.core.local_storage["Timer"].remove(item)
