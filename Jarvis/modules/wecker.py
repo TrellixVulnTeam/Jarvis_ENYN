@@ -29,8 +29,8 @@ def handle(text, core, skills):
         text += ' morgens'
 
     repeat = get_repeat(text)
-    days = get_day(text, skills)
     time = core.analysis["time"]
+    days = get_day(text, skills, core.analysis["datetime"])
 
     if 'lösch' in text or 'beend' in text or ('schalt' in text and 'ab' in text):
         try:
@@ -55,7 +55,7 @@ def get_repeat(text):
         return 'single'
 
 
-def get_day(text, skills):
+def get_day(text, skills, time):
     text = text.lower()
     days = []
 
@@ -70,9 +70,8 @@ def get_day(text, skills):
         for item in skills.Statics.weekdays:
             if item.lower() in text:
                 days.append(skills.Statics.weekdays_ger_to_eng[item.lower()])
-
-    if days is []:
-        days = [datetime.datetime.today().strftime("%A").lower()]
+    if days == []:
+        days.append(skills.Statics.weekdays_engl[time.weekday()].lower())
     return days
 
 
@@ -131,9 +130,8 @@ class Alarm:
                 "text": text, "active": True}
         if not type(days) == type([]):
             days = [days]
-
         for _day in days:
-            if self.core.local_storage["alarm"][repeat][_day] is None or not _day in self.core.local_storage["alarm"]["regular"].keys():
+            if self.core.local_storage["alarm"][repeat][_day] is None or _day not in self.core.local_storage["alarm"]["regular"].keys():
                 self.core.local_storage["alarm"][repeat][_day] = []
             self.core.local_storage["alarm"][repeat][_day].append(list)
 
