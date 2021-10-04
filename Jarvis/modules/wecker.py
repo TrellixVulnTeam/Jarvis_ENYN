@@ -115,7 +115,7 @@ class Alarm:
             user = self.core.user
             user_name = f', {self.core.user["first_name"].capitalize()}'
         else:
-            alarm_sound = "standard.wav"
+            alarm_sound = "standart.wav"
             user = None
             user_name = ''
         if text is None:
