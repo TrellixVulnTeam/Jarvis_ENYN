@@ -129,18 +129,17 @@ class Modules:
         if text is None:
             text = str(random.randint(0, 1000000000))
         else:
-            logging.info('{}'.format(text))
             try:
                 analysis = self.core.analyzer.analyze(str(text))
                 # logging.info('Analysis: ' + str(analysis))
             except:
                 traceback.print_exc()
-                logging.error('Sentence analysis failed!', conv_id=str(text))
+                logging.warning('[WARNING] Sentence analysis failed!', conv_id=str(text))
 
         if name is not None:
             for module in self.modules:
                 if module.__name__ == name:
-                    logging.info('--Modul {} was called directly (Parameter: {})--'.format(name, text))
+                    logging.info('[ACTION] --Modul {} was called directly (Parameter: {})--'.format(name, text))
                     self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
                                                                               user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
@@ -202,7 +201,7 @@ class Modules:
                                                                                                self)
             try:
                 module.start(self.core.continuous_modules[module.__name__], self.core.local_storage)
-                logging.info('Modul {} started'.format(module.__name__))
+                logging.info('[ACTION] Modul {} started'.format(module.__name__))
             except:
                 # traceback.print_exc()
                 continue
@@ -241,7 +240,7 @@ class Modules:
             for module in self.continuous_modules:
                 try:
                     module.stop(self.core.continuous_modules[module.__name__], self.core.local_storage)
-                    logging.info('Modul {} terminated'.format(module.__name__))
+                    logging.info('[ACTION] Modul {} terminated'.format(module.__name__))
                     no_stopped_modules = False
                 except:
                     continue
@@ -291,10 +290,10 @@ class Modulewrapper:
             self.messenger.say(text, self.user['telegram_id'])
         except KeyError:
             logging.warning(
-                'Der Text "{}" konnte nicht gesendet werden, da für den Nutzer "{}" keine Telegram-ID angegeben '
-                'wurde'.format(text, self.user))
+                '[WARNING] Sending message "{}" to messenger failed, because there is no Telegram-ID for this user '
+                '({}) '.format(text, self.user["name"]))
         except AttributeError:
-            logging.info('Sending message to messenger failed,  because there is no key for it!')
+            logging.info('[WARNING] Sending message to messenger failed,  because there is no key for it!')
         return
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
@@ -318,7 +317,6 @@ class Modulewrapper:
                                             announce=announce)
 
     def listen(self, text=None, messenger=None):
-        print(f"messenger: {messenger}, self.messenger: {self.messenger_call}")
         if messenger is None:
             messenger = self.messenger_call
         if text is not None:
@@ -479,10 +477,10 @@ class LUNA:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
                     self.local_storage['rejected_messenger_messages'].append(msg)
                     try:
-                        logging.warning('Message from unknown Telegram user {}. Access denied.'.format(
+                        logging.warning('[WARNING] Message from unknown Telegram user {}. Access denied.'.format(
                             msg['from']['first_name']))
                     except KeyError:
-                        logging.warning('Nachricht von unbekanntem Telegram-Nutzer ({}). Zugriff verweigert.'.format(
+                        logging.warning('[WARNING] Message from unknown Telegram user {}. Access denied.'.format(
                             msg['from']['id']))
                     self.messenger.say(
                         'Entschuldigung, aber ich darf leider zur Zeit nicht mit Fremden reden.',
@@ -538,7 +536,6 @@ class LUNA:
         if text == "wrong assistant!":
             self.Audio_Output.say("Geh mir nicht fremd, du Sau!")
         else:
-            logging.info('[USER INPUT]\t' + text)
             user = self.users.get_user_by_name(self.local_storage["user"])
             self.modules.start_module(text=str(text), user=user)
             self.Audio_Output.continue_after_hotword()
@@ -574,7 +571,7 @@ class Users:
             if not username == 'README.txt' and not username == 'README.md':
                 userpath = os.path.join(location, username)
                 self.add_user(userpath)
-                logging.info('Nutzer {} geladen'.format(username))
+                logging.info('[INFO] User {} loaded'.format(username))
         if self.users == []:
             # self.core.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
             pass
@@ -661,7 +658,7 @@ def start(config_data):
     webThr.daemon = True
     webThr.start()
 
-    logging.info('--------- FERTIG ---------\n\n')
+    logging.info('--------- DONE ---------\n\n')
     core.Audio_Output.say("Jarvis wurde erfolgreich gestartet!")
 
     # Starting the main-loop
@@ -681,9 +678,9 @@ def start(config_data):
 
 def start_telegram(core):
     if config_data['messenger']:
-        logging.info('Start Telegram...')
+        logging.info('[ACTION] Start Telegram...')
         if config_data['messenger_key'] == '':
-            logging.error('No Telegram-Bot-Token entered!')
+            logging.error('[INFO] No Telegram-Bot-Token entered!')
         else:
             from resources.messenger import TelegramInterface
 
@@ -695,7 +692,7 @@ def start_telegram(core):
 
 
 def reload(core):
-    logging.info('Reload System...\n')
+    logging.info('[ACTION] Reload System...\n')
     time.sleep(0.3)
     with open(relPath + "config.json", "r") as config_file:
         logging.info('[INFO] loading configs...')
@@ -708,11 +705,11 @@ def reload(core):
 
     time.sleep(0.3)
     if core.messenger == None:
-        logging.info('Load Telegram-API')
+        logging.info('[INFO] Load Telegram-API')
         start_telegram(core)
 
     time.sleep(0.3)
-    logging.info('Reload modules')
+    logging.info('[ACTION] Reload modules')
     core.modules.load_modules()
 
     """logging.info('Stop Audio-Devices')
@@ -725,11 +722,11 @@ def reload(core):
     core.Audio_Output.start()"""
 
     time.sleep(0.3)
-    logging.info('Reload Analyzer')
+    logging.info('[ACTION] Reload Analyzer')
     core.analyzer = Sentence_Analyzer()
 
     time.sleep(0.9)
-    logging.info('System reloaded successfully!')
+    logging.info('[INFO] System reloaded successfully!')
     """if webThr is not None:
         if not webThr.is_alive():
             webThr = Thread(target=ws.Webserver, args=[core])
@@ -743,7 +740,7 @@ def reload(core):
 
 
 def stop(core):
-    logging.info('Stop System...')
+    logging.info('[ACTION] Stop System...')
     core.local_storage["users"] = {}
     core.local_storage["rejected_messenger_messages"] = []
     config_data["Local_storage"] = core.local_storage
