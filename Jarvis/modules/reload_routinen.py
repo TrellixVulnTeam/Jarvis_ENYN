@@ -10,7 +10,6 @@ def isValid(text):
 
 def handle(text, core, skills):
     routines = []
-    print(os.listdir(core.path + '/resources/routine/'))
     for file in os.listdir(core.path + '/resources/routine/'):
         with open(core.path + '/resources/routine/' + file) as routine_file:
             routine = json.load(routine_file)
