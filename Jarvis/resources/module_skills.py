@@ -381,3 +381,9 @@ class skills:
         numb_to_month = {'01': 'Januar', '02': 'Februar', '03': 'März', '04': 'April', '05': 'Mai', '06': 'Juni',
                          '07': 'Juli', '08': 'August', '09': 'September', '10': 'Oktober', '11': 'November',
                          '12': 'Dezember'}
+
+        numb_to_ordinal = {"1": "erster", "2": "zweiter", "3": "dritter", "4": "vierter", "5": "fünfter",
+                           "6": "sechster", "7": "siebter", "8": "achter", "9": "neunter", "10": "zehnter",
+                           "11": "elfter", "12": "zwölfter", "13": "dreizehnter", "14": "vierzehnter",
+                           "15": "fünfzehnter", "16": "sechzehnter", "17": "siebzehnter", "18": "achtzehnter",
+                           "19": "neunzehnter", "20": "zwanzigster"}
