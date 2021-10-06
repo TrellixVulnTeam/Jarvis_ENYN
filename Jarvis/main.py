@@ -379,7 +379,9 @@ class Modulewrapper:
         if self.messenger_call:
             pass
         else:
-            text = text.replace('Entschuldige', 'Tut mir leid')
+            correct_output = self.core.config_data["correct_output"]
+            for item in correct_output:
+                text = text.replace(item, correct_output[item])
         return text
 
     def start_hotword_detection(self):
@@ -696,9 +698,13 @@ def reload(core):
     logging.info('Reload System...\n')
     time.sleep(0.3)
     with open(relPath + "config.json", "r") as config_file:
-        logging.info('read config new')
+        logging.info('[INFO] loading configs...')
         core.config_data = json.load(config_file)
         core.local_storage = core.config_data["Local_storage"]
+
+    with open(relPath + "resources/alias/correct_output.json") as correct_output:
+        # dont log loading file, because it is a config too
+        core.config_data["correct_output"] = json.load(correct_output)
 
     time.sleep(0.3)
     if core.messenger == None:
