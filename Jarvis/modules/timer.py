@@ -35,7 +35,6 @@ class Timer:
         # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
         text = text.replace(' auf ', ' in ')
         time = self.core.Analyzer.analyze(text)['datetime']
-        print(time)
         temp_text = "Dein Timer ist abgelaufen."
         duration = self.get_duration(text)
         if duration is None:
@@ -46,10 +45,14 @@ class Timer:
 
         # Vermeidung von Redundanz. Wird für 1 und mehrere Timer verwendet
         # Aufzählung wenn mehrere Timer
-        if 'Timer' in self.core.local_storage.keys():
+        if 'Timer' in self.core.local_storage.keys() or self.core.local_storage["Timer"] == []:
             self.core.local_storage['Timer'].append(E_eins)
-            anzahl = len(self.core.local_storage['Timer'])
-            self.core.say(str(anzahl) + '. Timer: ' + str(E_eins['Dauer']) + ' ab jetzt.')
+            anzahl = str(len(self.core.local_storage['Timer']))
+            if not self.core.messenger_call:
+                temp_text = self.core.skills.Statics.numb_to_ordinal[anzahl]
+            else:
+                temp_text = anzahl + "."
+            self.core.say(temp_text + ' Timer: ' + str(E_eins['Dauer']) + ' ab jetzt.')
         else:
             self.core.local_storage['Timer'] = [E_eins]
             self.core.say(str(E_eins['Dauer']) + ' ab jetzt.')
