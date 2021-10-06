@@ -27,5 +27,4 @@ def is_day_correct(day):
 def get_total_seconds(alarm_time):
     now = datetime.datetime.now()
     now_seconds = now.hour * 3600 + now.minute * 60 + now.second
-    print(f'alarm_seconds: {alarm_time["total_seconds"]} - now-seconds: {now_seconds} = {alarm_time["total_seconds"] - now_seconds}')
     return alarm_time["total_seconds"] - now_seconds
