@@ -41,10 +41,11 @@ class skills:
         text = text.replace(".", "")
         if split_text:
             text = text.split(' ')
-        for i in range(len(text)):
-            # Erst hier .lower um Groß- und Kleinschreibung beizubehalten
-            if text[i].lower() == start_word:
-                index = i + 1
+            for i in range(len(text)-1):
+                # toDo: Maybe check if text[i].lower == start_word or this option
+                # First here .lower to keep upper and lower case
+                if text[i].lower() in start_word:
+                    index = i + 1
 
         if index is not -1:
             if end_word == '':

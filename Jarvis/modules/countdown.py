@@ -20,9 +20,12 @@ class CountDown:
 
     def start(self, text):
         time_code = -1
-        for i in range(len(text.split(' '))):
-            if text[i] is 'von':
-                time_code = int(text[i + 1])
+        for i in range(len(text.split(' '))-1):
+            try:
+                time_code = int(text[i])
+            except:
+                pass
+
         if 'minute' in text:
             time_code *= 60
         elif 'stunde' in text:

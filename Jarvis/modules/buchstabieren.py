@@ -1,3 +1,8 @@
+import time
+
+PRIORITY = 3  # because hanoi
+
+
 def isValid(text):
     text = text.lower()
     if 'buchstabier' in text or 'diktier' in text or ('wie' in text and ('geschrieben' in text or 'schreibt' in text)):
@@ -18,8 +23,6 @@ def handle(text, core, skills):
         core.say("Leider habe ich nicht verstanden, was ich buchstabieren soll.")
         return
 
-    spelling = ""
     for letter in word:
-        spelling += letter + '<break time="0.5s"/>'
-
-    core.say(spelling)
+        core.say(letter)
+        time.sleep(0.5)
