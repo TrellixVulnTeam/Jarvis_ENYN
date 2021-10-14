@@ -119,7 +119,7 @@ class PhillipsWrapper:
             self.core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
 
     def set_light_brightness(self, lights, value):
-        self.bridge.set_light(lights, 'bri', str(value))
+        self.bridge.set_light(lights, 'bri', int(value))
 
     def inc_dec_brightness(self, lights, value):
         if type(lights[0]) is not type("") and type(lights[0]) is not type(1):
