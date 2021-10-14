@@ -11,11 +11,14 @@ def run(core, skills):
             for day in alarms[repeat]:
                 for alarm in alarms[repeat][day]:
                     # iterate over each weekday
-                    if is_day_correct(day) and get_total_seconds(alarm["time"]) <= 0 and alarm["active"]:
-                        dic = {'Text': alarm["text"], 'Ton': alarm["sound"], 'User': alarm["user"]}
-                        core.start_module(name='weckerausgabe', text=dic)
-                        alarms[repeat][day].remove(alarm)
-                        core.local_storage['alarm'] = alarms
+                    if is_day_correct(day):
+                        if get_total_seconds(alarm["time"]) <= 0 and alarm["active"]:
+                            dic = {'Text': alarm["text"], 'Ton': alarm["sound"], 'User': alarm["user"]}
+                            core.start_module(name='weckerausgabe', text=dic)
+                            alarms[repeat][day].remove(alarm)
+                            core.local_storage['alarm'] = alarms
+                        elif get_total_seconds(alarm["time"]) <= 1800:
+                            core.start_module(name="weckervorbereitung", text="")
 
 
 def is_day_correct(day):

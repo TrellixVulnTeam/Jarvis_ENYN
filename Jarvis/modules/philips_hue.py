@@ -63,11 +63,11 @@ class PhillipsWrapper:
             return
 
         elif 'hell' in text:
-            self.light_set_brightness(lights, 254)
+            self.set_light_brightness(lights, 254)
             return
 
         elif 'prozent' in text or '%' in text:
-            self.light_set_brightness(lights, Logic.get_percent_as_brightness(text))
+            self.set_light_brightness(lights, Logic.get_percent_as_brightness(text))
             return
 
         else:
@@ -78,7 +78,7 @@ class PhillipsWrapper:
 
         self.core.say('Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.')
 
-    def light_set_powerstate(self, lights, powerstate):
+    def set_light_powerstate(self, lights, powerstate):
 
         if powerstate is None and (type(lights) == type("") or len(lights) <= 1):
             if self.bridge.get_light(lights, 'on'):
@@ -91,6 +91,11 @@ class PhillipsWrapper:
             self.bridge.set_light(lights, 'on', False)
         else:
             return 'err'
+
+    def get_light_powerstate(self, light):
+        if light is None:
+            light = self.lights[0]
+        return self.bridge.get_light(light, 'on')
 
     def light_on(self, lights):
         print(lights)
@@ -112,7 +117,7 @@ class PhillipsWrapper:
         else:
             self.core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
 
-    def light_set_brightness(self, lights, value):
+    def set_light_brightness(self, lights, value):
         self.bridge.set_light(lights, 'bri', value)
 
     def inc_dec_brightness(self, lights, value):
@@ -219,6 +224,10 @@ class Logic:
                 percent = int(percent) / 100 * 254
                 return int(percent)
         return -1
+
+    @staticmethod
+    def get_brightness_as_percent(value):
+        return value / 254 * 100
 
     @staticmethod
     def get_named_color(text):
