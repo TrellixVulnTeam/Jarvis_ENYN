@@ -122,8 +122,11 @@ class PhillipsWrapper:
         self.bridge.set_light(lights, 'bri', value)
 
     def inc_dec_brightness(self, lights, value):
+        if type(lights[0]) is not type("") and type(lights[0]) is not type(1):
+            for i in range(len(lights)):
+                lights[i] = lights[i].id
         for light in lights:
-            brightness = self.bridge.get_light(light.id, 'bri') + value
+            brightness = self.bridge.get_light(lights, 'bri') + value
             if brightness > 254:
                 brightness = 254
             if brightness < 0:
