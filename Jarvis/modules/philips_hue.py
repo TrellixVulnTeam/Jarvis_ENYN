@@ -131,7 +131,7 @@ class PhillipsWrapper:
                 brightness = 254
             if brightness < 0:
                 brightness = 0
-            self.bridge.set_light(light.id, 'bri', brightness)
+            self.bridge.set_light(light, 'bri', brightness)
 
     def get_light_in_json(self, light_name):
         tempLight = self.bridge.get_light(light_name)
