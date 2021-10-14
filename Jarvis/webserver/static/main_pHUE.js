@@ -2,6 +2,7 @@ function createPHUEBoxes(groups, allLights) {
     let output = "";
     for (var gr in groups) {
         let spezGroup = groups[gr];
+        // toDo: disable all lights in group
         output += "<div class=\"card border-primary\">";
         output += "<div class=\"card-header form-inline bg-primary\">";
         output += spezGroup["name"];
@@ -11,16 +12,16 @@ function createPHUEBoxes(groups, allLights) {
         let tempLight;
         for (spezLight in spezGroup["lights"]) {
             tempLight = allLights[spezGroup["lights"][spezLight]];
-            output += "<li class=\"list-group-item d-flex justify-content-between align-items-center\">";
-            output += "<div class='d-flex flex-nowrap justify-content-between'>"
+            output += "<li class=\"list-group-item d-flex flex-nowrap justify-content-between\">";
             if (tempLight["on"] === true) {
                 output += "<button class=\"btn btn-outline-success\" onclick=\"changePowerstate('" + tempLight["name"] + "', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             } else {
                 output += "<button class=\"btn btn-outline-danger\" onclick=\"changePowerstate('" + tempLight["name"] + "', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             }
             output += "<span class=\"lampName\">" + tempLight["name"] + "</span>";
-            output += "<span class=\"material-icons-outlined\" style=\"width: 35%\">brightness_2</span>";
-            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" style='width: 254px' onchange=\"changeBrightness('" + tempLight["name"] + "', this)\">";
+            output += "<div>";
+            output += "<span class=\"material-icons-outlined\">brightness_2</span>";
+            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" onchange=\"changeBrightness('" + tempLight["name"] + "', this)\">";
             output += "<span class=\"material-icons-outlined\">light_mode</span></div>";
             output += "</li>";
         }
