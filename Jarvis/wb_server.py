@@ -399,7 +399,7 @@ def Webserver(core):
             elif action == 'powerState':
                 phueWrapper.light_set_powerstate(name, value)
             elif action == 'brightness':
-                phueWrapper.light_set_brightness(name, value)
+                phueWrapper.set_light_brightness(name, value)
             elif action == 'createGroup':
                 phueWrapper.create_group(value, getData())
             elif action == 'renameGroup':
