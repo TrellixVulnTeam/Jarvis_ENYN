@@ -1,119 +1,119 @@
-function refreshWeather(icon) {
+function refreshWeather(icon){
     icon = parseInt(icon);
     let time = "";
     let weatherIcon = "moon-new.svg";
     let weatherKind = "";
-    if (date.getHours() >= 22 || date.getHours() <= 6) {
-        time = "-night";
-    } else {
+    if (date.getHours() >= 22 || date.getHours() <= 6){
+       time = "-night";
+    }else {
         time = "-day";
     }
-    if (icon >= 200 && icon <= 202) {
-        weatherIcon = "thunderstorms" + time + "-rain.svg";
+    if (icon >= 200 && icon <= 202){
+        weatherIcon = "thunderstorms"+time+"-rain.svg";
         weatherKind = "thunder";
-    } else if (icon >= 210 && icon <= 212) {
-        weatherIcon = "thunderstorms" + time + "-rain.svg";
+    } else if (icon >= 210 && icon <= 212){
+        weatherIcon = "thunderstorms"+time+"-rain.svg";
         weatherKind = "thunder";
-    } else if (icon == 221) {
+    } else if (icon == 221){
         weatherIcon = "lightning-bolt.svg";
         weatherKind = "thunder";
-    } else if (icon >= 230 && icon <= 232) {
-        weatherIcon = "thunderstorms" + time + "-rain.svg";
+    } else if (icon >= 230 && icon <= 232){
+        weatherIcon = "thunderstorms"+time+"-rain.svg";
         weatherKind = "thunder";
-    } else if (icon == 300) {
-        weatherIcon = "partly-cloudy" + time + "-drizzle.svg";
+    } else if (icon == 300){
+        weatherIcon = "partly-cloudy"+time+"-drizzle.svg";
         weatherKind = "cloudy";
-    } else if (icon == 301 || icon == 302) {
-        weatherIcon = "partly-cloudy" + time + "-drizzle.svg";
+    } else if (icon == 301 || icon == 302){
+        weatherIcon = "partly-cloudy"+time+"-drizzle.svg";
         weatherKind = "rainy"
-    } else if (icon >= 310 && icon <= 314) {
-        weatherIcon = "partly-cloudy" + time + "-drizzle.svg";
+    } else if (icon >= 310 && icon <= 314){
+        weatherIcon = "partly-cloudy"+time+"-drizzle.svg";
         weatherKind = "rainy";
-    } else if (icon == 321) {
-        weatherIcon = "partly-cloudy" + time + "-rain.svg";
+    } else if (icon == 321){
+        weatherIcon = "partly-cloudy"+time+"-rain.svg";
         weatherKind = "rainy";
-    } else if (icon == 500) {
-        weatherIcon = "partly-cloudy" + time + "-drizzle.svg";
+    } else if (icon == 500){
+        weatherIcon = "partly-cloudy"+time+"-drizzle.svg";
         weatherKind = "rainy";
-    } else if (icon >= 501 && icon <= 502) {
-        weatherIcon = "partly-cloudy" + time + "-rain.svg";
+    }else if (icon >= 501 && icon <= 502){
+        weatherIcon = "partly-cloudy"+time+"-rain.svg";
         weatherKind = "rainy";
-    } else if (icon >= 503 && icon <= 504) {
+    }else if (icon >= 503 && icon <= 504){
         weatherIcon = "rain.svg";
         weatherKind = "rainy";
-    } else if (icon == 511) {
-        weatherIcon = "partly-cloudy" + time + "-sleet.svg";
+    } else if (icon == 511){
+        weatherIcon = "partly-cloudy"+time+"-sleet.svg";
         weatherKind = "rainy";
-    } else if (icon >= 520 && icon <= 531) {
+    } else if (icon >= 520 && icon <= 531){
         weatherIcon = "rain.svg";
         weatherKind = "rainy";
-    } else if (icon >= 600 && icon <= 602) {
-        weatherIcon = "partly-cloudy" + time + "-snow.svg";
+    } else if (icon >= 600 && icon <= 602){
+        weatherIcon = "partly-cloudy"+time+"-snow.svg";
         weatherKind = "snowy";
-    } else if (icon >= 611 && icon <= 616) {
-        weatherIcon = "partly-cloudy" + time + "-sleet.svg";
+    } else if (icon >= 611 && icon <= 616){
+        weatherIcon = "partly-cloudy"+time+"-sleet.svg";
         weatherKind = "rainy";
-    } else if (icon === 620 || icon == 621) {
-        weatherIcon = "partly-cloudy" + time + "-snow.svg";
+    } else if (icon == 620 || icon == 621){
+        weatherIcon = "partly-cloudy"+time+"-snow.svg";
         weatherKind = "snowy";
-    } else if (icon == 622) {
+    } else if (icon == 622){
         weatherIcon = "snow.svg";
         weatherKind = "snowy";
-    } else if (icon == 701) {
+    } else if (icon == 701){
         weatherIcon = "mist.svg";
         weatherKind = "misty";
-    } else if (icon == 711) {
-        weatherIcon = "partly-cloudy" + time + "smoke.svg";
+    } else if (icon == 711){
+        weatherIcon = "partly-cloudy"+time+"smoke.svg";
         weatherKind = "stormy";
-    } else if (icon == 721) {
-        weatherIcon = "haze" + time + ".svg";
+    } else if (icon == 721){
+        weatherIcon = "haze"+time+".svg";
         weatherKind = "stormy";
-    } else if (icon == 731) {
-        weatherIcon = "dust" + time + ".svg";
+    } else if (icon == 731){
+        weatherIcon = "dust"+time+".svg";
         weatherKind = "stormy";
-    } else if (icon == 741) {
-        weatherIcon = "fog" + time + ".svg";
+    } else if (icon == 741){
+        weatherIcon = "fog"+time+".svg";
         weatherKind = "misty";
-    } else if (icon == 751) {
+    } else if (icon == 751){
         weatherIcon = "dust-wind.svg";
         weatherKind = "stormy";
-    } else if (icon == 761) {
-        weatherIcon = "dust" + time + ".svg";
+    } else if (icon == 761){
+        weatherIcon = "dust"+time+".svg";
         weatherKind = "stormy";
-    } else if (icon == 762) {
+    } else if (icon == 762){
         weatherIcon = "smoke.svg";
         weatherIcon = "vulcan";
-    } else if (icon == 771) {
-        weatherIcon = "haze" + time + ".svg";
+    } else if (icon == 771){
+        weatherIcon = "haze"+time+".svg";
         weatherKind = "stormy";
-    } else if (icon == 781) {
+    } else if (icon == 781){
         weatherIcon = "tornado.svg";
         weatherKind = "stormy";
-    } else if (icon == 800) {
-        weatherIcon = "clear" + time + ".svg";
+    } else if (icon == 800){
+        weatherIcon = "clear"+time+".svg";
         weatherKind = "sunny";
-    } else if (icon == 801 || icon == 802) {
-        weatherIcon = "partly-cloudy" + time + ".svg";
+    } else if (icon == 801 ||icon == 802){
+        weatherIcon = "partly-cloudy"+time+".svg";
         weatherKind = "partly_cloudy";
-    } else if (icon == 803) {
+    } else if (icon == 803){
         weatherIcon = "cloudy.svg";
         weatherKind = "cloudy";
-    } else if (icon == 804) {
+    } else if (icon == 804){
         weatherIcon = "overcast.svg";
         weatherKind = "cloudy";
-    } else {
+    }else{
         console.log("Unknkown Icon!");
     }
     return [weatherIcon, weatherKind];
 }
 
-function refreshBackgroundAndText(weatherKind) {
+function refreshBackgroundAndText(weatherKind){
     var cards = document.getElementsByClassName("day-card");
-    if (weatherKind == "thunder") {
-        if (old_bg != "background_thunder.jpg") {
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_thunder.jpg')";
+    if (weatherKind == "thunder"){
+        if (old_bg != "background_thunder.jpg"){
+            document.body.style.backgroundImage = "url('statics/img/background_thunder.jpg')";
             document.body.style.color = "white";
-            for (let i = 0; i < cards.length; i++) {
+            for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "white";
             }
             changeTempCharXYColor("white");
@@ -123,11 +123,12 @@ function refreshBackgroundAndText(weatherKind) {
             document.getElementById("buttonPercChart").classList.replace("btn-outline-dark", "btn-dark");
             document.getElementById("buttonHumiChart").classList.replace("btn-outline-dark", "btn-dark");
         }
-    } else if (date.getHours() >= 22 || date.getHours() <= 6 || weatherKind == "night") {
-        if (old_bg != "background_night.jpg") {
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_night.jpg')";
+    }
+    else if (date.getHours() >= 22 || date.getHours() <= 6 || weatherKind == "night"){
+        if (old_bg != "background_night.jpg"){
+            document.body.style.backgroundImage = "url('statics/img/background_night.jpg')";
             document.body.style.color = "white";
-            for (var i = 0; i < cards.length; i++) {
+            for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "white";
             }
             changeTempCharXYColor("white");
@@ -135,11 +136,11 @@ function refreshBackgroundAndText(weatherKind) {
             document.getElementById("buttonPercChart").classList.replace("btn-outline-dark", "btn-dark");
             document.getElementById("buttonHumiChart").classList.replace("btn-outline-dark", "btn-dark");
         }
-    } else if (weatherKind == "misty") {
-        if (old_bg != "background_misty.jpg") {
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_misty.jpg')";
+    }else if (weatherKind == "misty"){
+        if (old_bg != "background_misty.jpg"){
+            document.body.style.backgroundImage = "url('statics/img/background_misty.jpg')";
             document.body.style.color = "black";
-            for (var i = 0; i < cards.length; i++) {
+            for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "black";
             }
             changeTempCharXYColor("black");
@@ -147,11 +148,11 @@ function refreshBackgroundAndText(weatherKind) {
             document.getElementById("buttonPercChart").classList.replace("btn-dark", "btn-outline-dark");
             document.getElementById("buttonHumiChart").classList.replace("btn-dark", "btn-outline-dark");
         }
-    } else if (weatherKind == "sunny") {
-        if (old_bg != "background_sunny.jpg") {
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_sunny.jpg')";
+    }else if (weatherKind == "sunny"){
+        if (old_bg != "background_sunny.jpg"){
+            document.body.style.backgroundImage = "url('statics/img/background_sunny.jpg')";
             document.body.style.color = "black";
-            for (var i = 0; i < cards.length; i++) {
+            for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "black";
             }
             changeTempCharXYColor("black");
@@ -159,19 +160,18 @@ function refreshBackgroundAndText(weatherKind) {
             document.getElementById("buttonPercChart").classList.replace("btn-dark", "btn-outline-dark");
             document.getElementById("buttonHumiChart").classList.replace("btn-dark", "btn-outline-dark");
         }
-    } else if (weatherKind.includes("cloudy")) {
-        7
-        if (weatherKind.includes("partly")) {
-            if (old_bg != "background_partly_cloudy.jpg") {
-                document.body.style.backgroundImage = "url('static/img/weatherBackground/background_partly_cloudy.jpg')";
+    } else if (weatherKind.includes("cloudy")){7
+        if (weatherKind.includes("partly")){
+            if (old_bg != "background_partly_cloudy.jpg"){
+                document.body.style.backgroundImage = "url('statics/img/background_partly_cloudy.jpg')";
                 old_bg = "background_partly_cloudy.jpg";
             }
-        } else if (old_bg != "background_cloudy.jpg") {
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_cloudy.jpg')";
+        }else if (old_bg != "background_cloudy.jpg"){
+            document.body.style.backgroundImage = "url('statics/img/background_cloudy.jpg')";
             old_bg = "background_cloudy.jpg";
         }
         document.body.style.color = "black";
-        for (var i = 0; i < cards.length; i++) {
+        for (var i = 0; i < cards.length; i++){
             cards[i].style.color = "black";
         }
         document.getElementById("buttonTempChart").classList.replace("btn-dark", "btn-outline-dark");
@@ -179,11 +179,11 @@ function refreshBackgroundAndText(weatherKind) {
         document.getElementById("buttonHumiChart").classList.replace("btn-dark", "btn-outline-dark");
         changeTempCharXYColor("black");
 
-    } else if (weatherKind == "rainy") {
-        if (old_bg != "background_rainy.jpg") {
-            document.body.style.backgroundImage = "url('static/img/weatherBackground/background_rainy.jpg')";
+    } else if (weatherKind == "rainy"){
+        if (old_bg != "background_rainy.jpg"){
+            document.body.style.backgroundImage = "url('statics/img/background_rainy.jpg')";
             document.body.style.color = "white";
-            for (var i = 0; i < cards.length; i++) {
+            for (var i = 0; i < cards.length; i++){
                 cards[i].style.color = "white";
             }
             old_bg = "background_rainy.jpg";
@@ -193,10 +193,10 @@ function refreshBackgroundAndText(weatherKind) {
             document.getElementById("buttonHumiChart").classList.replace("btn-outline-dark", "btn-dark");
         }
 
-    } else if (weatherKind == "snowy" && old_bg != "background_snow.jpg") {
-        document.body.style.backgroundImage = "url('static/img/weatherBackground/background_snow.jpg')";
+    } else if (weatherKind == "snowy" && old_bg != "background_snow.jpg"){
+        document.body.style.backgroundImage = "url('statics/img/background_snow.jpg')";
         document.body.style.color = "black";
-        for (var i = 0; i < cards.length; i++) {
+        for (var i = 0; i < cards.length; i++){
             cards[i].style.color = "black";
         }
         changeTempCharXYColor("black");
@@ -205,10 +205,10 @@ function refreshBackgroundAndText(weatherKind) {
         document.getElementById("buttonPercChart").classList.replace("btn-dark", "btn-outline-dark");
         document.getElementById("buttonHumiChart").classList.replace("btn-dark", "btn-outline-dark");
 
-    } else if (weatherKind == "stormy" && old_bg != "background_stormy.jpg") {
-        document.body.style.backgroundImage = "url('static/img/weatherBackground/background_stormy.jpg')";
+    } else if(weatherKind == "stormy" && old_bg != "background_stormy.jpg"){
+        document.body.style.backgroundImage = "url('statics/img/background_stormy.jpg')";
         document.body.style.color = "white";
-        for (var i = 0; i < cards.length; i++) {
+        for (var i = 0; i < cards.length; i++){
             cards[i].style.color = "white";
         }
         changeTempCharXYColor("white");
@@ -217,10 +217,10 @@ function refreshBackgroundAndText(weatherKind) {
         document.getElementById("buttonPercChart").classList.replace("btn-outline-dark", "btn-dark");
         document.getElementById("buttonHumiChart").classList.replace("btn-outline-dark", "btn-dark");
 
-    } else if (old_bg != "Wetter_bg.jpg") {
-        document.body.style.backgroundImage = "url('static/img/weatherBackground/Wetter_bg.jpg')";
+    }else if (old_bg != "Wetter_bg.jpg"){
+        document.body.style.backgroundImage = "url('statics/img/Wetter_bg.jpg')";
         document.body.style.color = "white";
-        for (let i = 0; i < cards.length; i++) {
+        for (var i = 0; i < cards.length; i++){
             cards[i].style.color = "white";
         }
         changeTempCharXYColor("white");
@@ -232,12 +232,12 @@ function refreshBackgroundAndText(weatherKind) {
 }
 
 
-function changeTempCharXYColor(colorName) {
+function changeTempCharXYColor(colorName){
     /*if (colorName == "white"){
         console.log(chartOptions);
         chartOptions["yAxis"]["labels"]["style"]["colors"] = 'white';
         chart.updateOptions(chartOptions);
-        
+
     }else if (colorName == "black"){
         chart.foreColor = '#000';
     }else{
@@ -245,43 +245,43 @@ function changeTempCharXYColor(colorName) {
     }*/
 }
 
-function fillInformations(data) {
+function fillInformations (data){
     let tempWeather = refreshWeather(data["current"]["weather"]["0"]["id"]);
     document.getElementById("todayWeatherTemp").innerHTML = Math.round(data["current"]["temp"]) + "&degC";
     document.getElementById("todayWeatherFeelsLikeTemp").innerHTML = Math.round(data["current"]["feels_like"]) + "&deg";
     document.getElementById("todayWeatherCloudiness").innerHTML = data["current"]["clouds"] + "&percnt;";
     document.getElementById("todayWeatherWindSpeed").innerHTML = data["current"]["wind_speed"] + " km/h";
-    document.getElementById("todayWeatherVision").innerHTML = (data["current"]["visibility"] / 1000) + "km";
+    document.getElementById("todayWeatherVision").innerHTML = (data["current"]["visibility"]/1000) + "km";
     document.getElementById("todayWeatherHumidity").innerHTML = data["current"]["humidity"] + "&percnt;";
     document.getElementById("todayWeatherDescription").innerHTML = data["current"]["weather"]["0"]["description"];
-    document.getElementById("todayWeatherIcon").innerHTML = "<img src='static/svg/weatherIcons/" + tempWeather[0] + "') width=\"175px\">";
+    document.getElementById("todayWeatherIcon").innerHTML = "<img src=\"statics/svg/weatherIcons/"+tempWeather[0]+"\" width=\"175px\">";
     document.getElementById("todayWeatherDew").innerHTML = Math.round(data["current"]["dew_point"]).toString() + "&degC";
     document.getElementById("todayWeatherUVIndex").innerHTML = Math.round(data["current"]["uvi"]);
     refreshBackgroundAndText(tempWeather[1]);
-    for (let i = 0; i < 8; i++) {
+    for(let i = 0; i < 8; i++){
         fillInformationForOneDay(i, data["daily"][i]);
     }
 }
 
-function fillInformationForOneDay(daynumber, dayWeather) {
+function fillInformationForOneDay(daynumber, dayWeather){
     let number = date.getDay() + daynumber;
     let newDayNumber = number % 7;
-    if (newDayNumber == 0) {
+    if (newDayNumber == 0){
         newDayNumber = 7;
     }
-    if (daynumber == 0) {
-        document.getElementById("day" + daynumber + "-headline").innerHTML = "Heute";
-    } else if (daynumber == 1) {
-        document.getElementById("day" + daynumber + "-headline").innerHTML = "Morgen";
+    if (daynumber == 0){
+        document.getElementById("day"+daynumber+"-headline").innerHTML = "Heute";
+    } else if (daynumber == 1){
+        document.getElementById("day"+daynumber+"-headline").innerHTML = "Morgen";
     } else {
-        document.getElementById("day" + daynumber + "-headline").innerHTML = getWeekdayName(newDayNumber);
+        document.getElementById("day"+daynumber+"-headline").innerHTML = getWeekdayName(newDayNumber);
     }
-    document.getElementById("day" + daynumber + "-weather-icon").innerHTML = "<img/weatherBackground src=\"static/svg/weatherIcons/" + refreshWeather(dayWeather["weather"]["0"]["id"])[0] + "\" width=\"75%\">";
-    document.getElementById("day" + daynumber + "-max-temp").innerHTML = Math.round(dayWeather["temp"]["max"]) + "&deg;";
-    document.getElementById("day" + daynumber + "-min-temp").innerHTML = Math.round(dayWeather["temp"]["min"]) + "&deg;";
+    document.getElementById("day"+daynumber+"-weather-icon").innerHTML = "<img src=\"statics/svg/weatherIcons/"+refreshWeather(dayWeather["weather"]["0"]["id"])[0]+"\" width=\"75%\">";
+    document.getElementById("day"+daynumber+"-max-temp").innerHTML = Math.round(dayWeather["temp"]["max"]) +"&deg;";
+    document.getElementById("day"+daynumber+"-min-temp").innerHTML =Math.round( dayWeather["temp"]["min"]) +"&deg;";
 }
 
-function createNextHoursTempChart(data) {
+function createNextHoursTempChart(data){
     date = new Date();
     let xValues = [];
     let descriptions = [];
@@ -292,16 +292,16 @@ function createNextHoursTempChart(data) {
     let humidity = [];
 
 
-    for (let i = 0; i <= forcastCounter; i++) {
+    for (let i = 0; i <= forcastCounter; i++){
         tempYValues.push([date.addHours(i), Math.round(data["hourly"][i]["temp"])]);
         feelsLikeYValues.push([date.addHours(i), Math.round(data["hourly"][i]["feels_like"])]);
         humidity.push([date.addHours(i), Math.round(data["hourly"][i]["humidity"])]);
     }
-    for (let i = 0; i < 60; i++) {
+    for(let i = 0; i < 60; i++){
         precipitation.push([date.addMinutes(i), data["minutely"][i]["precipitation"]]);
     }
 
-    for (let i = 1; i < forcastCounter; i++) {
+    for (let i = 1; i < forcastCounter; i++){
         xValues.push(date.addHours(i).getTime());
     }
 
@@ -343,10 +343,10 @@ function createNextHoursTempChart(data) {
             format: 'HH:mm',
             theme: "dark",
             x: {
-                formatter: function (value, {series, seriesIndex, dataPointIndex, w}) {
+                formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
                     let tempTime = new Date(value);
                     let min = tempTime.getMinutes().toString();
-                    if (min.length < 2) {
+                    if (min.length < 2){
                         min = "0" + min;
                     }
                     return tempTime.getHours() + ":" + min;
@@ -375,7 +375,7 @@ function createNextHoursTempChart(data) {
             min: 0,
             labels: {
                 formatter: function (value) {
-                    return value + " °C";
+                return value + " °C";
                 },
                 style: {
                     colors: "white",
@@ -388,12 +388,12 @@ function createNextHoursTempChart(data) {
             categories: xValues,
             labels: {
                 style: {
-                    colors: "white",
-                    fontWeight: "bold"
+                  colors: "white",
+                  fontWeight: "bold"
                 }
             }
         }
-    };
+      };
 
     chart = new ApexCharts(document.getElementById("myChart"), chartOptions);
     chart.render();
@@ -405,20 +405,20 @@ function createNextHoursTempChart(data) {
     chartOptions = chart.options;
 }
 
-Date.prototype.addHours = function (h) {
+Date.prototype.addHours = function(h){
     var copiedDate = new Date(this.getTime());
-    copiedDate.setHours(copiedDate.getHours() + h);
+    copiedDate.setHours(copiedDate.getHours()+h);
     //copiedDate.setMinutes(0);
     return copiedDate;
 }
 
-Date.prototype.addMinutes = function (m) {
+Date.prototype.addMinutes = function(m){
     var copiedDate = new Date(this.getTime());
-    copiedDate.setMinutes(copiedDate.getMinutes() + m);
+    copiedDate.setMinutes(copiedDate.getMinutes()+m);
     return copiedDate;
 }
 
-function showChartContenTemp() {
+function showChartContenTemp(){
     document.getElementById("buttonTempChart").classList.add("active");
     document.getElementById("buttonPercChart").classList.remove("active");
     document.getElementById("buttonHumiChart").classList.remove("active");
@@ -428,7 +428,7 @@ function showChartContenTemp() {
     let tempOptions = chartOptions;
     let xValues = [];
 
-    for (let i = 1; i < forcastCounter; i++) {
+    for (let i = 1; i < forcastCounter; i++){
         xValues.push(date.addHours(i).getTime());
     }
 
@@ -437,7 +437,7 @@ function showChartContenTemp() {
         min: 0,
         labels: {
             formatter: function (value) {
-                return value + " °C";
+            return value + " °C";
             },
             style: {
                 colors: "white"
@@ -450,8 +450,8 @@ function showChartContenTemp() {
         tickPlacement: 'on',
         labels: {
             style: {
-                colors: "white",
-                fontWeight: "bold"
+              colors: "white",
+              fontWeight: "bold"
             }
         }
     };
@@ -466,7 +466,7 @@ function showChartContenTemp() {
     document.getElementById("chartForecastHeadline").innerHTML = "48-Stunden-Vorhersage";
 }
 
-function showChartContenPerc() {
+function showChartContenPerc(){
     document.getElementById("buttonTempChart").classList.remove("active");
     document.getElementById("buttonPercChart").classList.add("active");
     document.getElementById("buttonHumiChart").classList.remove("active");
@@ -477,7 +477,7 @@ function showChartContenPerc() {
     let tempOptions = chartOptions;
     date = new Date();
 
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 60; i++){
         xValues.push(date.addMinutes(i));
     }
 
@@ -486,7 +486,7 @@ function showChartContenPerc() {
         min: 0,
         labels: {
             formatter: function (value) {
-                return Math.round(value * 1000) / 1000 + " mm";
+            return Math.round(value *1000)/1000 + " mm";
             },
             style: {
                 colors: "white",
@@ -500,8 +500,8 @@ function showChartContenPerc() {
         tickPlacement: 'on',
         labels: {
             style: {
-                colors: "white",
-                fontWeight: "bold"
+              colors: "white",
+              fontWeight: "bold"
             }
         }
     };
@@ -516,7 +516,7 @@ function showChartContenPerc() {
 
 }
 
-function showChartContenHumi() {
+function showChartContenHumi(){
     document.getElementById("buttonTempChart").classList.remove("active");
     document.getElementById("buttonPercChart").classList.remove("active");
     document.getElementById("buttonHumiChart").classList.add("active");
@@ -526,7 +526,7 @@ function showChartContenHumi() {
     let tempOptions = chartOptions;
     let xValues = [];
 
-    for (let i = 1; i < forcastCounter; i++) {
+    for (let i = 1; i < forcastCounter; i++){
         xValues.push(date.addHours(i).getTime());
     }
 
@@ -535,7 +535,7 @@ function showChartContenHumi() {
         min: 0,
         labels: {
             formatter: function (value) {
-                return value + "%";
+            return value + "%";
             },
             style: {
                 colors: "white",
@@ -558,7 +558,7 @@ function showChartContenHumi() {
     document.getElementById("chartForecastHeadline").innerHTML = "48-Stunden-Vorhersage";
 }
 
-function updateNextTwoHourPrediction(data, offset) {
+function updateNextTwoHourPrediction(data, offset){
     let xValues = [];
 
     let tempYValues = [];
@@ -567,24 +567,24 @@ function updateNextTwoHourPrediction(data, offset) {
     let humidity = [];
 
 
-    for (let i = 1; i <= forcastCounter; i++) {
+    for (let i = 1; i <= forcastCounter; i++){
         let tempTime = date.addHours(i).getTime();
         tempYValues.push([tempTime, Math.round(data["hourly"][i]["temp"])]);
         feelsLikeYValues.push([tempTime, Math.round(data["hourly"][i]["feels_like"])]);
         humidity.push([tempTime, Math.round(data["hourly"][i]["humidity"])]);
     }
 
-    for (let i = 0; i < 60; i++) {
+    for(let i = 0; i < 60; i++){
         precipitation.push([date.addMinutes(i).getTime(), data["minutely"][i]["precipitation"]]);
     }
 
-    if (activeChart == "percipitation") {
+    if (activeChart == "percipitation"){
         console.log("perc");
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 60; i++){
             xValues.push(date.addMinutes(i).getTime());
         }
     } else {
-        for (let i = 1; i < forcastCounter; i++) {
+        for (let i = 1; i < forcastCounter; i++){
             xValues.push(date.addHours(i).getTime());
         }
     }
@@ -608,9 +608,9 @@ function updateNextTwoHourPrediction(data, offset) {
             categories: xValues,
             tickPlacement: 'on'
         }
-    }]);
+        }]);
 
-    if (activeChart == "percipitation") {
+    if (activeChart == "percipitation"){
         chart.zoomX(xValues[0], xValues[59]);
     } else {
         chart.zoomX(xValues[0], xValues[12]);
@@ -619,33 +619,33 @@ function updateNextTwoHourPrediction(data, offset) {
 }
 
 
-function createDailyWeatherWidgets(anzDays, data) {
+function createDailyWeatherWidgets(anzDays, data){
     let output = "";
-    for (let i = 0; i < anzDays; i++) {
-        if (i == activeDayCard) {
-            output += "<button class=\"day-card btn btn-outline-dark col\" data-toggle=\"modal\" data-target=\"#day" + i + "-modal\">";
-        } else {
-            output += "<button class=\"day-card btn btn-outline-dark col\" data-toggle=\"modal\" data-target=\"#day" + i + "-modal\">";
+    for (let i = 0; i < anzDays; i++){
+        if (i == activeDayCard){
+            output += "<button class=\"day-card btn btn-outline-dark col\" data-toggle=\"modal\" data-target=\"#day"+i+"-modal\">";
+        }else {
+            output += "<button class=\"day-card btn btn-outline-dark col\" data-toggle=\"modal\" data-target=\"#day"+i+"-modal\">";
         }
         output += " <div class=\"d-flex flex-column\">";
-        output += "<div class=\"day-card-headline\" id=\"day" + i + "-headline\">";
-        if (i === 0) {
+        output += "<div class=\"day-card-headline\" id=\"day"+i+"-headline\">";
+        if (i == 0){
             output += "Heute";
-        } else if (i === 1) {
+        }else if (i == 1){
             output += "Morgen";
-        } else {
-            let newDayNumber = (date.getDay() + i) % 7;
-            if (newDayNumber == 0) {
+        }else {
+            let newDayNumber = (date.getDay()+i) % 7;
+            if (newDayNumber == 0){
                 newDayNumber = 7;
             }
             output += getWeekdayName(newDayNumber);
         }
         output += "</div>";
-        output += "<div class=\"day-card-weather-icon\" id=\"day" + i + "-weather-icon\">";
+        output += "<div class=\"day-card-weather-icon\" id=\"day"+i+"-weather-icon\">";
         output += "</div>";
         output += "<div class=\"day-card-temp-section\">";
-        output += "<span class=\"material-icons-round\">arrow_drop_up</span><span id=\"day" + i + "-max-temp\"></span><br />";
-        output += "<span class=\"material-icons-round\">arrow_drop_down</span><span id=\"day" + i + "-min-temp\"></span>";
+        output += "<span class=\"material-icons-round\">arrow_drop_up</span><span id=\"day"+i+"-max-temp\"></span><br />";
+        output += "<span class=\"material-icons-round\">arrow_drop_down</span><span id=\"day"+i+"-min-temp\"></span>";
         output += "</div>";
         output += "</div>";
         output += "</button>";
@@ -654,85 +654,85 @@ function createDailyWeatherWidgets(anzDays, data) {
 
     document.getElementById("nextDaysRow").innerHTML = output;
 
-    for (let i = 0; i < anzDays; i++) {
+    for (let i = 0; i < anzDays; i++){
         fillInformationForOneDay(i, data["daily"][i]);
     }
 }
 
-function getWeekdayName(tempDateNumber) {
-    if (tempDateNumber === 1) {
+function getWeekdayName(tempDateNumber){
+    if (tempDateNumber == 1){
         return "Montag";
-    } else if (tempDateNumber === 2) {
+    }else if (tempDateNumber == 2){
         return "Dienstag";
-    } else if (tempDateNumber === 3) {
+    }else if (tempDateNumber == 3){
         return "Mittwoch";
-    } else if (tempDateNumber === 4) {
+    }else if (tempDateNumber == 4){
         return "Donnerstag";
-    } else if (tempDateNumber === 5) {
+    }else if (tempDateNumber == 5){
         return "Freitag";
-    } else if (tempDateNumber === 6) {
+    }else if (tempDateNumber == 6){
         return "Samstag";
-    } else if (tempDateNumber === 7) {
+    }else if (tempDateNumber == 7){
         return "Sonntag";
-    } else {
+    }else {
         throw "invalid parameter!";
     }
 }
 
-function refresh() {
+function refresh(){
     date = new Date();
     console.log("refreshing...");
-    $.getJSON("https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&lang=de&units=metric", function (data) {
+    $.getJSON("https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+lon+"&appid="+apiKey+"&lang=de&units=metric", function(data){
         createDayModals(8, data);
-        if (chart == null) {
+        if (chart == null){
             createNextHoursTempChart(data);
-        } else {
+        }else {
             updateNextTwoHourPrediction(data, 0);
         }
         fillInformations(data);
     });
 }
 
-function createDayModals(anzDays, data) {
+function createDayModals(anzDays, data){
     let modalCode = "";
-    for (let i = 0; i < anzDays; i++) {
+    for(let i = 0; i < anzDays; i++){
         let weatherInf = refreshWeather(data["daily"][i]["weather"]["0"]["id"]);
-        modalCode += "<div class=\"modal fade\" id=\"day" + i + "-modal\">";
+        modalCode += "<div class=\"modal fade\" id=\"day"+i+"-modal\">";
         modalCode += "<div class=\"modal-dialog modal-dialog-centered modal-lg\" style=\"\"><div class=\"modal-content\"><div class=\"modal-header\">";
-        modalCode += "<div class=\"modal-title\" id=\"day" + i + "-modalTitle\">";
-        let newDayNumber = (date.getDay() + i) % 7;
-        if (newDayNumber == 0) {
+        modalCode += "<div class=\"modal-title\" id=\"day"+i+"-modalTitle\">";
+        let newDayNumber = (date.getDay()+i) % 7;
+        if (newDayNumber == 0){
             newDayNumber = 7;
-        } else {
+        } else{
             modalCode += getWeekdayName(newDayNumber);
         }
         modalCode += "<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button></div></div>";
-        modalCode += "<div class=\"modal-body\" id=\"day" + i + "-modalBody\" style=\"color: rgb(0, 0, 0)\">";
+        modalCode += "<div class=\"modal-body\" id=\"day"+i+"-modalBody\" style=\"color: rgb(0, 0, 0)\">";
         modalCode += "<div class=\"row\">";
-        modalCode += "<div class=\"col\" id=\"day" + i + "-modal-weather-icon\">";
-        modalCode += "<img/weatherBackground src=\"static/svg/weatherIcons/" + weatherInf[0] + "\" width=\"175px\">";
+        modalCode += "<div class=\"col\" id=\"day"+i+"-modal-weather-icon\">";
+        modalCode += "<img src=\"statics/svg/weatherIcons/"+weatherInf[0]+"\" width=\"175px\">";
         modalCode += "</div>";
-        modalCode += "<div class=\"col\" id=\"day" + i + "-modal-descr\" style=\"font-size: 3em\">";
+        modalCode += "<div class=\"col\" id=\"day"+i+"-modal-descr\" style=\"font-size: 3em\">";
         modalCode += data["daily"][i]["weather"]["0"]["description"];
         modalCode += "</div>";
-        modalCode += "<div class=\"col\" id=\"day" + i + "-modal-temp\">";
-        modalCode += "<span class=\"material-icons-round\">arrow_drop_up</span><span id=\"day" + i + "-max-temp\">" + Math.round(data["daily"][i]["temp"]["max"]) + " &degC</span><br />";
-        modalCode += "<span class=\"material-icons-round\">arrow_drop_down</span><span id=\"day" + i + "-min-temp\">" + Math.round(data["daily"][i]["temp"]["min"]) + " &degC</span>";
+        modalCode += "<div class=\"col\" id=\"day"+i+"-modal-temp\">";
+        modalCode += "<span class=\"material-icons-round\">arrow_drop_up</span><span id=\"day"+i+"-max-temp\">"+Math.round(data["daily"][i]["temp"]["max"])+" &degC</span><br />";
+        modalCode += "<span class=\"material-icons-round\">arrow_drop_down</span><span id=\"day"+i+"-min-temp\">"+Math.round(data["daily"][i]["temp"]["min"])+" &degC</span>";
         modalCode += "</div>";
         modalCode += "</div>";
         modalCode += "<div class=\"row justify-content-around\" style=\"margin-bottom: 20px\"><div class=\"col details\"><span class=\"material-icons-outlined\">air</span><span class=\"flex-column detail-headline\">";
-        modalCode += "<div>Wind</div><div class=\"detail-value\" id=\"day" + i + "-WeatherWindSpeed\">" + data["daily"][i]["wind_speed"] + " km/h</div>";
+        modalCode += "<div>Wind</div><div class=\"detail-value\" id=\"day"+i+"-WeatherWindSpeed\">"+data["daily"][i]["wind_speed"]+" km/h</div>";
         modalCode += "</span></div>";
         modalCode += "<div class=\"col details\"><span class=\"material-icons-outlined\">cloud</span><span class=\"detail-headline\">";
-        modalCode += "<div>Wolken</div><div class=\"detail-value\" id=\"day" + i + "-WeatherVision\">" + data["daily"][i]["clouds"] + "%</div></span></div>";
+        modalCode += "<div>Wolken</div><div class=\"detail-value\" id=\"day"+i+"-WeatherVision\">"+data["daily"][i]["clouds"]+"%</div></span></div>";
 
         modalCode += "<div class=\"col details\"><span class=\"material-icons-outlined\">water_drop</span><span class=\"detail-headline\">";
-        modalCode += "<div>Luftfeuchtigkeit</div><div class=\"detail-value\" id=\"day" + i + "-WeatherVision\">" + data["daily"][i]["humidity"] + "%</div></span></div>";
+        modalCode += "<div>Luftfeuchtigkeit</div><div class=\"detail-value\" id=\"day"+i+"-WeatherVision\">"+data["daily"][i]["humidity"]+"%</div></span></div>";
 
         modalCode += "<div class=\"col details\"><span class=\"material-icons-outlined\">ac_unit</span><span class=\"detail-headline\">";
-        modalCode += "<div>Taupunkt</div><div class=\"detail-value\" id=\"day" + i + "-WeatherVision\">" + Math.round(data["daily"][i]["dew_point"]) + " &degC</div></span></div>";
+        modalCode += "<div>Taupunkt</div><div class=\"detail-value\" id=\"day"+i+"-WeatherVision\">"+Math.round(data["daily"][i]["dew_point"])+" &degC</div></span></div>";
         modalCode += "<div class=\"col details\"><span class=\"material-icons-outlined\">wb_sunny</span><span class=\"detail-headline\">";
-        modalCode += "<div>UV-Index</div><div class=\"detail-value\" id=\"day" + i + "-WeatherVision\">" + data["daily"][i]["uvi"] + "</div></span></div>";
+        modalCode += "<div>UV-Index</div><div class=\"detail-value\" id=\"day"+i+"-WeatherVision\">"+data["daily"][i]["uvi"]+"</div></span></div>";
         modalCode += "</div>";
         modalCode += "<div class=\"modal-footer\">";
         modalCode += "<button type=\"button\" class=\"btn btn-danger\" data-dismiss=\"modal\">Schließen</button>";
@@ -741,13 +741,13 @@ function createDayModals(anzDays, data) {
     document.getElementById("dailyModals").innerHTML = modalCode;
 }
 
-$.getJSON("https://ipapi.co/json/", function (ipAPI) {
+$.getJSON("https://ipapi.co/json/", function(ipAPI) {
     lat = ipAPI.latitude;
     lon = ipAPI.longitude;
     document.getElementById("state").innerHTML = ipAPI.city.replace(/(\s)/gi, "+"); // Replace spaces
 
     date = new Date();
-    $.getJSON("https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&lang=de&units=metric", function (data) {
+    $.getJSON("https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+lon+"&appid="+apiKey+"&lang=de&units=metric", function(data){
         createDailyWeatherWidgets(8, data);
     });
     refresh();

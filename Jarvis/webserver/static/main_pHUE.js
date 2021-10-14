@@ -31,7 +31,7 @@ function createPHUEBoxes(groups, allLights) {
 }
 
 function changeBrightness(lampName, value){
-    $.get("/api/phue/change/brightness/"+lampName+","+value())
+    $.get("/api/phue/change/brightness/"+lampName+","+value.value())
 }
 
 function changePowerstate(lightname, element) {
