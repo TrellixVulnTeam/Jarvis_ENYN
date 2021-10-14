@@ -126,7 +126,7 @@ class PhillipsWrapper:
             for i in range(len(lights)):
                 lights[i] = lights[i].id
         for light in lights:
-            brightness = self.bridge.get_light(lights, 'bri') + value
+            brightness = self.bridge.get_light(light, 'bri') + value
             if brightness > 254:
                 brightness = 254
             if brightness < 0:
