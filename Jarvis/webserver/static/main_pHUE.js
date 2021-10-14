@@ -20,7 +20,7 @@ function createPHUEBoxes(groups, allLights) {
             output += "<span style=\"margin-left: 50px\"></span>";
             output += "<span class=\"lampName\">" + tempLight["name"] + "</span>";
             output += "<div style=\"width: 35%\"><span class=\"material-icons-outlined\">brightness_2</span>";
-            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" onchange=\"changePowerstate('" + tempLight["brightness"] + "', this)\"></div>";
+            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" onchange=\"changeBrightness('" + tempLight["brightness"] + "', this)\"></div>";
             output += "<span class=\"material-icons-outlined\">light_mode</span>";
             output += "</li>";
         }
@@ -31,7 +31,9 @@ function createPHUEBoxes(groups, allLights) {
 }
 
 function changeBrightness(lampName, element){
-    $.get("/api/phue/change/brightness/"+lampName+","+element.value())
+    console.log(element.value());
+    console.log(element.val());
+    $.get("/api/phue/change/brightness/"+lampName+","+element.val());
 }
 
 function changePowerstate(lightname, element) {
