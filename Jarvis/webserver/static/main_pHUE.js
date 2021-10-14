@@ -21,7 +21,7 @@ function createPHUEBoxes(groups, allLights) {
             output += "<span style=\"margin-left: 50px\"></span>";
             output += "<span class=\"lampName\">" + tempLight["name"] + "</span>";
             output += "<span class=\"material-icons-outlined\" style=\"width: 35%\">brightness_2</span>";
-            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" onchange=\"changeBrightness('" + tempLight["name"] + "', this)\">";
+            output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" style='width: 254px' onchange=\"changeBrightness('" + tempLight["name"] + "', this)\">";
             output += "<span class=\"material-icons-outlined\">light_mode</span></div>";
             output += "</li>";
         }
