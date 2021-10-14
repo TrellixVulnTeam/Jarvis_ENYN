@@ -12,13 +12,12 @@ function createPHUEBoxes(groups, allLights) {
         for (spezLight in spezGroup["lights"]) {
             tempLight = allLights[spezGroup["lights"][spezLight]];
             output += "<li class=\"list-group-item d-flex justify-content-between align-items-center\">";
+            output += "<div class='d-flex flex-nowrap'>"
             if (tempLight["on"] === true) {
                 output += "<button class=\"btn btn-outline-success\" onclick=\"changePowerstate('" + tempLight["name"] + "', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             } else {
                 output += "<button class=\"btn btn-outline-danger\" onclick=\"changePowerstate('" + tempLight["name"] + "', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             }
-            output += "<div class='d-flex flex-nowrap'>"
-            output += "<span style=\"margin-left: 50px\"></span>";
             output += "<span class=\"lampName\">" + tempLight["name"] + "</span>";
             output += "<span class=\"material-icons-outlined\" style=\"width: 35%\">brightness_2</span>";
             output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" style='width: 254px' onchange=\"changeBrightness('" + tempLight["name"] + "', this)\">";
