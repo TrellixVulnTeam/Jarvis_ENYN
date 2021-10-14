@@ -20,7 +20,7 @@ def run(core):
 
     for name in wrapper.light_names.keys():
         lights.append(name)
-    wrapper.light_on(lights)
+    wrapper.light_on(lights, change_brightness=False)
     wrapper.set_light_brightness(lights, 17)
 
     for i in range(len(14)):

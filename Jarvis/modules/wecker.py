@@ -127,7 +127,7 @@ class Alarm:
         list = {"time": {"hour": hour, "minute": minute,
                          "total_seconds": total_seconds, "time_stamp": get_time_stamp(hour, minute)},
                 "sound": alarm_sound, "user": user,
-                "text": text, "active": True}
+                "text": text, "active": True, "prepared": False}
         if not type(days) == type([]):
             days = [days]
         for _day in days:

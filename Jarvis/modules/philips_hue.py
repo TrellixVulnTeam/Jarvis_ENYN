@@ -45,6 +45,7 @@ class PhillipsWrapper:
             return
 
         elif 'an' in text:
+            # toDo: distinguish between different times
             self.light_on(lights)
             return
 
@@ -97,13 +98,13 @@ class PhillipsWrapper:
             light = self.lights[0]
         return self.bridge.get_light(light, 'on')
 
-    def light_on(self, lights):
-        print(lights)
+    def light_on(self, lights, change_brightness=True):
         if type(lights) != type([]) and type(lights) != type("") and type(lights) != (1):
             lights = self.bridge.get_light(lights)
             # toDO: possibility that lights is an array of Objects
         self.bridge.set_light(lights, 'on', True)
-        self.bridge.set_light(lights, 'bri', 254)
+        if change_brightness:
+            self.bridge.set_light(lights, 'bri', 254)
 
     def light_off(self, lights):
         self.bridge.set_light(lights, 'on', False)
