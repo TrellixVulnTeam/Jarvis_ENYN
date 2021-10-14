@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-#
 import base64
 import json
 import logging
@@ -41,11 +40,10 @@ def Webserver(core):
     # ------------------------------------------------------------------------------
 
     nav = [
-        {"href": "/setup", "text": "\"Einrichtung\""},
-        {"href": "/alarm", "text": "Wecker"},
-        {"href": "/weatherOverview", "text": "Wetter"},
+        {"href": "/setup", "text": "\"Erste Schritte\""},
+        {"href": "/setupSystem", "text": "Server einrichten"},
+        {"href": "/setupUser", "text": "Benutzer erstellen"},
         {"href": "/setupModules", "text": "Module bearbeiten (WIP)"},
-        {"href": "/phue", "text": "Philips-HUE"}
     ]
 
     @webapp.route("/")
@@ -399,9 +397,9 @@ def Webserver(core):
             if action == 'color':
                 phueWrapper.light_change_color(name, value)
             elif action == 'powerState':
-                phueWrapper.set_light_powerstate(name, value)
+                phueWrapper.light_set_powerstate(name, value)
             elif action == 'brightness':
-                phueWrapper.set_light_brightness(name, value)
+                phueWrapper.light_set_brightness(name, value)
             elif action == 'createGroup':
                 phueWrapper.create_group(value, getData())
             elif action == 'renameGroup':
@@ -413,7 +411,8 @@ def Webserver(core):
         elif groupAction == 'list':
             phueWrapper = PhillipsWrapper(core)
             if action == "lights":
-                if request.args.get('id') is True:
+                print(request.args.get('id'))
+                if request.args.get('id'):
                     lights = phueWrapper.get_lights_in_json(order_by_id=True)
                 else:
                     lights = phueWrapper.get_lights_in_json()
