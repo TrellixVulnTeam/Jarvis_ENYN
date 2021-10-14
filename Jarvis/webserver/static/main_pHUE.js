@@ -31,7 +31,7 @@ function createPHUEBoxes(groups, allLights) {
 }
 
 function changeBrightness(lampName, element){
-    console.log(element.value());
+    console.log(element.value);
     console.log(element.val());
     $.get("/api/phue/change/brightness/"+lampName+"/"+element.val());
 }
