@@ -16,7 +16,7 @@ def handle(text, core, skills):
 
 def run(core):
     wrapper = PhillipsWrapper(core)
-    wrapper.set_light_brightness(wrapper.lights, 17)
+    wrapper.set_light_brightness(wrapper.light_names, 17)
     wrapper.light_on(wrapper.lights)
 
     for i in range(len(14)):
