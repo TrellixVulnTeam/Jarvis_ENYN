@@ -24,5 +24,5 @@ def run(core):
     wrapper.set_light_brightness(lights, 17)
 
     for i in range(14):
-        wrapper.inc_dec_brightness(lights, 17)
+        wrapper.inc_dec_brightness(wrapper.lights, 17)
         time.sleep(120)
