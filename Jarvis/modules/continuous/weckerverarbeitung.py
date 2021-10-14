@@ -18,7 +18,7 @@ def run(core, skills):
                             alarms[repeat][day].remove(alarm)
                             core.local_storage['alarm'] = alarms
                         elif get_total_seconds(alarm["time"]) <= 1800:
-                            core.start_module(name="weckervorbereitung", text="")
+                            core.start_module(name="wecker_sonnenaufgang", text="")
 
 
 def is_day_correct(day):
