@@ -18,7 +18,7 @@ function createPHUEBoxes(groups, allLights) {
             } else {
                 output += "<button class=\"btn btn-outline-danger\" onclick=\"changePowerstate('" + tempLight["name"] + "', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             }
-            output += "<span class=\"lampName\">" + tempLight["name"] + "</span>";
+            output += "<span class=\"lampName\"'>" + tempLight["name"] + "</span>";
             output += "<div class='d-flex justify-content-around flex-nowrap'>";
             output += "<span class=\"material-icons-outlined\">brightness_2</span>";
             output += "<input type=\"range\" class=\"form-control-range\" min=\"0\" max=\"254\" value=\"" + tempLight["brightness"] + "\" onchange=\"changeBrightness('" + tempLight["name"] + "', this)\">";
