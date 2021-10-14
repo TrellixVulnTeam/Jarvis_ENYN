@@ -12,7 +12,7 @@ function createPHUEBoxes(groups, allLights) {
         for (spezLight in spezGroup["lights"]) {
             tempLight = allLights[spezGroup["lights"][spezLight]];
             output += "<li class=\"list-group-item d-flex justify-content-between align-items-center\">";
-            output += "<div class='d-flex flex-nowrap'>"
+            output += "<div class='d-flex flex-nowrap justify-content-between'>"
             if (tempLight["on"] === true) {
                 output += "<button class=\"btn btn-outline-success\" onclick=\"changePowerstate('" + tempLight["name"] + "', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
             } else {
