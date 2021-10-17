@@ -1,17 +1,24 @@
 function createPHUEBoxes(groups, allLights) {
     let output = "";
-    for (var gr in groups) {
+    for (let gr in groups) {
         let spezGroup = groups[gr];
         // toDo: disable all lights in group
         output += "<div class=\"card border-primary\">";
         output += "<div class=\"card-header form-inline bg-primary\">";
+        output += "<div class='d-flex justify-content-between'>";
         output += spezGroup["name"];
+        output += "<div class=\"custom-switch custom-switch-label-onoff pl-0\"><input class=\"custom-switch-input\" id=\"example_03\" type=\"checkbox\"><label class=\"custom-switch-btn\" for=\"example_03\"></label></div>"
+        output += "</div>";
         output += "</div>";
         output += "<div className=\"card-body\">";
         output += "<ul class=\"list-group\">";
+        let groupOn = true;
         let tempLight;
         for (spezLight in spezGroup["lights"]) {
             tempLight = allLights[spezGroup["lights"][spezLight]];
+            if (tempLight["on"] === false) {
+                groupOn = false;
+            }
             output += "<li class=\"list-group-item d-flex flex-nowrap justify-content-between\">";
             if (tempLight["on"] === true) {
                 output += "<button class=\"btn btn-outline-success\" onclick=\"changePowerstate('" + tempLight["name"] + "', this)\"><i class=\"bi bi-lightbulb-fill\"></i></button>";
