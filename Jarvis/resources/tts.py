@@ -94,9 +94,7 @@ class Text_to_Speech:
         el.click()
         # self.driver.find_element_by_xpath(f"//div[@aria-activedescendant='downshift-2-item-{index}']").click()
         """elements = self.driver.find_elements_by_class_name('bx--list-box__label')
-        print(elements)
         for element in elements:
-            print(element.text)
             if element.text == voice:
                 element.click()"""
 
@@ -126,7 +124,7 @@ class Text_to_Speech:
         opt.add_argument("no-default-browser-check")
         opt.add_argument("no-first-run")
         relPath = str(Path(__file__).parent) + "/webdriver/"
-        opt.add_extension(relPath + "vpn.crx")
+        # opt.add_extension(relPath + "vpn.crx")
         chrome_prefs = {"profile.managed_default_content_settings.images": 2}
         opt.add_experimental_option("prefs", chrome_prefs)
         return opt
