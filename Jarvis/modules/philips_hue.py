@@ -194,7 +194,13 @@ class PhillipsWrapper:
         return self.bridge.get_group()
 
     def get_group(self, group_name):
-        return self.bridge.get_group(group_name)
+        is_on = True
+        group = self.bridge.get_group(group_name)
+        for light in group["lights"]:
+            if not light["on"]:
+                is_on = False
+        group["on"] = is_on
+
 
 
 class Logic:
