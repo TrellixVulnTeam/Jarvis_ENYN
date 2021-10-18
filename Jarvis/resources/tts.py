@@ -16,6 +16,7 @@ class Text_to_Speech:
         self.driver = None
         self.text_area = None
         self.play_button = None
+        self.display = None
         self.to_say = []
         self.stopped = False
         self.is_reading = False
@@ -124,7 +125,7 @@ class Text_to_Speech:
         opt.add_argument("no-default-browser-check")
         opt.add_argument("no-first-run")
         relPath = str(Path(__file__).parent) + "/webdriver/"
-        # opt.add_extension(relPath + "vpn.crx")
+        opt.add_extension(relPath + "vpn.crx")
         chrome_prefs = {"profile.managed_default_content_settings.images": 2}
         opt.add_experimental_option("prefs", chrome_prefs)
         return opt
