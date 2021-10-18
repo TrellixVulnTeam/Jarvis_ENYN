@@ -32,7 +32,7 @@ def run_speedtest(core):
     """
     try:
         core.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
-        st = pyspeedtest.SpeedTest()
+        st = pyspeedtest.SpeedTest(host='www.speedtest.net')
 
         downlink_bps = st.download()
         uplink_bps = st.upload()
