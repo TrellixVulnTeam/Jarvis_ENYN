@@ -36,6 +36,7 @@ def run_speedtest(core):
         st = speedtest.Speedtest()
         server_names = ["google.com"]
         st.get_servers(server_names)
+        st.get_best_server()
 
         downlink_bps = st.download()
         uplink_bps = st.upload()
@@ -50,7 +51,8 @@ def run_speedtest(core):
 
     except Exception:
         traceback.print_exc()
-        core.say("Der Speedtest konnte nicht gestartet werden.")
+        core.say("Es gab ein Problem beim Starten des Speedtests. Bitte versuche es zu einem späteren Zeitpunkt "
+                 "erneut oder melde den Fehler.")
 
 
 def internet_availability(core):
