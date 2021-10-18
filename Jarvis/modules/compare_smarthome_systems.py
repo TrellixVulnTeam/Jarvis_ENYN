@@ -163,7 +163,7 @@ def handle(text, core, skill):
                     output_drei = 'Bisher kann ich das Wetter für einen Ort deiner Wahl herausfinden, dich an etwas erinnern wann immer du willst, ich kann rechnen und mich mit dir über deine Lieblingsfilme und Bücher unterhalten.'
                     core.say(output_drei)
             elif 'helfen' in output_zwei:
-                core.start_module(neuertext)
+                core.start_module(neuertext, user=core.user)
 
 
 def isValid(text):
