@@ -31,6 +31,7 @@ def handle(text, core, skills):
             ort = None
     for pattern, groupId in _PATTERNS:
         if ort is None:
+
             match = pattern.match(text)
             if match is not None:
                 ort = match.group(groupId)

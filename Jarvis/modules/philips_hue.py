@@ -114,9 +114,12 @@ class PhillipsWrapper:
         if color != None:
             self.light_on(lights)
             self.bridge.set_light(lights, 'xy', [color[0], color[1]])
-            self.bridge.set_light(lights, 'bri', 254)
+            # self.bridge.set_light(lights, 'bri', 254)
         else:
             self.core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
+
+    def set_light_color_temp(self, value):
+        pass # toDo
 
     def set_light_brightness(self, lights, value):
         self.bridge.set_light(lights, 'bri', int(value))
@@ -200,7 +203,8 @@ class PhillipsWrapper:
             if not light["on"]:
                 is_on = False
         group["on"] = is_on
-
+        print(group)
+        return group
 
 
 class Logic:

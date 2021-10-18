@@ -1,7 +1,6 @@
 import traceback
 
-import requests
-import speedtest
+import pyspeedtest
 
 
 def isValid(text):
@@ -33,14 +32,11 @@ def run_speedtest(core):
     """
     try:
         core.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
-        st = speedtest.Speedtest()
-        server_names = "google.com"
-        st.get_servers(server_names)
-        st.get_best_server()
+        st = pyspeedtest.SpeedTest()
 
         downlink_bps = st.download()
         uplink_bps = st.upload()
-        ping = st.results.ping / 1000
+        ping = st.ping() / 1000
         up_mbps = uplink_bps / 1000000
         down_mbps = downlink_bps / 1000000
 
