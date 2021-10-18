@@ -34,7 +34,7 @@ def run_speedtest(core):
     try:
         core.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
         st = speedtest.Speedtest()
-        server_names = ["google.com"]
+        server_names = "google.com"
         st.get_servers(server_names)
         st.get_best_server()
 
