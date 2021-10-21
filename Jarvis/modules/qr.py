@@ -21,5 +21,9 @@ def handle(text, core, skills):
     if antwort == 'TIMEOUT_OR_INVALID':
         core.say('Ich konnte dich leider nicht verstehen')
     else:
+        if not core.messenger_call:
+            core.say("Alles klar, ich schicke dir den QR-Code über den Messenger. Solltest du diesen nicht eingerichtet haben, Schau bitte auf der Jarvis-Internetseite nach dem letzten QR-Code!")
+            core.say("Diese Internetseite ist leider noch in Arbeit.")
+            # toDo: Nur sagen, wenn Messenger nicht eingerichtet ist
         url = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={urllib.parse.quote(antwort)}"
-        core.say(url)
+        core.say(url, output='messenger')
