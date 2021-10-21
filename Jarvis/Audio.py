@@ -40,6 +40,7 @@ class AudioInput:
             self.speech_engine.adjust_for_ambient_noise(source)
         self.core = None
         self.Audio_Output = None
+        self.recording = False
 
     def start(self):
         # starts the hotword detection
@@ -63,16 +64,16 @@ class AudioInput:
             return text
 
     def recognize_input(self, listen=False, play_bling_before_listen=False):
+        self.recording = True
         logging.info('[Listening] for user-input')
         # recognize user input through the microphone
         try:
             with sr.Microphone(device_index=None) as source:
                 # record user input
                 self.Audio_Output.detected_hotword()
-                if not listen:
-                    # if there is no conservation, play a bling sound
-                    self.Audio_Output.play_bling_sound()
-                audio = self.speech_engine.listen(source, timeout=8)
+
+                # duration was the last change ---------------------------------------------------------
+                audio = self.speech_engine.listen(source, duration=0.2, )
                 # self.speech_engine.record(source)
                 try:
                     # translate audio to text
@@ -87,19 +88,28 @@ class AudioInput:
                     except:
                         text = "Audio could not be recorded"
             if not listen and not play_bling_before_listen:
+                self.recording = False
                 self.core.hotword_detected(text)
             else:
+                # if the function was called by listen(), the text must be returned
+                self.recording = False
                 return text
         except:
             traceback.print_exc()
             logging.warning("Text could not be translated...")
+            self.recording = False
             return "Das habe ich nicht verstanden."
+
+    def play_bling_sound(self, listen):
+        if not listen:
+            # if there is no conservation, play a bling sound
+            self.Audio_Output.play_bling_sound()
 
     def run(self):
         porcupine = None
         try:
             keywords = ["jarvis", "hey siri"]
-            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.45, 0.2])
+            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.5, 0.2])
             pa = pyaudio.PyAudio()
             audio_stream = pa.open(
                 rate=porcupine.sample_rate,
@@ -110,7 +120,7 @@ class AudioInput:
 
             logging.info('\nListening {%s}' % keywords)
 
-            while not self.stopped:
+            while not self.stopped and not self.recording:
                 pcm = audio_stream.read(porcupine.frame_length)
                 pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
                 keyword_index = porcupine.process(pcm)
@@ -118,6 +128,7 @@ class AudioInput:
                     if keyword_index > 0:
                         self.core.hotword_detected("wrong assistant!")
                     else:
+                        self.recording = True
                         logging.info(
                             f'[ACTION] Detected {keywords[keyword_index]} at {datetime.now().hour}:{datetime.now().minute}')
                         self.recognize_input()
