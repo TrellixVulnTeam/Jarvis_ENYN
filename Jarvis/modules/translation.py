@@ -1,5 +1,7 @@
 def isValid(text):
-    return False
+    text = text.lower()
+    if 'übersetz' in text:
+        return True
 
 
 def handle(text, core, skills):
