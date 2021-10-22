@@ -1,6 +1,7 @@
 import traceback
 
-import pyspeedtest
+import requests
+from speedtest import Speedtest
 
 
 def isValid(text):
@@ -32,7 +33,7 @@ def run_speedtest(core):
     """
     try:
         core.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
-        st = pyspeedtest.SpeedTest(host='www.speedtest.net')
+        st = speedtest.Speedtest()
 
         downlink_bps = st.download()
         uplink_bps = st.upload()
@@ -66,7 +67,19 @@ def internet_connectivity_check(url='https://www.google.com/', timeout=2):
     Checks for internet connection availability based on google page.
     """
     try:
-        _ = requests.get(url, timeout=timeout)
+        requests.get(url, timeout=timeout)
         return True
     except requests.ConnectionError:
         return False
+
+
+class Core:
+    def __init__(self):
+        pass
+
+    def say(self, text):
+        print(text)
+
+
+if __name__ == "__main__":
+    handle("starte Speedtest", Core(), None)

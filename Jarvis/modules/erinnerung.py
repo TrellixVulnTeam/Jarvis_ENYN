@@ -159,18 +159,17 @@ def handle(text, core, skills):
                     'du sagst, wenn es das richtige ist?'.format(str(len(entries))))
                 answer = core.listen()
                 if 'ja' in answer:
+                    core.say(
+                        'Okay, ich werde dir einfach die Einträge vorlesen und nach jedem Eintrag sagst du entweder ja oder nein.')
+                    hit = False
                     for item in entries:
-                        core.say(
-                            'Okay, ich werde dir einfach die Einträge vorlesen und nach jedem Eintrag sagst du entweder ja oder nein.')
-                        hit = False
-                        for item in entries:
-                            if not hit:
-                                core.say(item['Text'] + ' Ist das richtig?')
-                                response = core.listen()
-                                if 'ja' in response:
-                                    founded = True
-                                    erinnerungen.remove(item)
-                                    core.local_storage['Erinnerungen'] = erinnerungen
+                        if not hit:
+                            core.say(item['Text'] + ' Ist das richtig?')
+                            response = core.listen()
+                            if 'ja' in response:
+                                founded = True
+                                erinnerungen.remove(item)
+                                core.local_storage['Erinnerungen'] = erinnerungen
                 else:
                     core.say('Okay, vielleicht probierst du es erneut.')
         if len(founded) > 1:
