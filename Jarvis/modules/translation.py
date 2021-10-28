@@ -5,6 +5,7 @@ def isValid(text):
 
 
 def handle(text, core, skills):
+    # toDo: was heißt auf
     traslation_text = skills.get_text_beetween('übersetz', text, end_word='ins', output='String')
     targetLang = skills.get_text_beetween('ins', output='String')
     core.translate(traslation_text, targetLang=targetLang)
