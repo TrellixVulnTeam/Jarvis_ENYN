@@ -134,7 +134,7 @@ class Modules:
                 # logging.info('Analysis: ' + str(analysis))
             except:
                 traceback.print_exc()
-                logging.warning('[WARNING] Sentence analysis failed!', conv_id=str(text))
+                logging.warning('[WARNING] Sentence analysis failed!')
 
         if name is not None:
             for module in self.modules:
@@ -540,7 +540,7 @@ class LUNA:
             self.modules.start_module(text=str(text), user=user)
             self.Audio_Output.continue_after_hotword()
 
-    def start_module(self, text, name, user):
+    def start_module(self, text, name):
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
         self.modules.query_threaded(name, text, user)
