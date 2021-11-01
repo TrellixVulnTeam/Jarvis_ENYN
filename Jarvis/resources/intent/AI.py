@@ -6,8 +6,6 @@ import pickle
 import numpy as np
 import os
 
-import sklearn.model_selection
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import nltk
@@ -60,7 +58,7 @@ class GenericAssistant(IAssistant):
     def load_json_intents(self, intents):
         self.intents = json.loads(open(intents, encoding=self.json_encoding).read())
 
-    def train_model(self, epoch_times=30):
+    def train_model(self, epoch_times=1000):
 
         self.words = []
         self.classes = []
@@ -101,25 +99,16 @@ class GenericAssistant(IAssistant):
 
         self.model = Sequential()
         # old values working 1024, 128, 0.125
-        self.prepare_model(4096, 1024, 0.25)
-        """self.model.add(Dense(128, activation='relu'))
-        self.model.add(Dropout(0.25))
-        self.model.add(Dense(96, activation='relu'))
-        self.model.add(Dropout(0.25))
-        self.model.add(Dense(80, activation='relu'))
-        self.model.add(Dropout(0.25))
-        self.model.add(Dense(64, activation='relu'))
-        self.model.add(Dropout(0.25))
-        self.model.add(Dense(48, activation='relu'))
-        self.model.add(Dropout(0.25))"""
+        self.prepare_model(8192, 256, 0.5)
         self.model.add(Dense(len(train_y[0]), activation='softmax'))
 
-        #last perfect working : learning_rate=0.0025, decay=1e-7, momentum=0.9, nesterov=True
-        sgd = SGD(learning_rate=0.0025, decay=1e-7, momentum=0.9, nesterov=True)
+        validation_data = self.load_validataion_data()
+
+        sgd = SGD(learning_rate=0.0025, decay=1e-9, momentum=0.9, nesterov=True)
         self.model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
         self.hist = self.model.fit(np.array(train_x), np.array(train_y), epochs=epoch_times, validation_split=0,
-                                   validation_data=self.load_validataion_data(), use_multiprocessing=True, shuffle=True,
-                                   verbose=1)
+                                   validation_data=validation_data, use_multiprocessing=True, shuffle=True,
+                                   verbose=1, workers=20)
 
     def prepare_model(self, max, min, steps):
         actual = max
@@ -149,30 +138,31 @@ class GenericAssistant(IAssistant):
             self.model = load_model(f'{model_name}.h5')
 
     def load_validataion_data(self):
-        training = []
-        output_empty = [0] * len(self.classes)
-        documents = []
+        with open("validation_data.json", "r") as validation_file:
+            validation_data = json.load(validation_file)
+            training = []
+            output_empty = [0] * len(self.classes)
+            documents = []
 
-        for intent in self.intents['intents']:
-            for pattern in intent['patterns']:
+            for pattern in validation_data["validation"]:
                 word = nltk.word_tokenize(pattern)
-                documents.append((word, intent['tag']))
-        for doc in documents:
-            bag = []
-            word_patterns = doc[0]
-            word_patterns = [self.lemmatizer.lemmatize(word.lower()) for word in word_patterns]
-            for word in self.words:
-                bag.append(1) if word in word_patterns else bag.append(0)
+                documents.append((word, validation_data["validation"][pattern]))
+            for doc in documents:
+                bag = []
+                word_patterns = doc[0]
+                word_patterns = [self.lemmatizer.lemmatize(word.lower()) for word in word_patterns]
+                for word in self.words:
+                    bag.append(1) if word in word_patterns else bag.append(0)
 
-            output_row = list(output_empty)
-            output_row[self.classes.index(doc[1])] = 1
-            training.append([bag, output_row])
+                output_row = list(output_empty)
+                output_row[self.classes.index(doc[1])] = 1
+                training.append([bag, output_row])
 
-        random.shuffle(training)
-        training = np.array(training)
-        train_x = list(training[:, 0])
-        train_y = list(training[:, 1])
-        return (train_x, train_y)
+            random.shuffle(training)
+            training = np.array(training)
+            train_x = list(training[:, 0])
+            train_y = list(training[:, 1])
+            return (train_x, train_y)
 
     def _clean_up_sentence(self, sentence):
         sentence_words = nltk.word_tokenize(sentence)
@@ -230,6 +220,10 @@ class GenericAssistant(IAssistant):
             return
         print()
         if ints[0]['intent'] in self.intent_methods.keys():
-            return {"module": self.intent_methods.get(ints[0]['intent'])}
+            return {"module": self.intent_methods.get(ints[0]['intent']), "intent": ints[0]['intent']}
         else:
             return self._get_response(ints, self.intents)
+
+    def test_request(self, message):
+        ints = self._predict_class(message)
+        return ints[0]['intent']

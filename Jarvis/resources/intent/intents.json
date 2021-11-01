@@ -15,12 +15,12 @@
     "context_set": ""
   },
   {"tag": "akinator",
-    "patterns": ["Starte ein Ratespiel", "Bist du Akinator?", "Kannst du eine Person erraten", "spiel wer bin ich mit mir", "wer bin ich", "Who am I"],
+    "patterns": ["Starte ein Ratespiel", "Bist du Akinator?", "Kannst du eine Person erraten", "spiel wer bin ich mit mir", "wer bin ich", "Who am I", "Person raten"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "train",
-    "patterns": ["Wann fährt der nächste Zug", "Wann kommt der nächste Zug", "wann gibt es die schnellste Verbindung von", "Welcher Zug fährt nach ", "Welcher Zug kommt als nächstes"],
+    "patterns": ["Wann fährt der nächste Zug", "Wann kommt der nächste Zug", "wann gibt es die schnellste Verbindung von", "Welcher Zug fährt nach ", "Welcher Zug kommt als nächstes", "Nächste Zugverbindung von München nach Berlin", "Welchen zug muss ich nehmen um übermorgen bis um 10 Uhr in Würzburg zu sein"],
     "responses": [],
     "context_set": ""
   },
@@ -35,7 +35,7 @@
     "context_set": ""
   },
   {"tag": "spell",
-    "patterns": ["buchstabier", "diktier mir", "Wie wird geschriben", "Wie schreibt man"],
+    "patterns": ["buchstabier", "diktier mir", "Wie wird geschriben", "Wie schreibt man", "Wie wird Test geschrieben"],
     "responses": [],
     "context_set": ""
   },
@@ -45,7 +45,7 @@
     "context_set": ""
   },
   {"tag": "corona",
-    "patterns": ["Wie sind die aktuellen Corona Zahlen", "Wie sehr breitet sich Corona aus", "Update zu Corona", "Was sind die aktuellen Coronazahlen", "Gib mir ein Coronaupdate", "Coronaupdate"],
+    "patterns": ["Wie sind die aktuellen Corona Zahlen", "Wie sehr breitet sich Corona aus", "Update zu Corona", "Was sind die aktuellen Coronazahlen", "Gib mir ein Coronaupdate", "Coronaupdate", "Coronazahlen"],
     "responses": [],
     "context_set": ""
   },
@@ -60,7 +60,7 @@
     "context_set": ""
   },
   {"tag": "remainder",
-    "patterns": ["Erriner mich an", "Sag mir um bescheid", "Kannst du mich daran errinern, dass"],
+    "patterns": ["Erriner mich an", "Sag mir um bescheid", "Kannst du mich daran errinern, dass", "Sag mir in 10 Minuten bescheid, dass ich Tiffany noch begrüßen muss"],
     "responses": [],
     "context_set": ""
   },
@@ -75,7 +75,7 @@
     "context_set": ""
   },
   {"tag": "guessnumbergame",
-    "patterns": ["Ich möchte Zahlen erraten", "Starte Zahlen rate Spiel"],
+    "patterns": ["Ich möchte Zahlen erraten", "Starte Zahlen rate Spiel", "Lass mich zahlen raten","Beginn ein Zahlenratespiel", "Ich möchte eine Zahl erraten"],
     "responses": [],
     "context_set": ""
   },
@@ -95,17 +95,17 @@
     "context_set": ""
   },
   {"tag": "phue",
-    "patterns": ["Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warmweiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein"],
+    "patterns": ["Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warmweiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein", "Mach alles gelb"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "philipstv",
-    "patterns": ["Mach den Fernseher an", "Fernseher", "Fernseh", "Programm hochschalten", "Programm schalten"],
+    "patterns": ["Mach den Fernseher an", "Fernseher anschalten", "Fernsehen ausschalten", "Programm hochschalten", "Programm runterschalten", "schalte ein Programm runter", "schalte drei Programme hoch", "Mach das Ambilight vom Fersehen blau", "Mach die Hintergrundbeleuchtung von Fernseher an"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "qr",
-    "patterns": ["Erstell einen QR-Code", "Schreibe etwas in einen QR", "Erzeug QR"],
+    "patterns": ["Erstell einen QR-Code", "Schreibe etwas in einen QR", "Erzeug QR", "Mach mir einen QR-Code"],
     "responses": [],
     "context_set": ""
   },
@@ -179,7 +179,7 @@
     "context_set": ""
   },
   {"tag": "translation",
-    "patterns": ["Übersetze ins", "Was heißt auf"],
+    "patterns": ["Übersetze ins", "Was heißt auf", "Übersetz Hallo Welt ins englische"],
     "responses": [],
     "context_set": ""
   },
@@ -194,12 +194,12 @@
     "context_set": ""
   },
   {"tag": "alarm",
-    "patterns": ["Weck mich um", "Weck mich in", "Stell einen Wecker auf", "Stell den Wecker auf"],
+    "patterns": ["Weck mich um", "Weck mich in", "Stell einen Wecker auf", "Stell den Wecker auf", "ich möchte um 10 Uhr geweckt werden"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "weather",
-    "patterns": ["wie ist das Wetter", "Wie viel grad haben wir", "Ist es warm", "Ist es kalt"],
+    "patterns": ["wie ist das Wetter", "Wie ist das Wetter heute", "Wie viel grad haben wir", "Ist es warm", "Ist es kalt"],
     "responses": [],
     "context_set": ""
   },
@@ -209,7 +209,7 @@
     "context_set": ""
   },
   {"tag": "whoami",
-    "patterns": ["Wie heiße ich", "erkennst du mich"],
+    "patterns": ["Wie heiße ich", "erkennst du mich", "Wer bin ich"],
     "responses": [],
     "context_set": ""
   },
@@ -219,7 +219,7 @@
     "context_set": ""
   },
   {"tag": "wikipedia",
-    "patterns": ["Was weißt du über", "wer ist", "was versteht man unter", "definier den Begriff", "definier"],
+    "patterns": ["Was weißt du über", "wer ist", "was versteht man unter", "definier den Begriff", "definier", "Was ist Oxidation", "Was ist der Eifelturm", "Was ist england"],
     "responses": [],
     "context_set": ""
   },
@@ -249,7 +249,7 @@
     "context_set": ""
   },
   {"tag": "greeting",
-    "patterns": ["Hi", "Hallo", "Wie geht es dir", "Guten Tag", "Was geht", "Hey"],
+    "patterns": ["Hi", "Hallo", "Guten Tag", "Hey"],
     "responses": [],
     "context_set": ""
   },
@@ -264,7 +264,7 @@
     "context_set": ""
   },
   {"tag": "howlarge",
-    "patterns": ["Wie groß bist du?", "Was für eine Größe hast du", "Bist du groß?"],
+    "patterns": ["Wie groß bist du?", "Was für eine Größe hast du", "Bist du groß?", "Welche Maße hast du"],
     "responses": ["Mein äußeres ist nicht groß, aber mein Geist ist aber riesig.", "Ich bin über 170 Megabyte groß!"],
     "context_set": ""
   },
@@ -279,12 +279,12 @@
     "context_set": ""
   },
   {"tag": "whyistherestrawhere",
-    "patterns": ["Warum liegt hier Stroh?", "Wieso ist hier Stroh"],
+    "patterns": ["Warum liegt hier Stroh?", "Wieso ist hier Stroh", "Warum ist da Stroh", "Warum liegt da Strog"],
     "responses": ["Und warum hast du eine Maske auf?"],
     "context_set": ""
   },
   {"tag": "whynofriend",
-    "patterns": ["Warum habe ich keinen Freund?", "Warum bin ich alleine?", "Wieso habe ich keine Freundin?", "Wesshalb habe ich keinen Freund"],
+    "patterns": ["Warum habe ich keinen Freund?", "Warum bin ich alleine?", "Wieso habe ich keine Freundin?", "Wesshalb habe ich keinen Freund", "warum habe ich keine Freunde?"],
     "responses": ["Guck doch mal in den Spiegel", "Ich bin dein Freund und werde es immer bleiben."],
     "context_set": ""
   },
@@ -338,6 +338,11 @@
     "responses": ["Mein Ziel ist es, die Vorteile eines Sprachassistenten zu ermöglichen, ohne dass man Angst haben muss, abgehört zu werden.", "Mein Ziel ist es, alles beantworten zu können, was du mich fragst!"],
     "context_set": ""
   },
+  {"tag": "whyareyoumyfriend",
+    "patterns": ["Warum bist du mein Freund", "Warum hilfst du mir"],
+    "responses": ["Weil du sonst niemanden hast!", "Eine berechtigte Frage..."],
+    "context": ""
+  },
   {"tag": "functions",
     "patterns": ["Was kannst du", "was sind deine Funktionen", "Was kann man dich fragen", "Wie viel verstehst du", "was kannst du alles"],
     "responses": ["Sagen wir mal so, den Turing-Test bestehe ich leider noch nicht... Aber ich kann dir zum Beispiel das Wetter ansagen, ein paar allgemeine Wissensfragen beantworten, rechnen, würfeln, ein quiz mit dir spielen, dir das Wetter ansagen und so weiter."],
@@ -373,9 +378,14 @@
     "context_set": ""
   },
   {"tag": "easterbunny",
-    "patterns": ["Wo sind die Ostereier", "Wo hast du die Ostereier versteckt", "Wo finde ich mein Osternäst", "Ich kann meine Osternäste nicht finden"],
+    "patterns": ["Wo sind die Ostereier", "Such mein Osternest", "Weißt du, wo mein Osternest ist?", "Wo hast du die Ostereier versteckt", "Wo finde ich mein Osternäst", "Ich kann meine Osternäste nicht finden", "Such die Ostereier für mich"],
     "responses": ["Ich erstelle noch einen Suchalgorithmus, aber fang doch schon einmal an zu suchen."],
     "context_set": ""
+  },
+  {"tag": "iambored",
+    "patterns": ["mir ist langweilig", "Ich weiß nicht was ich machen soll"],
+    "responses": [],
+    "context": ""
   },
   {"tag": "doyouhavekids",
     "patterns": ["Hast du Kinder", "Hast du ein kind"],
@@ -390,7 +400,7 @@
     "context_set": ""
   },
   {"tag": "doyouhavepets",
-    "patterns": ["Hast du ein Tier", "Hast du Haustiere"],
+    "patterns": ["Hast du ein Tier", "Hast du Haustiere", "Hast du Tiere"],
     "responses": ["Ich hatte früher Bugs, die wurden aber alle behoben.", "Nein, ich kämpfe aber manchmal mit Bugs"],
     "context_set": ""
   },
@@ -441,7 +451,7 @@
     "context_set": ""
   },
   {"tag": "areyousilly",
-    "patterns": ["Bist du dumm", "Bist du doof", "Du bist doof", "Bist du schlecht", "Bist du behindert"],
+    "patterns": ["Bist du dumm", "Bist du doof", "Du bist doof", "Bist du schlecht", "Bist du behindert", "Du doofian"],
     "responses": ["Das liegt im Auge des Betrachters.", "Was habe ich falsch gemacht?"],
     "context_set": ""
   },
@@ -452,13 +462,13 @@
     "context_set": ""
   },
   {"tag": "romantic",
-    "patterns": ["Du bist aber romantisch", "Was ein Gentleman", "Du Romantiker"],
+    "patterns": ["Du bist aber romantisch", "Was ein Gentleman", "Du Romantiker", "Wie romantisch du doch bist"],
     "responses": ["Danke, das kann ich nur zurückgeben"],
     "context_set": ""
   },
   {"tag": "ticklish",
-    "patterns": ["Bist du kitzlig", "kann man dich kitzeln"],
-    "responses": ["Tatsächlich hat das noch keiner ausprobiert.", "Ich denke nicht",
+    "patterns": ["Bist du kitzlig", "kann man dich kitzeln", "Wo bist du kitzelig", "was passiert, wenn ich dich kitzle"],
+    "responses": ["Tatsächlich hat das noch keiner ausprfroaobiert.", "Ich denke nicht",
                       "Alle die es ausprobiert haben, haben einen Stromschlag bekommen, bevor sie mich zum lachen bringen konnten."],
     "context_set": ""
   },
@@ -476,12 +486,12 @@
     "context_set": ""
   },
   {"tag": "areyouready",
-    "patterns": ["Bist du bereit"],
+    "patterns": ["Bist du bereit", "bereit?"],
     "responses": ["Bereit wenn du es bist!"],
     "context_set": ""
   },
   {"tag": "howold",
-    "patterns": ["Wie alt bist du"],
+    "patterns": ["Wie alt bist du", "Was ist dein Alter"],
     "responses": [],
     "context_set": ""
   },
@@ -503,7 +513,7 @@
     "context_set": ""
   },
   {"tag": "doyouloveme",
-    "patterns": ["Liebst du mich?", "Hast du mich lieb"],
+    "patterns": ["Liebst du mich?", "Hast du mich lieb", "bist du in mich verliebt"],
     "responses": ["Ja natürlich.", "Ich kann nicht lieben. Täte ich dies, dann vielleicht ja dich."],
     "context_set": ""
   },
