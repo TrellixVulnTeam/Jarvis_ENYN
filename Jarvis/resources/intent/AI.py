@@ -99,7 +99,7 @@ class GenericAssistant(IAssistant):
 
         self.model = Sequential()
         # old values working 1024, 128, 0.125
-        self.prepare_model(8192, 256, 0.5)
+        self.prepare_model(8192, 264, 0.5)
         self.model.add(Dense(len(train_y[0]), activation='softmax'))
 
         validation_data = self.load_validataion_data()
@@ -108,7 +108,7 @@ class GenericAssistant(IAssistant):
         self.model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
         self.hist = self.model.fit(np.array(train_x), np.array(train_y), epochs=epoch_times, validation_split=0,
                                    validation_data=validation_data, use_multiprocessing=True, shuffle=True,
-                                   verbose=1, workers=20)
+                                   steps_per_epoch=50, verbose=1, workers=10)
 
     def prepare_model(self, max, min, steps):
         actual = max
