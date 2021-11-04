@@ -24,11 +24,9 @@ class IntentWrapper:
     def proceed_with_user_input(self, user_input):
         response = self.ai.test_request(user_input)
         if type(response) is type(""):
-            self.core.Audio_Output.say(response)
             return response
         elif type(response) is type({}):
-            self.core.start_module(user_input, response["module"])
-            return response["intent"]
+            return response
 
     def test_module(self, user_input):
         response = self.ai.test_request(user_input)
