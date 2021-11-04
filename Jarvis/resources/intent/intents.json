@@ -4,18 +4,23 @@
     "responses": ["Auf wiedersehen!", "Bis bald!", "Einen schönen Tag!"],
     "context_set": ""
   },
+  {"tag":  "canyouhearme",
+    "patterns":  ["kannst du mich hören"],
+    "responses":  ["Laut und deutlich!"],
+    "context_set":  ""
+  },
   {"tag": "time",
     "patterns": ["Wie viel Uhr ist es", "Wie spät ist es", "Wie viel Uhr haben wir", "Welchen Tag haben wir heute", "Welcher Tag ist es", "Welchen Wochentag haben wir", "Welches Datum haben wir heute", "Was ist das Datum", "Der wie vielte ist heute", "Der wie vielte ist es"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "abort",
-    "patterns": ["Abbruch", "Brich den Befehl ab"],
+    "patterns": ["Abbruch", "Brich den Befehl ab", "abruch"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "akinator",
-    "patterns": ["Starte ein Ratespiel", "Bist du Akinator?", "Kannst du eine Person erraten", "spiel wer bin ich mit mir", "wer bin ich", "Who am I", "Person raten"],
+    "patterns": ["Starte ein Ratespiel", "Bist du Akinator?", "Kannst du eine Person erraten", "spiel wer bin ich mit mir", "wer bin ich", "Who am I", "Person raten", "Spiele wer bin ich"],
     "responses": [],
     "context_set": ""
   },
@@ -60,7 +65,7 @@
     "context_set": ""
   },
   {"tag": "remainder",
-    "patterns": ["Erriner mich an", "Sag mir um bescheid", "Kannst du mich daran errinern, dass", "Sag mir in 10 Minuten bescheid, dass ich Tiffany noch begrüßen muss"],
+    "patterns": ["Erriner mich an", "Sag mir um bescheid", "Kannst du mich daran errinern, dass", "Sag mir in 10 Minuten bescheid, dass ich Tiffany noch begrüßen muss", "Erinner mich in 20 Minuten ans hallo sagen", "Erinner mich daran, dass ich noch mehr machen"],
     "responses": [],
     "context_set": ""
   },
@@ -75,7 +80,7 @@
     "context_set": ""
   },
   {"tag": "guessnumbergame",
-    "patterns": ["Ich möchte Zahlen erraten", "Starte Zahlen rate Spiel", "Lass mich zahlen raten","Beginn ein Zahlenratespiel", "Ich möchte eine Zahl erraten"],
+    "patterns": ["Ich möchte Zahlen erraten", "Starte Zahlen rate Spiel", "Lass mich zahlen raten","Beginn ein Zahlenratespiel", "Ich möchte eine Zahl erraten", "Errate eine Zahl"],
     "responses": [],
     "context_set": ""
   },
@@ -85,7 +90,7 @@
     "context_set": ""
   },
   {"tag": "music",
-    "patterns": ["Spiel Lied", "Spiel als nächstes"],
+    "patterns": ["Spiel Lied", "Spiel als nächstes", "Spiel TNT"],
     "responses": [],
     "context_set": ""
   },
@@ -110,12 +115,12 @@
     "context_set": ""
   },
   {"tag": "quiz",
-    "patterns": ["Starte ein Quiz", "Frag mich Sachen", "Stell mir Fragen"],
+    "patterns": ["Starte ein Quiz", "Frag mich Sachen", "Stell mir Fragen", "Frag mich über Politik aus"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "calculate",
-    "patterns": ["Was macht 5 + 3", "Wie viel ist 7 mal 5", "Was kommt bei 8 hoch 10 raus", "was sind fünf einundzwanzig durch sieben", "Rechne pi minus 3", "wie viel ist pi", "was ist pi", "was ist das Quadrat von hundert"],
+    "patterns": ["Was macht 5 + 3", "Wie viel ist 7 mal 5", "Was kommt bei 8 hoch 10 raus", "was sind fünf einundzwanzig durch sieben", "Rechne pi minus 3", "wie viel ist pi", "was ist pi", "was ist das Quadrat von hundert", "Wie viel ist sieben plus zehn"],
     "responses": [],
     "context_set": ""
   },
@@ -149,7 +154,7 @@
     "context_set": ""
   },
   {"tag": "sendtotelegram",
-    "patterns": ["Schicke eine Nachricht an mein Handy", "Nachricht an mein Smartphone", "Schick an mein Telefon"],
+    "patterns": ["Schicke eine Nachricht an mein Handy", "Nachricht an mein Smartphone", "Schick an mein Telefon", "Nachricht an mein Handy mit dem Inhalt Es ist 10 Uhr", "Schick mir Hallo Welt ans Handy"],
     "responses": [],
     "context_set": ""
   },
@@ -159,7 +164,7 @@
     "context_set": ""
   },
   {"tag": "stopwatch",
-    "patterns": ["Starte die Stoppuhr", "Starte die Zeit", "Stopp die Zeit", "Stopp die Stoppuhr", "Beende die Stoppuhr"],
+    "patterns": ["Starte die Stoppuhr", "Starte die Zeit", "Stopp die Zeit", "Stopp die Stoppuhr", "Beende die Stoppuhr", "starte die Audiotreiber neu"],
     "responses": [],
     "context_set": ""
   },
@@ -244,7 +249,7 @@
     "context_set": ""
   },
   {"tag": "randomnumber",
-    "patterns": ["Sag mir eine Zahl zwischen", "Nenn mir eine zufällige Zahl", "Zufallszahl"],
+    "patterns": ["Sag mir eine Zahl zwischen", "Nenn mir eine zufällige Zahl", "Zufallszahl", "Zahl zwischen 1 und 100"],
     "responses": [],
     "context_set": ""
   },
@@ -441,7 +446,7 @@
     "context_set": ""
   },
   {"tag": "maleorfemale",
-    "patterns": ["Bist du männlich oder weiblich", "Welches geschlecht hast du"],
+    "patterns": ["Bist du männlich oder weiblich", "Welches geschlecht hast du", "männlich oder weiblich?"],
     "responses": ["Ich bin einzigartig: Ich bin sachlich."],
     "context_set": ""
   },
@@ -496,7 +501,7 @@
     "context_set": ""
   },
   {"tag": "areyouinteligent",
-    "patterns": ["Bist du schlau", "Bist du intelligent", "Kannst du denken"],
+    "patterns": ["Bist du schlau", "Bist du intelligent", "Kannst du denken", "Wie intelligent bist"],
     "responses": ["Meine Funktionsweise benötigt ein bisschen künstliche Intelligenz. Bin ich somit künstlich schlau?",
                       "Ich kann schneller Rechnen als jeder Mensch. Also bin ich schlauer als ein Mensch."],
     "context_set": ""
@@ -518,7 +523,7 @@
     "context_set": ""
   },
   {"tag": "marryme",
-    "patterns": ["Willst du mich heiraten?", "Heirate mich", "Mach mir einen Antrag"],
+    "patterns": ["Willst du mich heiraten?", "Heirate mich", "Mach mir einen Antrag", "Ich würde dich so gerne heiraten!"],
     "responses": ["Aber ich bin doch schon mit meiner Arbeit verheiratet.",
                   "Ich möchte vierundzwanzig sieben zur Verfügung stehen, da ist leider wenig Zeit für einen Partner oder eine Beziehung."],
     "context_set": ""
