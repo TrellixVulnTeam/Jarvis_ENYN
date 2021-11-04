@@ -42,10 +42,10 @@ class AudioInput:
         self.Audio_Output = None
         self.recording = False
 
-    def start(self):
+    def start(self, sentensivity):
         # starts the hotword detection
         self.stopped = False
-        snsrt = Thread(target=self.run)
+        snsrt = Thread(target=self.run, args=(sentensivity,))
         snsrt.daemon = True
         snsrt.start()
 
@@ -105,11 +105,11 @@ class AudioInput:
             # if there is no conservation, play a bling sound
             self.Audio_Output.play_bling_sound()
 
-    def run(self):
+    def run(self, sentensivity):
         porcupine = None
         try:
-            keywords = ["jarvis", "hey siri"]
-            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[0.5, 0.2])
+            keywords = ["jarvis"]
+            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[sentensivity])
             pa = pyaudio.PyAudio()
             audio_stream = pa.open(
                 rate=porcupine.sample_rate,
