@@ -15,6 +15,7 @@ import wb_server as ws
 from Audio import AudioOutput, AudioInput
 from resources.analyze import Sentence_Analyzer
 from resources.module_skills import skills as Skill
+from resources.intent import Wrapper as AIWrapper
 
 
 class Modules:
@@ -89,7 +90,8 @@ class Modules:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger, user)
+                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
+                                                                              user)
                     mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
@@ -134,7 +136,7 @@ class Modules:
                 # logging.info('Analysis: ' + str(analysis))
             except:
                 traceback.print_exc()
-                logging.warning('[WARNING] Sentence analysis failed!', conv_id=str(text))
+                logging.warning('[WARNING] Sentence analysis failed!')
 
         if name is not None:
             for module in self.modules:
@@ -197,7 +199,8 @@ class Modules:
         for module in self.continuous_modules:
             intervall_time = module.INTERVALL if hasattr(module, 'INTERVALL') else 0
             if __name__ == '__main__':
-                self.core.continuous_modules[module.__name__] = self.module_wrapper_continuous(self.core, intervall_time,
+                self.core.continuous_modules[module.__name__] = self.module_wrapper_continuous(self.core,
+                                                                                               intervall_time,
                                                                                                self)
             try:
                 module.start(self.core.continuous_modules[module.__name__], self.core.local_storage)
@@ -383,7 +386,7 @@ class Modulewrapper:
         return text
 
     def start_hotword_detection(self):
-        self.Audio_Input.start()
+        self.Audio_Input.start(config_data['Local_storage']['wakeword_sentensivity'])
 
     def stopp_hotword_detection(self):
         self.Audio_Input.stop()
@@ -402,7 +405,7 @@ class Modulewrapper:
             end = sp1[1]
             parse = front + random.choice(middle) + end
             """
-        #toDo
+        # toDo
         return userInput
 
 
@@ -451,6 +454,7 @@ class LUNA:
         self.config_data = conf_dat
         self.modules = modules
         self.analyzer = analyzer
+        self.ai = AIWrapper(self)
         self.skills = Skill()
         self.messenger = None
         self.messenger_queued_users = []  # These users are waiting for a response
@@ -533,14 +537,14 @@ class LUNA:
         reload(self)
 
     def hotword_detected(self, text):
-        if text == "wrong assistant!":
-            self.Audio_Output.say("Geh mir nicht fremd, du Sau!")
-        else:
-            user = self.users.get_user_by_name(self.local_storage["user"])
-            self.modules.start_module(text=str(text), user=user)
-            self.Audio_Output.continue_after_hotword()
+        user = self.users.get_user_by_name(self.local_storage["user"])
+        response = self.ai.proceed_with_user_input(text)
+        if type(response) == type(""):
+            self.Audio_Output.say(response)
+        elif type(response) == type({}):
+            self.start_module(text, response["module"])
 
-    def start_module(self, text, name, user):
+    def start_module(self, text, name):
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
         self.modules.query_threaded(name, text, user)
@@ -647,7 +651,7 @@ def start(config_data):
     time.sleep(1)
     # -----------Starting-----------#
     modules.start_continuous()
-    Audio_Input.start()
+    Audio_Input.start(sentensivity=config_data['Local_storage']['wakeword_sentensivity'])
     Audio_Output.start()
     core.start_module(name="reload_routinen", text="", user="")
     time.sleep(0.75)
