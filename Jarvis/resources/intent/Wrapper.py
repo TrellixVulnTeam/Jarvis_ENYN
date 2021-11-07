@@ -36,7 +36,7 @@ class IntentWrapper:
             return response["intent"]
 
     def train_model(self):
-        self.ai.train_model(800)
+        self.ai.train_model(1000)
         print("Training done")
         self.ai.save_model()
         self.ai.load_model()

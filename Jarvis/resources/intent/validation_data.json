@@ -1,7 +1,6 @@
 {
   "validation": {
     "ich möchte um 10 Uhr geweckt werden": "alarm",
-    "Wie lange brauche ich von Nürnberg nach Würzburg": "navigation",
     "Hallo": "greeting",
     "spiel TNT": "music",
     "Welcher Tag ist heute": "time",
@@ -9,12 +8,10 @@
     "Beginn ein Zahlenratespiel": "guessnumbergame",
     "Frag mich etwas": "quiz",
     "Starte ein Quiz": "quiz",
-    "Stell mir Fragen": "quiz",
     "Was ist das Product aus 5 und 3": "calculate",
     "Wie viel ist sieben plus zehn": "calculate",
     "Lade die Audio neu": "reloadaudio",
     "starte die Audiotreiber neu": "reloadaudio",
-    "Welcher Tag ist heute": "time",
     "Test eins zwei drei": "test",
     "Willst du mich heiraten?": "marryme",
     "Ich würde dich so gerne heiraten!": "iloveyou",

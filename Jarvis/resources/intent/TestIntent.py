@@ -8,7 +8,7 @@ import io
 import json
 import logging
 import urllib
-from Jarvis.Jarvis.resources.analyze import Sentence_Analyzer as Analyzer
+from Jarvis.resources.analyze import Sentence_Analyzer as Analyzer
 from urllib.request import Request, urlopen
 from Wrapper import IntentWrapper
 
@@ -754,7 +754,8 @@ class Modulewrapper:
 
 
 def testValidationData(intent_wrapper):
-    with open("validation_data.json", "r") as validation_file:
+    with open("validation_data.json", encoding='utf-8') as validation_file:
+        print(validation_file.encoding)
         val_data = json.load(validation_file)
         for item in val_data["validation"]:
             response = intent_wrapper.test_module(item)
@@ -762,7 +763,7 @@ def testValidationData(intent_wrapper):
                 print("FEHLER: " + item + " was not working, result: " + response + "\n")
 
 def testIntentData (intent_wrapper):
-    with open("intents.json", "r") as validation_file:
+    with open("intents.json", encoding='utf-8') as validation_file:
         data = json.load(validation_file)
         for item in data["intents"]:
             for sentence in item["patterns"]:
@@ -775,11 +776,11 @@ if __name__ == "__main__":
 
     print("Start System")
     intent_wrapper = IntentWrapper(Core())
-    intent_wrapper.train_model()
+    #intent_wrapper.train_model()
     print("Intent init!")
     testIntentData(intent_wrapper)
     print("Intent testing done")
     testValidationData(intent_wrapper)
     print("Validation data testing done")
     while True:
-        intent_wrapper.proceed_with_user_input(input("Type in something: "))
+        print(intent_wrapper.proceed_with_user_input(input("Type in something: ")))

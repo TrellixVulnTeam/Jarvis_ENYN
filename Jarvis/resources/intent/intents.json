@@ -70,7 +70,7 @@
     "context_set": ""
   },
   {"tag": "faultymodules",
-    "patterns": ["Welche Module sind fehlerhaft", "Welche Module klappen nicht", "Was klappt bei dir nicht", "fehlerhafte Module"],
+    "patterns": ["Welche Module sind fehlerhaft", "Welche Module klappen nicht", "Was klappt bei dir nicht", "fehlerhafte Module", "Was funktioniert nicht"],
     "responses": [],
     "context_set": ""
   },
@@ -100,7 +100,7 @@
     "context_set": ""
   },
   {"tag": "phue",
-    "patterns": ["Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warmweiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein", "Mach alles gelb"],
+    "patterns": ["Badeschrank und Küche aus","Alles grün", "Schalfzimmer und Esszimmer aus", "Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warmweiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein", "Mach alles gelb"],
     "responses": [],
     "context_set": ""
   },
@@ -159,7 +159,7 @@
     "context_set": ""
   },
   {"tag": "sunriseset",
-    "patterns": ["Wann geht die Sonne auf", "Wann geht die Sonne unter", "Wann ist Sonnenaufgang", "Wann ist der Sonnenuntergang", "Wann wird es hell", "wann wird es dunkel"],
+    "patterns": ["Wann geht die Sonne auf", "Wann geht die Sonne unter", "Wann ist Sonnenaufgang", "Wann ist der Sonnenuntergang", "Wann wird es hell", "wann wird es dunkel", "Um wie viel Uhr geht die Sonne auf"],
     "responses": [],
     "context_set": ""
   },
@@ -472,7 +472,7 @@
     "context_set": ""
   },
   {"tag": "ticklish",
-    "patterns": ["Bist du kitzlig", "kann man dich kitzeln", "Wo bist du kitzelig", "was passiert, wenn ich dich kitzle"],
+    "patterns": ["Bist du kitzlig", "kann man dich kitzeln", "Wo bist du kitzelig", "was passiert, wenn ich dich kitzle", "Bist du kitzelig"],
     "responses": ["Tatsächlich hat das noch keiner ausprfroaobiert.", "Ich denke nicht",
                       "Alle die es ausprobiert haben, haben einen Stromschlag bekommen, bevor sie mich zum lachen bringen konnten."],
     "context_set": ""

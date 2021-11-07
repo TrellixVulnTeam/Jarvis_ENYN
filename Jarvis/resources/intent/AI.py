@@ -218,7 +218,6 @@ class GenericAssistant(IAssistant):
         print(ints[0])
         if ints[0]['probability'] < 0.8:
             return
-        print()
         if ints[0]['intent'] in self.intent_methods.keys():
             return {"module": self.intent_methods.get(ints[0]['intent']), "intent": ints[0]['intent']}
         else:
@@ -226,4 +225,5 @@ class GenericAssistant(IAssistant):
 
     def test_request(self, message):
         ints = self._predict_class(message)
+        # print(ints[0]['probability'])
         return ints[0]['intent']
