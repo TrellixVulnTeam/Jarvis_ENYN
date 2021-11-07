@@ -234,3 +234,13 @@ class Akinator():
             return self.first_guess
         else:
             return raise_connection_error(resp["completion"])
+
+if __name__ == "__main__":
+    aki = Akinator()
+    question = aki.start_game(language="de")
+    while aki.progression <= 80:
+        user_input = input(question)
+        question = aki.answer(user_input)
+    result = aki.win()
+    print(result)
+    print(result["name"])
