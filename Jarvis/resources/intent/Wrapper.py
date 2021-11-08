@@ -1,7 +1,7 @@
 import json
 import logging
 
-from AI import GenericAssistant
+from .AI import GenericAssistant
 
 
 class IntentWrapper:
