@@ -7,7 +7,7 @@ from .AI import GenericAssistant
 class IntentWrapper:
     def __init__(self, core):
         self.core = core
-        with open("mappings.json", 'r') as mapping_file:
+        with open(core.path + "mappings.json", 'r') as mapping_file:
             mappings = json.loads(mapping_file.read())
             self.ai = GenericAssistant('intents.json', intent_methods=mappings)
             try:
