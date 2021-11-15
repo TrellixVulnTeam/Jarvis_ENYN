@@ -1,8 +1,9 @@
-
+from geopy.geocoders import Nominatim
+import requests
 
 class skills:
     def __init__(self):
-        pass
+        self.geo_location = Nominatim(user_agent="my_app")
 
     @staticmethod
     def get_enumerate(array):
@@ -292,7 +293,6 @@ class skills:
                 return i
         return -1
 
-
     @staticmethod
     def is_desired(text):
         # returns True, if user want this option
@@ -304,6 +304,25 @@ class skills:
         elif 'danke' in text and 'nein' not in text:
             return True
         return False
+
+    def get_data_of_city(self, city):
+        location = self.geo_location.geocode(city).raw
+        return self.__location_to_json(location)
+
+    def get_data_of_lat_lan(self, lat, lon):
+        location = self.geo_location.reverse(lat, lon)
+        return self.__location_to_json(location)
+
+    def __location_to_json(self, location):
+        display_name = location["display_name"].split(', ')
+        return {
+            "city": display_name[0],
+            "state": display_name[1],
+            "county": display_name[2],
+            "lat": location["lat"],
+            "lon": location["lon"],
+        }
+
 
     class Statics:
         def __init__(self):
@@ -388,3 +407,6 @@ class skills:
                            "11": "elfter", "12": "zwölfter", "13": "dreizehnter", "14": "vierzehnter",
                            "15": "fünfzehnter", "16": "sechzehnter", "17": "siebzehnter", "18": "achtzehnter",
                            "19": "neunzehnter", "20": "zwanzigster"}
+
+if __name__ == "__main__":
+    skills = skills()

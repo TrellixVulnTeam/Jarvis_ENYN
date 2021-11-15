@@ -460,7 +460,6 @@ class LUNA:
         self.local_storage = conf_dat["Local_storage"]
         self.config_data = conf_dat
         self.__data = {}
-        self.__fill_data()
         self.modules = modules
         self.analyzer = analyzer
 
@@ -477,6 +476,7 @@ class LUNA:
         self.continuous_modules = {}
         self.system_name = system_name
         self.path = config_data["Local_storage"]['LUNA_PATH']
+        self.__fill_data()  # since the path is needed, __fill_data() is called only here
 
         self.ai = AIWrapper(self)
         self.skills = Skill()
