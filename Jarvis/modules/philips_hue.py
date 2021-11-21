@@ -222,10 +222,15 @@ class Logic:
             if wrapper.bridge.get_group(int(group), 'name').lower() in text:
                 for light in group.lights:
                     lights.append(light.lower())
+        if ('alle' in text or 'überall' in text) and'außer' in text and lights != []:
+            temp_lights = []
+            for item in wrapper.light_names:
+                if item not in lights:
+                    temp_lights.append(item)
+            return temp_lights
         if not lights:
             for item in wrapper.light_names:
                 lights.append(item)
-        print(lights)
         return lights
 
     @staticmethod
