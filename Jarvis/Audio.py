@@ -36,7 +36,8 @@ class AudioInput:
         self.speech_engine.pause_threshold = 0.5
 
         with sr.Microphone(device_index=None) as source:
-            # terminate noise
+            self.speech_engine.pause_threshold = 1
+            self.speech_engine.energy_threshold = 50
             self.speech_engine.adjust_for_ambient_noise(source)
         self.core = None
         self.Audio_Output = None
@@ -65,6 +66,7 @@ class AudioInput:
 
     def recognize_input(self, listen=False, play_bling_before_listen=False):
         self.recording = True
+        self.adjusting()
         logging.info('[Listening] for user-input')
         # recognize user input through the microphone
         try:
@@ -73,7 +75,7 @@ class AudioInput:
                 self.Audio_Output.detected_hotword()
 
                 # duration was the last change ---------------------------------------------------------
-                audio = self.speech_engine.listen(source, duration=0.2, )
+                audio = self.speech_engine.listen(source)
                 # self.speech_engine.record(source)
                 try:
                     # translate audio to text

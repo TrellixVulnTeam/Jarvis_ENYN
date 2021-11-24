@@ -486,7 +486,7 @@ class LUNA:
             self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
 
     def __fill_data(self):
-        with open(self.path + 'data/api_keys.dat') as api_file:
+        with open(relPath + '/data/api_keys.dat') as api_file:
             self.__data["api_keys"] = json.load(api_file)
 
     def messenger_thread(self):
@@ -563,7 +563,7 @@ class LUNA:
         elif type(response) == type({}):
             self.start_module(text, response["module"])
 
-    def start_module(self, text, name):
+    def start_module(self, text, name, user=None):
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
         self.modules.query_threaded(name, text, user)
