@@ -65,6 +65,6 @@ class Weather:
         self.__hourly_forecast = weather_data["hourly"]
         self.__daily_forcast = weather_data["daily"]
 
-        class Statics:
-            def __init__(self):
-                pass
+    class Statics:
+        def __init__(self):
+            pass

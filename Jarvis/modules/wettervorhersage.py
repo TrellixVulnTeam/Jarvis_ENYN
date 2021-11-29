@@ -10,11 +10,11 @@ def __prepare_output(city, weather):
     weather_description = "Es gab leider ein Problem in der Analyse der Wetterdaten. Bitte versuche es zu einem späteren Zeitpunkt erneut!"
     temp_inf = f'bei einer Höchsttemperatur von {int(weather["temp"]["max"])}°C und einer Tiefsttemperatur von {int(weather["temp"]["max"])}°C'
     if weather_id in will_be_description_map.keys():
-        weather_description = f'In {city} wird es {will_be_description_map.get(weather_id)} {temp_inf} geben'
+        weather_description = f'In {city} wird es {will_be_description_map.get(weather_id)} {temp_inf} geben.'
     elif weather_id in give_description_map.keys():
-        weather_description = f'In {city} gibt es {give_description_map.get(weather_id)} {temp_inf}'
+        weather_description = f'In {city} gibt es {give_description_map.get(weather_id)} {temp_inf}.'
     elif weather_id in will_description_map.keys():
-        weather_description = f'In {city} wird es {will_description_map.get(weather_id)} {temp_inf}'
+        weather_description = f'In {city} wird es {will_description_map.get(weather_id)} {temp_inf}.'
     return weather_description
 
 
