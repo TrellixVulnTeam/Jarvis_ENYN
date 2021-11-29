@@ -1,3 +1,5 @@
+import json
+from datetime import datetime
 from phue import Bridge
 
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']
@@ -36,6 +38,10 @@ class PhillipsWrapper:
 
         self.lights = self.bridge.lights
         self.light_names = self.bridge.get_light_objects('name')
+
+        with open(core.path + "/resources/module_configs.json") as module_config_file:
+            module_config = json.load(module_config_file)
+            self.color_adjustment = module_config["philips_hue"]["color_adjustment"]
 
     def wrapper(self, text):
         lights = Logic.get_lights(text, self)
@@ -105,6 +111,10 @@ class PhillipsWrapper:
         self.bridge.set_light(lights, 'on', True)
         if change_brightness:
             self.bridge.set_light(lights, 'bri', 254)
+        if self.color_adjustment:
+            now = datetime.now()
+            # add sunrise and sunset
+            self.bridge.set_light(lights, 'sat', )
 
     def light_off(self, lights):
         self.bridge.set_light(lights, 'on', False)
