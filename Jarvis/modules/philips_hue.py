@@ -231,9 +231,14 @@ class Logic:
     def get_lights(text, wrapper):
         lights = []
         text = text.lower()
-        for item in wrapper.light_names:
-            if item.lower() in text:
-                lights.append(item)
+        if ('bis' in text and 'auf' in text) or 'außer' in text:
+            for item in wrapper.light_names:
+                if item.lower() not in text:
+                    lights.append(item)
+        else:
+            for item in wrapper.light_names:
+                if item.lower() in text:
+                    lights.append(item)
         for group in wrapper.bridge.get_group():
             if wrapper.bridge.get_group(int(group), 'name').lower() in text:
                 for light in group.lights:
