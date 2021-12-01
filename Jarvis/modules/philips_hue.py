@@ -10,8 +10,8 @@ color_code = [[0.1548, 0.1117], [0.6778, 0.3017], [0.439, 0.4446], [0.2015, 0.67
 
 def isValid(text):
     text = text.lower()
-    colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'dunkelgrün', 'braun', 'orange',
-              'warmweiß']
+    colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiss', 'dunkelgrün', 'braun', 'orange',
+              'warmweiss']
     if ('mach' in text or 'licht' in text) and (
             'an' in text or 'aus' in text or 'heller' in text or 'dunkler' in text or '%' in text or 'prozent' in text) \
             and not 'fernseh' in text:
@@ -125,14 +125,14 @@ class PhillipsWrapper:
         else:
             self.core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
 
-    def inc_dec_saturation(self, lights, value):
+    def inc_dec_ct(self, lights, value):
         for light in lights:
-            saturation = light.saturation + value
-            if saturation > 254:
-                saturation = 254
-            elif saturation < 0:
-                saturation = 0
-            self.bridge.set_light(light, 'sat', saturation)
+            ct = light.ct + value
+            if ct > 254:
+                ct = 254
+            elif ct < 0:
+                ct = 0
+            self.bridge.set_light(light, 'ct', ct)
 
     def set_light_color_temp(self, lights, value):
         self.bridge.set_light(lights, 'sat', int(value))
@@ -171,7 +171,8 @@ class PhillipsWrapper:
                     'on': light_objects[item].on,
                     'brightness': light_objects[item].brightness,
                     'color': light_objects[item].hue,
-                    'saturation': light_objects[item].saturation
+                    'saturation': light_objects[item].saturation,
+                    'ct': light_objects[item].ct
                 }
             return output
         else:
@@ -182,7 +183,8 @@ class PhillipsWrapper:
                     'on': light_objects[item].on,
                     'brightness': light_objects[item].brightness,
                     'color': light_objects[item].hue,
-                    'saturation': light_objects[item].saturation
+                    'saturation': light_objects[item].saturation,
+                    'ct': light_objects[item].ct
                 }
             return output
 

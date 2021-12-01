@@ -741,6 +741,15 @@ function createDayModals(anzDays, data){
     document.getElementById("dailyModals").innerHTML = modalCode;
 }
 
+document.getElementById("state").innerHTML = ipAPI.city.replace(/(\s)/gi, "+"); // Replace spaces
+lat = 49.783333;
+lon = 9.933333;
+$.getJSON("https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+lon+"&appid="+apiKey+"&lang=de&units=metric", function(data){
+    createDailyWeatherWidgets(8, data);
+});
+refresh();
+setInterval(refresh, 30000);
+
 $.getJSON("https://ipapi.co/json/", function(ipAPI) {
     lat = ipAPI.latitude;
     lon = ipAPI.longitude;

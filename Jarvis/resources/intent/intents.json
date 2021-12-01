@@ -100,7 +100,7 @@
     "context_set": ""
   },
   {"tag": "phue",
-    "patterns": ["Badeschrank und Küche aus","Alles grün", "Schalfzimmer und Esszimmer aus", "Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warmweiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein", "Mach alles gelb"],
+    "patterns": ["Badeschrank und Küche aus", "Alle Lichter grün", "Schalfzimmer und Esszimmer aus", "Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warmweiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein", "Mach alles gelb", "Mach das Licht wärmer", "Licht kälter"],
     "responses": [],
     "context_set": ""
   },
@@ -169,7 +169,7 @@
     "context_set": ""
   },
   {"tag": "news",
-    "patterns": ["Was gibts neues", "Spiel mir die Nachrichten vor", "Erzähl mir die Nachrichten", "Sprich die News"],
+    "patterns": ["Was gibts neues", "Spiel mir die Nachrichten vor", "Erzähl mir die Nachrichten", "Sprich die News", "Was gib's neues"],
     "responses": [],
     "context_set": ""
   },
@@ -512,7 +512,7 @@
     "context_set": ""
   },
   {"tag": "iloveyou",
-    "patterns": ["Ich liebe dich", "Ich habe dich lieb", "ich bin verliebt in dich"],
+    "patterns": ["Ich liebe dich", "Ich habe dich lieb", "ich bin verliebt in dich", "du bist sexy"],
     "responses": ["Ich fühle mich geehrt.", "Such dir ne Freundin oder einen Freund du Perversling!",
                   "Alles klar, Tinder wird herunter geladen."],
     "context_set": ""
@@ -548,6 +548,11 @@
     "patterns": ["Gibt es den Weihnachtsmann", "Existiert der Weihnachtsmann"],
     "responses": ["Ja", "Ich denke schon.",
                       "Gäbe es ihn nicht, wer bringt dir dann deine Geschenke an Weihnachten?"],
+    "context_set": ""
+  },
+  {"tag": "magicword",
+    "patterns": ["Wie heißt das Zauberwort", "Was ist das Zauberwort"],
+    "responses": ["Bitte"],
     "context_set": ""
   },
   {"tag": "phobie",

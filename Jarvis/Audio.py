@@ -84,7 +84,7 @@ class AudioInput:
                 except:
                     try:
                         # if it didn´t worked, adjust the ambient-noise and try again
-                        self.adjusting()
+                        self.__adjusting()
                         text = self.speech_engine.recognize_google(audio, language="de-DE")
                         logging.info('[USER INPUT]\t' + text)
                     except:
@@ -122,11 +122,11 @@ class AudioInput:
 
             logging.info('\nListening {%s}' % keywords)
 
-            while not self.stopped and not self.recording:
+            while not self.stopped:
                 pcm = audio_stream.read(porcupine.frame_length)
                 pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
                 keyword_index = porcupine.process(pcm)
-                if keyword_index >= 0:
+                if keyword_index >= 0 and not self.recording:
                     if keyword_index > 0:
                         self.core.hotword_detected("wrong assistant!")
                     else:
@@ -141,7 +141,7 @@ class AudioInput:
         except:
             logging.error(f"[ERROR] {traceback.print_exc()}")
 
-    def adjusting(self):
+    def __adjusting(self):
         with sr.Microphone(device_index=None) as source:
             self.speech_engine.adjust_for_ambient_noise(source)
 
@@ -195,11 +195,12 @@ class AudioOutput:
                     audio.Channel(0).set_volume(0.1)
                     audio.Channel(1).set_volume(0.1)
                     audio.Channel(2).set_volume(0.1)
+                    self.music_player.set_volume(0.1)
                 if not self.notification == [] and audio.Channel(0).get_busy() == 0 and not self.tts.is_reading:
                     if audio.Channel(0).get_busy() == 1:
                         audio.Channel(1).set_volume(0.10)
                         audio.Channel(2).set_volume(0.10)
-                    if type(self.notification[0]) == type("string"):
+                    if type(self.notification[0]) is type("string"):
                         logging.info(f'Saying "{self.notification[0]}"')
                         # if the notification is a string (a message to say), pass through to tts
                         self.tts.say(self.notification[0])
@@ -210,8 +211,8 @@ class AudioOutput:
                         track = audio.Sound(self.notification[0])
                         self.notification.pop(0)
                         audio.Channel(0).play(track)
-                if not self.music == [] and audio.Channel(2).get_busy() == 0:
-                    if type(self.music[0]) == type("string"):
+                if not self.music is [] and audio.Channel(2).get_busy() == 0:
+                    if type(self.music[0]) is type("string"):
                         logging.info(f'Play music with name {self.music[0]}')
                         topic = self.music[0]
                         self.music.pop(0)
@@ -221,11 +222,11 @@ class AudioOutput:
                         track = audio.Sound(self.music[0])
                         audio.Channel(2).play(track)
                         self.playback.pop(0)
-                if not self.playback == [] and audio.Channel(1).get_busy() == 0:
+                if not self.playback is [] and audio.Channel(1).get_busy() == 0:
                     track = audio.Sound(self.playback[0])
                     self.playback.pop(0)
                     audio.Channel(1).play(track)
-                if not audio.Channel(0).get_busy() == 1 and audio.Channel(1).get_volume != 1 and audio.Channel(
+                if not audio.Channel(0).get_busy() is 1 and audio.Channel(1).get_volume != 1 and audio.Channel(
                         2).get_volume != 1:
                     audio.Channel(1).set_volume(1)
                     audio.Channel(2).set_volume(1)
@@ -236,7 +237,7 @@ class AudioOutput:
     def say(self, text):
         # Forwards the given text to the text-to-speech function and waits
         # until the announcement has ended.
-        if text == '' or text == None:
+        if text == '' or text is None:
             text = 'Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr.'
         self.notification.append(text)
         while text in self.notification:
@@ -262,21 +263,20 @@ class AudioOutput:
         else:
             self.playback.insert(0, buff)
 
-    def play_notification(self, buff, next):
-        if not next:
+    def play_notification(self, buff, is_next):
+        if not is_next:
             self.notification.append(buff)
         else:
             self.notification.insert(0, buff)
 
     def play_bling_sound(self):
-        # playing Bling-Sound
         TOP_DIR = os.path.dirname(os.path.abspath(__file__))
         DETECT_DONG = os.path.join(TOP_DIR, "resources/sounds/bling.wav")
 
         with open(DETECT_DONG, "rb") as wavfile:
             input_wav = wavfile.read()
         data = io.BytesIO(input_wav)
-        self.play_notification(data, next=True)
+        self.play_notification(data, is_next=True)
 
     def pause(self, channel):
         audio.Channel(channel).pause()

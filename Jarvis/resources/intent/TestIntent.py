@@ -18,7 +18,7 @@ class Core:
     def __init__(self):
         self.messenger = False
         self.system_name = "TESTSYSTEM"
-        self.path = ""
+        self.path = "C:\\Users\\Jakob\\OneDrive\\Jarvis\\Jarvis"
         self.active_modules = {}
         self.config_data = {"correct_output": []}
         self.analyzer = Analyzer()
@@ -776,7 +776,8 @@ if __name__ == "__main__":
 
     print("Start System")
     intent_wrapper = IntentWrapper(Core())
-    #intent_wrapper.train_model()
+    print("training...")
+    intent_wrapper.train_model()
     print("Intent init!")
     testIntentData(intent_wrapper)
     print("Intent testing done")
