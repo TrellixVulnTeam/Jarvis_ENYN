@@ -86,5 +86,7 @@ will_description_map = {
 
 if __name__ == "__main__":
     from Jarvis.resources.Weather import Weather
-    weather = Weather()
+    from Jarvis.resources.module_skills import skills
+    api_key = ""
+    weather = Weather(api_key, "Würzburg", skills())
     print(__prepare_output("Würzburg", weather))

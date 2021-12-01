@@ -1,3 +1,4 @@
+import logging
 from abc import ABCMeta, abstractmethod
 
 import random
@@ -19,36 +20,15 @@ from tensorflow.keras.models import load_model
 nltk.download('punkt', quiet=True)
 nltk.download('wordnet', quiet=True)
 
-class IAssistant(metaclass=ABCMeta):
 
-    @abstractmethod
-    def train_model(self):
-        """ Implemented in child class """
+class GenericAssistant:
 
-    @abstractmethod
-    def request_tag(self, message):
-        """ Implemented in child class """
-
-    @abstractmethod
-    def get_tag_by_id(self, id):
-        """ Implemented in child class """
-
-    @abstractmethod
-    def request_method(self, message):
-        """ Implemented in child class """
-
-    @abstractmethod
-    def request(self, message):
-        """ Implemented in child class """
-
-
-class GenericAssistant(IAssistant):
-
-    def __init__(self, intents, intent_methods={}, model_name="assistant_model", *, json_encoding='utf-8'):
+    def __init__(self, intents, path_extension, intent_methods={}, model_name="assistant_model", json_encoding='utf-8'):
         self.intents = intents
         self.intent_methods = intent_methods
         self.model_name = model_name
         self.json_encoding = json_encoding
+        self.path_extension = path_extension
 
         if intents.endswith(".json"):
             self.load_json_intents(intents)
@@ -56,7 +36,7 @@ class GenericAssistant(IAssistant):
         self.lemmatizer = WordNetLemmatizer()
 
     def load_json_intents(self, intents):
-        self.intents = json.loads(open(intents, encoding=self.json_encoding).read())
+        self.intents = json.loads(open(self.path_extension + intents, encoding=self.json_encoding).read())
 
     def train_model(self, epoch_times=1000):
 
@@ -98,8 +78,8 @@ class GenericAssistant(IAssistant):
         train_y = list(training[:, 1])
 
         self.model = Sequential()
-        # old values working 1024, 128, 0.125
-        self.prepare_model(8192, 264, 0.5)
+        # old values working 8192, 264, 0.5
+        self.prepare_model(1024, 64, 0.5)
         self.model.add(Dense(len(train_y[0]), activation='softmax'))
 
         validation_data = self.load_validataion_data()
@@ -115,30 +95,30 @@ class GenericAssistant(IAssistant):
         while actual > min:
             self.model.add(Dense(actual, activation='relu'))
             self.model.add(Dropout(steps))
-            actual -= actual*steps
+            actual -= actual * steps
 
     def save_model(self, model_name=None):
         if model_name is None:
-            self.model.save(f"{self.model_name}.h5", self.hist)
-            pickle.dump(self.words, open(f'{self.model_name}_words.pkl', 'wb'))
-            pickle.dump(self.classes, open(f'{self.model_name}_classes.pkl', 'wb'))
+            self.model.save("{}.h5".format(self.model_name), self.hist)
+            pickle.dump(self.words, open('{}{}_words.pkl'.format(self.path_extension, self.model_name), 'wb'))
+            pickle.dump(self.classes, open('{}{}_classes.pkl'.format(self.path_extension, self.model_name), 'wb'))
         else:
-            self.model.save(f"{model_name}.h5", self.hist)
-            pickle.dump(self.words, open(f'{model_name}_words.pkl', 'wb'))
-            pickle.dump(self.classes, open(f'{model_name}_classes.pkl', 'wb'))
+            self.model.save("{}.h5".format(model_name), self.hist)
+            pickle.dump(self.words, open('{}{}_words.pkl'.format(self.path_extension, model_name), 'wb'))
+            pickle.dump(self.classes, open('{}{}_classes.pkl'.format(self.path_extension, model_name), 'wb'))
 
     def load_model(self, model_name=None):
         if model_name is None:
-            self.words = pickle.load(open(f'{self.model_name}_words.pkl', 'rb'))
-            self.classes = pickle.load(open(f'{self.model_name}_classes.pkl', 'rb'))
-            self.model = load_model(f'{self.model_name}.h5')
+            self.words = pickle.load(open('{}{}_words.pkl'.format(self.path_extension, self.model_name), 'rb'))
+            self.classes = pickle.load(open('{}{}_classes.pkl'.format(self.path_extension, self.model_name), 'rb'))
+            self.model = load_model('{}{}.h5'.format(self.path_extension, self.model_name), compile=False)
         else:
-            self.words = pickle.load(open(f'{model_name}_words.pkl', 'rb'))
-            self.classes = pickle.load(open(f'{model_name}_classes.pkl', 'rb'))
-            self.model = load_model(f'{model_name}.h5')
+            self.words = pickle.load(open('{}{}_words.pkl'.format(self.path_extension, model_name), 'rb'))
+            self.classes = pickle.load(open('{}{}_classes.pkl'.format(self.path_extension, model_name), 'rb'))
+            self.model = load_model('{}{}.h5'.format(self.path_extension, model_name), compile=False)
 
     def load_validataion_data(self):
-        with open("validation_data.json", "r") as validation_file:
+        with open(self.path_extension + "validation_data.json", "r") as validation_file:
             validation_data = json.load(validation_file)
             training = []
             output_empty = [0] * len(self.classes)
@@ -196,7 +176,7 @@ class GenericAssistant(IAssistant):
             tag = ints[0]['intent']
             list_of_intents = intents_json['intents']
             for i in list_of_intents:
-                if i['tag']  == tag:
+                if i['tag'] == tag:
                     result = random.choice(i['responses'])
                     break
         except IndexError:
@@ -214,7 +194,6 @@ class GenericAssistant(IAssistant):
 
     def request(self, message):
         ints = self._predict_class(message)
-        print(ints[0]['probability'])
         print(ints[0])
         if ints[0]['probability'] < 0.8:
             return

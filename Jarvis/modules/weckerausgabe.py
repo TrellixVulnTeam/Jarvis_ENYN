@@ -4,7 +4,7 @@ from philips_hue import PhillipsWrapper
 def handle(text, core, skills):
     ton = text.get('Ton')
     user = text.get('User')
-    path = core.path + "/modules/resources/clock_sounds/" + ton
+    path = core.path + "/modules/resources/alarm_sounds/" + ton
     try:
         if core.local_storage['module_storage']['philips_hue']['Bridge-Ip'] != '':
             pw = PhillipsWrapper(core)
