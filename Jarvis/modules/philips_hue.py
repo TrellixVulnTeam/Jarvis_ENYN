@@ -1,3 +1,5 @@
+import json
+from datetime import datetime
 from phue import Bridge
 
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
@@ -37,6 +39,10 @@ class PhillipsWrapper:
 
         self.lights = self.bridge.lights
         self.light_names = self.bridge.get_light_objects('name')
+
+        with open(core.path + "/resources/module_configs.json") as module_config_file:
+            module_config = json.load(module_config_file)
+            self.color_adjustment = module_config["philips_hue"]["color_adjustment"]
 
     def wrapper(self, text):
         lights = Logic.get_lights(text, self)
@@ -112,6 +118,10 @@ class PhillipsWrapper:
         self.bridge.set_light(lights, 'on', True)
         if change_brightness:
             self.bridge.set_light(lights, 'bri', 254)
+        if self.color_adjustment:
+            now = datetime.now()
+            # add sunrise and sunset
+            self.bridge.set_light(lights, 'sat', )
 
     def light_off(self, lights):
         self.bridge.set_light(lights, 'on', False)
@@ -245,10 +255,15 @@ class Logic:
             if wrapper.bridge.get_group(int(group), 'name').lower() in text:
                 for light in group.lights:
                     lights.append(light.lower())
+        if ('alle' in text or 'überall' in text) and 'außer' in text and lights != []:
+            temp_lights = []
+            for item in wrapper.light_names:
+                if item not in lights:
+                    temp_lights.append(item)
+            return temp_lights
         if not lights:
             for item in wrapper.light_names:
                 lights.append(item)
-        print(lights)
         return lights
 
     @staticmethod

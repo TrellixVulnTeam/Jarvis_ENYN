@@ -1,3 +1,7 @@
+
+A new version of a better README is planed. For Questions, you can reach me at jakob.priesner@outlook.de
+
+
 # Jarvis
 
 ## Intention

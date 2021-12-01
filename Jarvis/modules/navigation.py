@@ -1,5 +1,4 @@
 import re
-
 import googlemaps
 
 SECURE = True
@@ -58,3 +57,17 @@ def handle(text, core, skills):
 
     core.say(
         'Von ' + origin + ' nach ' + destination + ' sind es ' + distanceTxt + ' Kilometer. Die Fahrt dauert ' + durationTxt)
+
+
+class Core:
+    def __init__(self):
+        pass
+
+    def say(self, text):
+        print(text)
+
+
+if __name__ == "__main__":
+    core = Core()
+    while True:
+        handle(input(), core, None)

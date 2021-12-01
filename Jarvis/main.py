@@ -390,7 +390,7 @@ class Modulewrapper:
         return text
 
     def start_hotword_detection(self):
-        self.Audio_Input.start()
+        self.Audio_Input.start(config_data['Local_storage']['wakeword_sentensivity'])
 
     def stopp_hotword_detection(self):
         self.Audio_Input.stop()
@@ -462,7 +462,8 @@ class LUNA:
         self.__data = {}
         self.modules = modules
         self.analyzer = analyzer
-
+        self.ai = AIWrapper(self)
+        self.skills = Skill()
         self.messenger = None
         self.messenger_queued_users = []  # These users are waiting for a response
         self.messenger_queue_output = {}
@@ -563,7 +564,7 @@ class LUNA:
         elif type(response) == type({}):
             self.start_module(text, response["module"])
 
-    def start_module(self, text, name, user=None):
+    def start_module(self, text, name):
         # user prediction is not implemented yet, therefore here the workaround
         user = self.local_storage['user']
         self.modules.query_threaded(name, text, user)

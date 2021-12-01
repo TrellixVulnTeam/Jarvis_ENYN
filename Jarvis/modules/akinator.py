@@ -18,7 +18,7 @@ def handle(text, core, skills):
     aki = Akinator()
     question = aki.start_game(language='de')
 
-    while aki.progression <= 80:
+    while aki.progression <= 90:
         core.say(question)
         user_input = assign_user_input(core.listen(), core)
         if user_input == "b":
@@ -28,9 +28,9 @@ def handle(text, core, skills):
                 pass
         else:
             question = aki.answer(user_input)
-    aki.win()
+    result = aki.win()
 
-    core.say(f'Es ist {aki.first_guess["name"]}! Stimmt das?')
+    core.say(f'Es ist {result["name"]}! Stimmt das?')
 
     user_input = core.listen().lower()
     if 'ja' in user_input or 'das stimmt' in user_input or 'richtig' in user_input:
