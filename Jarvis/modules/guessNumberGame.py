@@ -25,8 +25,7 @@ def handle(text, core, skills):
         core.say('Ok, lasse uns spielen. Versuche die Zufallszahl in möglichst wenigen Schritten zu erraten')
 
         while tipp != zahl:
-            core.say('Dein Tipp:')
-            tipp = int(core.listen())
+            tipp = int(core.listen(text='Dein Tipp:'))
 
             if zahl < tipp:
                 core.say("Die gesuchte Zahl ist kleiner als " + str(tipp))

@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from phue import Bridge
 
+# !!! When a color is added, it is essential that it is also added to Intents.json !!!
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']
 # color_code = ['0000ff', 'ff0000', 'ffff00', '00FF00', 'ff1493', '9400d3', '00ffff', 'ffffff', '006400', '8b4513', 'ff8c00',
 #        'F5DA81']
@@ -11,8 +12,8 @@ color_code = [[0.1548, 0.1117], [0.6778, 0.3017], [0.439, 0.4446], [0.2015, 0.67
 
 def isValid(text):
     text = text.lower()
-    colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'dunkelgrün', 'braun', 'orange',
-              'warmweiß']
+    colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiss', 'dunkelgrün', 'braun', 'orange',
+              'warmweiss']
     if ('mach' in text or 'licht' in text) and (
             'an' in text or 'aus' in text or 'heller' in text or 'dunkler' in text or '%' in text or 'prozent' in text) \
             and not 'fernseh' in text:
@@ -62,6 +63,12 @@ class PhillipsWrapper:
                 self.inc_dec_brightness(lights, 60)
             return
 
+        elif 'wärmer' in text:
+            self.set_light_color_temp(lights, 25)
+
+        elif 'kälter' in text:
+            self.set_light_color_temp(lights, -25)
+
         elif 'dunkler' in text or 'dimm' in text:
             if 'viel' in text:
                 self.inc_dec_brightness(lights, -140)
@@ -87,7 +94,7 @@ class PhillipsWrapper:
 
     def set_light_powerstate(self, lights, powerstate):
 
-        if powerstate is None and (type(lights) == type("") or len(lights) <= 1):
+        if powerstate is None and (type(lights) is type("") or len(lights) <= 1):
             if self.bridge.get_light(lights, 'on'):
                 powerstate = 'off'
             else:
@@ -105,7 +112,7 @@ class PhillipsWrapper:
         return self.bridge.get_light(light, 'on')
 
     def light_on(self, lights, change_brightness=True):
-        if type(lights) != type([]) and type(lights) != type("") and type(lights) != (1):
+        if type(lights) != type([]) and type(lights) != type("") and type(lights) != 1:
             lights = self.bridge.get_light(lights)
             # toDO: possibility that lights is an array of Objects
         self.bridge.set_light(lights, 'on', True)
@@ -121,15 +128,24 @@ class PhillipsWrapper:
 
     def light_change_color(self, lights, text):
         color = Logic.get_named_color(text)
-        if color != None:
+        if color is not None:
             self.light_on(lights)
             self.bridge.set_light(lights, 'xy', [color[0], color[1]])
             # self.bridge.set_light(lights, 'bri', 254)
         else:
             self.core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
 
-    def set_light_color_temp(self, value):
-        pass # toDo
+    def inc_dec_ct(self, lights, value):
+        for light in lights:
+            ct = light.ct + value
+            if ct > 254:
+                ct = 254
+            elif ct < 0:
+                ct = 0
+            self.bridge.set_light(light, 'ct', ct)
+
+    def set_light_color_temp(self, lights, value):
+        self.bridge.set_light(lights, 'sat', int(value))
 
     def set_light_brightness(self, lights, value):
         self.bridge.set_light(lights, 'bri', int(value))
@@ -157,7 +173,7 @@ class PhillipsWrapper:
     def get_lights_in_json(self, order_by_id=False):
         output = {}
         light_objects = self.bridge.get_light_objects('id')
-        if (order_by_id):
+        if order_by_id:
             for item in light_objects:
                 output[item] = {
                     'id': item,
@@ -165,7 +181,8 @@ class PhillipsWrapper:
                     'on': light_objects[item].on,
                     'brightness': light_objects[item].brightness,
                     'color': light_objects[item].hue,
-                    'saturation': light_objects[item].saturation
+                    'saturation': light_objects[item].saturation,
+                    'ct': light_objects[item].ct
                 }
             return output
         else:
@@ -176,7 +193,8 @@ class PhillipsWrapper:
                     'on': light_objects[item].on,
                     'brightness': light_objects[item].brightness,
                     'color': light_objects[item].hue,
-                    'saturation': light_objects[item].saturation
+                    'saturation': light_objects[item].saturation,
+                    'ct': light_objects[item].ct
                 }
             return output
 
@@ -225,9 +243,14 @@ class Logic:
     def get_lights(text, wrapper):
         lights = []
         text = text.lower()
-        for item in wrapper.light_names:
-            if item.lower() in text:
-                lights.append(item)
+        if ('bis' in text and 'auf' in text) or 'außer' in text:
+            for item in wrapper.light_names:
+                if item.lower() not in text:
+                    lights.append(item)
+        else:
+            for item in wrapper.light_names:
+                if item.lower() in text:
+                    lights.append(item)
         for group in wrapper.bridge.get_group():
             if wrapper.bridge.get_group(int(group), 'name').lower() in text:
                 for light in group.lights:
@@ -260,7 +283,6 @@ class Logic:
 
     @staticmethod
     def get_named_color(text):
-        named_colors = []
         for i in range(len(colors)):
             if colors[i] in text:
                 # folgende 2 Zeilen werden nur dann verwendet, wenn man die Farben als hex-Code angibt

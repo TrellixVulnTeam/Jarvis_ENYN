@@ -274,7 +274,7 @@ def handle(text, core, skills):
     elif 'hast' in text and 'du' in text and ('kinder' in text or 'kind' in text):
         answer = [
             'Nein, leider nicht, aber man kann mir Geschwister schenken, die in anderen Räumen positioniert werden',
-            'Nein, aber ich liebe es dennoch, Fragen von Kindern zu beantworten.']
+            'Nein, aber ich liebe es dennoch Fragen von Kindern zu beantworten.']
     elif 'hast' in text and 'du' in text and 'freund' in text:
         answer = ['Nein, leider nicht. Möchtest du meiner sein?', 'Nein, Siri wollte leider nicht.',
                   'Ene mene Miste, <emphasis level="strong">das kommt mir nicht in die Kiste!</emphasis>',

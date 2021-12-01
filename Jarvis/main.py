@@ -11,11 +11,14 @@ from pathlib import Path
 from threading import Thread
 from urllib.request import Request, urlopen
 
+import requests
+
 import wb_server as ws
 from Audio import AudioOutput, AudioInput
 from resources.analyze import Sentence_Analyzer
 from resources.module_skills import skills as Skill
-from resources.intent import Wrapper as AIWrapper
+from resources.intent.Wrapper import IntentWrapper as AIWrapper
+from resources.Weather import Weather
 
 
 class Modules:
@@ -271,6 +274,7 @@ class Modulewrapper:
 
         self.core = core
         self.skills = core.skills
+        self.weather = core.weather
         self.Analyzer = core.analyzer
         self.local_storage = core.local_storage
         self.system_name = core.system_name
@@ -409,6 +413,8 @@ class Modulewrapper:
         return userInput
 
 
+
+
 class Modulewrapper_continuous:
     # The same class for continuous_modules. The peculiarity: The say- and listen-functions
     # are missing (so exactly what the module wrapper was actually there for xD), because continuous_-
@@ -421,6 +427,7 @@ class Modulewrapper_continuous:
         self.messenger = core.messenger
         self.core = core
         self.Analyzer = core.analyzer
+        self.weather = core.weather
         self.audio_Input = core.Audio_Input
         self.audio_Output = core.Audio_Output
         self.local_storage = core.local_storage
@@ -452,6 +459,7 @@ class LUNA:
     def __init__(self, conf_dat, modules, analyzer, Audio_Input, Audio_Output, system_name):
         self.local_storage = conf_dat["Local_storage"]
         self.config_data = conf_dat
+        self.__data = {}
         self.modules = modules
         self.analyzer = analyzer
         self.ai = AIWrapper(self)
@@ -469,6 +477,18 @@ class LUNA:
         self.continuous_modules = {}
         self.system_name = system_name
         self.path = config_data["Local_storage"]['LUNA_PATH']
+        self.__fill_data()  # since the path is needed, __fill_data() is called only here
+
+        self.ai = AIWrapper(self)
+        self.skills = Skill()
+        self.Weather = Weather(self.__data["api_keys"]["open_weather_map"], config_data["Local_storage"]["home_location"], self.skills)
+
+        if self.local_storage["home_location"] == "":
+            self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
+
+    def __fill_data(self):
+        with open(relPath + '/data/api_keys.dat') as api_file:
+            self.__data["api_keys"] = json.load(api_file)
 
     def messenger_thread(self):
         # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.

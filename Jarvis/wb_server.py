@@ -436,7 +436,7 @@ def Webserver(core):
     @webapp.route("/api/alarm/getSound/<filename>")
     def getAlarmSound(filename):
         def gen():
-            with open(core.path + "/modules/resources/clock_sounds/" + filename, "rb") as fwav:
+            with open(core.path + "/modules/resources/alarm_sounds/" + filename, "rb") as fwav:
                 data = fwav.read(1024)
                 while data:
                     yield data
@@ -480,7 +480,7 @@ def Webserver(core):
         elif action == "isPresent":
             return jsonify({"single": single_present, "regular": regular_present})
         elif action == "alarmSounds":
-            path = core.path + "/modules/resources/clock_sounds/"
+            path = core.path + "/modules/resources/alarm_sounds/"
             names = os.listdir(path)
             for file in names:
                 print(file)

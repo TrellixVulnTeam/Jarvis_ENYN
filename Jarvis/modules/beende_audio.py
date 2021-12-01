@@ -14,7 +14,7 @@ def handle(text, core, skills):
         core.Audio_Output.stop_notification()
         core.Audio_Output.stop_music()
         core.Audio_Output.stop_playback()
-    elif 'wecker' in text:
+    elif 'wecker' in text or "wach" in text:
         core.Audio_Output.stop_playback()
     else:
         core.Audio_Output.music_player.stop()

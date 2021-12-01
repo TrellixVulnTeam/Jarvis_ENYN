@@ -15,7 +15,7 @@ def isValid(text):
         return False
 
 
-def get_aussage_gemeinsam():
+def get_aussage_gemeinsam(text, core):
     liste = core.local_storage.get('einkaufsliste')
     i = 0
     aussage = ''
@@ -38,7 +38,7 @@ def handle(text, core, skills):
         if 'gemeinsam' in text or 'gemeinsame' in text:
             core.say(get_aussage_gemeinsam(), output='messenger')
         else:
-            core.say(get_aussage(txt, core), output='messenger')
+            core.say(get_aussage_gemeinsam(text, core), output='messenger')
     else:
         match = re.search('^smartphone nachricht', text)
         if match != None:

@@ -1,0 +1,12 @@
+
+ype in something: >? Wie lange brauche ich von Nürnberg nach Würzburg
+Starting module 'countdown' with text 'Wie lange brauche ich von Nürnberg nach Würzburg'
+
+Type in something: >? Wie weit ist es von Nürnberg nach würzburg
+0.58212626
+{'intent': 'weather', 'probability': 0.58212626}
+
+
+Type in something: >? Ich möchte eine Zahl erraten
+0.5200919
+{'intent': 'headornumber', 'probability': 0.5200919}
