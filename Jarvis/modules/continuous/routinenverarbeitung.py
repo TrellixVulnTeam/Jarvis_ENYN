@@ -83,7 +83,7 @@ def get_sunrise_sunset_inf(location):
     r = requests.get("https://nominatim.openstreetmap.org/search?q={0}&format=json".format(place))
     try:
         response = json.loads(r.text)
-        placeData = response.get('0')
+        placeData = response
         lat = float(placeData["lat"])
         lon = float(placeData["lon"])
         datetimeTemp = datetime.now()
@@ -99,6 +99,7 @@ def get_sunrise_sunset_inf(location):
     except:
         traceback.print_exc()
         print("[WARINING] Something went wrong with the Sunrise and Sunset module!")
+        raise NotImplementedError
         # return invalid values, so it wont be a sunrise or a sunset
         return 24, 0
 

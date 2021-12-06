@@ -106,13 +106,14 @@ class Text_to_Speech:
         driver_Path = str(Path(__file__).parent) + '/webdriver/chromedriver'
         self.driver = webdriver.Chrome(driver_Path, chrome_options=self.get_opt())
         # self.start_vpn()
+        time.sleep(2)
         self.get_website_inf()
 
     def get_website_inf(self):
         URL = "https://www.ibm.com/demos/live/tts-demo/self-service/home"
         self.driver.get(URL)
         self.text_area = self.driver.find_element_by_id('text-area')
-        time.sleep(1)
+        time.sleep(3)
         self.play_button = self.driver.find_element_by_id('btn')
         # self.select_german()
         self.select_voice(self.gender)

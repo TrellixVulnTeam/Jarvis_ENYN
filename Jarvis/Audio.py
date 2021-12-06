@@ -15,7 +15,8 @@ import pvporcupine
 import pyaudio
 import speech_recognition as sr
 import vlc
-from pygame import mixer as audio
+import pygame
+from pygame import mixer as mixer
 
 from resources.tts import Text_to_Speech
 
@@ -66,7 +67,6 @@ class AudioInput:
 
     def recognize_input(self, listen=False, play_bling_before_listen=False):
         self.recording = True
-        self.adjusting()
         logging.info('[Listening] for user-input')
         # recognize user input through the microphone
         try:
@@ -84,7 +84,7 @@ class AudioInput:
                 except:
                     try:
                         # if it didn´t worked, adjust the ambient-noise and try again
-                        self.__adjusting()
+                        self.adjusting()
                         text = self.speech_engine.recognize_google(audio, language="de-DE")
                         logging.info('[USER INPUT]\t' + text)
                     except:
@@ -177,12 +177,14 @@ class AudioOutput:
         self.mixer = []
 
         self.music_player = MusicPlayer(self)
-        # audio.pre_init(44100, -16, 1, 512)
+        mixer.pre_init(44100, -16, 1, 512)
         self.tts = Text_to_Speech()
         self.tts.start(voice)
 
     def start(self):
-        audio.init()
+        mixer.init()
+        time.sleep(2)
+        print("Audio_output done..:")
         ot = Thread(target=self.run)
         ot.daemon = True
         ot.start()
@@ -192,14 +194,14 @@ class AudioOutput:
         while True:
             try:
                 if self.listen:
-                    audio.Channel(0).set_volume(0.1)
-                    audio.Channel(1).set_volume(0.1)
-                    audio.Channel(2).set_volume(0.1)
+                    mixer.Channel(0).set_volume(0.1)
+                    mixer.Channel(1).set_volume(0.1)
+                    mixer.Channel(2).set_volume(0.1)
                     self.music_player.set_volume(0.1)
-                if not self.notification == [] and audio.Channel(0).get_busy() == 0 and not self.tts.is_reading:
-                    if audio.Channel(0).get_busy() == 1:
-                        audio.Channel(1).set_volume(0.10)
-                        audio.Channel(2).set_volume(0.10)
+                if not self.notification == [] and mixer.Channel(0).get_busy() == 0 and not self.tts.is_reading:
+                    if mixer.Channel(0).get_busy() == 1:
+                        mixer.Channel(1).set_volume(0.10)
+                        mixer.Channel(2).set_volume(0.10)
                     if type(self.notification[0]) is type("string"):
                         logging.info(f'Saying "{self.notification[0]}"')
                         # if the notification is a string (a message to say), pass through to tts
@@ -207,11 +209,12 @@ class AudioOutput:
                         self.notification.pop(0)
                     else:
                         logging.info(f'Playing the track "{self.notification[0]}"')
-                        # else pass through to audio-manager
-                        track = audio.Sound(self.notification[0])
+                        # else pass through to mixer-manager
+                        track = mixer.Sound(self.notification[0])
                         self.notification.pop(0)
-                        audio.Channel(0).play(track)
-                if not self.music is [] and audio.Channel(2).get_busy() == 0:
+                        mixer.Channel(0).play(track)
+                if not self.music == [] and mixer.Channel(2).get_busy() == 0:
+                    print(self.music)
                     if type(self.music[0]) is type("string"):
                         logging.info(f'Play music with name {self.music[0]}')
                         topic = self.music[0]
@@ -219,17 +222,17 @@ class AudioOutput:
                         self.music_player.play(by_name=topic)
                     else:
                         logging.info(f'Play track with path {self.music[0]}')
-                        track = audio.Sound(self.music[0])
-                        audio.Channel(2).play(track)
+                        track = mixer.Sound(self.music[0])
+                        mixer.Channel(2).play(track)
                         self.playback.pop(0)
-                if not self.playback is [] and audio.Channel(1).get_busy() == 0:
-                    track = audio.Sound(self.playback[0])
+                if not self.playback == [] and mixer.Channel(1).get_busy() == 0:
+                    track = mixer.Sound(self.playback[0])
                     self.playback.pop(0)
-                    audio.Channel(1).play(track)
-                if not audio.Channel(0).get_busy() is 1 and audio.Channel(1).get_volume != 1 and audio.Channel(
+                    mixer.Channel(1).play(track)
+                if not mixer.Channel(0).get_busy() is 1 and mixer.Channel(1).get_volume != 1 and mixer.Channel(
                         2).get_volume != 1:
-                    audio.Channel(1).set_volume(1)
-                    audio.Channel(2).set_volume(1)
+                    mixer.Channel(1).set_volume(1)
+                    mixer.Channel(2).set_volume(1)
                 time.sleep(0.2)
             except:
                 traceback.print_exc()
@@ -279,26 +282,26 @@ class AudioOutput:
         self.play_notification(data, is_next=True)
 
     def pause(self, channel):
-        audio.Channel(channel).pause()
+        mixer.Channel(channel).pause()
 
     def resume(self, channel):
-        audio.Channel(channel).unpause()
+        mixer.Channel(channel).unpause()
 
     def set_volume(self, channel, volume):
-        audio.Channel(channel).set_volume(volume)
+        mixer.Channel(channel).set_volume(volume)
 
     def stop_notification(self):
-        audio.Channel(0).stop()
+        mixer.Channel(0).stop()
 
     def stop_music(self):
-        audio.Channel(1).stop()
+        mixer.Channel(1).stop()
 
     def stop_playback(self):
-        audio.Channel(2).stop()
+        mixer.Channel(2).stop()
 
     def stop(self):
         self.tts.stop()
-        audio.stop()
+        mixer.stop()
         self.music_player.stop()
 
 
@@ -425,8 +428,10 @@ class MusicPlayer:
         self.player.play()
 
     def set_volume(self, volume):
+        if 0 < volume < 1:
+            volume *= 100
         self.old_volume = self.player.audio_get_volume()
-        self.player.audio_set_volume(volume)
+        self.player.audio_set_volume(int(volume))
 
     def stop(self):
         self.playlist = []

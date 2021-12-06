@@ -1,9 +1,9 @@
 from geopy.geocoders import Nominatim
-import requests
+
 
 class skills:
     def __init__(self):
-        self.geo_location = Nominatim(user_agent="my_app")
+       self.geo_location = Nominatim(user_agent="my_app")
 
     @staticmethod
     def get_enumerate(array):
@@ -306,7 +306,10 @@ class skills:
         return False
 
     def get_data_of_city(self, city):
-        location = self.geo_location.geocode(city).raw
+        location = self.geo_location.geocode(city)
+        if location is None:
+            return None
+        location = location.raw
         return self.__location_to_json(location)
 
     def get_data_of_lat_lan(self, lat, lon):

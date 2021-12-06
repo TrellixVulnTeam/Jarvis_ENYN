@@ -1,15 +1,16 @@
 import json
 import logging
 
-from AI import GenericAssistant
+from .AI import GenericAssistant
 
 
 class IntentWrapper:
     def __init__(self, core):
         self.core = core
+        print(self.core.path)
         #with open(core.path + "/resources/intent/mappings.json", 'r') as mapping_file:
         print("start")
-        with open(core.path + "\\resources\\intent\\mappings.json", 'r') as mapping_file:
+        with open(core.path + "/resources/intent/mappings.json", 'r') as mapping_file:
             print("with open")
             mappings = json.loads(mapping_file.read())
             self.ai = GenericAssistant('intents.json', core.path + '/resources/intent/', intent_methods=mappings)

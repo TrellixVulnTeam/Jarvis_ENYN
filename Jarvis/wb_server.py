@@ -14,7 +14,7 @@ from Crypto import Random
 from flask import Flask, render_template, jsonify, request, Response, send_file
 from gevent import pywsgi
 
-from main import Modulewrapper
+from core import Modulewrapper
 from modules.philips_hue import PhillipsWrapper
 from webserver.helpWrapper import InstallWrapper
 
