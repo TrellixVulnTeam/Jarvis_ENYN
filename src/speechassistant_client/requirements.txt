@@ -1,0 +1,4 @@
+- Installer:
+    Einrichtung, wie Module herunter laden
+
+Weckertöne hochladen
