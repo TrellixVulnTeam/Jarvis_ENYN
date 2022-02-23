@@ -39,7 +39,7 @@ class Timer:
         duration = self.get_duration(text)
         if duration is None:
             return
-        # Zeit: Um wieviel Uhr der Timer fertig ist; Text: Antwort von Core; Benutzer; Raum; Dauer: Wie lange der
+        # Zeit: Um wie viel Uhr der Timer fertig ist; Text: Antwort von Core; Benutzer; Raum; Dauer: Wie lange der
         # Timer gehen soll
         E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration.capitalize(), 'Benutzer': self.core.user}
 
@@ -60,7 +60,7 @@ class Timer:
     def get_duration(self, text):
         text = text.replace(' auf ', ' in ')
         text = text.replace(' von ', ' in ')
-        duration = self.skills.get_text_beetween('in', text, output='String')
+        duration = self.skills.get_text_between('in', text, output='String')
         if duration is "":
             self.core.say('Ich habe nicht verstanden, wie lange der Timer dauern soll. Bitte versuche es erneut!')
             return None

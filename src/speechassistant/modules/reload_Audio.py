@@ -1,3 +1,6 @@
+import time
+
+
 def isValid(text):
     if 'lad' in text and 'audio' in text:
         return True
@@ -19,10 +22,11 @@ def handle(text, core, skills):
 
 
 def restart_output(core):
-    core.core.Audio_Output.stop()
-    core.core.Audio_Output.start()
+    core.core.audio_output.stop()
+    time.sleep(1)
+    core.core.audio_output.start()
 
 
 def restart_input(core):
-    core.core.Audio_Input.stop()
-    core.core.Audio_Input.start()
+    core.core.audio_input.stop()
+    core.core.audio_input.start()

@@ -12,13 +12,13 @@ def isValid(text):
 
 def handle(text, core, skills):
     if 'buchstabier' in text:
-        word = skills.get_text_beetween('buchstabier', text)[0]
+        word = skills.get_text_between('buchstabier', text)[0]
     elif 'diktier' in text:
-        word = skills.get_text_beetween('diktier', text)[0]
+        word = skills.get_text_between('diktier', text)[0]
     elif 'wie' in text and 'geschrieben' in text:
-        word = skills.get_text_beetween('wird', text)[0]
+        word = skills.get_text_between('wird', text)[0]
     elif 'wie' in text and 'schreibt' in text:
-        word = skills.get_text_beetween('man', text)[0]
+        word = skills.get_text_between('man', text)[0]
     else:
         core.say("Leider habe ich nicht verstanden, was ich buchstabieren soll.")
         return

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
+
 import base64
 import json
 import logging
@@ -336,7 +336,7 @@ def Webserver(_core, _temp_module_wrapper):
         users = _core.users.get_user_list()
         modules = _core.local_storage["modules"]
 
-        externSystems = {
+        extern_systems = {
             "Phillips HUE": {
                 "name": "Phillips Hue",
                 "established": False
@@ -354,13 +354,13 @@ def Webserver(_core, _temp_module_wrapper):
         elif action == "telegram":
             data = _core.config_data['messenger']
         elif action == "externSystems":
-            data = externSystems
+            data = extern_systems
         else:
             data = {
                 "users": users,
                 "modules": modules,
                 "telegram": True if _core.config_data["messenger_key"] != "" else False,
-                "externSystems": externSystems
+                "externSystems": extern_systems
             }
         return jsonify(data)
 
@@ -391,7 +391,7 @@ def Webserver(_core, _temp_module_wrapper):
     @webapp.route("/api/phue/<groupAction>/<action>/<name>")
     @webapp.route("/api/phue/<groupAction>/<action>/<name>/<value>")
     def changePHUE(groupAction, action, name=None, value=None):
-        phueWrapper = PhillipsWrapper(_core)
+        phueWrapper = PhilipsWrapper(_core)
         if groupAction == "change":
             if action == 'color':
                 phueWrapper.light_change_color(name, value)
@@ -408,7 +408,7 @@ def Webserver(_core, _temp_module_wrapper):
             else:
                 return 'err'
         elif groupAction == 'list':
-            phueWrapper = PhillipsWrapper(_core)
+            phueWrapper = PhilipsWrapper(_core)
             if action == "lights":
                 print(request.args.get('id'))
                 if request.args.get('id'):

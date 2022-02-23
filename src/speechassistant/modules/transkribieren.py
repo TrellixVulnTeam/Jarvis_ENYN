@@ -6,5 +6,5 @@ def isValid(text):
 
 def handle(text, core, skills):
     start_word = 'transkribiere' if 'transkribier' in text else 'mit'
-    text = skills.get_text_beetween(start_word, text, output='String')
+    text = skills.get_text_between(start_word, text, output='String')
     core.say(text, output='messenger')

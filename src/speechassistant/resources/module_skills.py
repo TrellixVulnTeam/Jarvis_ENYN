@@ -44,7 +44,7 @@ class Skills:
     """
 
     @staticmethod
-    def get_text_beetween(start_word: str, text: str, end_word: str = '', output: str = 'array',
+    def get_text_between(start_word: str, text: str, end_word: str = '', output: str = 'array',
                           included: bool = True) -> str | list:
         if not start_word in text:
             start_index = 0

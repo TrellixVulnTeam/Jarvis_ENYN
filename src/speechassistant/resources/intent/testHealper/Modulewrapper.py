@@ -12,8 +12,8 @@ class Test_Modulewrapper:
         # toDo: down below
         # self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
 
-        self.Audio_Output = core.Audio_Output
-        self.Audio_Input = core.Audio_Input
+        self.audio_output = core.audio_output
+        self.audio_input = core.audio_input
 
         self.messenger_call = messenger
 

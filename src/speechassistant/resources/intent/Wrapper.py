@@ -19,7 +19,7 @@ class IntentWrapper:
             except FileNotFoundError:
                 print("except")
                 logging.info("Couldn't find a model, so train a new one...")
-                self.core.Audio_Output.say(
+                self.core.audio_output.say(
                     "Meine Inteligenz wurde leider noch nicht trainiert. Ich werde das schnell erledigen, habe bitte etwas Geduld! Dieser Vorgang dauert etwa 3 Stunden.")
                 self.ai.train_model()
                 logging.info("Model trained successfully")

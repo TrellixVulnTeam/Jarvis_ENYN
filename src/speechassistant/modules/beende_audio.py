@@ -9,15 +9,15 @@ def isValid(text):
 def handle(text, core, skills):
     text = text.lower()
     if 'musik' in text:
-        core.Audio_Output.music_player.stop()
+        core.audio_output.music_player.stop()
     elif 'ausgabe' in text:
-        core.Audio_Output.stop_notification()
-        core.Audio_Output.stop_music()
-        core.Audio_Output.stop_playback()
+        core.audio_output.stop_notification()
+        core.audio_output.stop_music()
+        core.audio_output.stop_playback()
     elif 'wecker' in text or "wach" in text:
-        core.Audio_Output.stop_playback()
+        core.audio_output.stop_playback()
     else:
-        core.Audio_Output.music_player.stop()
-        core.Audio_Output.stop_notification()
-        core.Audio_Output.stop_music()
-        core.Audio_Output.stop_playback()
+        core.audio_output.music_player.stop()
+        core.audio_output.stop_notification()
+        core.audio_output.stop_music()
+        core.audio_output.stop_playback()

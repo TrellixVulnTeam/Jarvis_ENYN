@@ -3,4 +3,4 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    core.Audio_Output.music_player.stop()
+    core.audio_output.music_player.stop()
