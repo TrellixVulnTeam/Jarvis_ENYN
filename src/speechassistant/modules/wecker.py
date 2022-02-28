@@ -112,8 +112,6 @@ class Alarm:
             minute = time["minute"]
             seconds = time["second"]
         if self.core.user is not None:
-            print(self.core.user)
-            print(type(self.core.user))
             logging.info(self.core.user)
             alarm_sound = self.core.user["alarm_sound"]
             user = self.core.user
