@@ -9,12 +9,11 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import Select
 
 
 class Text_to_Speech:
 
-    def __init__(self, ):
+    def __init__(self) -> None:
         self.driver = None
         self.action = None
         self.text_area = None
@@ -39,8 +38,7 @@ class Text_to_Speech:
         self.start_driver()
 
     def start_driver(self):
-        driver_Path = str(Path(__file__).parent) + '/webdriver/chromedriver'
-        self.driver = webdriver.Chrome(driver_Path, chrome_options=self.get_opt())
+        self.driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver', options=self.get_opt())
         self.action = ActionChains(self.driver)
         # self.start_vpn()
         time.sleep(2)
@@ -84,8 +82,8 @@ class Text_to_Speech:
         # self.driver.execute_script(script, self.text_area, text)
 
     def select_german(self):
-        self.click_button('downshift-0-toggle-button')
-        self.click_button('downshift-0-item-6')
+        self.driver.find_element_by_id('downshift-0-toggle-button').click()
+        self.driver.find_element_by_id('downshift-0-item-6').click()
         # //*[@id="downshift-0-item-6"]
         # drop_down = Select(self.driver.find_element_by_xpath('//*[@id="downshift-0-toggle-button"]'))
         # drop_down.select_by_visible_text("German")
@@ -109,10 +107,10 @@ class Text_to_Speech:
         self.play_button.click()
 
     def get_website_inf(self):
-        URL = "https://www.ibm.com/demos/live/tts-demo/self-service/home"
-        self.driver.get(URL)
+        url: str = "https://www.ibm.com/demos/live/tts-demo/self-service/home"
+        self.driver.get(url)
         self.text_area = self.driver.find_element_by_id('text-area')
-        time.sleep(3)
+        print("type of text-area: " + type(self.text_area))
         self.play_button = self.driver.find_element_by_id('btn')
         self.select_german()
         self.select_voice(self.gender)
@@ -124,8 +122,8 @@ class Text_to_Speech:
         opt.add_argument("--disable-webgl")
         opt.add_argument("no-default-browser-check")
         opt.add_argument("no-first-run")
-        relPath = str(Path(__file__).parent) + "/webdriver/"
-        opt.add_extension(relPath + "vpn.crx")
+        #relPath = str(Path(__file__).parent) + "/webdriver/"
+        #opt.add_extension(relPath + "vpn.crx")
         chrome_prefs = {"profile.managed_default_content_settings.images": 2}
         opt.add_experimental_option("prefs", chrome_prefs)
         return opt
@@ -139,3 +137,4 @@ class Text_to_Speech:
 if __name__ == "__main__":
     tts = Text_to_Speech()
     tts.start("male")
+    tts.say('Hallo Welt')
