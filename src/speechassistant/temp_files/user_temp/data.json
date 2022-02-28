@@ -15,3 +15,12 @@
     "waiting_notifications": []
   }
 }
+
+'uid INTEGER PRIMARY KEY,'
+'alias VARCHAR(10) UNIQUE,'
+'firstname VARCHAR(15),'
+'lastname VARCHAR(30),'
+'birthday VARCHAR(10),'
+'mid INTEGER UNIQUE,'
+'sid INTEGER,'
+'FOREIGN KEY(sid) REFERENCES audio(id))'

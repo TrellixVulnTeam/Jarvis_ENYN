@@ -11,6 +11,8 @@ from sqlite3 import Connection, Cursor
 from src.speechassistant.exceptions.SQLException import *
 
 shopping_item: TypeAlias = dict[[str, int], [str, str], [str, str], [str, float]]
+user_item: TypeAlias = dict[[str, int], [str, str], [str, str], [str, str], [str, dict[str, int], [str, int], [str, int]], [str, int], [str, int], [str, list[str]]]
+
 
 class DataBase:
     def __init__(self, root_path: str) -> None:
@@ -24,7 +26,7 @@ class DataBase:
         self.reminder_interface = self._ReminderInterface(self.db)
         self.quiz_interface = self._QuizInterface(self.db)
         self.shoppinglist_interface = self._ShoppingListInterface(self.db, self.__execute)
-        self.user_interface = self._UserInterface(self.db)
+        self.user_interface = self._UserInterface(self.db, self.__execute)
         self.routine_interface = self._RoutineInterface(self.db)
 
         logging.info('\n[INFO] DataBase successfully initialized.')
@@ -39,7 +41,7 @@ class DataBase:
 
         self.__create_table('CREATE TABLE IF NOT EXISTS user ('
                             'uid INTEGER PRIMARY KEY,'
-                            'alias VARCHAR(10) UNIQUE,'
+                            'alias VARCHAR(15) UNIQUE,'
                             'firstname VARCHAR(15),'
                             'lastname VARCHAR(30),'
                             'birthday VARCHAR(10),'
@@ -224,7 +226,7 @@ class DataBase:
 
         def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
             self.db: Connection = db
-            self.exec_func = execute
+            self.exec_func: Callable = execute
             logging.info('[INFO] ShoppingListInterface initialized.')
 
         def get_list(self) -> list[shopping_item]:
@@ -268,21 +270,101 @@ class DataBase:
             return result_list
 
     class _UserInterface:
-        def __init__(self, db: Connection) -> None:
+        def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
             self.db: Connection = db
+            self.exec_func: Callable = execute
             logging.info('[INFO] UserInterface initialized.')
 
-        def get_users(self):
-            pass
+        def get_user(self, user: str | int) -> user_item:
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
 
-        def add_user(self):
-            pass
+            statement: str = f'SELECT * from user WHERE uid="{user}"'
+            result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
+            return self.__build_json(result_set)[0]
 
-        def remove_user(self):
-            pass
+        def get_users(self) -> list[user_item]:
+            statement: str = 'SELECT * from user'
+            result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
+
+            user_list: list[user_item] = self.__build_json(result_set)
+
+            for user in user_list:
+                notification_statement: str = f'SELECT text FROM notification WHERE uid="{user.get("uid")}"'
+                notification_result_set: list[tuple] = self.exec_func(notification_statement)
+                for text, in notification_result_set:
+                    user["waiting_notifications"].append(text)
+
+            return user_list
+
+        def add_user(self, alias: str, firstname: str, lastname: str, birthday: dict, messenger_id: int = 0, song_id: int = 1) -> None:
+            statement: str = f'INSERT INTO user (alias, firstname, lastname, birthday, mid, sid)' \
+                             f'VALUES ("{alias}", "{firstname}", "{lastname}", ' \
+                             f'"{self.__birthday_to_string(birthday)}", "{messenger_id}", "{song_id}") '
+            self.exec_func(statement)
+
+        def add_user_notification(self, user: int | str, notification: str):
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
+
+            statement: str = f'INSERT INTO notification (uid, text) VALUES ("{user}", "{notification}")'
+            self.exec_func(statement)
+
+        def update_user(self, uid: int, alias: str, firstname: str, lastname: str, birthday: dict, messenger_id: int = 0, song_id: int = 1):
+            statement: str = f'UPDATE user ' \
+                             f'SET alias="{alias}", firstname="{firstname}", lastname="{lastname}", ' \
+                             f'birthday="{self.__birthday_to_string(birthday)}", mid="{messenger_id}", sid="{song_id}"'
+            self.exec_func(statement)
+
+        def delete_user_notification(self, user: int | str, text: str) -> None:
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
+
+            statement: str = f'DELETE FROM notification WHERE uid="{user}" AND text="{text}"'
+            self.exec_func(statement)
+
+        def delete_user(self, user: int | str) -> None:
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
+
+            statement: str = f'DELETE FROM user WHERE uid="{user}"'
+            self.exec_func(statement)
+
+        @staticmethod
+        def __birthday_to_string(birthday: dict) -> str:
+            return str(birthday.get('year')) + str(birthday.get('month')).rjust(2, '0') + str(
+                birthday.get('day')).rjust(2, '0')
+
+        def __get_user_id(self, alias: str) -> int:
+            user_result_set: list[tuple[str]] = self.exec_func(f'SELECT uid FROM user WHERE alias="{alias}"')
+            if len(user_result_set) == 1:
+                return int(user_result_set[0][0])
+            else:
+                raise UserNotFountException()
 
         def __create_table(self):
             pass
+
+        @staticmethod
+        def __build_json(result_set: list[tuple]) -> list:
+            result_list: list[dict] = []
+
+            for uid, alias, firstname, lastname, birthday, mid, sid in result_set:
+                result_list.append({
+                    "uid": uid,
+                    "name": alias,
+                    "first_name": firstname,
+                    "last_name": lastname,
+                    "date_of_birth": {
+                        "year": birthday[0:4],
+                        "month": birthday[4:6],
+                        "day": birthday[6:8]
+                    },
+                    "messenger_id": mid,
+                    "alarm_sound": sid,
+                    "waiting_notifications": []
+                })
+            return result_list
 
     class _RoutineInterface:
         def __init__(self, db: Connection) -> None:
@@ -336,12 +418,4 @@ class DataBase:
 
 if __name__ == "__main__":
     dbb = DataBase("C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\")
-    # dbb.create_tables()
-    dbb.shoppinglist_interface.clear_list()
-    dbb.shoppinglist_interface.add_item('Milch', 'ml', 250)
-    dbb.shoppinglist_interface.add_item('Bananen', '', 3)
-    result = dbb.shoppinglist_interface.get_list()
-    logging.info(result)
-    dbb.shoppinglist_interface.update_item('Milch', 1402.95)
-    result = dbb.shoppinglist_interface.get_list()
-    logging.info(result)
+
