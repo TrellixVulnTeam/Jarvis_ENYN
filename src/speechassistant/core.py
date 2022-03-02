@@ -18,14 +18,17 @@ from Audio import AudioOutput, AudioInput
 from resources.analyze import Sentence_Analyzer
 from resources.module_skills import Skills
 from resources.intent.Wrapper import IntentWrapper as AIWrapper
+from database.database_connection import DataBase
 from services import *
 
 
 class Core:
-    def __init__(self, conf_dat: dict, analyzer: Sentence_Analyzer, audio_input: AudioInput, audio_output: AudioOutput, system_name: str) -> None:
+    def __init__(self, conf_dat: dict, analyzer: Sentence_Analyzer, audio_input: AudioInput, audio_output: AudioOutput,
+                 system_name: str) -> None:
         self.local_storage: dict = conf_dat["Local_storage"]
         self.config_data: dict = conf_dat
         self.path: str = conf_dat["Local_storage"]['CORE_PATH']
+        self.data_base = DataBase(f'{self.path}/database')
         self.__data: dict = {}
         self.modules: Modules | None = None
         self.analyzer: Sentence_Analyzer = analyzer
@@ -185,7 +188,8 @@ class ModuleWrapper:
             logging.info('[WARNING] Sending message to messenger failed,  because there is no key for it!')
         return
 
-    def play(self, path: str | None = None, audiofile: str = None, next: bool = False, notification: bool = False) -> None:
+    def play(self, path: str | None = None, audiofile: str = None, next: bool = False,
+             notification: bool = False) -> None:
         if path is not None:
             with open(path, "rb") as wav_file:
                 input_wav: AnyStr = wav_file.read()
@@ -198,11 +202,13 @@ class ModuleWrapper:
         else:
             self.audio_output.play_playback(data, next)
 
-    def play_music(self, by_name: str = None, url: str = None, path: str = None, as_next: bool = False, now: bool = False, playlist:bool = False, announce: bool = False) -> None:
+    def play_music(self, by_name: str = None, url: str = None, path: str = None, as_next: bool = False,
+                   now: bool = False, playlist: bool = False, announce: bool = False) -> None:
         if by_name is not None:
             by_name = "'" + by_name + "'"
         # simply forward information
-        self.audio_output.music_player.play(by_name=by_name, url=url, path=path, as_next=as_next, now=now, playlist=playlist,
+        self.audio_output.music_player.play(by_name=by_name, url=url, path=path, as_next=as_next, now=now,
+                                            playlist=playlist,
                                             announce=announce)
 
     def listen(self, text: str = None, messenger: bool = None) -> str:
@@ -408,7 +414,8 @@ class Modules:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    self.core.active_modules[str(text)]: ModuleWrapper = self.module_wrapper(self.core, text, analysis, messenger,
+                    self.core.active_modules[str(text)]: ModuleWrapper = self.module_wrapper(self.core, text, analysis,
+                                                                                             messenger,
                                                                                              user)
                     mt: Thread = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
@@ -442,7 +449,8 @@ class Modules:
             print('[INFO] -- (None present)')
         return
 
-    def start_module(self, user: dict = None, text: str | None = None, name: str = None, messenger: bool = False) -> bool:
+    def start_module(self, user: dict = None, text: str | None = None, name: str = None,
+                     messenger: bool = False) -> bool:
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill: Skills = self.core.skills
         analysis: dict = {}
@@ -460,7 +468,8 @@ class Modules:
             for module in self.modules:
                 if module.__name__ == name:
                     logging.info('[ACTION] --Modul {} was called directly (Parameter: {})--'.format(name, text))
-                    self.core.active_modules[str(text)]: ModuleWrapper = self.module_wrapper(self.core, text, analysis, messenger,
+                    self.core.active_modules[str(text)]: ModuleWrapper = self.module_wrapper(self.core, text, analysis,
+                                                                                             messenger,
                                                                                              user)
                     mt: Thread = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
@@ -572,66 +581,31 @@ class Modules:
 class Services:
     def __init__(self, core: Core, __data: dict, configuration_data: dict) -> None:
         self.weather: Weather = Weather(__data["api_keys"]["open_weather_map"],
-                               configuration_data["Local_storage"]["home_location"],
-                               core.skills)
+                                        configuration_data["Local_storage"]["home_location"],
+                                        core.skills)
         self.light_system: LightController = LightController(core)
 
 
 class Users:
     def __init__(self, core: Core) -> None:
-        self.users: list = []
         self.core: Core = core
-        self.load_users()
+        self.database_connection = core.data_base.user_interface
 
     def get_user_list(self) -> list:
-        return self.users
+        return self.database_connection.get_users()
 
-    def load_users(self) -> None:
-        # Load users separately from the users folder
-        logging.info('---------- USERS ---------')
-        location: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'users')
-        sub_dirs: list[str] = os.listdir(location)
-        try:
-            sub_dirs.remove("README.txt")
-            sub_dirs.remove("README.md")
-        except ValueError:
-            pass
-        # We will now go through the individual subfolders of server/users to set up the users.
-        # users. The subfolders conveniently have the names of the users.
-        for username in sub_dirs:
-            if not username == 'README.txt' and not username == 'README.md':
-                userpath: str = os.path.join(location, username)
-                self.add_user(userpath)
-                logging.info('[INFO] User {} loaded'.format(username))
-        if not self.users:
-            # self.core.Audio_Output.say("Bitte richte zunächst einen Nutzer ein und starte dann das System wieder neu!")
-            pass
+    def add_user(self, alias: str, first_name: str, last_name: str, birthday: dict, messenger_id: int,
+                 song_id: int = 1) -> None:
+        self.database_connection.add_user(alias, first_name, last_name, birthday, messenger_id, song_id)
 
-    def add_user(self, path: str) -> None:
-        with open(path + "/data.json") as user_file:
-            user_data: dict = json.load(user_file)["User_Info"]
-        with open(path + "/resources/user_storage.json") as user_storage_file:
-            user_storage: dict = json.load(user_storage_file)
-        user_data["user_storage"]: dict = user_storage
-        self.users.append(user_data)
+    def get_user_by_name(self, name: str) -> dict:
+        return self.database_connection.get_user(name)
 
-    def get_user_by_name(self, name: str) -> dict | None:
-        for user in self.users:
-            if user.get('first_name').lower() == name.lower():
-                return user
-        return None
+    def get_user_by_id(self, user_id: int) -> dict:
+        return self.database_connection.get_user(user_id)
 
-    def get_user_by_id(self, user_id: int) -> dict | None:
-        for user in self.users:
-            if user["id"] == user_id:
-                return user
-        return None
-
-    def get_user_by_messenger_id(self, messenger_id: int) -> dict | None:
-        for user in self.users:
-            if user["messenger_id"] == messenger_id:
-                return user
-        return None
+    def get_user_by_messenger_id(self, messenger_id: int) -> dict:
+        return self.database_connection.get_user_by_messenger_id(messenger_id)
 
 
 def start(conf_dat: dict) -> None:
@@ -663,18 +637,16 @@ def start(conf_dat: dict) -> None:
     analyzer: Sentence_Analyzer = Sentence_Analyzer()
     audio_output: AudioOutput = AudioOutput(voice=config_data["voice"])
     # os.system('clear')
-    audio_input: AudioInput = AudioInput()
+    audio_input: AudioInput = AudioInput(audio_output.adjust_after_hot_word)
     core: Core = Core(config_data, analyzer, audio_input, audio_output, system_name)
     modules: Modules = Modules(core, core.local_storage)
     core.modules = modules
     core.local_storage['CORE_starttime']: float = time.time()
-    audio_input.set_core(core, audio_output)
     time.sleep(1)
     # -----------Starting-----------#
     modules.start_continuous()
-    audio_input.start(sentensivity=config_data['wakeword_sentensivity'])
+    audio_input.start(config_data['wakeword_sentensivity'], core.hotword_detected)
     audio_output.start()
-    core.start_module(name="reload_routinen", text="")
     core.services.weather.start()
     time.sleep(0.75)
 
