@@ -10,7 +10,6 @@
       "system_name",
       "activation_phrase"
     ],
-    "users": {},
     "messenger_allowed_id_table": [],
     "rejected_messenger_messages": [],
     "module_storage": {
@@ -23,8 +22,6 @@
         "host": ""
       }
     },
-    "birthdays": {
-    },
     "user": ""
   },
   "messenger_key": "",
@@ -32,7 +29,6 @@
   "messenger": true,
   "voice": "male",
   "wakeword_sentensivity": 0.5,
-  "Network_Key": "",
   "use_cameras": false,
   "use_facerec": false,
   "use_interface": false

@@ -35,6 +35,7 @@ class DataBase:
         self.user_interface = self._UserInterface(self.db, self.__execute)
         self.routine_interface = self._RoutineInterface(self.db, self.__execute)
         self.audio_interface = self._AudioInterface(self.db, self.__execute)
+        self.messenger_interface = self._MessangerInterface(self.__execute)
         self.__audio_path: str = ''
 
         logging.info('\n[INFO] DataBase successfully initialized.')
@@ -167,6 +168,16 @@ class DataBase:
                             'PRIMARY KEY(uid, text),'
                             'FOREIGN KEY(uid) REFERENCES user(uid))')
 
+        self.__create_table('CREATE TABLE IF NOT EXISTS messengernotifications')
+        self.__create_table('CREATE TABLE IF NOT EXISTS birthdays ('
+                            'firstname VARCHAR(15),'
+                            'lastname VARCHAR(30),'
+                            'day INTEGER,'
+                            'month INTEGER,'
+                            'year INTEGER,'
+                            'PRIMARY KEY(firstname, lastname),'
+                            'UNIQUE (firstname, lastname))')
+
         self.db.commit()
 
         if self.error_counter == 0:
@@ -241,18 +252,18 @@ class DataBase:
         def update_alarm(self, aid: int, time: dict = None, text: str = None, user: int = None, active: bool = None,
                          initiated: bool = None, sound: str = None):
             old_alarm: tuple = self.exec_func(f'SELECT * FROM alarm WHERE aid={aid}')[0]
-            if not time is None:
+            if time is not None:
                 old_alarm[3] = time["hour"]
                 old_alarm[4] = time["minute"]
-            if not text is None:
+            if text is not None:
                 old_alarm[6] = text
-            if not user is None:
+            if user is not None:
                 old_alarm[2] = user
-            if not active is None:
-                old_alarm[7] = int(active == True)
-            if not initiated is None:
-                old_alarm[8] = int(initiated == True)
-            if not sound is None:
+            if active is not None:
+                old_alarm[7] = int(active is True)
+            if initiated is not None:
+                old_alarm[8] = int(initiated is True)
+            if sound is not None:
                 old_alarm[1] = initiated
 
             statement: str = f'UPDATE alarm SET sname="{old_alarm[2]}", uid={old_alarm[3]}, hour={old_alarm[4]}, minute={old_alarm[5]}, total_seconds={old_alarm[6]}, text="{old_alarm[7]}", ' \
@@ -566,6 +577,10 @@ class DataBase:
             result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
             return self.__build_json(result_set)[0]
 
+        def get_user_by_messenger_id(self, messenger_id: int) -> user_item:
+            result_set: list[tuple] = self.exec_func(f'SELECT * FROM user WHERE mid={messenger_id}')
+            return self.__build_json(result_set)[0]
+
         def get_users(self) -> list[user_item]:
             statement: str = 'SELECT * from user'
             result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
@@ -599,7 +614,7 @@ class DataBase:
             # toDo: dynamic
             statement: str = f'UPDATE user ' \
                              f'SET alias="{alias}", firstname="{firstname}", lastname="{lastname}", ' \
-                             f'birthday="{self.__birthday_to_string(birthday)}", mid="{messenger_id}", sid="{song_id}" '\
+                             f'birthday="{self.__birthday_to_string(birthday)}", mid="{messenger_id}", sid="{song_id}" ' \
                              f'WHERE uid={uid}'
             self.exec_func(statement)
 
@@ -683,7 +698,7 @@ class DataBase:
             return routine_list
 
         def add_routine(self, routine: dict) -> None:
-            statement: str = f'INSERT INTO routine (description, daily, monday, tuesday, wednesday, thursday, friday, '\
+            statement: str = f'INSERT INTO routine (description, daily, monday, tuesday, wednesday, thursday, friday, ' \
                              f'saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall)' \
                              f'VALUES ("{routine.get("description")}", '
             for key in ['daily', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
@@ -695,7 +710,8 @@ class DataBase:
             rid: int = self.exec_func('SELECT last_insert_rowid()')[0][0]
 
             for module in routine['actions']['commands']:
-                self.exec_func(f'INSERT INTO routinecommands (rid, modulename) VALUES ({rid}, "{module.get("module_name")}")')
+                self.exec_func(
+                    f'INSERT INTO routinecommands (rid, modulename) VALUES ({rid}, "{module.get("module_name")}")')
                 module_id: int = self.exec_func('SELECT last_insert_rowid()')[0][0]
 
                 for text in module.get('text'):
@@ -794,6 +810,68 @@ class DataBase:
 
         def __create_table(self):
             pass
+
+    class _MessangerInterface:
+        def __init__(self, execute: Callable[[str], list]) -> None:
+            self.exec_func: Callable = execute
+
+        def add_rejected_message(self, msg):
+            if msg['content_type'] == 'text':
+                pass
+
+    class _BirthdayInterface:
+        def __init__(self, execute: Callable[[str], list]):
+            self.exec_func: Callable = execute
+
+        def add_birthday(self, first_name: str, last_name: str, day: int, month: int, year: int) -> None:
+            self.exec_func(f'INSERT INTO birthdays '
+                           f'VALUES ("{first_name}", "{last_name}", {day}, {month}, {year})')
+
+        def get_birthday(self, first_name: str, last_name: str) -> dict:
+            result_set: tuple = self.exec_func(f'SELECT * FROM birthdays '
+                                               f'WHERE firstname="{first_name}" '
+                                               f'AND lastname="{last_name}"')[0]
+            return self.__build_json(result_set)
+
+        def update_birthday(self, old_first_name: str, old_last_name: str, new_first_name: str = None,
+                            new_last_name: str = None, day: int = None, month: int = None, year: int = None) -> None:
+            old_birthday: tuple = self.exec_func(f'SELECT * FROM birthdays '
+                                                 f'WHERE firstname="{old_first_name}" '
+                                                 f'AND lastname="{old_last_name}"')[0]
+
+            if new_first_name is not None:
+                old_birthday[0] = new_first_name
+            if new_last_name is not None:
+                old_birthday[1] = new_last_name
+            if day is not None:
+                old_birthday[2] = day
+            if month is not None:
+                old_birthday[3] = month
+            if year is not None:
+                old_birthday[4] = year
+
+            statement: str = f'UPDATE birthdays ' \
+                             f'SET firstname="{old_birthday[0]}" ' \
+                             f'lastname="{old_birthday[1]}" ' \
+                             f'day={old_birthday[2]} ' \
+                             f'month={old_birthday[3]} ' \
+                             f'year={old_birthday[4]} ' \
+                             f'WHERE firstname="{old_first_name}" ' \
+                             f'AND lastname="{old_last_name}"'
+            self.exec_func(statement)
+
+        def delete_birthday(self, first_name: str, last_name: str) -> None:
+            self.exec_func(f'DELETE FROM birthdays WHERE firstname="{first_name}" AND lastname="{last_name}"')
+
+        @staticmethod
+        def __build_json(result_set: tuple) -> dict:
+            return {
+                'first_name': result_set[0],
+                'last_name': result_set[1],
+                'day': result_set[2],
+                'month': result_set[3],
+                'year': result_set[4]
+            }
 
     def __execute(self, command: str) -> list:
         cursor: Cursor = self.db.cursor()
