@@ -6,10 +6,8 @@ import pkgutil
 import random
 import time
 import traceback
-import urllib
 from threading import Thread
 from typing import AnyStr, Any
-from urllib.request import Request, urlopen
 
 import requests
 
@@ -160,7 +158,10 @@ class ModuleWrapper:
         self.core: Core = core
         self.skills: Skills = core.skills
         self.services: Services = core.services
+        self.data_base = core.data_base
+
         self.Analyzer: Sentence_Analyzer = core.analyzer
+
         self.local_storage: dict = core.local_storage
         self.system_name: str = core.system_name
         self.path: str = core.path
@@ -219,7 +220,7 @@ class ModuleWrapper:
         if messenger:
             return self.core.messenger_listen(self.user["first_name"].lower())
         else:
-            return self.audio_input.recognize_input(listen=True)
+            return self.audio_input.recognize_input(self.core.hotword_detected, listen=True)
 
     def recognize(self, audio_file: Any) -> str:
         return self.audio_input.recognize_file(audio_file)
@@ -245,6 +246,7 @@ class ModuleWrapper:
         else:
             return module_storage[module_name]
 
+    """
     @staticmethod
     def translate(text, target_lang='de'):
         try:
@@ -257,6 +259,7 @@ class ModuleWrapper:
             return answer[0][0][0]
         except Exception:
             return text
+    """
 
     def correct_output(self, core_array, messenger_array):
         if self.messenger_call is True:
@@ -278,7 +281,7 @@ class ModuleWrapper:
         return text
 
     def start_hotword_detection(self):
-        self.audio_input.start(config_data['Local_storage']['wakeword_sentensivity'])
+        self.audio_input.start(config_data['Local_storage']['wakeword_sentensivity'], self.core.hotword_detected)
 
     def stopp_hotword_detection(self):
         self.audio_input.stop()
@@ -315,6 +318,7 @@ class Modulewrapper_continuous:
         self.core = core
         self.Analyzer = core.analyzer
         self.services = core.services
+        self.data_base = core.data_base
         self.audio_Input = core.audio_input
         self.audio_output = core.audio_output
         self.local_storage = core.local_storage
@@ -493,7 +497,7 @@ class Modules:
                         mt.join()  # wait until Module is done...
                         self.start_module(user=user, name='wartende_benachrichtigung')
                         break
-                except:
+                except Exception:
                     traceback.print_exc()
                     print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
         return False
@@ -624,13 +628,9 @@ def start(conf_dat: dict) -> None:
             print("[WARNING] There was a problem with the Setup-Wizard!")
             traceback.print_exc()"""
 
-    config_data["Local_storage"]["routines"]: list = []
-    config_data["Local_storage"]["alarm_routines"]: list = []
-
     logging.info('--------- Start System ---------\n\n')
 
     system_name: str = config_data['System_name']
-    home_location: str = config_data["Local_storage"]["home_location"]
     config_data['Local_storage']['CORE_PATH']: AnyStr = os.path.dirname(os.path.abspath(__file__))
     # clear unnecessary warnings
     modules: Modules
