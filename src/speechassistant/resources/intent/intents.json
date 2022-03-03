@@ -15,7 +15,7 @@
     "context_set": ""
   },
   {"tag": "abort",
-    "patterns": ["Abbruch", "Brich den Befehl ab", "abruch"],
+    "patterns": ["Abbruch", "Brich den Befehl ab", "abbruch"],
     "responses": [],
     "context_set": ""
   },
@@ -40,12 +40,12 @@
     "context_set": ""
   },
   {"tag": "spell",
-    "patterns": ["buchstabier", "diktier mir", "Wie wird geschriben", "Wie schreibt man", "Wie wird geschrieben"],
+    "patterns": ["buchstabiere", "diktiere mir", "Wie wird geschrieben", "Wie schreibt man", "Wie wird geschrieben"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "football",
-    "patterns": ["Wer führt in der Bundesliga", "Wer führt die Bundesliga an", "Wer ist auf der ersten Position in der Bundesliga", "Auf welchem Platz ist in der Bundesliga", "Auf welchem Rang ist ", "Wer ist auf der Plazierung"],
+    "patterns": ["Wer führt in der Bundesliga", "Wer führt die Bundesliga an", "Wer ist auf der ersten Position in der Bundesliga", "Auf welchem Platz ist in der Bundesliga", "Auf welchem Rang ist ", "Wer ist auf der Platzierung"],
     "responses": [],
     "context_set": ""
   },
@@ -60,12 +60,12 @@
     "context_set": ""
   },
   {"tag": "shoppinglist",
-    "patterns": ["Set auf die Einkaufsliste", "Schreib auf die Einkaufsliste", "Für auf die Einkaufsliste", "Füg der Einkaufsliste hinzu", "Was steht auf der Einkaufsliste", "Gib mir die Einkaufsliste aus", "Lösch die Einkaufsliste", "Leer die Einkaufsliste", "Sende mir die Einkaufsliste", "Schick mir die Einkaufsliste", "Räum die Einkaufsliste auf"],
+    "patterns": ["Set auf die Einkaufsliste", "Schreib auf die Einkaufsliste", "Für auf die Einkaufsliste", "Füg der Einkaufsliste hinzu", "Was steht auf der Einkaufsliste", "Gib mir die Einkaufsliste aus", "Lösche die Einkaufsliste", "Leer die Einkaufsliste", "Sende mir die Einkaufsliste", "Schick mir die Einkaufsliste", "Räum die Einkaufsliste auf"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "remainder",
-    "patterns": ["Erriner mich an", "Sag mir um bescheid", "Kannst du mich daran errinern, dass", "Sag mir in 10 Minuten bescheid, dass ich Tiffany noch begrüßen muss", "Erinner mich in 20 Minuten ans hallo sagen", "Erinner mich daran, dass ich noch mehr machen"],
+    "patterns": ["Erinnere mich an", "Sag mir um bescheid", "Kannst du mich daran erinnern, dass", "Sag mir in 10 Minuten bescheid, dass ich Tiffany noch begrüßen muss", "Erinner mich in 20 Minuten ans hallo sagen", "Erinner mich daran, dass ich noch mehr machen"],
     "responses": [],
     "context_set": ""
   },
@@ -85,7 +85,7 @@
     "context_set": ""
   },
   {"tag": "hotworddetection",
-    "patterns": ["Starte die Hotworddetection", "Stoppe die Hotworddetection"],
+    "patterns": ["Starte die hotword detection", "Stoppe die hotword detection"],
     "responses": [],
     "context_set": ""
   },
@@ -100,17 +100,17 @@
     "context_set": ""
   },
   {"tag": "phue",
-    "patterns": ["Badeschrank und Küche aus", "Alle Lichter grün", "Schalfzimmer und Esszimmer aus", "Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warmweiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein", "Mach alles gelb", "Mach das Licht wärmer", "Licht kälter"],
+    "patterns": ["Badeschrank und Küche aus", "Alle Lichter grün", "Schlafzimmer und Esszimmer aus", "Mach das Licht an", "Mach das Licht aus", "Mach Links und Rechts blau", "Fensterbrett und Küche rot", "Nachttisch gelb", "Mach das Licht heller", "Fensterbrett dunkler", "Stell das Licht auf 50 Prozent", "Mach den Flur warm weiß", "Mach das Bad orange", "Mach die Garage weiß", "Mach das Esszimmer türkis", "Licht im Kinderzimmer pink", "Lampen in dem Arbeitszimmer sollen grün sein", "Mach alles gelb", "Mach das Licht wärmer", "Licht kälter"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "philipstv",
-    "patterns": ["Mach den Fernseher an", "Fernseher anschalten", "Fernsehen ausschalten", "Programm hochschalten", "Programm runterschalten", "schalte ein Programm runter", "schalte drei Programme hoch", "Mach das Ambilight vom Fersehen blau", "Mach die Hintergrundbeleuchtung von Fernseher an"],
+    "patterns": ["Mach den Fernseher an", "Fernseher anschalten", "Fernsehen ausschalten", "Programm hochschalten", "Programm runterschalten", "schalte ein Programm runter", "schalte drei Programme hoch", "Mach das Ambilight vom Fernsehen blau", "Mach die Hintergrundbeleuchtung von Fernseher an"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "qr",
-    "patterns": ["Erstell einen QR-Code", "Schreibe etwas in einen QR", "Erzeug QR", "Mach mir einen QR-Code"],
+    "patterns": ["Erstelle einen QR-Code", "Schreibe etwas in einen QR", "Erzeuge QR", "Mach mir einen QR-Code"],
     "responses": [],
     "context_set": ""
   },
@@ -184,7 +184,7 @@
     "context_set": ""
   },
   {"tag": "translation",
-    "patterns": ["Übersetze ins", "Was heißt auf", "Übersetz Hallo Welt ins englische"],
+    "patterns": ["Übersetze ins", "Was heißt auf", "Übersetze Hallo Welt ins englische", "Was heißt draußen sein im amerikanischen", "Was bedeutet computer auf deutsch"],
     "responses": [],
     "context_set": ""
   },
@@ -224,7 +224,7 @@
     "context_set": ""
   },
   {"tag": "wikipedia",
-    "patterns": ["Was weißt du über", "wer ist", "was versteht man unter", "definier den Begriff", "definier", "Was ist Oxidation", "Was ist der Eifelturm", "Was ist england"],
+    "patterns": ["Was weißt du über", "wer ist", "was versteht man unter", "definiere den Begriff", "definiere", "Was ist Oxidation", "Was ist der Eifelturm", "Was ist england"],
     "responses": [],
     "context_set": ""
   },
@@ -284,23 +284,23 @@
     "context_set": ""
   },
   {"tag": "whyistherestrawhere",
-    "patterns": ["Warum liegt hier Stroh?", "Wieso ist hier Stroh", "Warum ist da Stroh", "Warum liegt da Strog"],
+    "patterns": ["Warum liegt hier Stroh?", "Wieso ist hier Stroh", "Warum ist da Stroh", "Warum liegt da Stroh"],
     "responses": ["Und warum hast du eine Maske auf?"],
     "context_set": ""
   },
   {"tag": "whynofriend",
-    "patterns": ["Warum habe ich keinen Freund?", "Warum bin ich alleine?", "Wieso habe ich keine Freundin?", "Wesshalb habe ich keinen Freund", "warum habe ich keine Freunde?"],
+    "patterns": ["Warum habe ich keinen Freund?", "Warum bin ich alleine?", "Wieso habe ich keine Freundin?", "Weshalb habe ich keinen Freund", "warum habe ich keine Freunde?"],
     "responses": ["Guck doch mal in den Spiegel", "Ich bin dein Freund und werde es immer bleiben."],
     "context_set": ""
   },
   {"tag": "whyfriend",
-    "patterns": ["Warum habe ich Freunde?", "Wesshalb habe ich einen Freund", "Warum habe ich eine Freundin"],
+    "patterns": ["Warum habe ich Freunde?", "Weshalb habe ich einen Freund", "Warum habe ich eine Freundin"],
     "responses": ["Du bist halt einfach fenominal!", "Das frage ich mich auch schon die ganze Zeit..."],
     "context_set": ""
   },
   {"tag": "whoareyou",
     "patterns": ["Wer bist du?", "Was bist du?"],
-    "responses": ["Ich bin Jarvis, ein inteligenter Sprachassistent!"],
+    "responses": ["Ich bin Jarvis, ein intelligenter Sprachassistent!"],
     "context_set": ""
   },
   {"tag": "parents",
@@ -356,7 +356,7 @@
   {"tag": "meaningoflife",
     "patterns": ["Was ist der Sinn des Lebens"],
     "responses": ["Der wahre Sinn des Lebens ist: Glücklich zu sein!",
-                  "Der Sinn des Lebens ist die größte Last zu finden, die du erstragen kannst, und sie zu ertragen",
+                  "Der Sinn des Lebens ist die größte Last zu finden, die du ertragen kannst, und sie zu ertragen",
                   "Sein, was wir sind, und werden, was wir werden können, das ist das Ziel unseres Lebens."],
     "context_set": ""
   },
@@ -373,7 +373,7 @@
     "context_set": ""
   },
   {"tag": "location",
-    "patterns": ["Wo wohnst du", "Wo bist du gerade", "Wo befindest du dich", "Wo hälst du dich auf"],
+    "patterns": ["Wo wohnst du", "Wo bist du gerade", "Wo befindest du dich", "Wo hältst du dich auf"],
     "responses": ["Anders als andere Sprachassistenten wohnt nicht nur mein Körper in deinem Haus, sondern auch mein Kopf."],
     "context_set": ""
   },
@@ -383,7 +383,7 @@
     "context_set": ""
   },
   {"tag": "easterbunny",
-    "patterns": ["Wo sind die Ostereier", "Such mein Osternest", "Weißt du, wo mein Osternest ist?", "Wo hast du die Ostereier versteckt", "Wo finde ich mein Osternäst", "Ich kann meine Osternäste nicht finden", "Such die Ostereier für mich"],
+    "patterns": ["Wo sind die Ostereier", "Such mein Osternest", "Weißt du, wo mein Osternest ist?", "Wo hast du die Ostereier versteckt", "Wo finde ich mein Osternest", "Ich kann meine Osterfeste nicht finden", "Such die Ostereier für mich"],
     "responses": ["Ich erstelle noch einen Suchalgorithmus, aber fang doch schon einmal an zu suchen."],
     "context_set": ""
   },
@@ -401,7 +401,7 @@
     "patterns": ["Hast du einen Freund?", "Hast du Freunde"],
     "responses": ["Nein, leider nicht. Möchtest du meiner sein?", "Nein, Siri wollte leider nicht.",
                   "Ene mene Miste, das kommt mir nicht in die Kiste!",
-                  "Ich habe es mit Online Dating probiert, aber da haben mich nur Bots angeschreieben."],
+                  "Ich habe es mit Online Dating probiert, aber da haben mich nur Bots angeschrieben."],
     "context_set": ""
   },
   {"tag": "doyouhavepets",
@@ -473,7 +473,7 @@
   },
   {"tag": "ticklish",
     "patterns": ["Bist du kitzlig", "kann man dich kitzeln", "Wo bist du kitzelig", "was passiert, wenn ich dich kitzle", "Bist du kitzelig"],
-    "responses": ["Tatsächlich hat das noch keiner ausprfroaobiert.", "Ich denke nicht",
+    "responses": ["Tatsächlich hat das noch keiner ausprobiert.", "Ich denke nicht",
                       "Alle die es ausprobiert haben, haben einen Stromschlag bekommen, bevor sie mich zum lachen bringen konnten."],
     "context_set": ""
   },
@@ -508,7 +508,7 @@
   },
   {"tag": "introduce",
     "patterns": ["Stell dich vor", "Kannst du dich vorstellen", "erzähl wer du bist"],
-    "responses": ["Hallo, Ich bin Jarvis, ein Sprachassistent. Das Ziel meines Projekts ist es einen sicheren Sprachassistenten zu nutzen, ohne dass man Angst haben muss, was mit seinen Daten geschieht. Ich kann mittlerweile schon zum Beispiel das Wetter ansagen, dich Wecken oder an Sachen erinnern und vieles mehr. Ein Team arbeitet aber viel an weiteren Modulen, damit ich in Zukunk auch eine Alternative zu anderen Sprachassistenten bleibe."],
+    "responses": ["Hallo, Ich bin Jarvis, ein Sprachassistent. Das Ziel meines Projekts ist es einen sicheren Sprachassistenten zu nutzen, ohne dass man Angst haben muss, was mit seinen Daten geschieht. Ich kann mittlerweile schon zum Beispiel das Wetter ansagen, dich Wecken oder an Sachen erinnern und vieles mehr. Ein Team arbeitet aber viel an weiteren Modulen, damit ich in Zukunft auch eine Alternative zu anderen Sprachassistenten bleibe."],
     "context_set": ""
   },
   {"tag": "iloveyou",
@@ -600,8 +600,8 @@
     "context_set": ""
   },
   {"tag": "poem",
-    "patterns": ["Kennst du ein Gedicht", "Sag ein Gedicht auf", "Trage ein Gedicht vor", "Erzäl mir ein Gedicht"],
-    "responses": ["Bleibe nur eine Minute allein, ohne Kaffe, ohne Wein, Du nur mit dir in einem Raum, Die Zeit so lang, du glaubst es kaum."],
+    "patterns": ["Kennst du ein Gedicht", "Sag ein Gedicht auf", "Trage ein Gedicht vor", "Erzähl mir ein Gedicht"],
+    "responses": ["Bleibe nur eine Minute allein, ohne Kaffee, ohne Wein, Du nur mit dir in einem Raum, Die Zeit so lang, du glaubst es kaum."],
     "context_set": ""
   },
   {"tag": "joke",
@@ -617,7 +617,7 @@
                      "Wie nennt man eine Polizistin, die ihre Tage hat? Red Bull.",
                      "Habe einem Hipster ins Bein geschossen. Jetzt hopster.",
                      "Mann wäscht ab.",
-                     "Greifen uns Äliens deswegen nicht an, weil sie all unsere Sienc-Fiction Filme für real halten und Angst haben, dass sie verlieren würden?",
+                     "Greifen uns Äliens deswegen nicht an, weil sie all unsere Science-Fiction Filme für real halten und Angst haben, dass sie verlieren würden?",
                      "Wenn mein Sohn Pfarrer wird, spreche ich ihn dann mit Sohn oder mit Vater an?",
                      "Hab heute eine Prostituierte getroffen. Sie sagte, dass sie alles für zwanzig Euro macht. Ratet mal, wer jetzt ein aufgeräumtes Zimmer hat."],
     "context_set": ""
@@ -642,7 +642,7 @@
                   "Tue es, oder tue es nicht. Es gibt kein Versuchen.",
                   "Furcht ist der Pfad zur dunklen Seite. Furcht führt zu Wut, Wut führt zu Hass, Hass führt zu unsäglichem Leid.",
                   "Immer zu zweit sie sind. Keiner mehr, keiner weniger. Ein Meister und ein Schüler.",
-                  "Warhrlich wunderbar die Seele eines Kindes ist.",
+                  "Wahrlich wunderbar die Seele eines Kindes ist.",
                   "In die Irre euch die Augen führen, in der Macht ganz verschieden jeder von euch ist.",
                   "Du kannst Veränderungen nicht aufhalten. Genau so, wie du die Sonne nicht daran hindern kannst unterzugehen."],
     "context_set": ""

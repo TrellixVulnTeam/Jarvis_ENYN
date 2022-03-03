@@ -22,7 +22,6 @@ class LightController:
             for light in system["systemObject"].get_lights_in_json():
                 self.lights.append({"id": light["id"], "name": light["name"], "system": system})
 
-
     def __get_named_lights(self, text):
         text = text.lower()
         named_lights = []
@@ -104,11 +103,3 @@ class LightController:
                     # color[1] = converter.hex_to_xy(farbe)[1]
                     return color_code[i]
             return None
-
-
-
-
-
-
-
-
