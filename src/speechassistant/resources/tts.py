@@ -1,17 +1,20 @@
+import logging
 import time
 import traceback
 from pathlib import Path
 from threading import Thread
 
 import pyperclip
+
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.ui import Select
 
 
-class Text_to_Speech:
+class TTS:
 
     def __init__(self) -> None:
         self.driver = None
@@ -24,27 +27,31 @@ class Text_to_Speech:
         self.is_reading = False
         self.gender = 'male'
 
-    def start(self, gender):
-        tts_thread = Thread(target=self.run(gender))
+    def start(self, gender: str) -> None:
+        tts_thread: Thread = Thread(target=self.run(gender))
         tts_thread.daemon = True
         tts_thread.start()
 
-    def run(self, gender):
-        print("[LOADING] Speechmodule")
-        # self.display = Display(size=(800, 600))
-        # self.display.start()
-        self.gender = gender
+    def run(self, gender: str) -> None:
+        logging.info("[ACTION] Load Speechmodule")
+        self.display: Display = Display(size=(800, 600))
+        self.display.start()
+        self.gender: str = gender
         # start browser
-        self.start_driver()
+        self.__start_driver()
 
-    def start_driver(self):
-        self.driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver', options=self.get_opt())
-        self.action = ActionChains(self.driver)
+    def __start_driver(self) -> None:
+        # toDo: change following path
+        # driver_path: str = str(Path(__file__).parent) + '/webdriver/chromedriver'
+        driver_path: str = '/home/pi/Desktop/chromedriver'
+        print(driver_path)
+        self.driver: webdriver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver', chrome_options=self.get_opt())
+        self.action: ActionChains = ActionChains(self.driver)
         # self.start_vpn()
         time.sleep(2)
         self.get_website_inf()
 
-    def say(self, text):
+    def say(self, text: str) -> None:
         try:
             # output the entered text as audio
             self.is_reading = True
@@ -82,16 +89,9 @@ class Text_to_Speech:
         # self.driver.execute_script(script, self.text_area, text)
 
     def select_german(self):
+        print(self.text_area)
         self.driver.find_element_by_id('downshift-0-toggle-button').click()
         self.driver.find_element_by_id('downshift-0-item-6').click()
-        # //*[@id="downshift-0-item-6"]
-        # drop_down = Select(self.driver.find_element_by_xpath('//*[@id="downshift-0-toggle-button"]'))
-        # drop_down.select_by_visible_text("German")
-        # self.driver.execute_script("langChange(6)")
-
-    def click_button(self, id: str) -> None:
-        element: WebElement = self.driver.find_element_by_id(id)
-        self.action.move_to_element(element).click().perform()
 
     def select_voice(self, gender):
         if gender == "male":
@@ -107,10 +107,10 @@ class Text_to_Speech:
         self.play_button.click()
 
     def get_website_inf(self):
-        url: str = "https://www.ibm.com/demos/live/tts-demo/self-service/home"
+        url: str = 'https://www.ibm.com/demos/live/tts-demo/self-service/home'
         self.driver.get(url)
         self.text_area = self.driver.find_element_by_id('text-area')
-        print("type of text-area: " + type(self.text_area))
+        time.sleep(3)
         self.play_button = self.driver.find_element_by_id('btn')
         self.select_german()
         self.select_voice(self.gender)
@@ -135,6 +135,7 @@ class Text_to_Speech:
 
 
 if __name__ == "__main__":
-    tts = Text_to_Speech()
+    tts = TTS()
     tts.start("male")
+    time.sleep(3)
     tts.say('Hallo Welt')
