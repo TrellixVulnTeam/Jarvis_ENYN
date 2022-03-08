@@ -14,8 +14,8 @@ from Crypto import Random
 from flask import Flask, render_template, jsonify, request, Response, send_file
 from gevent import pywsgi
 
-from services.light_systems.Phue import PhilipsWrapper
-from webserver.helpWrapper import InstallWrapper
+from src.speechassistant.services.light_systems.Phue import PhilipsWrapper
+from src.speechassistant.webserver.helpWrapper import InstallWrapper
 
 # JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
 sys.path.append(os.path.join(os.path.dirname(__file__), "/"))

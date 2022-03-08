@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations  # compatibility for < 3.10
 
 import io
 import logging
@@ -21,7 +21,7 @@ import speech_recognition as sr
 import vlc
 from pygame import mixer as mixer
 
-from resources.tts import Text_to_Speech
+from src.speechassistant.resources.tts import TTS
 
 
 class AudioInput:
@@ -33,7 +33,7 @@ class AudioInput:
     """
 
     def __init__(self, _adjust_after_hot_word: Callable) -> None:
-        self.audio_output: AudioOutput | None = None
+        self.audio_output: AudioOutput = None
         self.adjust_after_hot_word: Callable = _adjust_after_hot_word
         logging.getLogger().setLevel(logging.INFO)
         self.stopped: bool = False
@@ -163,7 +163,7 @@ class MusicPlayer:
     """
 
     def __init__(self, _audio_output: AudioOutput) -> None:
-        self.music_thread: Thread | None = None
+        self.music_thread: Thread = None
         self.playlist: list = []
         self.instance: vlc.Instance = vlc.Instance()
         self.player = self.instance.media_player_new()
@@ -320,7 +320,7 @@ class AudioOutput:
 
         self.music_player: MusicPlayer = MusicPlayer(self)
         mixer.pre_init(44100, -16, 1, 512)
-        self.tts: Text_to_Speech = Text_to_Speech()
+        self.tts: TTS = TTS()
         self.tts.start(voice)
 
         self.stopped: bool = True

@@ -1,3 +1,5 @@
+from __future__ import annotations      # compatibility for < 3.10
+
 import io
 import logging
 from datetime import datetime

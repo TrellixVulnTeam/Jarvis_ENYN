@@ -11,13 +11,13 @@ from typing import AnyStr, Any
 
 import requests
 
-import wb_server as ws
-from Audio import AudioOutput, AudioInput
-from resources.analyze import Sentence_Analyzer
-from resources.module_skills import Skills
-from resources.intent.Wrapper import IntentWrapper as AIWrapper
-from database.database_connection import DataBase
-from services import *
+import src.speechassistant.wb_server as ws
+from src.speechassistant.Audio import AudioOutput, AudioInput
+from src.speechassistant.resources.analyze import Sentence_Analyzer
+from src.speechassistant.resources.module_skills import Skills
+from src.speechassistant.resources.intent.Wrapper import IntentWrapper as AIWrapper
+from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.services import *
 
 
 class Core:
@@ -27,12 +27,12 @@ class Core:
         self.config_data: dict = conf_dat
         self.path: str = conf_dat["Local_storage"]['CORE_PATH']
         self.data_base = DataBase(f'{self.path}/database')
-        self.__data: dict = {}
-        self.modules: Modules | None = None
+        self.skills: Skills = Skills()
+        self.__data: dict = conf_dat
+        self.__fill_data()  # since the path is needed, __fill_data() is called only here
+        self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = analyzer
         self.services: Services = Services(self, self.__data, conf_dat)
-        self.ai: AIWrapper = AIWrapper(self)
-        self.skills: Skills = Skills()
         self.messenger = None
         self.messenger_queued_users: list = []  # These users are waiting for a response
         self.messenger_queue_output: dict = {}
@@ -45,8 +45,6 @@ class Core:
         self.active_modules: dict = {}
         self.continuous_modules: dict = {}
         self.system_name: str = system_name
-
-        self.__fill_data()  # since the path is needed, __fill_data() is called only here
 
         self.ai: AIWrapper = AIWrapper(self)
         self.skills: Skills = Skills()
@@ -189,7 +187,7 @@ class ModuleWrapper:
             logging.info('[WARNING] Sending message to messenger failed,  because there is no key for it!')
         return
 
-    def play(self, path: str | None = None, audiofile: str = None, next: bool = False,
+    def play(self, path: str = None, audiofile: str = None, next: bool = False,
              notification: bool = False) -> None:
         if path is not None:
             with open(path, "rb") as wav_file:
@@ -400,7 +398,7 @@ class Modules:
         modules.sort(key=lambda mod: mod.PRIORITY if hasattr(mod, 'PRIORITY') else 0, reverse=True)
         return modules
 
-    def query_threaded(self, name: str, text: str | None, user: dict, messenger: bool = False) -> bool:
+    def query_threaded(self, name: str, text: str, user: dict, messenger: bool = False) -> bool:
         mod_skill: Skills = self.core.skills
         if text is None:
             # generate a random text
@@ -409,7 +407,7 @@ class Modules:
         else:
             # else there is a valid text -> analyze
             try:
-                analysis: dict | None = self.core.analyzer.analyze(str(text))
+                analysis: dict = self.core.analyzer.analyze(str(text))
             except Exception:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')
@@ -453,7 +451,7 @@ class Modules:
             print('[INFO] -- (None present)')
         return
 
-    def start_module(self, user: dict = None, text: str | None = None, name: str = None,
+    def start_module(self, user: dict = None, text: str = None, name: str = None,
                      messenger: bool = False) -> bool:
         # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill: Skills = self.core.skills
@@ -462,7 +460,7 @@ class Modules:
             text: str = str(random.randint(0, 1000000000))
         else:
             try:
-                analysis: dict | None = self.core.analyzer.analyze(str(text))
+                analysis: dict = self.core.analyzer.analyze(str(text))
                 # logging.info('Analysis: ' + str(analysis))
             except Exception:
                 traceback.print_exc()
@@ -481,7 +479,7 @@ class Modules:
                     break
         else:
             try:
-                analysis: dict | None = self.core.analyzer.analyze(str(text))
+                analysis: dict = self.core.analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
                 print('[ERROR] Sentence analysis failed!')

@@ -1,3 +1,5 @@
+from __future__ import annotations      # compatibility for < 3.10
+
 import json
 import logging
 import os

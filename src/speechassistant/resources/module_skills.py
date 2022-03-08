@@ -217,8 +217,10 @@ class Skills:
     """
 
     def get_data_of_city(self, city: str) -> dict:
-        location = self.geo_location.geocode(city).raw
-        return self.__location_to_json(location)
+        print(city)
+        location = self.geo_location.geocode(city)
+        print(location)
+        return self.__location_to_json(location.raw)
 
     """ Returns geological data of a city
     Args:
