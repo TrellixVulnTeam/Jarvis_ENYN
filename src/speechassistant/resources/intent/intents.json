@@ -254,7 +254,7 @@
     "context_set": ""
   },
   {"tag": "greeting",
-    "patterns": ["Hi", "Hallo", "Guten Tag", "Hey"],
+    "patterns": ["Hi", "Hallo", "Guten Tag", "Hey", "Gute Nacht", "Ich gehe jetzt schlafen", "Guten Morgen", "Ich bin wach"],
     "responses": [],
     "context_set": ""
   },
