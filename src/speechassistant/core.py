@@ -25,8 +25,10 @@ class Core:
                  system_name: str) -> None:
         self.local_storage: dict = conf_dat["Local_storage"]
         self.config_data: dict = conf_dat
+        self.use_ai = conf_dat["ai"]
         self.path: str = conf_dat["Local_storage"]['CORE_PATH']
         self.data_base = DataBase(f'{self.path}/database')
+        self.data_base.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
         self.skills: Skills = Skills()
         self.__data: dict = conf_dat
         self.__fill_data()  # since the path is needed, __fill_data() is called only here
@@ -124,15 +126,21 @@ class Core:
 
     def hotword_detected(self, text: str) -> None:
         user: dict = self.users.get_user_by_name(self.local_storage["user"])
-        response: str | dict = self.ai.proceed_with_user_input(text)
-        if isinstance(type(response), str):
-            self.audio_output.say(response)
-        elif isinstance(type(response), dict):
-            self.start_module(text, response["module"], user=user)
+        if self.use_ai:
+            response: str | dict = self.ai.proceed_with_user_input(text)
+            if response is None:
+                # if the AI has not found a matching module, try to find one via isValid()
+                self.modules.start_module(text=str(text), user=user)
+            elif type(response) is str:
+                self.audio_output.say(response)
+            elif type(response) is dict:
+                self.start_module(text, response["module"], user=user)
+            else:
+                raise ValueError('Invalid type of attribute "text"!')
         else:
-            raise ValueError('Invalid type of attribute "text"!')
+            self.modules.start_module(text=str(text), user=user)
 
-    def start_module(self, text: str, name: str, user: dict = "") -> bool:
+    def start_module(self, text: str, name: str, user: dict = None) -> bool:
         # user prediction is not implemented yet, therefore here the workaround
         user: dict = self.local_storage['user']
         return self.modules.query_threaded(name, text, user)

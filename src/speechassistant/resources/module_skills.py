@@ -45,12 +45,12 @@ class Skills:
 
     @staticmethod
     def get_text_between(start_word: str, text: str, end_word: str = '', output: str = 'array',
-                          included: bool = True) -> str | list:
+                         could_included: bool = True) -> str | list:
         if not start_word in text:
             start_index = 0
         else:
             temp_start = re.search(f'{start_word}', text)
-            if included:
+            if could_included:
                 start_index = temp_start.start()
             else:
                 start_index = temp_start.end() + 1  # the space character should also be deleted
@@ -59,7 +59,7 @@ class Skills:
             end_index = len(text)
         else:
             temp_end = re.search(f'{end_word}', text)
-            if included:
+            if could_included:
                 end_index = temp_end.start()
             else:
                 end_index = temp_end.end() + 1  # the space character should also be deleted

@@ -26,7 +26,8 @@ class DataBase:
     def __init__(self, root_path: str) -> None:
         logging.basicConfig(level=logging.DEBUG)
         logging.info('[ACTION] Initialize DataBase...\n')
-        self.db = sqlite3.connect(f'{root_path}database\\data_base')
+        self.db = sqlite3.connect(f'{root_path}database\\data_base', check_same_thread=False)
+        self.cursor = self.db.cursor()
         self.error_counter: int = 0
 
         self.alarm_interface = self._AlarmInterface(self.db, self.__execute)
@@ -59,7 +60,7 @@ class DataBase:
                             'firstname VARCHAR(15),'
                             'lastname VARCHAR(30),'
                             'birthday VARCHAR(10),'
-                            'mid INTEGER UNIQUE,'
+                            'mid INTEGER,'
                             'sname VARCHAR(30),'
                             'FOREIGN KEY(sname) REFERENCES audio(name))')
 
@@ -206,6 +207,8 @@ class DataBase:
 
     def stop(self):
         logging.info('[ACTION] Stopping database...')
+        self.db.commit()
+        self.cursor.close()
         self.db.close()
 
     class _AlarmInterface:
@@ -606,6 +609,14 @@ class DataBase:
             statement: str = f'DELETE FROM shoppinglist'
             self.exec_func(statement)
 
+        @staticmethod
+        def is_item_in_list(name) -> bool:
+            statement: str = f'SELECT FROM shoppinglist WHERE name="{name}"'
+            if statement:
+                return True
+            else:
+                return False
+
         def __create_table(self):
             pass
 
@@ -656,7 +667,7 @@ class DataBase:
 
         def add_user(self, alias: str, firstname: str, lastname: str, birthday: dict, messenger_id: int = 0,
                      song_id: int = 1) -> None:
-            statement: str = f'INSERT INTO user (alias, firstname, lastname, birthday, mid, sid)' \
+            statement: str = f'INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) ' \
                              f'VALUES ("{alias}", "{firstname}", "{lastname}", ' \
                              f'"{self.__birthday_to_string(birthday)}", "{messenger_id}", "{song_id}") '
             self.exec_func(statement)
@@ -697,7 +708,7 @@ class DataBase:
                 raise ValueError('No suitable description of a user given. Either the uid, the alias or first '
                                  'and last name is required!')
 
-            uid, alias, firstname, lastname, birthday, mid, sid = result_set
+            uid, alias, firstname, lastname, birthday, mid, sname = result_set
 
             if _new_alias is not None:
                 alias = _new_alias
@@ -711,13 +722,13 @@ class DataBase:
 
             # SELECT is needed to ensure consistency of the data. Do not enter a song name that does not exist!
             try:
-                sid = self.exec_func(f'SELECT name FROM audio WHERE name="{_song_name}"')[0]
+                sname = self.exec_func(f'SELECT name FROM audio WHERE name="{_song_name}"')[0]
             except IndexError:
                 raise NoMatchingEntry(f'No matching audio file with the name {_song_name} was found in the database.')
 
             statement: str = f'UPDATE user ' \
                              f'SET alias="{alias}", firstname="{firstname}", lastname="{lastname}", ' \
-                             f'birthday="{self.__birthday_to_string(birthday)}", mid="{mid}", sid="{sid}" ' \
+                             f'birthday="{self.__birthday_to_string(birthday)}", mid="{mid}", sname="{sname}" ' \
                              f'WHERE uid={uid}'
             self.exec_func(statement)
 
@@ -754,7 +765,7 @@ class DataBase:
         def __build_json(result_set: list[tuple]) -> list:
             result_list: list[dict] = []
 
-            for uid, alias, firstname, lastname, birthday, mid, sid in result_set:
+            for uid, alias, firstname, lastname, birthday, mid, sname in result_set:
                 result_list.append({
                     "uid": uid,
                     "name": alias,
@@ -766,7 +777,7 @@ class DataBase:
                         "day": birthday[6:8]
                     },
                     "messenger_id": mid,
-                    "alarm_sound": sid,
+                    "alarm_sound": sname,
                     "waiting_notifications": []
                 })
             return result_list
@@ -1068,23 +1079,23 @@ class DataBase:
             }
 
     def __execute(self, command: str) -> list:
-        cursor: Cursor = self.db.cursor()
-        result_set: list
+        # cursor: Cursor = self.db.cursor()
+        result_set: list = []
         try:
-            cursor.execute(command)
-            result_set = cursor.fetchall()
+            result_set = self.cursor.execute(command).fetchall()
+            self.db.commit()
         except Exception as e:
             self.error_counter += 1
             logging.warning(f"[ERROR] Couldn't execute SQL command: {command}:\n {e}")
             raise SQLException(f"Couldn't execute SQL Statement: {command}\n{e}")
-        finally:
-            cursor.close()
-        self.db.commit()
         return result_set
 
 
 if __name__ == "__main__":
-    dbb = DataBase("C:\\Users\\Jakob\\PycharmProjects\\Jarvis2\\src\\speechassistant\\")
+    dbb = DataBase("C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\")
     dbb.create_tables()
+
+    dbb.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
+    logging.info(dbb.user_interface.get_user('Jakob'))
 
     dbb.stop()
