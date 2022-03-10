@@ -5,9 +5,9 @@ import logging
 import os
 import pickle
 import random
-from abc import ABCMeta, abstractmethod
 from typing import Tuple
 import numpy as np
+import tensorflow.lite.python.lite
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -15,8 +15,11 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.optimizers import SGD, Adadelta
 
+import matplotlib.pyplot as plt
+
+nltk.download('omw-1.4', quiet=True)
 nltk.download('punkt', quiet=True)
 nltk.download('wordnet', quiet=True)
 
@@ -78,17 +81,18 @@ class GenericAssistant:
         train_y: list = list(training[:, 1])
 
         self.model = Sequential()
-        # old values working 8192, 264, 0.5
         self.prepare_model(1024, 64, 0.5)
         self.model.add(Dense(len(train_y[0]), activation='softmax'))
 
         validation_data = self.load_validataion_data()
 
-        sgd = SGD(learning_rate=0.0025, decay=1e-9, momentum=0.9, nesterov=True)
-        self.model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
-        self.hist = self.model.fit(np.array(train_x), np.array(train_y), epochs=epoch_times, validation_split=0,
-                                   validation_data=validation_data, use_multiprocessing=True, shuffle=True,
-                                   steps_per_epoch=50, verbose=1, workers=10)
+        adelta = Adadelta(learning_rate=0.1, rho=0.95, epsilon=1e-8, name='Adadelta')
+        sgd = SGD(learning_rate=0.0025, decay=1e-8, momentum=0.95, nesterov=True)
+        self.model.compile(loss='categorical_crossentropy', optimizer=adelta, metrics=['accuracy'])
+        self.hist = self.model.fit(np.array(train_x), np.array(train_y), epochs=epoch_times,
+                                   validation_data=validation_data, batch_size=15, shuffle=True,
+                                   steps_per_epoch=50, verbose=1, workers=15)
+        # self.show_result(self.hist)
 
     def prepare_model(self, max: int, min: int, steps: int) -> None:
         actual: int = max
@@ -96,6 +100,24 @@ class GenericAssistant:
             self.model.add(Dense(actual, activation='relu'))
             self.model.add(Dropout(steps))
             actual -= actual * steps
+
+    def show_result(self, history_dict):
+        acc = history_dict['accuracy']
+        val_acc = history_dict['val_accuracy']
+        loss = history_dict['loss']
+        val_loss = history_dict['val_loss']
+
+        epochs = range(1, len(acc) + 1)
+
+        # "bo" is for "blue dot"
+        plt.plot(epochs, acc, 'bo', label='Training acc')
+        plt.plot(epochs, val_acc, 'b', label='Validation acc')
+        plt.title('Training and validation accuracy')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+
+        plt.show()
 
     def save_model(self, model_name: str = None) -> None:
         if model_name is None:
@@ -111,11 +133,13 @@ class GenericAssistant:
         if model_name is None:
             self.words = pickle.load(open('{}{}_words.pkl'.format(self.path_extension, self.model_name), 'rb'))
             self.classes = pickle.load(open('{}{}_classes.pkl'.format(self.path_extension, self.model_name), 'rb'))
-            self.model = load_model('{}{}.h5'.format(self.path_extension, self.model_name), compile=False)
+            self.model = load_model('{}{}.h5'.format(self.path_extension, self.model_name), compile=True)
+            # self.model = tensorflow.lite.Interpreter('{}{}.h5'.format(self.path_extension, self.model_name))
+            # self.model.allocate_tensors()
         else:
             self.words = pickle.load(open('{}{}_words.pkl'.format(self.path_extension, model_name), 'rb'))
             self.classes = pickle.load(open('{}{}_classes.pkl'.format(self.path_extension, model_name), 'rb'))
-            self.model = load_model('{}{}.h5'.format(self.path_extension, model_name), compile=False)
+            self.model = load_model('{}{}.h5'.format(self.path_extension, model_name), compile=True)
 
     def load_validataion_data(self) -> Tuple[list, list]:
         with open(self.path_extension + "validation_data.json", "r") as validation_file:
@@ -184,9 +208,14 @@ class GenericAssistant:
         return result
 
     def request(self, message: str) -> dict | str:
+        for item in message:
+            if item not in self.words:
+                message.replace(item, '*')
         ints: dict = self._predict_class(message)
-        if ints[0]['probability'] < 0.8:
-            return
+        if not ints:
+            raise Exception('Couldn\'n find a matching entry')
+        if ints[0]['probability'] < 0.5:
+            return None
         if ints[0]['intent'] in self.intent_methods.keys():
             return {"module": self.intent_methods.get(ints[0]['intent']), "intent": ints[0]['intent']}
         else:
@@ -194,4 +223,5 @@ class GenericAssistant:
 
     def test_request(self, message: str) -> dict | str:
         ints: dict = self._predict_class(message)
+        # print(f'{message} : {ints[0]}')
         return ints[0]['intent']

@@ -5,7 +5,7 @@
     "context_set": ""
   },
   {"tag":  "canyouhearme",
-    "patterns":  ["kannst du mich hören", "hörst du mich?"],
+    "patterns":  ["kannst du mich hören", "hörst du mich"],
     "responses":  ["Laut und deutlich!"],
     "context_set":  ""
   },
@@ -15,12 +15,12 @@
     "context_set": ""
   },
   {"tag": "abort",
-    "patterns": ["Abbruch", "Brich den Befehl ab", "abbruch"],
+    "patterns": ["Abbruch", "Brich den Befehl ab", "abbruch", "Führ den aktuellen Befehl nicht aus"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "akinator",
-    "patterns": ["Starte ein Ratespiel", "Bist du Akinator?", "Kannst du eine Person erraten", "spiel wer bin ich mit mir", "wer bin ich", "Who am I", "Person raten", "Spiele wer bin ich"],
+    "patterns": ["Starte ein Ratespiel", "Bist du Akinator?", "Kannst du eine Person erraten", "spiel wer bin ich mit mir", "wer bin ich", "Who am I", "Person raten", "Spiele wer bin ich", "errate wer ich bin"],
     "responses": [],
     "context_set": ""
   },
@@ -30,17 +30,17 @@
     "context_set": ""
   },
   {"tag": "stopaudio",
-    "patterns": ["stopp", "beende die audio", "stopp die Musik", "Ich bin wach", "Beende die Ausgabe", "Stopp die Ausgabe"],
+    "patterns": ["stopp", "beende die audio", "stopp die Musik", "Ich bin wach", "Beende die Ausgabe", "Stopp die Ausgabe", "hör auf zu reden"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "binary",
-    "patterns": ["Was ist in binär", "Wandle in binär um", "gib in binär aus"],
+    "patterns": ["Was ist in binär", "Wandle in binär um", "gib in binär aus", "was ist 20 in binär", "was ist 9093 im Binärsystem"],
     "responses": [],
     "context_set": ""
   },
   {"tag": "spell",
-    "patterns": ["buchstabiere", "diktiere mir", "Wie wird geschrieben", "Wie schreibt man", "Wie wird geschrieben"],
+    "patterns": ["buchstabiere", "diktiere mir", "Wie wird geschrieben", "Wie schreibt man", "Wie wird geschrieben", "buchstabiere Hallo Welt", "buchstabier mir laufen", "buchstabiere mich gehen", "wie wird nämlich geschrieben"],
     "responses": [],
     "context_set": ""
   },

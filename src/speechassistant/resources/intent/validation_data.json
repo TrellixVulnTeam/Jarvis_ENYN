@@ -14,7 +14,7 @@
     "starte die Audiotreiber neu": "reloadaudio",
     "Test eins zwei drei": "test",
     "Willst du mich heiraten?": "marryme",
-    "Ich würde dich so gerne heiraten!": "iloveyou",
+    "Ich würde dich so gerne heiraten!": "marryme",
     "Liebst du mich": "doyouloveme",
     "bist du in mich verliebt": "doyouloveme",
     "ich liebe dich": "iloveyou",
@@ -38,7 +38,7 @@
     "Wie romantisch du doch bist": "romantic",
     "Du bist super": "youaregood",
     "Wie lange brauche ich von Nürnberg nach Würzburg": "navigation",
-    "Errate eine Zahl": "akinator",
+    "Errate eine Zahl": "guessnumbergame",
     "Person raten": "akinator",
     "Nächste Zugverbindung von München nach Berlin": "train",
     "Coronaupdate": "corona",
@@ -97,7 +97,7 @@
     "Wie wird Test geschrieben": "spell",
     "Coronazahlen": "corona",
     "Welchen zug muss ich nehmen um übermorgen bis um 10 Uhr in Würzburg zu sein": "train",
-    "abruch": "abort",
+    "abbruch": "abort",
     "Übersetz Hallo Welt ins englische": "translation",
     "Was ist england": "wikipedia",
     "Erstelle eine qr Code mit dem Inhalt wie viel uhr ist es": "qr",
@@ -107,7 +107,18 @@
     "Test 123": "test",
     "kannst du": "canyou",
     "kannst du kacken": "canyou",
-    "kannst du kochen": "canyou"
-
+    "kannst du kochen": "canyou",
+    "hörst du mich": "canyouhearme",
+    "Sag mir um 11 Uhr bescheid, dass ich noch zur Uni muss": "remainder",
+    "Wie lange brauche ich nach München": "navigation",
+    "wie viel Kilometer sind es von München nach Stuttgart": "navigation",
+    "Küche an": "phue",
+    "Licht am PC an": "phue",
+    "Schlafzimmer aus": "phue",
+    "Lich draußen dunkler": "phue",
+    "mach den Fernsehen an": "philipstv",
+    "ich will fern schauen": "philipstv",
+    "buchstabier Hallo Welt": "spell",
+    "diktiere mir Lich an": "spell"
     }
 }
