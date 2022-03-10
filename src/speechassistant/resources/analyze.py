@@ -1,3 +1,5 @@
+from __future__ import annotations      # compatibility for < 3.10
+
 import datetime
 import re
 
@@ -107,7 +109,7 @@ class Sentence_Analyzer:
             text = text[:-1]
         return text
 
-    def to_number(self, word: str) -> float | int | None:
+    def to_number(self, word: str) -> float | int:
         # Wandelt so ziemlich alles in eine Zahl um oder gibt 'None' aus, wenn nicht möglich
         if word is None:
             return None
