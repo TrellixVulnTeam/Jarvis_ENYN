@@ -1,3 +1,5 @@
+from src.speechassistant.services.light_systems.Phue import PhilipsWrapper
+
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']
 # color_code = ['0000ff', 'ff0000', 'ffff00', '00FF00', 'ff1493', '9400d3', '00ffff', 'ffffff', '006400', '8b4513', 'ff8c00',
@@ -21,6 +23,6 @@ def isValid(text):
 
 def handle(text, core, skills):
     # toDo
-    pw = core.services.light_system.systems["phue"]["systemObject"]
+    pw = PhilipsWrapper(core)
     pw.wrapper(text)
 

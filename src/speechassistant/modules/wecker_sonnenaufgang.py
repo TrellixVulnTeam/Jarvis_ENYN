@@ -1,6 +1,6 @@
 import time
 
-from philips_hue import PhillipsWrapper
+from src.speechassistant.modules.philips_hue import PhilipsWrapper
 from threading import Thread
 
 

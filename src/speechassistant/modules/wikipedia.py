@@ -5,7 +5,7 @@ PRIORITY = -1
 SECURE = True
 import wikipedia
 
-wikipedia.set_lang("de")
+# wikipedia.set_lang("de")
 
 """
 Was weißt du über <>

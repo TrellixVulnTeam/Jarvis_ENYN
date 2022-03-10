@@ -529,8 +529,7 @@ def handle(text, core, skills):
                 start = core.listen().strip()
         startB = TrainStation(start)
         if "nach " in text:
-            core.say(speechVariation(["Mal sehen, was so auf den Schienen los ist.", "Einen Augenblick bitte."]),
-                     wait=False)
+            core.say(speechVariation(["Mal sehen, was so auf den Schienen los ist.", "Einen Augenblick bitte."]))
             ziel = text.split("nach ")[1]
         if "planen" in text or "reise" in text:
             core.say(speechVariation([

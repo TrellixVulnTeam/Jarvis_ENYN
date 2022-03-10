@@ -1,5 +1,8 @@
 import datetime
 
+def isValid(text):
+    # toDo
+    return False
 
 def handle(text, core, skills):
     ts = datetime.datetime.now()

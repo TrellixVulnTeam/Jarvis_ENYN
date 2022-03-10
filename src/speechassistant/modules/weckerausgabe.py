@@ -1,4 +1,4 @@
-from philips_hue import PhillipsWrapper
+from src.speechassistant.services.light_systems.Phue import PhilipsWrapper
 
 
 def handle(text, core, skills):
@@ -7,7 +7,7 @@ def handle(text, core, skills):
     path = core.path + "/modules/resources/alarm_sounds/" + ton
     try:
         if core.local_storage['module_storage']['philips_hue']['Bridge-Ip'] != '':
-            pw = PhillipsWrapper(core)
+            pw = PhilipsWrapper(core)
             pw.wrapper("mach das Licht weiß")
     except RuntimeError:
         pass
