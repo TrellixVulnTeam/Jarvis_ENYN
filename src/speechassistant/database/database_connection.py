@@ -42,7 +42,9 @@ class DataBase:
         self.birthday_interface = self._BirthdayInterface(self.__execute)
         self.__audio_path: str = ''
 
-        logging.info('\n[INFO] DataBase successfully initialized.')
+        self.create_tables()
+
+        logging.info('[INFO] DataBase successfully initialized.')
 
     def create_tables(self) -> None:
         # toDo: CONSTRAINTS
@@ -186,7 +188,7 @@ class DataBase:
         self.db.commit()
 
         if self.error_counter == 0:
-            logging.info('\n[INFO] Tables successfully created!')
+            logging.info('[INFO] Tables successfully created!')
         else:
             raise UnsolvableException(f'During the creation of {self.error_counter} tables there were problems. '
                                       'Manual intervention mandatory.')
@@ -585,6 +587,10 @@ class DataBase:
             result_set: list[tuple[int, str, str, float]] = self.exec_func(statement)
             return self.__build_json(result_set)
 
+        def get_item(self, name: str) -> dict:
+            result_set = self.exec_func(f'SELECT * FROM shoppinglist WHERE name="{name}"')
+            return self.__build_json(result_set)[0]
+
         def add_item(self, name: str, measure: str, quantity: float) -> None:
             statement: str = f'INSERT INTO shoppinglist ("name", "measure", "quantity") ' \
                              f'VALUES ("{name}", "{measure}", {quantity})'
@@ -609,10 +615,10 @@ class DataBase:
             statement: str = f'DELETE FROM shoppinglist'
             self.exec_func(statement)
 
-        @staticmethod
-        def is_item_in_list(name) -> bool:
-            statement: str = f'SELECT FROM shoppinglist WHERE name="{name}"'
-            if statement:
+        def is_item_in_list(self, name) -> bool:
+            statement: str = f'SELECT * FROM shoppinglist WHERE name="{name}"'
+            result_set = self.exec_func(statement)
+            if result_set:
                 return True
             else:
                 return False
@@ -625,6 +631,8 @@ class DataBase:
             result_list: list[shopping_item] = []
 
             for rid, name, measure, quantity in result_set:
+                if quantity.is_integer():
+                    quantity = int(quantity)
                 result_list.append({
                     "id": rid,
                     "name": name,
@@ -1089,13 +1097,3 @@ class DataBase:
             logging.warning(f"[ERROR] Couldn't execute SQL command: {command}:\n {e}")
             raise SQLException(f"Couldn't execute SQL Statement: {command}\n{e}")
         return result_set
-
-
-if __name__ == "__main__":
-    dbb = DataBase("C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\")
-    dbb.create_tables()
-
-    dbb.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
-    logging.info(dbb.user_interface.get_user('Jakob'))
-
-    dbb.stop()

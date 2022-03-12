@@ -1,44 +1,9 @@
 import logging
+import random
 import re
 from src.speechassistant.core import ModuleWrapper
 from src.speechassistant.resources.module_skills import Skills
 
-"""
-class ModuleWrapper:
-    def __init__(self):
-        self.local_storage = {"shopping_list": {}}
-        self.messenger_call = False
-
-    def say(self, text: str) -> None:
-        print(text)
-
-    def listen(self, text: str = None) -> str:
-        if text is not None: print(text)
-        return input(text)
-
-
-class Skills:
-    def __init__(self) -> None:
-        pass
-
-    @staticmethod
-    def get_enumerate(array: list):
-        new_array = []
-        for item in array:
-            new_array.append(item.strip(' '))
-
-        ausgabe = ''
-        if len(new_array) == 0:
-            pass
-        elif len(new_array) == 1:
-            ausgabe = array[0]
-        else:
-            for item in range(len(new_array) - 1):
-                ausgabe += new_array[item] + ', '
-            ausgabe = ausgabe.rsplit(', ', 1)[0]
-            ausgabe = ausgabe + ' und ' + new_array[-1]
-        return ausgabe
-"""
 
 def prepare_text(text: str) -> str:
     # The text is split only at "and".
@@ -49,9 +14,9 @@ def prepare_text(text: str) -> str:
     text = text.replace(' kg ', 'kg ')
     text = text.replace(' kilogram ', 'kg ')
     # "ein", etc are superfluous and can only lead to errors
-    text = text.replace('eine ', '')
-    text = text.replace('einen ', '')
-    text = text.replace('ein ', '')
+    text = text.replace(' eine ', '')
+    text = text.replace(' einen ', '')
+    text = text.replace(' ein ', '')
     return text
 
 
@@ -60,7 +25,7 @@ def get_items(text: str) -> list:
 
 
 def get_shopping_list(shopping_list: dict, skills: Skills, for_messenger: bool = False) -> str:
-    anz_items = len(shopping_list.keys())
+    anz_items = len(shopping_list)
     if anz_items == 0:
         return 'Aktuelle hast du keine Artikel auf deiner Einkaufsliste.'
 
@@ -74,8 +39,8 @@ def get_shopping_list(shopping_list: dict, skills: Skills, for_messenger: bool =
         space = '\t'
     else:
         space = ' '
-    for item in shopping_list.keys():
-        item_list.append(simplify_unit(shopping_list.get(item)) + space + shopping_list.get(item)['name'])
+    for item in shopping_list:
+        item_list.append(simplify_unit(item) + space + item['name'])
 
     # remove the ',' after the last item and return
     if for_messenger:
@@ -104,7 +69,7 @@ def dlt_items(text: str, core: ModuleWrapper) -> list:
     # search for items to be deleted from text
     for item in core.data_base.shoppinglist_interface.get_list():
         if item['name'].lower() in text:
-            del_items.append(item)
+            del_items.append(item['name'])
     # delete items
     for item in del_items:
         core.data_base.shoppinglist_interface.remove_item(item)
@@ -175,7 +140,9 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         for item in new_items:
             item_name = item.get('name')
             if core.data_base.shoppinglist_interface.is_item_in_list(item_name):
-                shopping_list.get(item_name)['quantity'] += item.get('quantity')
+                new_quantity = core.data_base.shoppinglist_interface.get_item(item_name).get('quantity') + \
+                               float(item.get('quantity'))
+                core.data_base.shoppinglist_interface.update_item(item_name, new_quantity)
             else:
                 core.data_base.shoppinglist_interface.add_item(item.get('name'), item.get('measure'), item.get('quantity'))
     elif ('was' in lower_text and 'steht' in lower_text) or ('gib' in lower_text and 'aus' in lower_text):
@@ -184,32 +151,8 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         if len(shopping_list) == 0:
             core.say(['Deine Einkaufsliste ist bereits leer.', 'Ich kann das nicht aus deiner Einkaufsliste löschen, da sie leer ist.'])
         else:
-            deleted_items = dlt_items(text, core)
-            if len(deleted_items) == 0:
-                core.say(deleted_items[0].get('name') + ' wurde [|erfolgreich] von der Einkaufsliste entfernt.')
+            deleted_items: list = dlt_items(text, core)
+            if len(deleted_items) == 1:
+                core.say(deleted_items[0] + ' wurde [|erfolgreich] von der Einkaufsliste entfernt.')
             else:
                 core.say(skills.get_enumerate(deleted_items) + ' wurden [|erfolgreich] von der Einkaufsliste entfernt.')
-
-
-if __name__ == "__main__":
-
-    core = ModuleWrapper()
-    skills = Skills()
-
-    """
-    print(simplify_unit({'measure': 'g', 'quantity': 10}))
-    print(simplify_unit({'measure': 'g', 'quantity': 1500}))
-    print(simplify_unit({'measure': 'kg', 'quantity': 10}))
-    print(simplify_unit({'measure': 'ml', 'quantity': 10}))
-    print(simplify_unit({'measure': 'ml', 'quantity': 10000}))
-    """
-
-    handle("Was steht auf meiner Einkaufsliste?", core, skills)
-    handle("Setz Butter und Milch und 150g Rinderhack auf die Einkaufsliste", core, skills)
-    handle("Was steht auf meiner Einkaufsliste?", core, skills)
-    handle("Setz 2 Bananen und 150ml Rinderbrühe und Milch auf die Einkaufsliste", core, skills)
-    handle("Setz 1.5kg Rinderhack auf die Einkaufsliste", core, skills)
-    handle("Was steht auf meiner Einkaufsliste?", core, skills)
-    handle("Lösch Rinderbrühe von meiner Einkaufsliste", core, skills)
-    handle("Was steht auf meiner Einkaufsliste?", core, skills)
-    # print(calculate_units(['500g Mehl', 'Bananen', 'Zwiebeln']))
