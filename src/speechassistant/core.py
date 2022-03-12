@@ -173,7 +173,9 @@ class ModuleWrapper:
         self.path: str = core.path
         self.user: dict = user
 
-    def say(self, text: str, output: str = 'auto') -> None:
+    def say(self, text: str | list, output: str = 'auto') -> None:
+        if type(text) is list:
+            text = random.choice(text)
         text: str = self.speech_variation(text)
         if output == 'auto':
             if self.messenger_call:
