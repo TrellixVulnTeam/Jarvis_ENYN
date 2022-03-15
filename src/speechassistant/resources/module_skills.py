@@ -63,7 +63,6 @@ class Skills:
                 end_index = temp_end.start()
             else:
                 end_index = temp_end.end() + 1  # the space character should also be deleted
-        print(f'start: {start_index}, end: {end_index}')
         result_string = text[start_index:end_index]
         if output == 'string':
             return result_string
@@ -92,7 +91,6 @@ class Skills:
 
     @staticmethod
     def get_time(time: datetime | dict) -> str:
-        print(type(time))
         if isinstance(time, datetime):
             hour = time.hour
             minute = time.minute
@@ -217,9 +215,7 @@ class Skills:
     """
 
     def get_data_of_city(self, city: str) -> dict:
-        print(city)
         location = self.geo_location.geocode(city)
-        print(location)
         return self.__location_to_json(location.raw)
 
     """ Returns geological data of a city
@@ -230,7 +226,7 @@ class Skills:
         dict: Dictionary with the values of the city
     """
 
-    def get_data_of_lat_lan(self, lat: int, lon: int) -> dict:
+    def get_data_of_lat_lon(self, lat: int, lon: int) -> dict:
         location = self.geo_location.reverse((lat, lon))
         return self.__location_to_json(location)
 
