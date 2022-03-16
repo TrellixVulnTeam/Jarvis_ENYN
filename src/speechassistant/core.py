@@ -80,10 +80,9 @@ class Core:
                     self.messenger.messages.remove(msg)
                     continue
 
-                # no pictures available
-                # if msg['type'] == "photo":
-                #    self.messenger.say('Leider kann ich noch nichts mit Bildern anfangen.', self.users.get_user_by_name(user))
-                # Message is definitely a (possibly inserted) "new request" ("Jarvis,...").
+                # no pictures available if msg['type'] == "photo": self.messenger.say('Leider kann ich noch nichts
+                # mit Bildern anfangen.', self.users.get_user_by_name(user)) Message is definitely a (possibly
+                # inserted) "new request" ("Jarvis,...").
                 if msg['text'].lower().startswith("Jarvis"):
                     self.modules.start_module(text=msg['text'], user=user, messenger=True)
                 # Message is not a request at all, but a response (or a module expects such a response)
@@ -95,8 +94,8 @@ class Core:
                     th: Thread = Thread(target=self.modules.start_module, args=(user, msg['text'], None, True,))
                     th.daemon = True
                     th.start()
-                '''if response == False:
-                    self.messenger.say('Das habe ich leider nicht verstanden.', self.users.get_user_by_name(user)['messenger_id'])'''
+                '''if response == False: self.messenger.say('Das habe ich leider nicht verstanden.', 
+                self.users.get_user_by_name(user)['messenger_id']) '''
                 self.messenger.messages.remove(msg)
             time.sleep(0.5)
 
@@ -115,7 +114,8 @@ class Core:
                 return response["text"]
             time.sleep(0.03)
 
-    def webserver_action(self, action: str) -> str:
+    @staticmethod
+    def webserver_action(action: str) -> str:
         if action == 'mute':
             return 'ok'
         else:
@@ -126,7 +126,16 @@ class Core:
 
     def hotword_detected(self, text: str) -> None:
         user: dict = self.users.get_user_by_name(self.local_storage["user"])
-        if self.use_ai:
+
+        matching_routines: list[dict] = self.data_base.routine_interface.get_routines(on_command=text)
+        if matching_routines is not []:
+            # if there are matching routines of this command, start the matching modules
+            for routine in matching_routines:
+                for command in routine['actions']["commands"]:
+                    for text in command["text"]:
+                        self.modules.start_module(user=user, text=text, name=command["module_name"])
+        elif self.use_ai:
+            # else if the user want to use AI, user it
             response: str | dict = self.ai.proceed_with_user_input(text)
             if response is None:
                 # if the AI has not found a matching module, try to find one via isValid()
@@ -138,11 +147,13 @@ class Core:
             else:
                 raise ValueError('Invalid type of attribute "text"!')
         else:
+            # else use the isValid functions
             self.modules.start_module(text=str(text), user=user)
 
     def start_module(self, text: str, name: str, user: dict = None) -> bool:
         # user prediction is not implemented yet, therefore here the workaround
-        user: dict = self.local_storage['user']
+        if user is None:
+            user: dict = self.local_storage['user']
         return self.modules.query_threaded(name, text, user)
 
 
@@ -197,7 +208,7 @@ class ModuleWrapper:
             logging.info('[WARNING] Sending message to messenger failed,  because there is no key for it!')
         return
 
-    def play(self, path: str = None, audiofile: str = None, next: bool = False,
+    def play(self, path: str = None, audiofile: str = None, as_next: bool = False,
              notification: bool = False) -> None:
         if path is not None:
             with open(path, "rb") as wav_file:
@@ -207,9 +218,9 @@ class ModuleWrapper:
                 input_wav: AnyStr = wav_file.read()
         data: io.BytesIO = io.BytesIO(input_wav)
         if notification:
-            self.audio_output.play_notification(data, next)
+            self.audio_output.play_notification(data, as_next)
         else:
-            self.audio_output.play_playback(data, next)
+            self.audio_output.play_playback(data, as_next)
 
     def play_music(self, by_name: str = None, url: str = None, path: str = None, as_next: bool = False,
                    now: bool = False, playlist: bool = False, announce: bool = False) -> None:
@@ -220,7 +231,7 @@ class ModuleWrapper:
                                             playlist=playlist,
                                             announce=announce)
 
-    def listen(self, text: str = None, messenger: bool = None) -> str:
+    def listen(self, text: str = None, messenger: bool = None, play_sound: bool = False) -> str:
         if messenger is None:
             messenger: bool = self.messenger_call
         if text is not None:
@@ -228,7 +239,8 @@ class ModuleWrapper:
         if messenger:
             return self.core.messenger_listen(self.user["first_name"].lower())
         else:
-            return self.audio_input.recognize_input(self.core.hotword_detected, listen=True)
+            return self.audio_input.recognize_input(self.core.hotword_detected, listen=True,
+                                                    play_bling_before_listen=play_sound)
 
     def recognize(self, audio_file: Any) -> str:
         return self.audio_input.recognize_file(audio_file)
@@ -313,7 +325,7 @@ class ModuleWrapper:
         return user_input
 
 
-class Modulewrapper_continuous:
+class ModuleWrapperContinuous:
     # The same class for continuous_modules. The peculiarity: The say- and listen-functions
     # are missing (so exactly what the module wrapper was actually there for xD), because continuous_-
     # modules are not supposed to make calls to the outside. For this there is a
@@ -363,7 +375,7 @@ class Modules:
         self.continuous_modules: list = []
 
         self.module_wrapper = ModuleWrapper
-        self.module_wrapper_continuous = Modulewrapper_continuous
+        self.module_wrapper_continuous = ModuleWrapperContinuous
 
         self.continuous_stopped: bool = False
         self.continuous_threads_running: int = 0
@@ -393,7 +405,8 @@ class Modules:
                 loader = finder.find_module(name)
                 mod = loader.load_module(name)
                 self.local_storage["modules"][name]: dict = {"name": name, "status": "loaded"}
-            except:
+            except Exception:
+                # catch only exceptions, that are thrown from loader and finder
                 traceback.print_exc()
                 self.local_storage["modules"][name]: dict = {"name": name, "status": "error"}
                 print('[WARNING] Module {} is incorrect and was skipped!'.format(name))
@@ -405,7 +418,7 @@ class Modules:
                 else:
                     print('[INFO] Modul {} loaded'.format(name))
                     modules.append(mod)
-        modules.sort(key=lambda mod: mod.PRIORITY if hasattr(mod, 'PRIORITY') else 0, reverse=True)
+        modules.sort(key=lambda module: module.PRIORITY if hasattr(module, 'PRIORITY') else 0, reverse=True)
         return modules
 
     def query_threaded(self, name: str, text: str, user: dict, messenger: bool = False) -> bool:

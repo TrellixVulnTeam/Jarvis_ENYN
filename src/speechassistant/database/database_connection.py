@@ -1,4 +1,4 @@
-from __future__ import annotations      # compatibility for < 3.10
+from __future__ import annotations  # compatibility for < 3.10
 
 import io
 import logging
@@ -126,7 +126,12 @@ class DataBase:
                             'aftersunset INTEGER, '
                             'aftercall INTEGER)')
 
-        self.__create_table('CREATE TABLE IF NOT EXISTS routineactivation ('
+        self.__create_table('CREATE TABLE IF NOT EXISTS oncommand ('
+                            'rid INTEGER, '
+                            'command VARCHAR(255), '
+                            'PRIMARY KEY(rid, command))')
+
+        self.__create_table('CREATE TABLE IF NOT EXISTS routineactivationtime ('
                             'rid INTEGER, '
                             'hour INTEGER, '
                             'minute INTEGER, '
@@ -297,7 +302,8 @@ class DataBase:
             self.exec_func(statement)
 
         def update_repeating(self, aid: int, _monday: bool = None, _tuesday: bool = None, _wednesday: bool = None,
-                             _thursday: bool = None, _friday: bool = None, _saturday: bool = None, _sunday: bool = None):
+                             _thursday: bool = None, _friday: bool = None, _saturday: bool = None,
+                             _sunday: bool = None):
             try:
                 result_set: tuple = self.exec_func(f'SELECT * FROM alarmrepeat WHERE aid={aid}')[0]
             except:
@@ -462,7 +468,8 @@ class DataBase:
                              f'VALUES("{self.__build_time_string(time)}", "{text}", {user_id})'
             self.exec_func(statement)
 
-        def update_timer(self, timer_id: int, _time: datetime = None, _text: str = None, _user: int | str = None) -> None:
+        def update_timer(self, timer_id: int, _time: datetime = None, _text: str = None,
+                         _user: int | str = None) -> None:
 
             try:
                 result_set: tuple = self.exec_func(f'SELECT * FROM timer WHERE id={timer_id}')[0]
@@ -804,24 +811,32 @@ class DataBase:
                 for item in self.exec_func(f'SELECT * FROM commandtext WHERE cid={command[0]}'):
                     text_set.append(item)
             date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rid={routine_id}')
-            activation_set: list[tuple] = self.exec_func(f'SELECT * FROM routineactivation WHERE rid={routine_id}')
+            activation_set: list[tuple] = self.exec_func(f'SELECT * FROM routineactivationtime WHERE rid={routine_id}')
+            on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rid={routine_id}')
+            return self.__build_json(routine_set, command_set, text_set, date_set, activation_set, on_command_set)
 
-            return self.__build_json(routine_set, command_set, text_set, date_set, activation_set)
-
-        def get_routines(self) -> list[routine_item]:
+        def get_routines(self, on_command: str = None) -> list[routine_item]:
             routine_list: list[dict] = []
-            routine_set: list[tuple] = self.exec_func(f'SELECT * FROM routine')
+            if on_command is None:
+                routine_set: list[tuple] = self.exec_func(f'SELECT * FROM routine')
+            else:
+                routine_set: list[tuple] = self.exec_func(f'SELECT * FROM  routine '
+                                                          f'INNER JOIN oncommand ON routine.rid=oncommand.rid '
+                                                          f'WHERE instr("{on_command}", oncommand.command) > 0')
 
-            for routine in routine_set:
-                command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rid={routine[0]}')
+            for rout in routine_set:
+                command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rid={rout[0]}')
                 text_set: list[tuple] = []
                 for command in command_set:
                     for item in self.exec_func(f'SELECT * FROM commandtext WHERE cid={command[0]}'):
                         text_set.append(item)
-                date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rid={routine[0]}')
-                activation_set: list[tuple] = self.exec_func(f'SELECT * FROM routineactivation WHERE rid={routine[0]}')
+                date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rid={rout[0]}')
+                activation_set: list[tuple] = self.exec_func(
+                    f'SELECT * FROM routineactivationtime WHERE rid={rout[0]}')
 
-                routine_list.append(self.__build_json(routine, command_set, text_set, date_set, activation_set))
+                on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rid={rout[0]}')
+
+                routine_list.append(self.__build_json(rout, command_set, text_set, date_set, activation_set, on_command_set))
 
             return routine_list
 
@@ -840,11 +855,14 @@ class DataBase:
             self.__add_commands(routine['actions']['commands'], rid)
 
             for item in routine['retakes']['days']['date_of_day']:
-                self.exec_func(f'INSERT INTO routinedates (rid, day, month) VALUES ({rid}, {item.get("day")}, {item.get("month")})')
+                self.exec_func(
+                    f'INSERT INTO routinedates (rid, day, month) VALUES ({rid}, {item.get("day")}, {item.get("month")})')
 
             for item in routine['retakes']['activation']['clock_time']:
-                logging.info(item)
-                self.exec_func(f'INSERT INTO routineactivation VALUES ({rid}, {item["hour"]}, {item["minute"]})')
+                self.exec_func(f'INSERT INTO routineactivationtime VALUES ({rid}, {item["hour"]}, {item["minute"]})')
+
+            for item in routine['on_commands']:
+                self.exec_func(f'INSERT INTO oncommand VALUES({rid}, "{item}")')
 
         def update_routine(self, rid: int, _description: str = None, _daily: bool = None, _monday: bool = None,
                            _tuesday: bool = None, _wednesday: bool = None, _thursday: bool = None, _friday: bool = None,
@@ -908,9 +926,9 @@ class DataBase:
             if _clock_time is not None:
                 # delete old entries
 
-                self.exec_func(f'DELETE FROM routineactivation WHERE rid={rid}')
+                self.exec_func(f'DELETE FROM routineactivationtime WHERE rid={rid}')
                 for item in _clock_time:
-                    self.exec_func(f'INSERT INTO routineactivation '
+                    self.exec_func(f'INSERT INTO routineactivationtime '
                                    f'VALUES ({rid}, {item.get("hour")}, {item.get("minute")})')
 
             if _commands is not None:
@@ -925,7 +943,7 @@ class DataBase:
                 self.__add_commands(_commands, rid)
 
         def delete_routine(self, routine_id: int) -> None:
-            self.exec_func(f'DELETE FROM routineactivation WHERE rid={routine_id}')
+            self.exec_func(f'DELETE FROM routineactivationtime WHERE rid={routine_id}')
             self.exec_func(f'DELETE FROM routinedates WHERE rid={routine_id}')
             self.exec_func(f'DELETE FROM commandtext WHERE rid={routine_id}')
             self.exec_func(f'DELETE FROM routinecommands WHERE rid={routine_id}')
@@ -942,10 +960,11 @@ class DataBase:
 
         @staticmethod
         def __build_json(routine: tuple, commands: list[tuple], commandtext: list[tuple], dates: list[tuple],
-                         activation: list[tuple]) -> routine_item:
+                         activation: list[tuple], on_commands: list[tuple]) -> routine_item:
             result_dict = {
                 "id": routine[0],
                 "descriptions": routine[1],
+                "on_commands": [],
                 "retakes": {
                     "days": {
                         "daily": (routine[2] == 1),
@@ -994,6 +1013,10 @@ class DataBase:
                     "module_name": module_name,
                     "text": text_list
                 })
+
+            for command, in on_commands:
+                result_dict["on_commands"].append(command)
+
             return result_dict
 
         def __create_table(self):
@@ -1047,7 +1070,8 @@ class DataBase:
             return result_list
 
         def update_birthday(self, _old_first_name: str, _old_last_name: str, _new_first_name: str = None,
-                            _new_last_name: str = None, _day: int = None, _month: int = None, _year: int = None) -> None:
+                            _new_last_name: str = None, _day: int = None, _month: int = None,
+                            _year: int = None) -> None:
             first_name, last_name, day, month, year = self.exec_func(f'SELECT * FROM birthdays '
                                                                      f'WHERE firstname="{_old_first_name}" '
                                                                      f'AND lastname="{_old_last_name}"')[0]
