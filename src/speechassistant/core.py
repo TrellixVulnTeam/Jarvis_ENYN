@@ -134,21 +134,21 @@ class Core:
                 for command in routine['actions']["commands"]:
                     for text in command["text"]:
                         self.modules.start_module(user=user, text=text, name=command["module_name"])
-        elif self.use_ai:
-            # else if the user want to use AI, user it
-            response: str | dict = self.ai.proceed_with_user_input(text)
-            if response is None:
-                # if the AI has not found a matching module, try to find one via isValid()
-                self.modules.start_module(text=str(text), user=user)
-            elif type(response) is str:
-                self.audio_output.say(response)
-            elif type(response) is dict:
-                self.start_module(text, response["module"], user=user)
-            else:
-                raise ValueError('Invalid type of attribute "text"!')
         else:
-            # else use the isValid functions
-            self.modules.start_module(text=str(text), user=user)
+            if not self.modules.start_module(text=str(text), user=user) and self.use_ai:
+                # if isValid() functions did not found a matching module and the user wants to try with AI (use_ai),
+                # start AI
+                response: str | dict = self.ai.proceed_with_user_input(text)
+                if response is None:
+                    # if the AI has not found a matching module, try to find one via isValid()
+                    self.modules.start_module(text=str(text), user=user)
+                elif type(response) is str:
+                    self.audio_output.say(response)
+                elif type(response) is dict:
+                    self.start_module(text, response["module"], user=user)
+                else:
+                    raise ValueError('Invalid type of attribute "text"!')
+
 
     def start_module(self, text: str, name: str, user: dict = None) -> bool:
         # user prediction is not implemented yet, therefore here the workaround
