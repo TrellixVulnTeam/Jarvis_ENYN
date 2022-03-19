@@ -47,22 +47,22 @@ class AudioInput:
             self.speech_engine.adjust_for_ambient_noise(source)
         self.audio_output: AudioOutput
         self.recording: bool = False
-        self.sentensivity: float = 0.5
+        self.sensitivity: float = 0.5
 
-    def start(self, sentensivity: float, _hot_word_detected: Callable) -> None:
+    def start(self, sensitivity: float, _hot_word_detected: Callable) -> None:
         # starts the hotword detection
         logging.info("[ACTION] Starting audio input module...")
-        self.sentensivity = sentensivity
+        self.sensitivity = sensitivity
         self.stopped = False
-        audio_input_thread: Thread = Thread(target=self.run, args=(sentensivity, _hot_word_detected,))
+        audio_input_thread: Thread = Thread(target=self.run, args=(sensitivity, _hot_word_detected,))
         audio_input_thread.daemon = True
         audio_input_thread.start()
 
-    def run(self, sentensivity: float, _hot_word_detected: Callable) -> None:
+    def run(self, sensitivity: float, _hot_word_detected: Callable) -> None:
         porcupine: any = None
         try:
             keywords: list = ["jarvis"]
-            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[sentensivity])
+            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[sensitivity])
             pa = pyaudio.PyAudio()
             audio_stream: IO = pa.open(
                 rate=porcupine.sample_rate,
@@ -86,7 +86,7 @@ class AudioInput:
 
         except MemoryError:
             porcupine.delete()
-            self.start(self.sentensivity, _hot_word_detected)
+            self.start(self.sensitivity, _hot_word_detected)
         except Exception:
             logging.error(f"[ERROR] {traceback.print_exc()}")
 
@@ -381,15 +381,16 @@ class AudioOutput:
             except Exception:
                 traceback.print_exc()
 
-    def say(self, text: str) -> None:
+    def say(self, text: str, wait_until_done: bool = True) -> None:
         # Forwards the given text to the text-to-speech function and waits
         # until the announcement has ended.
         if text == '' or text is None:
             text: str = 'Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr.'
         self.notification.append(text)
         # block while not done
-        while text in self.notification:
-            time.sleep(0.2)
+        if wait_until_done:
+            while text in self.notification:
+                time.sleep(0.2)
 
     def adjust_after_hot_word(self) -> None:
         self.listen = True
