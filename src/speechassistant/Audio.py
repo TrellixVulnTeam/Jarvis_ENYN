@@ -347,17 +347,22 @@ class AudioOutput:
                     if mixer.Channel(0).get_busy() == 1:
                         mixer.Channel(1).set_volume(0.10)
                         mixer.Channel(2).set_volume(0.10)
-                    if isinstance(self.notification[0], str):
+                    if type(self.notification[0]) is str:
                         logging.info(f'Saying "{self.notification[0]}"')
                         # if the notification is a string (a message to say), pass through to tts
                         self.tts.say(self.notification[0])
                         self.notification.pop(0)
                     else:
                         logging.info(f'Playing the track "{self.notification[0]}"')
-                        # else pass through to mixer-manager
-                        track: mixer.Sound = mixer.Sound(self.notification[0])
-                        self.notification.pop(0)
-                        mixer.Channel(0).play(track)
+                        try:
+                            # else pass through to mixer-manager
+                            track: mixer.Sound = mixer.Sound(self.notification[0])
+                            mixer.Channel(0).play(track)
+                        except TypeError:
+                            logging.warning(f'Could not handle type of "{self.notification[0]}" (=> Type: {type(self.notification[0])})')
+                        finally:
+                            self.notification.pop(0)
+
                 if not self.music == [] and mixer.Channel(2).get_busy() == 0:
                     if isinstance(self.music[0], str):
                         logging.info(f'Play music with name {self.music[0]}')
