@@ -9,5 +9,4 @@ def handle(text, core, skills):
         text = 'erzähl mir einen ' + random.choice(options)
         handle(text, core, skills)
     else:
-        answer = ['Alles klar, vielleicht findest du ja eine Beschäftigung.']
-    core.say(answer)
+        core.say('Alles klar, vielleicht findest du ja eine Beschäftigung.')
