@@ -111,7 +111,7 @@ class DataBase:
                             'FOREIGN KEY(uid) REFERENCES user(uid))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS routine ('
-                            'rid INTEGER PRIMARY KEY, '
+                            'name VARCHAR(50) PRIMARY KEY, '
                             'description VARCHAR(255), '
                             'daily INTEGER, '
                             'monday INTEGER, '
@@ -127,29 +127,30 @@ class DataBase:
                             'aftercall INTEGER)')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS oncommand ('
-                            'rid INTEGER, '
+                            'rname VARCHAR(50), '
                             'command VARCHAR(255), '
-                            'PRIMARY KEY(rid, command))')
+                            'FOREIGN KEY(rname) REFERENCES routine(rname)'
+                            'PRIMARY KEY(rname, command))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS routineactivationtime ('
-                            'rid INTEGER, '
+                            'rname VARCHAR(50), '
                             'hour INTEGER, '
                             'minute INTEGER, '
-                            'FOREIGN KEY(rid) REFERENCES routine (rid), '
-                            'PRIMARY KEY(rid, hour, minute))')
+                            'FOREIGN KEY(rname) REFERENCES routine(rname), '
+                            'PRIMARY KEY(rname, hour, minute))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS routinedates ('
-                            'rid INTEGER,'
+                            'rname VARCHAR(50),'
                             'day INTEGER,'
                             'month INTEGER,'
-                            'PRIMARY KEY(rid, day, month),'
-                            'FOREIGN KEY(rid) REFERENCES routine(rid))')
+                            'PRIMARY KEY(rname, day, month),'
+                            'FOREIGN KEY(rname) REFERENCES routine(rname))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS routinecommands ('
                             'cid INTEGER PRIMARY KEY, '
-                            'rid INTEGER NOT NULL, '
+                            'rname VARCHAR(50), '
                             'modulename VARCHAR(50), '
-                            'FOREIGN KEY(rid) REFERENCES routine(rid))')
+                            'FOREIGN KEY(rname) REFERENCES routine(rname))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS commandtext ('
                             'cid INTEGER,'
@@ -637,11 +638,10 @@ class DataBase:
         def __build_json(result_set: list[tuple[int, str, str, float]]) -> list[shopping_item]:
             result_list: list[shopping_item] = []
 
-            for rid, name, measure, quantity in result_set:
+            for name, measure, quantity in result_set:
                 if quantity.is_integer():
                     quantity = int(quantity)
                 result_list.append({
-                    "id": rid,
                     "name": name,
                     "measure": measure,
                     "quantity": quantity
@@ -803,16 +803,16 @@ class DataBase:
             self.exec_func: Callable = execute
             logging.info('[INFO] RoutineInterface initialized.')
 
-        def get_routine(self, routine_id: int) -> routine_item:
-            routine_set: tuple = self.exec_func(f'SELECT * FROM routine WHERE rid={routine_id}')[0]
-            command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rid={routine_id}')
+        def get_routine(self, name: str) -> routine_item:
+            routine_set: tuple = self.exec_func(f'SELECT * FROM routine WHERE name={name}')[0]
+            command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rname={name}')
             text_set: list[tuple] = []
             for command in command_set:
                 for item in self.exec_func(f'SELECT * FROM commandtext WHERE cid={command[0]}'):
                     text_set.append(item)
-            date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rid={routine_id}')
-            activation_set: list[tuple] = self.exec_func(f'SELECT * FROM routineactivationtime WHERE rid={routine_id}')
-            on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rid={routine_id}')
+            date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rname={name}')
+            activation_set: list[tuple] = self.exec_func(f'SELECT * FROM routineactivationtime WHERE rname={name}')
+            on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rname={name}')
             return self.__build_json(routine_set, command_set, text_set, date_set, activation_set, on_command_set)
 
         def get_routines(self, on_command: str = None) -> list[routine_item]:
@@ -821,62 +821,66 @@ class DataBase:
                 routine_set: list[tuple] = self.exec_func(f'SELECT * FROM routine')
             else:
                 routine_set: list[tuple] = self.exec_func(f'SELECT * FROM  routine '
-                                                          f'INNER JOIN oncommand ON routine.rid=oncommand.rid '
+                                                          f'INNER JOIN oncommand ON routine.name=oncommand.name '
                                                           f'WHERE instr("{on_command}", oncommand.command) > 0')
 
             for rout in routine_set:
-                command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rid={rout[0]}')
+                command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rname={rout[0]}')
                 text_set: list[tuple] = []
                 for command in command_set:
                     for item in self.exec_func(f'SELECT * FROM commandtext WHERE cid={command[0]}'):
                         text_set.append(item)
-                date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rid={rout[0]}')
+                date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rname={rout[0]}')
                 activation_set: list[tuple] = self.exec_func(
-                    f'SELECT * FROM routineactivationtime WHERE rid={rout[0]}')
+                    f'SELECT * FROM routineactivationtime WHERE rname={rout[0]}')
 
-                on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rid={rout[0]}')
+                on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rname={rout[0]}')
 
                 routine_list.append(self.__build_json(rout, command_set, text_set, date_set, activation_set, on_command_set))
 
             return routine_list
 
         def add_routine(self, routine: dict) -> None:
-            statement: str = f'INSERT INTO routine (description, daily, monday, tuesday, wednesday, thursday, friday, ' \
+            statement: str = f'INSERT INTO routine (name, description, daily, monday, tuesday, wednesday, thursday, friday, ' \
                              f'saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall)' \
-                             f'VALUES ("{routine.get("description")}", '
+                             f'VALUES ("{routine.get("name")}", ""{routine.get("description")}", '
             for key in ['daily', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
                 statement += str(int(routine['retakes']['days'][key] is True)) + ', '
             for key in ['after_alarm', 'after_sunrise', 'after_sunset', 'after_call']:
                 statement += str(int(routine["retakes"]["activation"][key] is True)) + ', '
             self.exec_func(statement[0:len(statement) - 2] + ')')
 
-            rid: int = self.exec_func('SELECT last_insert_rowid()')[0][0]
+            name: str = self.exec_func('SELECT last_insert_rowid()')[0][0]
 
-            self.__add_commands(routine['actions']['commands'], rid)
+            self.__add_commands(routine['actions']['commands'], name)
 
             for item in routine['retakes']['days']['date_of_day']:
                 self.exec_func(
-                    f'INSERT INTO routinedates (rid, day, month) VALUES ({rid}, {item.get("day")}, {item.get("month")})')
+                    f'INSERT INTO routinedates (rname, day, month) VALUES ({name}, {item.get("day")}, {item.get("month")})')
 
             for item in routine['retakes']['activation']['clock_time']:
-                self.exec_func(f'INSERT INTO routineactivationtime VALUES ({rid}, {item["hour"]}, {item["minute"]})')
+                self.exec_func(f'INSERT INTO routineactivationtime VALUES ({name}, {item["hour"]}, {item["minute"]})')
 
             for item in routine['on_commands']:
-                self.exec_func(f'INSERT INTO oncommand VALUES({rid}, "{item}")')
+                self.exec_func(f'INSERT INTO oncommand VALUES({name}, "{item}")')
 
-        def update_routine(self, rid: int, _description: str = None, _daily: bool = None, _monday: bool = None,
+        def update_routine(self, old_name: str, _name: str = None, _description: str = None, _daily: bool = None, _monday: bool = None,
                            _tuesday: bool = None, _wednesday: bool = None, _thursday: bool = None, _friday: bool = None,
                            _saturday: bool = None, _sunday: bool = None, _after_alarm: bool = None,
                            _after_sunrise: bool = None, _after_sunset: bool = None, _after_call: bool = None,
                            _dates: list = None, _clock_time: list = None, _commands: list = None):
             try:
-                result_set: tuple = self.exec_func(f'SELECT * FROM routine WHERE rid={rid}')[0]
+                result_set: tuple = self.exec_func(f'SELECT * FROM routine WHERE name={old_name}')[0]
             except IndexError:
-                raise NoMatchingEntry(f'No matching routine with the id {rid} was found in the database.')
+                raise NoMatchingEntry(f'No matching routine with the name {old_name} was found in the database.')
 
-            rid, description, daily, monday, tuesday, wednesday, thursday, friday, saturday, sunday, after_alarm, \
+            name, description, daily, monday, tuesday, wednesday, thursday, friday, saturday, sunday, after_alarm, \
             after_sunrise, after_sunset, after_call = result_set
 
+            if _name is not None:
+                if len(_name) > 50:
+                    raise ValueError('Given name is too long!')
+                name = _name
             if _description is not None:
                 if len(_description) > 255:
                     raise ValueError('Given text is too long!')
@@ -908,16 +912,16 @@ class DataBase:
                 after_call = int(_after_call is True)
 
             statement: str = f'UPDATE routine ' \
-                             f'SET description="{description}", daily={daily}, monday={monday}, tuesday={tuesday}, ' \
+                             f'SET name="{name}", description="{description}", daily={daily}, monday={monday}, tuesday={tuesday}, ' \
                              f'wednesday={wednesday}, thursday={thursday}, friday={friday}, saturday={saturday}, ' \
                              f'sunday={sunday}, afteralarm={after_alarm}, aftersunrise={after_sunrise}, ' \
                              f'aftersunset={after_sunset}, aftercall={after_call} ' \
-                             f'WHERE rid={rid}'
+                             f'WHERE name={old_name}'
             self.exec_func(statement)
 
             if _dates is not None:
                 # delete old entries
-                self.exec_func(f'DELETE FROM routinedates WHERE rid={rid}')
+                self.exec_func(f'DELETE FROM routinedates WHERE rname={name}')
 
                 for item in _dates:
                     self.exec_func(
@@ -949,10 +953,10 @@ class DataBase:
             self.exec_func(f'DELETE FROM routinecommands WHERE rid={routine_id}')
             self.exec_func(f'DELETE FROM routine WHERE rid={routine_id}')
 
-        def __add_commands(self, commands: list[dict], rid: int):
+        def __add_commands(self, commands: list[dict], name: str):
             for module in commands:
                 self.exec_func(
-                    f'INSERT INTO routinecommands (rid, modulename) VALUES ({rid}, "{module.get("module_name")}")')
+                    f'INSERT INTO routinecommands (name, modulename) VALUES ({name}, "{module.get("module_name")}")')
                 module_id: int = self.exec_func('SELECT last_insert_rowid()')[0][0]
 
                 for text in module.get('text'):
@@ -963,26 +967,27 @@ class DataBase:
                          activation: list[tuple], on_commands: list[tuple]) -> routine_item:
             result_dict = {
                 "id": routine[0],
-                "descriptions": routine[1],
+                "name": routine[1],
+                "descriptions": routine[2],
                 "on_commands": [],
                 "retakes": {
                     "days": {
-                        "daily": (routine[2] == 1),
-                        "monday": (routine[3] == 1),
-                        "tuesday": (routine[4] == 1),
-                        "wednesday": (routine[5] == 1),
-                        "thursday": (routine[6] == 1),
-                        "friday": (routine[7] == 1),
-                        "saturday": (routine[8] == 1),
-                        "sunday": (routine[9] == 1),
+                        "daily": (routine[3] == 1),
+                        "monday": (routine[4] == 1),
+                        "tuesday": (routine[5] == 1),
+                        "wednesday": (routine[6] == 1),
+                        "thursday": (routine[7] == 1),
+                        "friday": (routine[8] == 1),
+                        "saturday": (routine[9] == 1),
+                        "sunday": (routine[10] == 1),
                         "date_of_day": []
                     },
                     "activation": {
                         "clock_time": [],
-                        "after_alarm": (routine[10] == 1),
-                        "after_sunrise": (routine[11] == 1),
-                        "after_sunset": (routine[12] == 1),
-                        "after_call": (routine[13] == 1)
+                        "after_alarm": (routine[11] == 1),
+                        "after_sunrise": (routine[12] == 1),
+                        "after_sunset": (routine[13] == 1),
+                        "after_call": (routine[14] == 1)
                     }
                 },
                 "actions": {
@@ -1121,3 +1126,7 @@ class DataBase:
             logging.warning(f"[ERROR] Couldn't execute SQL command: {command}:\n {e}")
             raise SQLException(f"Couldn't execute SQL Statement: {command}\n{e}")
         return result_set
+
+if __name__ == '__main__':
+    db = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\')
+    db.create_tables()
