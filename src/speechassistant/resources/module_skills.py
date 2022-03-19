@@ -141,7 +141,7 @@ class Skills:
         str: time difference
     """
 
-    def get_time_differenz(self, start_time: datetime, time: datetime = datetime.now()) -> str:
+    def get_time_difference(self, start_time: datetime, time: datetime = datetime.now()) -> str:
         aussage = []
 
         time_difference = time - start_time

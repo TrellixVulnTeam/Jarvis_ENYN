@@ -81,7 +81,7 @@ class Timer:
                 self.delete_timer_if_passed(user_timer, timer)
 
             for timer in user_timer:
-                output += timer["Dauer"] + 'Timer mit ' + self.skills.get_time_differenz(datetime.datetime.now(), timer[
+                output += timer["Dauer"] + 'Timer mit ' + self.skills.get_time_difference(datetime.datetime.now(), timer[
                     'Zeit']) + ' verbleibend.\n  '
         return output
 
