@@ -61,7 +61,7 @@ def get_day(text, skills, time):
     days = []
 
     if 'täglich' in text or 'jeden tag' in text or 'alle' in text or 'jeden morgen' in text or 'jeden abend' in text:
-        days = [each_day.lower() for each_day in skills.Statics.weekdays_engl]
+        days = [each_day.lower() for each_day in skills.statics.weekdays_engl]
     elif 'wochentag' in text or 'unter der woche' in text:
         for i in range(5):
             days.append(skills.Statics.weekdays_engl[i].lower())

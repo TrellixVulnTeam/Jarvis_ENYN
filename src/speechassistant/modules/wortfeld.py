@@ -19,7 +19,7 @@ def handle(text, core, skills):
     words = words.replace(' und ', ', ')
 
     bg_color = "black"
-    for color in skills.Statics.color_ger_to_eng.keys():
+    for color in skills.statics.color_ger_to_eng.keys():
         if color in text:
             bg_color = skills.Statics.color_ger_to_eng.get(color)
     word_cloud = WordCloud(background_color=bg_color, mask=char_mask).generate(words)
