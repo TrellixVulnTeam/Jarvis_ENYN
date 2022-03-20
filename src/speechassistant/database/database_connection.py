@@ -461,13 +461,18 @@ class DataBase:
 
             return self.__build_json(result_set[0])
 
-        def add_timer(self, time: datetime, text: str, user_id: int) -> None:
+        def add_timer(self, time: datetime, text: str, user_id: int) -> int:
             if len(text) > 255:
                 raise ValueError('Given text is too long!')
 
             statement: str = f'INSERT INTO timer (time, text, uid) ' \
                              f'VALUES("{self.__build_time_string(time)}", "{text}", {user_id})'
-            self.exec_func(statement)
+            result_set: list | int = self.exec_func(statement)
+            if type(result_set) is list:
+                raise RuntimeError(f'__execute() returned wrong type on INSERT command! (command: {statement})')
+            else:
+                # id from inserted timer - id from the first timer in the current data-base +1
+                return int(result_set) - self.exec_func('SELECT id FROM timer LIMIT 1')[0][0] + 1
 
         def update_timer(self, timer_id: int, _time: datetime = None, _text: str = None,
                          _user: int | str = None) -> None:
@@ -881,6 +886,8 @@ class DataBase:
                 if len(_name) > 50:
                     raise ValueError('Given name is too long!')
                 name = _name
+                # toDo: update names of other tables
+
             if _description is not None:
                 if len(_description) > 255:
                     raise ValueError('Given text is too long!')
@@ -925,26 +932,24 @@ class DataBase:
 
                 for item in _dates:
                     self.exec_func(
-                        f'INSERT INTO routinedates VALUES ({rid}, {item.get("day")}, {item.get("month")})')
+                        f'INSERT INTO routinedates VALUES ({name}, {item.get("day")}, {item.get("month")})')
 
             if _clock_time is not None:
                 # delete old entries
-
-                self.exec_func(f'DELETE FROM routineactivationtime WHERE rid={rid}')
+                self.exec_func(f'DELETE FROM routineactivationtime WHERE rname={name}')
                 for item in _clock_time:
                     self.exec_func(f'INSERT INTO routineactivationtime '
-                                   f'VALUES ({rid}, {item.get("hour")}, {item.get("minute")})')
+                                   f'VALUES ({name}, {item.get("hour")}, {item.get("minute")})')
 
             if _commands is not None:
                 # delete old entries
-                result_set: list[tuple] = self.exec_func(f'SELECT cid FROM routinecommands WHERE rid={rid}')
-                logging.info("rid" + str(rid))
+                result_set: list[tuple] = self.exec_func(f'SELECT cid FROM routinecommands WHERE rname={name}')
                 for item in result_set:
                     logging.info(item[0])
                     self.exec_func(f'DELETE FROM commandtext WHERE cid={item[0]}')
                     self.exec_func(f'DELETE FROM routinecommands WHERE cid={item[0]}')
 
-                self.__add_commands(_commands, rid)
+                self.__add_commands(_commands, name)
 
         def delete_routine(self, routine_id: int) -> None:
             self.exec_func(f'DELETE FROM routineactivationtime WHERE rid={routine_id}')
@@ -1115,18 +1120,16 @@ class DataBase:
                 'year': result_set[4]
             }
 
-    def __execute(self, command: str) -> list:
+    def __execute(self, command: str) -> list | int:
         # cursor: Cursor = self.db.cursor()
         result_set: list = []
         try:
             result_set = self.cursor.execute(command).fetchall()
             self.db.commit()
+            if 'insert into' in command.lower():
+                return self.cursor.lastrowid
         except Exception as e:
             self.error_counter += 1
             logging.warning(f"[ERROR] Couldn't execute SQL command: {command}:\n {e}")
             raise SQLException(f"Couldn't execute SQL Statement: {command}\n{e}")
         return result_set
-
-if __name__ == '__main__':
-    db = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\')
-    db.create_tables()
