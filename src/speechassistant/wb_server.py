@@ -129,7 +129,6 @@ def Webserver(_core, _temp_module_wrapper):
 
         reg_alarm_exist = True if reg_len > 0 else False
         sin_alarm_exist = True if sin_len > 0 else False
-        print(data)
         return render_template("alarm.html", nav=nav, data=data, reg_alarm_exist=reg_alarm_exist,
                                sin_alarm_exist=sin_alarm_exist)
 
@@ -410,7 +409,6 @@ def Webserver(_core, _temp_module_wrapper):
         elif groupAction == 'list':
             phueWrapper = PhilipsWrapper(_core)
             if action == "lights":
-                print(request.args.get('id'))
                 if request.args.get('id'):
                     lights = phueWrapper.get_lights_in_json(order_by_id=True)
                 else:
@@ -482,9 +480,8 @@ def Webserver(_core, _temp_module_wrapper):
             path = _core.path + "/modules/resources/alarm_sounds/"
             names = os.listdir(path)
             for file in names:
-                print(file)
-                # file.replace('./', '')
-                # file.replace('.wav', '')
+                file.replace('./', '')
+                file.replace('.wav', '')
             data = {"alarmSounds": names}
             return jsonify(data)
 

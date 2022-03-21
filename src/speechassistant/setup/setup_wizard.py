@@ -201,7 +201,6 @@ class InstallationAudio:
                 audio = self.speech_engine.listen(source)
                 try:
                     text = self.speech_engine.recognize_google(audio, language="de-DE")
-                    print(text)
                 except:
                     text = "Audio konnte nicht aufgenommen werden"
             return text

@@ -160,10 +160,6 @@ def handle(text, core, skills):
                     timezone = 1
                 sT = sunsetTimes(lat, lon, day_of_year, timezone)
                 sunrise, sunset = sT.converted
-                print("\n\n\n\n\n\n\n")
-                print(sunrise)
-                print(sunset)
-                print("\n\n\n\n\n\n\n")
                 core.say(speechVariation(
                     "In {0} geht die Sonne [nach meinen Berechnungen|] um "
                     " {1} Uhr {2} auf und um {3} Uhr {4} wieder unter. Du "
