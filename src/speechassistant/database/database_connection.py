@@ -1,12 +1,12 @@
 from __future__ import annotations  # compatibility for < 3.10
 
 import io
-import logging
 from datetime import datetime
 from typing import Callable, TypeAlias
 import os
 
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
+from src.speechassistant.resources.enums import OutputTypes
 
 import sqlite3
 from sqlite3 import Connection, Cursor
@@ -30,12 +30,12 @@ class DataBase:
         self.cursor = self.db.cursor()
         self.error_counter: int = 0
 
+        self.user_interface = self._UserInterface(self.db, self.__execute)
         self.alarm_interface = self._AlarmInterface(self.db, self.__execute)
-        self.timer_interface = self._TimerInterface(self.db, self.__execute)
-        self.reminder_interface = self._ReminderInterface(self.db, self.__execute)
+        self.timer_interface = self._TimerInterface(self.db, self.__execute, self.user_interface)
+        self.reminder_interface = self._ReminderInterface(self.db, self.__execute, self.user_interface)
         self.quiz_interface = self._QuizInterface(self.db)
         self.shoppinglist_interface = self._ShoppingListInterface(self.db, self.__execute)
-        self.user_interface = self._UserInterface(self.db, self.__execute)
         self.routine_interface = self._RoutineInterface(self.db, self.__execute)
         self.audio_interface = self._AudioInterface(self.db, self.__execute)
         self.messenger_interface = self._MessangerInterface(self.__execute)
@@ -92,6 +92,7 @@ class DataBase:
 
         self.__create_table('CREATE TABLE IF NOT EXISTS timer ('
                             'id INTEGER PRIMARY KEY,'
+                            'duration VARCHAR(50)'
                             'time VARCHAR(25),'
                             'text VARCHAR(255),'
                             'uid INTEGER,'
@@ -191,7 +192,7 @@ class DataBase:
                             'PRIMARY KEY(firstname, lastname),'
                             'UNIQUE (firstname, lastname))')
 
-        self.db.commit()
+        # #self.db.commit()
 
         if self.error_counter == 0:
             logging.info('[INFO] Tables successfully created!')
@@ -218,6 +219,155 @@ class DataBase:
         self.db.commit()
         self.cursor.close()
         self.db.close()
+
+    class _UserInterface:
+        def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
+            self.db: Connection = db
+            self.exec_func: Callable = execute
+            logging.info('[INFO] UserInterface initialized.')
+
+        def get_user(self, user: str | int) -> user_item:
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
+
+            statement: str = f'SELECT * from user WHERE uid="{user}"'
+            result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
+            return self.__build_json(result_set)[0]
+
+        def get_user_by_messenger_id(self, messenger_id: int) -> user_item:
+            result_set: list[tuple] = self.exec_func(f'SELECT * FROM user WHERE mid={messenger_id}')
+            return self.__build_json(result_set)[0]
+
+        def get_users(self) -> list[user_item]:
+            statement: str = 'SELECT * from user'
+            result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
+
+            user_list: list[user_item] = self.__build_json(result_set)
+
+            for user in user_list:
+                notification_statement: str = f'SELECT text FROM notification WHERE uid="{user.get("uid")}"'
+                notification_result_set: list[tuple] = self.exec_func(notification_statement)
+                for text, in notification_result_set:
+                    user["waiting_notifications"].append(text)
+
+            return user_list
+
+        def add_user(self, alias: str, firstname: str, lastname: str, birthday: dict, messenger_id: int = 0,
+                     song_id: int = 1) -> None:
+            statement: str = f'INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) ' \
+                             f'VALUES ("{alias}", "{firstname}", "{lastname}", ' \
+                             f'"{self.__birthday_to_string(birthday)}", "{messenger_id}", "{song_id}") '
+            self.exec_func(statement)
+
+        def add_user_notification(self, user: int | str, notification: str):
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
+
+            statement: str = f'INSERT INTO notification (uid, text) VALUES ("{user}", "{notification}")'
+            self.exec_func(statement)
+
+        # The first line of attributes is for mapping purposes only, so that the user can be specified more easily
+        def update_user(self, uid: int = None, alias: str = None, first_name: str = None, last_name: str = None,
+                        _new_alias: str = None, _new_first_name: str = None, _new_last_name: str = None,
+                        _birthday: dict = None, _messenger_id: int = 0, _song_name: str = 'standard'):
+
+            # SELECT(s) is/are needed to ensure consistency of the data. Do not enter a value that does not exist!
+
+            if uid is not None:
+                try:
+                    result_set: tuple = self.exec_func(f'SELECT * FROM user WHERE uid={uid}')[0]
+                except IndexError:
+                    raise NoMatchingEntry(f'No matching user with the user-id {uid} was found in the database.')
+            elif alias is not None:
+                try:
+                    result_set: tuple = self.exec_func(f'SELECT * FROM user WHERE alias="{alias}"')[0]
+                except IndexError:
+                    raise NoMatchingEntry(f'No matching user with the alias "{alias}" was found in the database.')
+            elif first_name is not None and last_name is not None:
+                try:
+                    result_set: tuple = self.exec_func(f'SELECT * FROM user '
+                                                       f'WHERE firstname="{first_name}" '
+                                                       f'AND lastname="{last_name}"')[0]
+                except IndexError:
+                    raise NoMatchingEntry(f'No matching user with the name "{last_name, first_name}" was found '
+                                          f'in the database.')
+            else:
+                raise ValueError('No suitable description of a user given. Either the uid, the alias or first '
+                                 'and last name is required!')
+
+            uid, alias, firstname, lastname, birthday, mid, sname = result_set
+
+            if _new_alias is not None:
+                alias = _new_alias
+            if _new_first_name is not None:
+                firstname = _new_first_name
+            if _new_last_name is not None:
+                lastname = _new_last_name
+            if _birthday is not None:
+                birthday = self.__birthday_to_string(_birthday)
+            mid = _messenger_id
+
+            # SELECT is needed to ensure consistency of the data. Do not enter a song name that does not exist!
+            try:
+                sname = self.exec_func(f'SELECT name FROM audio WHERE name="{_song_name}"')[0]
+            except IndexError:
+                raise NoMatchingEntry(f'No matching audio file with the name {_song_name} was found in the database.')
+
+            statement: str = f'UPDATE user ' \
+                             f'SET alias="{alias}", firstname="{firstname}", lastname="{lastname}", ' \
+                             f'birthday="{self.__birthday_to_string(birthday)}", mid="{mid}", sname="{sname}" ' \
+                             f'WHERE uid={uid}'
+            self.exec_func(statement)
+
+        def delete_user_notification(self, user: int | str, text: str) -> None:
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
+
+            statement: str = f'DELETE FROM notification WHERE uid="{user}" AND text="{text}"'
+            self.exec_func(statement)
+
+        def delete_user(self, user: int | str) -> None:
+            if type(user) is str:
+                user: int = self.__get_user_id(user)
+
+            statement: str = f'DELETE FROM user WHERE uid="{user}"'
+            self.exec_func(statement)
+
+        @staticmethod
+        def __birthday_to_string(birthday: dict) -> str:
+            return str(birthday.get('year')) + str(birthday.get('month')).rjust(2, '0') + str(
+                birthday.get('day')).rjust(2, '0')
+
+        def __get_user_id(self, alias: str) -> int:
+            user_result_set: list[tuple[str]] = self.exec_func(f'SELECT uid FROM user WHERE alias="{alias}"')
+            if len(user_result_set) == 1:
+                return int(user_result_set[0][0])
+            else:
+                raise UserNotFountException()
+
+        def __create_table(self):
+            pass
+
+        @staticmethod
+        def __build_json(result_set: list[tuple]) -> list:
+            result_list: list[dict] = []
+
+            for uid, alias, firstname, lastname, birthday, mid, sname in result_set:
+                result_list.append({
+                    "uid": uid,
+                    "name": alias,
+                    "first_name": firstname,
+                    "last_name": lastname,
+                    "date_of_birth": {
+                        "year": birthday[0:4],
+                        "month": birthday[4:6],
+                        "day": birthday[6:8]
+                    },
+                    "messenger_id": mid,
+                    "alarm_sound": sname,
+                    "waiting_notifications": []
+                })
+            return result_list
 
     class _AlarmInterface:
         def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
@@ -441,19 +591,37 @@ class DataBase:
 
     class _TimerInterface:
 
-        def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
+        def __init__(self, db: Connection, execute: Callable[[str], list], user_interface) -> None:
             self.db: Connection = db
             self.exec_func = execute
+            self.user_interface = user_interface
             logging.info('[INFO] TimerInterface initialized.')
 
-        def get_all_timer(self) -> list[timer_item]:
-            result_dict: list[dict] = []
+        def get_all_timer(self, output_type: OutputTypes) -> list[timer_item] | list[tuple]:
+
             statement: str = f'SELECT * FROM timer'
             result_set: list = self.exec_func(statement)
-            for timer in result_set:
-                result_dict.append(self.__build_json(timer))
 
-            return result_set
+            if output_type == OutputTypes.DICT:
+                result_list: list[dict] = []
+                for timer in result_set:
+                    result_list.append(self.__build_json(timer))
+                return result_list
+            elif output_type == OutputTypes.TUPLE:
+                for timer in result_set:
+                    timer[2] = self.__build_datetime_object(timer[2])
+                return result_set
+
+        def get_timer_of_user(self, user: str | int) -> list[dict]:
+            result_list: list[dict] = []
+            if type(user) is str:
+                user = self.user_interface.__get_user_id(user)
+
+            result_set: list[tuple] = self.exec_func(f'SELECT * FROM timer WHERE uid={user}')
+            for timer in result_set:
+                result_list.append(self.__build_json(timer))
+
+            return result_list
 
         def get_timer(self, timer_id: int) -> timer_item:
             statement: str = f'SELECT * FROM timer WHERE id={timer_id} LIMIT 1'
@@ -461,20 +629,22 @@ class DataBase:
 
             return self.__build_json(result_set[0])
 
-        def add_timer(self, time: datetime, text: str, user_id: int) -> int:
+        def add_timer(self, time: datetime, duration: str, text: str, user_id: int) -> int:
             if len(text) > 255:
                 raise ValueError('Given text is too long!')
+            if len(duration) > 50:
+                duration = self.__shorten_duration_string(duration)
 
-            statement: str = f'INSERT INTO timer (time, text, uid) ' \
-                             f'VALUES("{self.__build_time_string(time)}", "{text}", {user_id})'
+            statement: str = f'INSERT INTO timer (duration, time, text, uid) ' \
+                             f'VALUES("{duration}", ""{self.__build_time_string(time)}", "{text}", {user_id})'
             result_set: list | int = self.exec_func(statement)
             if type(result_set) is list:
                 raise RuntimeError(f'__execute() returned wrong type on INSERT command! (command: {statement})')
             else:
-                # id from inserted timer - id from the first timer in the current data-base +1
+                # id from inserted timer - id from the first timer in the current database +1
                 return int(result_set) - self.exec_func('SELECT id FROM timer LIMIT 1')[0][0] + 1
 
-        def update_timer(self, timer_id: int, _time: datetime = None, _text: str = None,
+        def update_timer(self, timer_id: int, _duration: str = None, _time: datetime = None, _text: str = None,
                          _user: int | str = None) -> None:
 
             try:
@@ -482,8 +652,13 @@ class DataBase:
             except IndexError:
                 raise NoMatchingEntry(f'No matching element with the timer-id {timer_id} was found in the database.')
 
-            tid, time, text, uid = result_set
+            tid, duration, time, text, uid = result_set
 
+            if _duration is not None:
+                if len(_duration) > 50:
+                    duration = self.__shorten_duration_string(_duration)
+                else:
+                    duration = _duration
             if _time is not None:
                 time = self.__build_time_string(_time)
             if _text is not None:
@@ -504,23 +679,38 @@ class DataBase:
                         raise NoMatchingEntry(f'No user with id {_user} found!')
 
             statement: str = f'UPDATE timer ' \
-                             f'SET time="{time}", text="{text}", uid={uid} ' \
+                             f'SET duration="{duration}", time="{time}", text="{text}", uid={uid} ' \
                              f'WHERE id={tid}'
             self.exec_func(statement)
 
         def delete_timer(self, timer_id: int) -> None:
             self.exec_func(f'DELETE FROM timer WHERE id={timer_id}')
 
+        def delete_passed_timer(self) -> None:
+            self.exec_func(f'DELETE FROM timer WHERE time < {self.__build_time_string(datetime.now())}')
+
         @staticmethod
-        def __build_json(timer: tuple[int, str, str, str, int]) -> dict:
-            time: str = timer[1]
+        def __shorten_duration_string(duration: str) -> str:
+            # try to short the duration string, else store with unknown duration
+            duration_arr: list[str] = duration.split(' ')
+            if len(duration_arr[0]) + len(duration_arr[1]) > 40:
+                return 'Unbekannte Länge'
+            else:
+                return 'mehr als ' + duration_arr[0] + duration_arr[1]
+
+        def __build_json(self, timer: tuple[int, str, str, str, int]) -> dict:
             return {
                 "id": timer[0],
-                "time": datetime(int(time[0:4]), int(time[4:6]), int(time[6:8]),
-                                 int(time[8:10]), int(time[10:12]), int(time[12:]), 0),
-                "text": timer[2],
-                "uid": timer[3]
+                "duration": timer[1],
+                "time": self.__build_datetime_object(timer[2]),
+                "text": timer[3],
+                "uid": timer[4]
             }
+
+        @staticmethod
+        def __build_datetime_object(time_string: str) -> datetime:
+            return datetime(int(time_string[0:4]), int(time_string[4:6]), int(time_string[6:8]),
+                            int(time_string[8:10]), int(time_string[10:12]), int(time_string[12:]), 0)
 
         @staticmethod
         def __build_time_string(time: datetime) -> str:
@@ -531,9 +721,10 @@ class DataBase:
 
     class _ReminderInterface:
 
-        def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
+        def __init__(self, db: Connection, execute: Callable[[str], list], user_interface) -> None:
             self.db: Connection = db
             self.exec_func: Callable = execute
+            self.user_interface = user_interface  # connection is necessary for __get_user_id()
             logging.info('[INFO] ReminderInterface initialized.')
 
         def get_reminder(self):
@@ -552,7 +743,7 @@ class DataBase:
             if user is None:
                 user = -1
             elif type(user) is str:
-                user = self.__get_user_id(user)
+                user = self.user_interface.__get_user_id(user)
 
             if time is None:
                 time = ''
@@ -563,13 +754,6 @@ class DataBase:
 
         def delete_reminder(self, _id: int):
             self.exec_func(f'DELETE FROM reminder WHERE id={_id}')
-
-        def __get_user_id(self, alias: str) -> int:
-            user_result_set: list[tuple[str]] = self.exec_func(f'SELECT uid FROM user WHERE alias="{alias}"')
-            if len(user_result_set) == 1:
-                return int(user_result_set[0][0])
-            else:
-                raise UserNotFountException()
 
         @staticmethod
         def __build_json(result_set: list[tuple[int, str, str, int]]) -> list[dict]:
@@ -653,155 +837,6 @@ class DataBase:
                 })
             return result_list
 
-    class _UserInterface:
-        def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
-            self.db: Connection = db
-            self.exec_func: Callable = execute
-            logging.info('[INFO] UserInterface initialized.')
-
-        def get_user(self, user: str | int) -> user_item:
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
-
-            statement: str = f'SELECT * from user WHERE uid="{user}"'
-            result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
-            return self.__build_json(result_set)[0]
-
-        def get_user_by_messenger_id(self, messenger_id: int) -> user_item:
-            result_set: list[tuple] = self.exec_func(f'SELECT * FROM user WHERE mid={messenger_id}')
-            return self.__build_json(result_set)[0]
-
-        def get_users(self) -> list[user_item]:
-            statement: str = 'SELECT * from user'
-            result_set: list[tuple[int, str, str, str, str, int, int]] = self.exec_func(statement)
-
-            user_list: list[user_item] = self.__build_json(result_set)
-
-            for user in user_list:
-                notification_statement: str = f'SELECT text FROM notification WHERE uid="{user.get("uid")}"'
-                notification_result_set: list[tuple] = self.exec_func(notification_statement)
-                for text, in notification_result_set:
-                    user["waiting_notifications"].append(text)
-
-            return user_list
-
-        def add_user(self, alias: str, firstname: str, lastname: str, birthday: dict, messenger_id: int = 0,
-                     song_id: int = 1) -> None:
-            statement: str = f'INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) ' \
-                             f'VALUES ("{alias}", "{firstname}", "{lastname}", ' \
-                             f'"{self.__birthday_to_string(birthday)}", "{messenger_id}", "{song_id}") '
-            self.exec_func(statement)
-
-        def add_user_notification(self, user: int | str, notification: str):
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
-
-            statement: str = f'INSERT INTO notification (uid, text) VALUES ("{user}", "{notification}")'
-            self.exec_func(statement)
-
-        # The first line of attributes is for mapping purposes only, so that the user can be specified more easily
-        def update_user(self, uid: int = None, alias: str = None, first_name: str = None, last_name: str = None,
-                        _new_alias: str = None, _new_first_name: str = None, _new_last_name: str = None,
-                        _birthday: dict = None, _messenger_id: int = 0, _song_name: str = 'standard'):
-
-            # SELECT(s) is/are needed to ensure consistency of the data. Do not enter a value that does not exist!
-
-            if uid is not None:
-                try:
-                    result_set: tuple = self.exec_func(f'SELECT * FROM user WHERE uid={uid}')[0]
-                except IndexError:
-                    raise NoMatchingEntry(f'No matching user with the user-id {uid} was found in the database.')
-            elif alias is not None:
-                try:
-                    result_set: tuple = self.exec_func(f'SELECT * FROM user WHERE alias="{alias}"')[0]
-                except IndexError:
-                    raise NoMatchingEntry(f'No matching user with the alias "{alias}" was found in the database.')
-            elif first_name is not None and last_name is not None:
-                try:
-                    result_set: tuple = self.exec_func(f'SELECT * FROM user '
-                                                       f'WHERE firstname="{first_name}" '
-                                                       f'AND lastname="{last_name}"')[0]
-                except IndexError:
-                    raise NoMatchingEntry(f'No matching user with the name "{last_name, first_name}" was found '
-                                          f'in the database.')
-            else:
-                raise ValueError('No suitable description of a user given. Either the uid, the alias or first '
-                                 'and last name is required!')
-
-            uid, alias, firstname, lastname, birthday, mid, sname = result_set
-
-            if _new_alias is not None:
-                alias = _new_alias
-            if _new_first_name is not None:
-                firstname = _new_first_name
-            if _new_last_name is not None:
-                lastname = _new_last_name
-            if _birthday is not None:
-                birthday = self.__birthday_to_string(_birthday)
-            mid = _messenger_id
-
-            # SELECT is needed to ensure consistency of the data. Do not enter a song name that does not exist!
-            try:
-                sname = self.exec_func(f'SELECT name FROM audio WHERE name="{_song_name}"')[0]
-            except IndexError:
-                raise NoMatchingEntry(f'No matching audio file with the name {_song_name} was found in the database.')
-
-            statement: str = f'UPDATE user ' \
-                             f'SET alias="{alias}", firstname="{firstname}", lastname="{lastname}", ' \
-                             f'birthday="{self.__birthday_to_string(birthday)}", mid="{mid}", sname="{sname}" ' \
-                             f'WHERE uid={uid}'
-            self.exec_func(statement)
-
-        def delete_user_notification(self, user: int | str, text: str) -> None:
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
-
-            statement: str = f'DELETE FROM notification WHERE uid="{user}" AND text="{text}"'
-            self.exec_func(statement)
-
-        def delete_user(self, user: int | str) -> None:
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
-
-            statement: str = f'DELETE FROM user WHERE uid="{user}"'
-            self.exec_func(statement)
-
-        @staticmethod
-        def __birthday_to_string(birthday: dict) -> str:
-            return str(birthday.get('year')) + str(birthday.get('month')).rjust(2, '0') + str(
-                birthday.get('day')).rjust(2, '0')
-
-        def __get_user_id(self, alias: str) -> int:
-            user_result_set: list[tuple[str]] = self.exec_func(f'SELECT uid FROM user WHERE alias="{alias}"')
-            if len(user_result_set) == 1:
-                return int(user_result_set[0][0])
-            else:
-                raise UserNotFountException()
-
-        def __create_table(self):
-            pass
-
-        @staticmethod
-        def __build_json(result_set: list[tuple]) -> list:
-            result_list: list[dict] = []
-
-            for uid, alias, firstname, lastname, birthday, mid, sname in result_set:
-                result_list.append({
-                    "uid": uid,
-                    "name": alias,
-                    "first_name": firstname,
-                    "last_name": lastname,
-                    "date_of_birth": {
-                        "year": birthday[0:4],
-                        "month": birthday[4:6],
-                        "day": birthday[6:8]
-                    },
-                    "messenger_id": mid,
-                    "alarm_sound": sname,
-                    "waiting_notifications": []
-                })
-            return result_list
-
     class _RoutineInterface:
         def __init__(self, db: Connection, execute: Callable[[str], list]) -> None:
             self.db: Connection = db
@@ -826,7 +861,7 @@ class DataBase:
                 routine_set: list[tuple] = self.exec_func(f'SELECT * FROM routine')
             else:
                 routine_set: list[tuple] = self.exec_func(f'SELECT * FROM  routine '
-                                                          f'INNER JOIN oncommand ON routine.name=oncommand.name '
+                                                          f'INNER JOIN oncommand ON routine.name=oncommand.rname '
                                                           f'WHERE instr("{on_command}", oncommand.command) > 0')
 
             for rout in routine_set:
@@ -841,7 +876,8 @@ class DataBase:
 
                 on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rname={rout[0]}')
 
-                routine_list.append(self.__build_json(rout, command_set, text_set, date_set, activation_set, on_command_set))
+                routine_list.append(
+                    self.__build_json(rout, command_set, text_set, date_set, activation_set, on_command_set))
 
             return routine_list
 
@@ -869,7 +905,8 @@ class DataBase:
             for item in routine['on_commands']:
                 self.exec_func(f'INSERT INTO oncommand VALUES({name}, "{item}")')
 
-        def update_routine(self, old_name: str, _name: str = None, _description: str = None, _daily: bool = None, _monday: bool = None,
+        def update_routine(self, old_name: str, _name: str = None, _description: str = None, _daily: bool = None,
+                           _monday: bool = None,
                            _tuesday: bool = None, _wednesday: bool = None, _thursday: bool = None, _friday: bool = None,
                            _saturday: bool = None, _sunday: bool = None, _after_alarm: bool = None,
                            _after_sunrise: bool = None, _after_sunset: bool = None, _after_call: bool = None,
@@ -1125,11 +1162,11 @@ class DataBase:
         result_set: list = []
         try:
             result_set = self.cursor.execute(command).fetchall()
-            self.db.commit()
             if 'insert into' in command.lower():
                 return self.cursor.lastrowid
         except Exception as e:
             self.error_counter += 1
             logging.warning(f"[ERROR] Couldn't execute SQL command: {command}:\n {e}")
+            self.db.rollback()
             raise SQLException(f"Couldn't execute SQL Statement: {command}\n{e}")
         return result_set

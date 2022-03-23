@@ -1,7 +1,14 @@
-import datetime
+from __future__ import annotations
+
+from datetime import datetime
 import logging
 
-PRIORITY = 2 #Konflikte mit modul wie_lange_noch
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
+from src.speechassistant.resources.enums import OutputTypes
+
+PRIORITY = 2  # Conflicts with module "wie_lange_noch"
+
 
 def isValid(text):
     text = text.lower()
@@ -26,38 +33,31 @@ def handle(text, core, skills):
 
 
 class Timer:
-    def __init__(self, core, skills):
-        self.core = core
-        self.skills = skills
-        self.create_timer_storage()
 
-    def create_timer(self, text):
+    def __init__(self, core: ModuleWrapper, skills: Skills):
+        self.core: ModuleWrapper = core
+        self.timer_interface = self.core.data_base.timer_interface
+        self.skills: Skills = skills
+
+    def create_timer(self, text: str) -> None:
         # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
         text = text.replace(' auf ', ' in ')
-        time: datetime.datetime = self.core.Analyzer.analyze(text)['datetime']
-        temp_text = "Dein Timer ist abgelaufen."
+        target_time: datetime = self.core.Analyzer.analyze(text)['datetime']
+        timer_text: str = "Dein Timer ist abgelaufen."
         duration = self.get_duration(text)
         if duration is None:
             return
-        # Zeit: Um wie viel Uhr der Timer fertig ist; Text: Antwort von Core; Benutzer; Raum; Dauer: Wie lange der
-        # Timer gehen soll
-        E_eins = {'Zeit': time, 'Text': temp_text, 'Dauer': duration.capitalize(), 'Benutzer': self.core.user}
 
-        # Vermeidung von Redundanz. Wird für 1 und mehrere Timer verwendet
+        # Vermeidung von Redundanz. Wird für ein und mehrere Timer verwendet
         # Aufzählung wenn mehrere Timer
-        if 'Timer' in self.core.local_storage.keys() or self.core.local_storage["Timer"] == []:
-            self.core.local_storage['Timer'].append(E_eins)
-            anzahl = str(len(self.core.local_storage['Timer']))
-            if not self.core.messenger_call:
-                temp_text = self.core.skills.Statics.numb_to_ordinal[anzahl]
-            else:
-                temp_text = anzahl + "."
-            self.core.say(temp_text + ' Timer: ' + str(E_eins['Dauer']) + ' ab jetzt.')
+        position: int = self.timer_interface.add_timer(target_time, timer_text, user_id=self.core.user.get('id'))
+        if not self.core.messenger_call:
+            temp_text = self.core.skills.statics.numb_to_ordinal[position]
         else:
-            self.core.local_storage['Timer'] = [E_eins]
-            self.core.say(str(E_eins['Dauer']) + ' ab jetzt.')
+            temp_text = str(position) + "."
+        self.core.say(temp_text + ' Timer: ' + str(duration) + ' ab jetzt.')
 
-    def get_duration(self, text):
+    def get_duration(self, text: str) -> str | None:
         text = text.replace(' auf ', ' in ')
         text = text.replace(' von ', ' in ')
         duration = self.skills.get_text_between('in', text, output='String')
@@ -66,41 +66,23 @@ class Timer:
             return None
         return duration
 
-    def get_remain_duration(self):
-        # Begrenzt Timer auf die des Benutzers
-        user_timer = self.core.local_storage['Timer']
+    def get_remain_duration(self) -> str:
+        self.timer_interface.delete_passed_timer()
+        # Just query timer from user
+        # user_timer = self.timer_interface.get_timer_of_user(self.core.user['id'])
+        user_timer = self.timer_interface.get_all_timer(output_type=OutputTypes.TUPLE)
         output = ''
 
         if len(user_timer) == 0:
             output = "Du hast keinen aktiven Timer!"
         else:
             if len(user_timer) > 1:
-                output = f'Du hast {str(len(self.core.local_storage["Timer"]))} Timer gestellt.\n  '
+                output = f'Du hast {str(len(user_timer))} Timer gestellt.\n  '
 
-            for timer in user_timer:
-                self.delete_timer_if_passed(user_timer, timer)
-
-            for timer in user_timer:
-                output += timer["Dauer"] + 'Timer mit ' + self.skills.get_time_difference(datetime.datetime.now(), timer[
-                    'Zeit']) + ' verbleibend.\n  '
+            for timer_id, duration, time, text, uid in user_timer:
+                output += duration + 'Timer mit ' + self.skills.get_time_difference(datetime.now(),
+                                                                                    time) + ' verbleibend.\n '
         return output
 
-    def delete_timer_if_passed(self, user_timer, item):
-        try:
-            # erst einmal checken, ob der Timer vlt eigentlich schon abgelaufen ist,
-            # was eigentlich nicht passieren sollte.
-            now = datetime.datetime.now()
-            timer_abgelaufen = (item["Zeit"] - now).total_seconds() < 0
-            if timer_abgelaufen:
-                user_timer.remove(item)
-                self.core.local_storage["Timer"].remove(item)
-        except:
-            # local_storage doesn´t extend this timer. Just write this into the Log
-            logging.warning('[WARNING] Not existing timer could not be deleted')
-
-    def delete_timer(self):
+    def delete_timer(self) -> None:
         self.core.say('Diese Funktion wird derzeit auf das Webinterface ausgelagert.')
-
-    def create_timer_storage(self):
-        if 'Timer' not in self.core.local_storage.keys():
-            self.core.local_storage["Timer"] = []
