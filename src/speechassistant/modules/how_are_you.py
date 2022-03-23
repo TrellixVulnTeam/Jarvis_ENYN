@@ -1,6 +1,12 @@
 import random
 
 
+def isValid(text: str) -> bool:
+    if 'wie' in text and 'geht' in text and 'dir' in text:
+        return True
+    return False
+
+
 def handle(text, core, skills):
     answers = ['Danke, gut!',
                'Mir gehts gut, {}.'.format(core.user["name"]),
@@ -12,4 +18,4 @@ def handle(text, core, skills):
         answer = ['Das freut mich!']
     else:
         answer = ['Ich fürchte, ich konnte dich nicht verstehen. Geht es dir so schlecht?']
-    core.say(random.choice(answer))
+    core.say(answer)

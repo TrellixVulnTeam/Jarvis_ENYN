@@ -1,8 +1,25 @@
-import logging
-import random
 import re
 from src.speechassistant.core import ModuleWrapper
 from src.speechassistant.resources.module_skills import Skills
+
+
+def isValid(text):
+    text = text.lower()
+    if 'to' in text and 'do' in text and 'liste' in text:
+        return False
+    if 'einkaufsliste' in text:
+        if 'setz' in text or 'setzte' in text or 'schreib' in text or 'schreibe' in text or 'füg' in text or 'füge' in text:
+            return True
+        elif ('was' in text and 'steht' in text and 'auf' in text) or ('gib' in text and 'aus' in text):
+            return True
+        elif ('lösch' in text or 'leere' in text) and 'einkaufsliste' in text:
+            return True
+        elif 'send' in text or 'schick' in text or 'schreib' in text:
+            return True
+        elif 'räum' in text and 'auf' in text:
+            return True
+    else:
+        return False
 
 
 def prepare_text(text: str) -> str:

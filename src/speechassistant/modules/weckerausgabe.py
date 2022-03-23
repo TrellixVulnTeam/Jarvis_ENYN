@@ -1,4 +1,4 @@
-from src.speechassistant.services.light_systems.Phue import PhilipsWrapper
+from src.speechassistant.resources.services import PhilipsWrapper
 
 
 def handle(text, core, skills):
