@@ -1,3 +1,5 @@
+from __future__ import annotations  # compatibility for < 3.10
+
 import io
 import json
 import logging
@@ -17,7 +19,7 @@ from src.speechassistant.resources.analyze import Sentence_Analyzer
 from src.speechassistant.resources.module_skills import Skills
 from src.speechassistant.resources.intent.Wrapper import IntentWrapper as AIWrapper
 from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.services import *
+from src.speechassistant.resources.services import *
 
 
 class Core:
@@ -128,7 +130,7 @@ class Core:
         user: dict = self.users.get_user_by_name(self.local_storage["user"])
 
         matching_routines: list[dict] = self.data_base.routine_interface.get_routines(on_command=text)
-        if matching_routines is not []:
+        if matching_routines:
             # if there are matching routines of this command, start the matching modules
             for routine in matching_routines:
                 for command in routine['actions']["commands"]:
@@ -148,7 +150,6 @@ class Core:
                     self.start_module(text, response["module"], user=user)
                 else:
                     raise ValueError('Invalid type of attribute "text"!')
-
 
     def start_module(self, text: str, name: str, user: dict = None) -> bool:
         # user prediction is not implemented yet, therefore here the workaround
@@ -362,8 +363,8 @@ class ModuleWrapperContinuous:
         else:
             return module_storage[module_name]
 
-    def translate(self, ttext, targetLang='de'):
-        return ModuleWrapper.translate(targetLang)
+    def translate(self, text, target_lang='de'):
+        return ModuleWrapper.translate(text, target_lang)
 
 
 class Modules:
@@ -425,7 +426,7 @@ class Modules:
         mod_skill: Skills = self.core.skills
         if text is None:
             # generate a random text
-            text: str = str(random.randint(0, 1000000000))
+            # text: str = str(random.randint(0, 1000000000))
             analysis: dict = {}
         else:
             # else there is a valid text -> analyze
@@ -440,8 +441,7 @@ class Modules:
             for module in self.modules:
                 if module.__name__ == name:
                     self.core.active_modules[str(text)]: ModuleWrapper = self.module_wrapper(self.core, text, analysis,
-                                                                                             messenger,
-                                                                                             user)
+                                                                                             messenger, user)
                     mt: Thread = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
@@ -494,12 +494,11 @@ class Modules:
                 if module.__name__ == name:
                     logging.info('[ACTION] --Modul {} was called directly (Parameter: {})--'.format(name, text))
                     self.core.active_modules[str(text)]: ModuleWrapper = self.module_wrapper(self.core, text, analysis,
-                                                                                             messenger,
-                                                                                             user)
+                                                                                             messenger, user)
                     mt: Thread = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
                     mt.daemon = True
                     mt.start()
-                    break
+                    return True
         else:
             try:
                 analysis: dict = self.core.analyzer.analyze(str(text))
@@ -518,6 +517,8 @@ class Modules:
                         mt.join()  # wait until Module is done...
                         self.start_module(user=user, name='wartende_benachrichtigung')
                         break
+                except AttributeError:
+                    logging.warning(f'[WARNING] {module.__name__} has no isValid() function!')
                 except Exception:
                     traceback.print_exc()
                     print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
