@@ -1,4 +1,4 @@
-from src.speechassistant.services.light_systems.Phue import PhilipsWrapper
+from src.speechassistant.resources.services.light_systems.Phue import PhilipsWrapper
 
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']

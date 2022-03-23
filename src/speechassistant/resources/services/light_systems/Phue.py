@@ -1,6 +1,4 @@
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
-import json
-
 from phue import Bridge
 from datetime import datetime
 
@@ -102,10 +100,10 @@ class PhilipsWrapper:
         self.bridge.set_light(lights, 'on', True)
         if change_brightness:
             self.bridge.set_light(lights, 'bri', 254)
-        if self.color_adjustment:
+        """if self.color_adjustment:
             now = datetime.now()
             # add sunrise and sunset
-            self.bridge.set_light(lights, 'sat', )
+            self.bridge.set_light(lights, 'sat', )"""
 
     def light_off(self, lights):
         self.bridge.set_light(lights, 'on', False)

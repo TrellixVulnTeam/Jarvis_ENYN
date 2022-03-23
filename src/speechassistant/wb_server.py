@@ -14,7 +14,7 @@ from Crypto import Random
 from flask import Flask, render_template, jsonify, request, Response, send_file
 from gevent import pywsgi
 
-from src.speechassistant.services.light_systems.Phue import PhilipsWrapper
+from src.speechassistant.resources.services.light_systems.Phue import PhilipsWrapper
 from src.speechassistant.webserver.helpWrapper import InstallWrapper
 
 # JARVIS_setup_wrapper-import is a bit hacky but I can't see any nicer way to realize it yet
