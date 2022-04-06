@@ -88,7 +88,8 @@ class DataBase:
                             'thursday INTEGER,'
                             'friday INTEGER ,'
                             'saturday INTEGER,'
-                            'sunday INTEGER)')
+                            'sunday INTEGER, '
+                            'regular INTEGER)')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS timer ('
                             'id INTEGER PRIMARY KEY,'
@@ -382,20 +383,21 @@ class DataBase:
                 returning_list.append(self.__build_json(item))
             return returning_list
 
-        def add_alarm(self, time: dict, text: str, user_id: int, repeating: dict, active: bool = True,
+        def add_alarm(self, time: dict, text: str, user: int | str, repeating: dict, active: bool = True,
                       initiated: bool = False, song: str = 'standard.wav') -> None:
+            if type(user) is str:
+                user = self.__get_user_id(user)
             if active:
                 active_int: int = 1
             else:
                 active_int: int = 0
-
             if initiated:
                 init_int = 1
             else:
                 init_int = 0
 
             statement: str = f'INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, initiated) ' \
-                             f'VALUES ({song}, {user_id}, {time["hour"]}, {time["minute"]}, ' \
+                             f'VALUES ({song}, {user}, {time["hour"]}, {time["minute"]}, ' \
                              f'{time["total_seconds"]}, "{text}", {active_int}, {init_int})'
 
             self.exec_func(statement)
@@ -484,6 +486,7 @@ class DataBase:
             self.exec_func(statement)
 
         def __build_json(self, result_set: list) -> dict | list[dict]:
+            # toDo: add alarmrepeat
             result_list: list[dict] = []
             for aid, sname, uid, hour, minute, total_seconds, text, active, initiated in result_set:
                 sound_path: str = self.exec_func(f'SELECT path FROM audio WHERE name="{sname}"')[0]
@@ -501,6 +504,13 @@ class DataBase:
                     "initiated": initiated
                 })
             return result_list
+
+        def __get_user_id(self, alias: str) -> int:
+            user_result_set: list[tuple[str]] = self.exec_func(f'SELECT uid FROM user WHERE alias="{alias}"')
+            if len(user_result_set) == 1:
+                return int(user_result_set[0][0])
+            else:
+                raise UserNotFountException()
 
         def __create_table(self):
             pass

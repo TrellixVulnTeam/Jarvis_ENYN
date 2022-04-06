@@ -2,16 +2,16 @@ import datetime
 import logging
 import traceback
 
-
-def isValid(text):
-    text = text.lower()
-    if 'weck' in text:
-        return True
-    return False
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
-def handle(text, core, skills):
-    alarm = Alarm(core)
+def isValid(text: str) -> bool:
+    return 'weck' in text.lower()
+
+
+def handle(text: str, core: ModuleWrapper, skills: Skills):
+    alarm: Alarm = Alarm(core)
 
     """
             if core.analysis["time"] is None:
@@ -29,54 +29,62 @@ def handle(text, core, skills):
         # automatically assumed here if evening is not explicitly meant.
         text += ' morgens'
 
-    repeat = get_repeat(text)
-    time = core.analysis["time"]
-    days = get_day(text, skills, core.analysis["datetime"])
+    regular: bool = is_regular(text)
+    time: datetime.datetime = core.analysis["time"]
+    repeating: list[dict] = get_repeating(text, skills)
 
     if 'lösch' in text or 'beend' in text or ('schalt' in text and 'ab' in text):
         try:
-            alarm.delete_alarm(days, repeat, time=time)
+            alarm.delete_alarm(repeating, regular, time=time)
         except ValueError:
             core.say("Es gab einen fatalen internen Error in dem Modul Wecker. Am besten du meldest den Fehler, "
                      "damit das Modul so schnell wie möglich wieder funktionsfähig ist.")
-        except:
-            core.say("Leider habe ich nicht verstanden welchen Wecker ich löschen soll. Bitte versuche es "
-                     "über das online-Portal oder über einen erneuten Sprachbefehl mit Zeitangabe erneut.")
     else:
         # days, repeat, time=None, hour=None, minute=None, text=None, sound=None
-        alarm.create_alarm(days, repeat, time=time)
-        core.say(alarm.get_reply(text, time, repeat))
+        alarm.create_alarm(regular, time)
+        core.say(alarm.get_reply(text, time, regular))
 
 
-def get_repeat(text):
+def is_regular(text: str) -> bool:
     text = text.lower()
     if ('jeden' in text or 'immer' in text) and not ('nur am' in text or 'nur an dem' in text):
-        return 'regular'
+        return True
     else:
-        return 'single'
+        return False
 
 
-def get_day(text, skills, time):
-    text = text.lower()
-    days = []
+def get_repeating(text: str, skills: Skills) -> list[dict]:
+    text: str = text.lower()
+    repeating: list[dict] = []
 
     if 'täglich' in text or 'jeden tag' in text or 'alle' in text or 'jeden morgen' in text or 'jeden abend' in text:
-        days = [each_day.lower() for each_day in skills.statics.weekdays_engl]
+        repeating = [{each_day.lower(): True} for each_day in skills.statics.weekdays_engl]
     elif 'wochentag' in text or 'unter der woche' in text:
+        # add monday - friday (as True values)
         for i in range(5):
-            days.append(skills.Statics.weekdays_engl[i].lower())
+            repeating.append({skills.statics.weekdays_engl[i].lower(): True})
+        # add saturday and sunday (as False values)
+        for i in [6, 7]:
+            repeating.append({skills.statics.weekdays_engl[i].lower(): False})
     elif 'wochenende' in text:
-        days = ['saturday', 'sunday']
+        # add monday - friday (as False values)
+        for i in range(5):
+            repeating.append({skills.statics.weekdays_engl[i].lower(): False})
+        # add saturday and sunday (as True values)
+        for i in [6, 7]:
+            repeating.append({skills.statics.weekdays_engl[i].lower(): True})
     else:
-        for item in skills.Statics.weekdays:
+        for item in skills.statics.weekdays:
             if item.lower() in text:
-                days.append(skills.Statics.weekdays_ger_to_eng[item.lower()])
-    if days == []:
-        days.append(skills.Statics.weekdays_engl[time.weekday()].lower())
-    return days
+                repeating.append({skills.statics.weekdays_ger_to_eng[item.lower()]: True})
+            else:
+                repeating.append({skills.statics.weekdays_ger_to_eng[item.lower()]: False})
+    if repeating is []:
+        repeating = [{each_day.lower(): False} for each_day in skills.statics.weekdays_engl]
+    return repeating
 
 
-def get_time_stamp(hour, minute):
+def get_time_stamp(hour: int, minute: int) -> str:
     hour = str(hour)
     minute = str(minute)
 
@@ -89,76 +97,46 @@ def get_time_stamp(hour, minute):
 
 
 class Alarm:
-    def __init__(self, core):
-        self.core = core
-        self.local_storage = core.local_storage
-        self.skills = core.skills
-        self.create_alarm_storage()
+    def __init__(self, core: ModuleWrapper) -> None:
+        self.core: ModuleWrapper = core
+        self.local_storage: dict = core.local_storage
+        self.skills: Skills = core.skills
+        self.alarm_interface = self.core.data_base.alarm_interface
 
-        self.user = None
-        self.days = None
-        self.repeat = None
-        self.text = None
-        self.list = None
+        self.user: dict
+        self.days: dict
+        self.repeat: dict
+        self.text: dict
+        self.list: dict
 
-    def create_alarm(self, days, repeat, time=None, hour=None, minute=None, seconds=0, text=None, sound=None):
-        # toDo: dont add alarm when exists
+    def create_alarm(self, is_regular: bool, time=None, hour=None, minute=None, seconds=0, text=None, sound=None) -> None:
         if not (time is not None or (hour is not None and minute is not None)):
             raise ValueError("missing values!")
-        if repeat != "regular" and repeat != "single":
-            raise ValueError("invlaid repeat-value!")
         if time is not None:
-            hour = time["hour"]
-            minute = time["minute"]
-            seconds = time["second"]
+            hour: int = time["hour"]
+            minute: int = time["minute"]
         if self.core.user is not None:
-            logging.info(self.core.user)
-            alarm_sound = self.core.user["alarm_sound"]
-            user = self.core.user
-            user_name = f', {self.core.user["first_name"].capitalize()}'
+            alarm_sound: str = self.core.user["alarm_sound"]
+            user_id: int = self.core.user.get("id")
+            user_name: str = f', {self.core.user["first_name"].capitalize()}'
         else:
-            alarm_sound = "standart.wav"
-            user = None
-            user_name = ''
+            alarm_sound: str = "standart.wav"
+            user_id: int = -1
+            user_name: str = ''
         if text is None:
-            text = f'Alles Gute zum Geburtstag{user_name}!' if self.is_birthday() else f'Guten Morgen{user_name}!'
+            text: str = f'Alles Gute zum Geburtstag{user_name}!' if self.is_birthday() else f'Guten Morgen{user_name}!'
         if sound is not None:
-            alarm_sound = sound
-
-        total_seconds = int(hour) * 3600 + int(minute) * 60
-        list = {"time": {"hour": hour, "minute": minute,
-                         "total_seconds": total_seconds, "time_stamp": get_time_stamp(hour, minute)},
-                "sound": alarm_sound, "user": user,
-                "text": text, "active": True, "prepared": False}
-        if not type(days) == type([]):
-            days = [days]
-        for _day in days:
-            if self.core.local_storage["alarm"][repeat][_day] is None or _day not in self.core.local_storage["alarm"]["regular"].keys():
-                self.core.local_storage["alarm"][repeat][_day] = []
-            self.core.local_storage["alarm"][repeat][_day].append(list)
+            alarm_sound: str = sound
+        total_seconds: int = int(hour) * 3600 + int(minute) * 60
+        time: dict = {"hour": hour, "minute": minute, "total_seconds": total_seconds}
+        repeating: list[dict] = get_repeating(text, self.skills)
+        repeating.append({"regular": is_regular})
+        self.alarm_interface.add_alarm(time, text, user_id, repeating, song=alarm_sound)
 
     def delete_alarm(self, days, repeat, time=None, hour=None, minute=None):
-        if not (time is not None or (hour is not None and minute is not None)):
-            raise ValueError("missing values!")
-        if repeat != "regular" and repeat != "single":
-            raise ValueError("invlaid repeat-value!")
-        if time is not None:
-            hour = time.hour
-            minute = time.minute
-        # repeat means "regular" or "single"
-        if not type(days) == type([]):
-            days = [days]
-        for item in days:
-            try:
-                for alarm in self.core.local_storage["alarm"][repeat][item]:
-                    # check every alarm
-                    if hour == alarm["time"]["hour"] and minute == alarm["time"]["minute"]:
-                        # if hour and minute matches, remove it
-                        self.core.local_storage["alarm"][repeat][item].remove(alarm)
-            except:
-                traceback.print_exc()
+        self.core.say("Die Löschfunktion wird derzeit auf die Website ausgelagert.")
 
-    def is_birthday(self):
+    def is_birthday(self) -> bool:
         if self.core.user:
             birth_date = self.core.user["date_of_birth"]
             today = datetime.datetime.today()
@@ -181,7 +159,7 @@ class Alarm:
         else:
             output += 'für jeden '
 
-            for item in self.skills.Statics.weekdays:
+            for item in self.skills.statics.weekdays:
                 if item.lower() in text.lower():
                     output += item
                     break
@@ -189,30 +167,6 @@ class Alarm:
         output += ' um ' + self.skills.get_time(time)
         return output
 
-    def create_alarm_storage(self):
-        if 'alarm' not in self.core.local_storage.keys():
-            self.core.local_storage["alarm"] = {}
-
-        if 'regular' not in self.core.local_storage["alarm"].keys():
-            self.core.local_storage["alarm"]["regular"] = {}
-
-        if 'single' not in self.core.local_storage["alarm"].keys():
-            self.core.local_storage["alarm"]["single"] = {}
-
-        for extension in ['regular', 'single']:
-            for day in [each_day.lower() for each_day in self.skills.Statics.weekdays_engl]:
-                if day not in self.core.local_storage["alarm"][extension].keys():
-                    self.core.local_storage["alarm"][extension][day] = []
-
     def confirm_action(self, days):
-        repeatings = 'Regelmäßiger ' if self.repeat == 'regular' else ''
-        day_names = []
-        for item in days:
-            day_names.append(self.skills.Statics.weekdays_eng_to_ger[item])
 
-        day_enum = self.skills.get_enumerate(day_names)
-        if len(days) > 1:
-            self.core.say(f'{repeatings}Wecker gestellt für{day_enum} um {self.skills.get_time(self.time)}')
-        else:
-            self.core.say(
-                f'{repeatings}Wecker gestellt für{self.get_reply()}, {self.time["hour"]} Uhr {self.time["minute"]}')
+        pass
