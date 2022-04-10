@@ -1,0 +1,25 @@
+.add-button {
+    align-self: center;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.smaller {
+    width: 70%;
+    justify-self: center;
+}
+
+space-before {
+  margin-top: 30px;
+}
+
+tile-selector {
+  align-self: center;
+}
+
+fieldset {
+    margin-bottom: 25px;
+    padding: 20px;
+}

@@ -1,0 +1,8 @@
+
+<button
+  type="button"
+  class="btn"
+  [ngClass]="checked ? 'btn-primary' : 'btn-secondary'"
+  (click)="onSateChanged()">
+  {{ text }}
+</button>
