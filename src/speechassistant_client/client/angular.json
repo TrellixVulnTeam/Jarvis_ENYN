@@ -99,9 +99,14 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/material-design-icons/iconfont/material-icons.css",
+              "node_modules/bootstrap5/src/bootstrap.min.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/bootstrap5/src/js/bootstrap.bundle.min.js",
+              "node"
+            ]
           }
         }
       }
