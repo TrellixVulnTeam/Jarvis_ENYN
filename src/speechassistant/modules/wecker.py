@@ -109,7 +109,8 @@ class Alarm:
         self.text: dict
         self.list: dict
 
-    def create_alarm(self, is_regular: bool, time=None, hour=None, minute=None, seconds=0, text=None, sound=None) -> None:
+    def create_alarm(self, is_regular: bool, time: dict = None, hour: int = None, minute: int = None, text: str = None,
+                     sound: str = None) -> None:
         if not (time is not None or (hour is not None and minute is not None)):
             raise ValueError("missing values!")
         if time is not None:
@@ -132,6 +133,7 @@ class Alarm:
         repeating: list[dict] = get_repeating(text, self.skills)
         repeating.append({"regular": is_regular})
         self.alarm_interface.add_alarm(time, text, user_id, repeating, song=alarm_sound)
+        self.core.say(self.get_reply(text, time, repeating[len(repeating)-1]["regular"]))
 
     def delete_alarm(self, days, repeat, time=None, hour=None, minute=None):
         self.core.say("Die Löschfunktion wird derzeit auf die Website ausgelagert.")
@@ -144,12 +146,11 @@ class Alarm:
                 return True
         return False
 
-    def get_reply(self, text, time, repeat):
-
+    def get_reply(self, text: str, time: dict, is_regular: bool) -> str:
         output = 'Wecker gestellt '
 
         now = datetime.datetime.now()
-        if repeat == 'single':
+        if is_regular:
             if time["day"] == now.day:
                 output += 'für heute'
             elif time["day"] == (now.day+1):
@@ -167,6 +168,3 @@ class Alarm:
         output += ' um ' + self.skills.get_time(time)
         return output
 
-    def confirm_action(self, days):
-
-        pass
