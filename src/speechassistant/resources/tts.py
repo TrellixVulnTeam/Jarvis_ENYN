@@ -4,14 +4,12 @@ import traceback
 from pathlib import Path
 from threading import Thread
 
-import pyperclip
+import pyperclip3
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import Select
 
 
 class TTS:
@@ -83,7 +81,7 @@ class TTS:
 
     def push_text(self, text):
         self.text_area.clear()
-        pyperclip.copy(text)
+        pyperclip3.copy(text)
         self.text_area.send_keys(Keys.CONTROL, 'v')
         # script = "var element = arguments[0], txt = arguments[1]; element.value = txt; element.dispatchEvent(new Event('change'));"
         # self.driver.execute_script(script, self.text_area, text)
