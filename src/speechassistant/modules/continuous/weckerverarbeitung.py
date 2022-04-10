@@ -1,34 +1,21 @@
-import datetime
+from datetime import datetime
+from src.speechassistant.core import ModuleWrapperContinuous
 
-INTERVALL = 2
-
-
-def run(core, skills):
-    if 'alarm' in core.local_storage.keys():
-        alarms = core.local_storage.get('alarm')
-        for repeat in alarms:
-            # iterate over 'regular' and 'single'
-            for day in alarms[repeat]:
-                for alarm in alarms[repeat][day]:
-                    # iterate over each weekday
-                    if is_day_correct(day):
-                        if get_total_seconds(alarm["time"]) <= 0 and alarm["active"]:
-                            dic = {'Text': alarm["text"], 'Ton': alarm["sound"], 'User': alarm["user"]}
-                            core.start_module(name='weckerausgabe', text=dic)
-                            alarms[repeat][day].remove(alarm)
-                            core.local_storage['alarm'] = alarms
-                        elif get_total_seconds(alarm["time"]) <= 1800 and not alarm["prepared"]:
-                            alarm["prepared"] = True
-                            core.start_module(name="wecker_sonnenaufgang", text="")
+INTERVALL = 60
 
 
-def is_day_correct(day):
-    if day.lower() == datetime.datetime.today().strftime("%A").lower():
-        return True
-    return False
+def run(core: ModuleWrapperContinuous):
+    active: list[dict]
+    init: list[dict]
+    now: datetime = datetime.now()
+    alarm_interface = core.data_base.alarm_interface
+    active, init = alarm_interface.get_alarms(active=True)
 
+    for item in active:
+        dic = {'text': item["text"], 'sound': item["sound"], 'user': item["user"]}
+        core.start_module(name='weckerausgabe', text=dic)
+        alarm_interface.update_alarm(item["aid"], _last_executed=f'{now.day}.{now.month}.{now.year}')
 
-def get_total_seconds(alarm_time):
-    now = datetime.datetime.now()
-    now_seconds = now.hour * 3600 + now.minute * 60 + now.second
-    return alarm_time["total_seconds"] - now_seconds
+    for item in init:
+        core.start_module(name="wecker_sonnenaufgang", text="")
+        alarm_interface.update_alarm(item["aid"], _initiated=True)
