@@ -81,8 +81,9 @@ class TTS:
 
     def push_text(self, text):
         self.text_area.clear()
-        pyperclip3.copy(text)
-        self.text_area.send_keys(Keys.CONTROL, 'v')
+        # pyperclip3.copy(text)
+        # self.text_area.send_keys(Keys.CONTROL, 'v')
+        self.text_area.send_keys(text)
         # script = "var element = arguments[0], txt = arguments[1]; element.value = txt; element.dispatchEvent(new Event('change'));"
         # self.driver.execute_script(script, self.text_area, text)
 

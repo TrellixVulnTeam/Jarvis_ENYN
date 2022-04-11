@@ -31,5 +31,6 @@
   "wakeword_sentensivity": 0.5,
   "use_cameras": false,
   "use_facerec": false,
-  "use_interface": false
+  "use_interface": false,
+  "ai": true
 }

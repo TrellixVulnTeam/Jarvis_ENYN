@@ -13,7 +13,7 @@ from typing import AnyStr, Any
 
 import requests
 
-import src.speechassistant.wb_server as ws
+import src.speechassistant.webserver.wb_server as ws
 from src.speechassistant.Audio import AudioOutput, AudioInput
 from src.speechassistant.resources.analyze import Sentence_Analyzer
 from src.speechassistant.resources.module_skills import Skills
@@ -29,13 +29,13 @@ class Core:
         self.config_data: dict = conf_dat
         self.use_ai = conf_dat["ai"]
         self.path: str = conf_dat["Local_storage"]['CORE_PATH']
-        self.data_base = DataBase(f'{self.path}/database')
-        self.data_base.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
-        self.skills: Skills = Skills()
         self.__data: dict = conf_dat
         self.__fill_data()  # since the path is needed, __fill_data() is called only here
         self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = analyzer
+        self.skills: Skills = Skills()
+        self.data_base = DataBase(os.path.join(self.path, 'database'), self.skills)
+        self.data_base.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
         self.services: Services = Services(self, self.__data, conf_dat)
         self.messenger = None
         self.messenger_queued_users: list = []  # These users are waiting for a response
@@ -51,7 +51,8 @@ class Core:
         self.system_name: str = system_name
 
         self.ai: AIWrapper = AIWrapper(self)
-        self.skills: Skills = Skills()
+
+
 
         if self.local_storage["home_location"] == "":
             self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
@@ -138,7 +139,7 @@ class Core:
                         self.modules.start_module(user=user, text=text, name=command["module_name"])
         else:
             if not self.modules.start_module(text=str(text), user=user) and self.use_ai:
-                # if isValid() functions did not found a matching module and the user wants to try with AI (use_ai),
+                # if isValid() functions does not found a matching module and the user wants to try with AI (use_ai),
                 # start AI
                 response: str | dict = self.ai.proceed_with_user_input(text)
                 if response is None:
@@ -339,7 +340,7 @@ class ModuleWrapperContinuous:
         self.core = core
         self.Analyzer = core.analyzer
         self.services = core.services
-        self.data_base = core.data_base
+        self.data_base: DataBase = core.data_base
         self.audio_Input = core.audio_input
         self.audio_output = core.audio_output
         self.local_storage = core.local_storage
@@ -516,7 +517,7 @@ class Modules:
                         mt.start()
                         mt.join()  # wait until Module is done...
                         self.start_module(user=user, name='wartende_benachrichtigung')
-                        break
+                        return True
                 except AttributeError:
                     logging.warning(f'[WARNING] {module.__name__} has no isValid() function!')
                 except Exception:
