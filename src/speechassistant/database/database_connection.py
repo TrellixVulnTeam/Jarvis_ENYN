@@ -1,9 +1,10 @@
 from __future__ import annotations  # compatibility for < 3.10
 
 import io
+import json
 import pathlib
 from datetime import datetime
-from typing import Callable  # , TypeAlias
+from typing import Callable, TypeAlias  # , TypeAlias
 import os
 import sqlite3
 from sqlite3 import Connection, Cursor
@@ -22,27 +23,29 @@ routine_item: TypeAlias = dict[[str, str], [str, dict], [str, dict], [str, dict]
 
 from src.speechassistant.resources.module_skills import Skills
 
+
 # toDo: except IndexError -> if ... is None
 # toDo: as_tuple -> output_type: OutputTypes
 # toDo: fetch_one -> LIMIT 1
+# toDo: close cursor before raise
 
 class DataBase:
     def __init__(self, root_path: str, skills: Skills) -> None:
         logging.basicConfig(level=logging.DEBUG)
         logging.info('[ACTION] Initialize DataBase...\n')
-        self.db: Connection = sqlite3.connect(os.path.join(root_path, 'database\\data_base'), check_same_thread=False)
+        self.db: Connection = sqlite3.connect(os.path.join(root_path, 'database', 'data_base'), check_same_thread=False)
         self.error_counter: int = 0
 
-        self.user_interface = self._UserInterface(self.db, self.__execute)
-        self.alarm_interface = self._AlarmInterface(self.db, self.__execute, skills)
-        self.timer_interface = self._TimerInterface(self.db, self.__execute, self.user_interface)
-        self.reminder_interface = self._ReminderInterface(self.db, self.__execute, self.user_interface)
+        self.user_interface = self._UserInterface(self.db)
+        self.alarm_interface = self._AlarmInterface(self.db, skills)
+        self.timer_interface = self._TimerInterface(self.db, self.user_interface)
+        self.reminder_interface = self._ReminderInterface(self.db, self.user_interface)
         self.quiz_interface = self._QuizInterface(self.db)
-        self.shoppinglist_interface = self._ShoppingListInterface(self.db, self.__execute)
-        self.routine_interface = self._RoutineInterface(self.db, self.__execute)
-        self.audio_interface = self._AudioInterface(self.db, self.__execute)
-        self.messenger_interface = self._MessangerInterface(self.__execute)
-        self.birthday_interface = self._BirthdayInterface(self.__execute)
+        self.shoppinglist_interface = self._ShoppingListInterface(self.db)
+        self.routine_interface = self._RoutineInterface(self.db)
+        self.audio_interface = self._AudioInterface(self.db)
+        self.messenger_interface = self._MessangerInterface()
+        self.birthday_interface = self._BirthdayInterface(self.db)
         self.__audio_path: str = ''
 
         self.create_tables()
@@ -132,28 +135,31 @@ class DataBase:
                             'aftersunset INTEGER, '
                             'aftercall INTEGER)')
 
-        self.__create_table('CREATE TABLE IF NOT EXISTS oncommand ('
+        self.__create_table('CREATE TABLE IF NOT EXISTS oncommand ( '
+                            'ocid INTEGER PRIMARY KEY, '
                             'rname VARCHAR(50), '
                             'command VARCHAR(255), '
                             'FOREIGN KEY(rname) REFERENCES routine(rname)'
-                            'PRIMARY KEY(rname, command))')
+                            'UNIQUE (rname, command))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS routineactivationtime ('
+                            'ratid INTEGER PRIMARY KEY, '
                             'rname VARCHAR(50), '
                             'hour INTEGER, '
                             'minute INTEGER, '
                             'FOREIGN KEY(rname) REFERENCES routine(rname), '
-                            'PRIMARY KEY(rname, hour, minute))')
+                            'UNIQUE (rname, hour, minute))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS routinedates ('
-                            'rname VARCHAR(50),'
-                            'day INTEGER,'
-                            'month INTEGER,'
-                            'PRIMARY KEY(rname, day, month),'
+                            'rdid INTEGER PRIMARY KEY, '
+                            'rname VARCHAR(50), '
+                            'day INTEGER, '
+                            'month INTEGER, '
+                            'UNIQUE (rname, day, month), '
                             'FOREIGN KEY(rname) REFERENCES routine(rname))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS routinecommands ('
-                            'cid INTEGER PRIMARY KEY, '
+                            'rcid INTEGER PRIMARY KEY, '
                             'rname VARCHAR(50), '
                             'modulename VARCHAR(50), '
                             'FOREIGN KEY(rname) REFERENCES routine(rname))')
@@ -162,14 +168,15 @@ class DataBase:
                             'cid INTEGER,'
                             'text VARCHAR(255) NOT NULL,'
                             'PRIMARY KEY(cid, text),'
-                            'FOREIGN KEY(cid) REFERENCES routinecommands(cid), '
+                            'FOREIGN KEY(cid) REFERENCES routinecommands(rcid), '
                             'UNIQUE(cid, text))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS quiz ('
                             'category VARCHAR(50) PRIMARY KEY)')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS questions ('
-                            'category REFERENCES quiz(category) PRIMARY KEY,'
+                            'qid INTEGER PRIMARY KEY,'
+                            'category REFERENCES quiz(category),'
                             'starting INTEGER,'
                             'question VARCHAR(255),'
                             'audio VARCHAR(30),'
@@ -189,12 +196,12 @@ class DataBase:
 
         # self.__create_table('CREATE TABLE IF NOT EXISTS messengernotifications')
         self.__create_table('CREATE TABLE IF NOT EXISTS birthdays ('
-                            'firstname VARCHAR(15),'
-                            'lastname VARCHAR(30),'
-                            'day INTEGER,'
-                            'month INTEGER,'
-                            'year INTEGER,'
-                            'PRIMARY KEY(firstname, lastname),'
+                            'firstname VARCHAR(15), '
+                            'lastname VARCHAR(30), '
+                            'day INTEGER, '
+                            'month INTEGER, '
+                            'year INTEGER, '
+                            'PRIMARY KEY(firstname, lastname), '
                             'UNIQUE (firstname, lastname))')
 
         # #self.db.commit()
@@ -226,9 +233,8 @@ class DataBase:
         self.db.close()
 
     class _UserInterface:
-        def __init__(self, db: Connection, execute: Callable[[str, tuple | None], list]) -> None:
+        def __init__(self, db: Connection) -> None:
             self.db: Connection = db
-            self.exec_func: Callable = execute
             logging.info('[INFO] UserInterface initialized.')
 
         def get_user(self, user: str | int) -> user_item:
@@ -341,7 +347,8 @@ class DataBase:
                                 SET alias=?, firstname=?, lastname=?, 
                                 birthday=?, mid=?, sname=? 
                                 WHERE uid=?"""
-            cursor.execute(statement, (alias, firstname, lastname, self.__birthday_to_string(birthday), mid, sname, uid))
+            cursor.execute(statement,
+                           (alias, firstname, lastname, self.__birthday_to_string(birthday), mid, sname, uid))
             cursor.close()
 
         def delete_user_notification(self, user: int | str, text: str) -> None:
@@ -371,9 +378,13 @@ class DataBase:
                 birthday.get('day')).rjust(2, '0')
 
         def __get_user_id(self, alias: str) -> int:
-            user_result_set: list[tuple[str]] = self.exec_func(f'SELECT uid FROM user WHERE alias=?', (alias,))
-            if len(user_result_set) == 1:
-                return int(user_result_set[0][0])
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'SELECT uid FROM user WHERE alias=?'
+            cursor.execute(statement, (alias,))
+            uid: int = cursor.fetchone()
+            cursor.close()
+            if uid:
+                return uid
             else:
                 raise UserNotFountException()
 
@@ -409,9 +420,8 @@ class DataBase:
             }
 
     class _AlarmInterface:
-        def __init__(self, db: Connection, execute: Callable[[str, tuple | None], list], skills: Skills) -> None:
+        def __init__(self, db: Connection, skills: Skills) -> None:
             self.db: Connection = db
-            self.exec_func = execute
             self.skills = skills
             logging.info('[INFO] AlarmInterface initialized.')
 
@@ -421,20 +431,19 @@ class DataBase:
             cursor.execute(statement, (aid,))
             result_set: tuple = cursor.fetchone()
             cursor.close()
-            return self.__build_json(result_set, as_tuple)
+            return self.__build_json([result_set], as_tuple)[0]
 
         def get_alarms(self, active: bool = False, unsorted: bool = False, as_tuple: bool = False) -> \
-                tuple[list[dict],list[dict]] | dict:
+                list[dict] | list[tuple] | tuple[list, list]:
             cursor: Cursor = self.db.cursor()
             init_result_set: list = []
             if unsorted:
                 if active:
-                    statement: str = 'SELECT * FROM alarm as a ' \
-                                     'JOIN alarmrepeat as ar ON a.aid=ar.aid'
+                    statement: str = 'SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid'
                 else:
-                    statement: str = 'SELECT * FROM alarm as a ' \
-                                     'JOIN alarmrepeat as ar ON a.aid=ar.aid ' \
-                                     'WHERE a.active=true'
+                    statement: str = """SELECT * FROM alarm as a 
+                                        JOIN alarmrepeat as ar ON a.aid=ar.aid 
+                                        WHERE a.active=True"""
                 cursor.execute(statement)
                 result_set: list[tuple] = cursor.fetchall()
                 cursor.close()
@@ -473,8 +482,9 @@ class DataBase:
             if type(user) is str:
                 user = self.__get_user_id(user)
 
-            statement: str = f'INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed) ' \
-                             f'VALUES (?, ?, ?, ?, ?, ?, ?, ?, "")'
+            statement: str = """INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, 
+                                initiated, last_executed) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, "")"""
 
             cursor.execute(statement, (song, user, time["hour"], time["minute"], time["total_seconds"], text,
                                        int(active), int(initiated)))
@@ -525,7 +535,7 @@ class DataBase:
                     try:
                         statement: str = 'SELECT uid FROM user WHERE name=?'
                         cursor.execute(statement, (_user,))
-                        uid: int = cursor.fetchone()[0]
+                        uid: int = cursor.fetchone()
                     except IndexError:
                         raise NoMatchingEntry(f'No user found with name "{_user}.')
                 else:
@@ -551,12 +561,11 @@ class DataBase:
                              _thursday: bool = None, _friday: bool = None, _saturday: bool = None,
                              _sunday: bool = None):
             cursor: Cursor = self.db.cursor()
-            try:
-                statement: str = 'SELECT * FROM alarmrepeat WHERE aid=?'
-                cursor.execute(statement, (aid,))
-                result_set: tuple = cursor.fetchone()[0]
-            except:
+            statement: str = 'SELECT * FROM alarmrepeat WHERE aid=?'
+            cursor.execute(statement, (aid,))
+            if cursor.rowcount == 0:
                 raise NoMatchingEntry(f'No matching element with the id {aid} was found in the database.')
+            result_set: tuple = cursor.fetchone()
 
             aid, monday, tuesday, wednesday, thursday, friday, saturday, sunday = result_set
 
@@ -584,6 +593,8 @@ class DataBase:
         def __build_json(self, result_set: list[tuple], as_tuple: bool = False) -> list[dict] | list[tuple]:
             # toDo: add alarmrepeat
 
+            cursor: Cursor = self.db.cursor()
+
             if as_tuple:
                 result_list: list[tuple] = []
                 for aid, sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed in result_set:
@@ -592,9 +603,10 @@ class DataBase:
                 return result_list
 
             result_list: list[dict] = []
-            print(result_set)
             for aid, sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed, _, monda, tuesday, wednesday, thursday, friday, saturday, sunday, regular in result_set:
-                sound_path: str = self.exec_func(f'SELECT path FROM audio WHERE name=?', (sname,))[0]
+                statement: str = 'SELECT path FROM audio WHERE name=?'
+                cursor.execute(statement, (sname,))
+                sound_path: str = cursor.fetchone()
                 result_list.append({
                     "id": aid,
                     "time": {
@@ -609,12 +621,16 @@ class DataBase:
                     "initiated": initiated,
                     "last_executed": last_executed
                 })
+            cursor.close()
             return result_list
 
         def __get_user_id(self, alias: str) -> int:
-            user_result_set: list[tuple[str]] = self.exec_func(f'SELECT uid FROM user WHERE alias=?', (alias,))
-            if len(user_result_set) == 1:
-                return int(user_result_set[0][0])
+            cursor = self.db.cursor()
+            cursor.execute('SELECT uid FROM user WHERE alias=?', (alias,))
+            uid: int = cursor.fetchone()
+            cursor.close()
+            if uid is not None:
+                return uid
             else:
                 raise UserNotFountException()
 
@@ -623,9 +639,8 @@ class DataBase:
 
     class _AudioInterface:
 
-        def __init__(self, db: Connection, execute: Callable[[str, tuple | None], list]) -> None:
+        def __init__(self, db: Connection) -> None:
             self.db: Connection = db
-            self.exec_func = execute
             self.audio_path: str = 'C:\\Users\\Jakob\\PycharmProjects\\Jarvis'
             logging.info('[INFO] AudioInterface initialized.')
 
@@ -647,7 +662,7 @@ class DataBase:
                     raise FileNameAlreadyExists()
 
             if not file_stored:
-                if path is not None and not audio_file is None:
+                if path is not None and audio_file is not None:
                     raise ValueError('Got too many arguments! Decide between the path and the audio file.')
                 elif path is None and audio_file is None:
                     raise ValueError('Neither path nor audio file given!')
@@ -667,7 +682,7 @@ class DataBase:
             try:
                 statement: str = 'SELECT * FROM audio WHERE name=?'
                 cursor.execute(statement, (_audio_name,))
-                result_set: tuple = cursor.fetchone()[0]
+                result_set: tuple = cursor.fetchone()
             except IndexError:
                 raise NoMatchingEntry(f'No matching element with the audio name "{_audio_name}" was found '
                                       f'in the database.')
@@ -686,7 +701,7 @@ class DataBase:
             elif _audio_file is not None:
                 statement: str = 'SELECT path FROM audio WHERE name=?'
                 cursor.execute(statement, (_audio_name,))
-                file_path: str = cursor.fetchone()[0]
+                file_path: str = cursor.fetchone()
                 os.remove(file_path)
                 self.__save_audio_file(_audio_name, _audio_file)
                 path = self.audio_path + _audio_name
@@ -731,7 +746,7 @@ class DataBase:
             cursor: Cursor = self.db.cursor()
             statement: str = 'SELECT path FROM audio WHERE name=?'
             cursor.execute(statement, (audio_name,))
-            file_path: str = cursor.fetchone()[0]
+            file_path: str = cursor.fetchone()
             statement = 'DELETE FROM audio WHERE name=?'
             cursor.execute(statement, (audio_name,))
             anz_removed: int = cursor.rowcount
@@ -763,9 +778,8 @@ class DataBase:
 
     class _TimerInterface:
 
-        def __init__(self, db: Connection, execute: Callable[[str, tuple | None], list], user_interface) -> None:
+        def __init__(self, db: Connection, user_interface) -> None:
             self.db: Connection = db
-            self.exec_func = execute
             self.user_interface = user_interface
             logging.info('[INFO] TimerInterface initialized.')
 
@@ -850,7 +864,7 @@ class DataBase:
                     try:
                         statement: str = 'SELECT uid FROM user WHERE name=?'
                         cursor.execute(statement, (_user,))
-                        uid: int = cursor.fetchone()[0]
+                        uid: int = cursor.fetchone()
                     except IndexError:
                         raise NoMatchingEntry(f'No user with name {_user} found!')
                 else:
@@ -858,7 +872,7 @@ class DataBase:
                     try:
                         statement: str = 'SELECT uid FROM user WHERE uid=?'
                         cursor.execute(statement, (_user,))
-                        uid = cursor.fetchone()[0]
+                        uid = cursor.fetchone()
                     except IndexError:
                         raise NoMatchingEntry(f'No user with id {_user} found!')
 
@@ -912,9 +926,8 @@ class DataBase:
 
     class _ReminderInterface:
 
-        def __init__(self, db: Connection, execute: Callable[[str, tuple | None], list], user_interface) -> None:
+        def __init__(self, db: Connection, user_interface) -> None:
             self.db: Connection = db
-            self.exec_func: Callable = execute
             self.user_interface = user_interface  # connection is necessary for __get_user_id()
             logging.info('[INFO] ReminderInterface initialized.')
 
@@ -973,9 +986,8 @@ class DataBase:
 
     class _ShoppingListInterface:
 
-        def __init__(self, db: Connection, execute: Callable[[str, tuple | None], list]) -> None:
+        def __init__(self, db: Connection) -> None:
             self.db: Connection = db
-            self.exec_func: Callable = execute
             logging.info('[INFO] ShoppingListInterface initialized.')
 
         def get_list(self) -> list[shopping_item]:
@@ -990,73 +1002,52 @@ class DataBase:
             cursor: Cursor = self.db.cursor()
             statement: str = 'SELECT * FROM shoppinglist WHERE name=?'
             cursor.execute(statement, (name,))
-            result_set: tuple = cursor.fetchone()[0]
+            result_set: tuple = cursor.fetchone()
             cursor.close()
             return self.__build_json(result_set)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         def add_item(self, name: str, measure: str, quantity: float) -> None:
+            cursor: Cursor = self.db.cursor()
             statement: str = f'INSERT INTO shoppinglist ("name", "measure", "quantity") ' \
                              f'VALUES (?, ?, ?)'
-            self.exec_func(statement, (name, measure, quantity))
+            cursor.execute(statement, (name, measure, quantity))
+            cursor.close()
 
         def update_item(self, name: str, quantity: float) -> None:
+            cursor: Cursor = self.db.cursor()
             # If there is no item with the name, the user should be told about it and not just not update anything
-            anz_results: int = len(self.exec_func(f'SELECT * FROM shoppinglist WHERE name=?', (name,)))
+            statement: str = 'SELECT 1 FROM shoppinglist WHERE name=? LIMIT 1'
+            cursor.execute(statement, (name,))
+
+            anz_results: int = cursor.rowcount
             if anz_results == 0:
+                cursor.close()
                 raise NoMatchingEntry(f'No matching element with the name {name} was found in the database.')
 
-            statement: str = f'UPDATE shoppinglist ' \
-                             f'SET quantity=? ' \
-                             f'WHERE name=?'
-            self.exec_func(statement, (quantity, name))
+            statement: str = """UPDATE shoppinglist 
+                                SET quantity=? 
+                                WHERE name=?"""
+            cursor.execute(statement, (quantity, name))
+            cursor.close()
 
         def remove_item(self, name: str) -> None:
-            statement: str = f'DELETE FROM shoppinglist WHERE name=?'
-            self.exec_func(statement, (name,))
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'DELETE FROM shoppinglist WHERE name=?'
+            cursor.execute(statement, (name,))
+            cursor.close()
 
         def clear_list(self) -> None:
-            statement: str = f'DELETE FROM shoppinglist'
-            self.exec_func(statement, ())
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'DELETE FROM shoppinglist'
+            cursor.execute(statement)
+            cursor.close()
 
         def is_item_in_list(self, name) -> bool:
-            statement: str = f'SELECT * FROM shoppinglist WHERE name=?'
-            result_set = self.exec_func(statement, (name,))
-            if result_set:
+            cursor: Cursor = self.db.cursor()
+            statement: str = f'SELECT 1 FROM shoppinglist WHERE name=? LIMIT 1'
+            cursor.execute(statement, (name,))
+            cursor.close()
+            if cursor.rowcount == 1:
                 return True
             else:
                 return False
@@ -1064,7 +1055,8 @@ class DataBase:
         def __create_table(self):
             pass
 
-        def __build_json(self, result_set: list[tuple[int, str, str, float]] | tuple[int, str, str, float]) -> list[shopping_item] | shopping_item:
+        def __build_json(self, result_set: list[tuple[int, str, str, float]] | tuple[int, str, str, float]) \
+                -> list[shopping_item] | shopping_item:
             result_list: list[shopping_item] = []
             if type(result_set) is list:
                 for data_set in result_set:
@@ -1075,85 +1067,123 @@ class DataBase:
 
         @staticmethod
         def __get_data_set(data_set: tuple[int, str, str, float]):
-            name, measure, quantity = data_set
+            sid, name, measure, quantity = data_set
             if quantity.is_integer():
                 quantity = int(quantity)
             return {
+                "id": sid,
                 "name": name,
                 "measure": measure,
                 "quantity": quantity
             }
 
     class _RoutineInterface:
-        def __init__(self, db: Connection, execute: Callable[[str, tuple | None], list]) -> None:
+        def __init__(self, db: Connection) -> None:
             self.db: Connection = db
-            self.exec_func: Callable = execute
             logging.info('[INFO] RoutineInterface initialized.')
 
         def get_routine(self, name: str) -> routine_item:
-            routine_set: tuple = self.exec_func(f'SELECT * FROM routine WHERE name=?', (name,))[0]
-            command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rname=?', (name,))
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'SELECT * FROM routine WHERE name=? LIMIT 1'
+            cursor.execute(statement, (name,))
+            routine_set: tuple = cursor.fetchone()
+            statement: str = 'SELECT * FROM routinecommands WHERE rname=?'
+            cursor.execute(statement, (name,))
+            command_set: list[tuple] = cursor.fetchall()
             text_set: list[tuple] = []
+            statement: str = 'SELECT * FROM commandtext WHERE cid=?'
             for command in command_set:
-                for item in self.exec_func(f'SELECT * FROM commandtext WHERE cid=?', (command[0],)):
+                cursor.execute(statement, (command[0],))
+                for item in cursor.fetchall():
                     text_set.append(item)
-            date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rname=?', (name,))
-            activation_set: list[tuple] = self.exec_func(f'SELECT * FROM routineactivationtime WHERE rname=?', (name,))
-            on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rname=?', (name,))
+            statement: str = 'SELECT * FROM routinedates WHERE rname=?'
+            cursor.execute(statement, (name,))
+            date_set: list[tuple] = cursor.fetchall()
+            statement = 'SELECT * FROM routineactivationtime WHERE rname=?'
+            cursor.execute(statement, (name,))
+            activation_set: list[tuple] = cursor.fetchall()
+            statement = 'SELECT command FROM oncommand WHERE rname=?'
+            cursor.execute(statement, (name,))
+            on_command_set: list[tuple] = cursor.fetchall()
+            cursor.close()
             return self.__build_json(routine_set, command_set, text_set, date_set, activation_set, on_command_set)
 
         def get_routines(self, on_command: str = None) -> list[routine_item]:
+            cursor: Cursor = self.db.cursor()
             routine_list: list[dict] = []
             if on_command is None:
-                routine_set: list[tuple] = self.exec_func(f'SELECT * FROM routine', ())
+                statement: str = 'SELECT * FROM routine'
+                cursor.execute(statement)
+                routine_set: list[tuple] = cursor.fetchall()
             else:
-                routine_set: list[tuple] = self.exec_func(f'SELECT * FROM  routine '
-                                                          f'INNER JOIN oncommand ON routine.name=oncommand.rname '
-                                                          f'WHERE instr(?, oncommand.command) > 0', (on_command,))
+                statement: str = """SELECT * FROM  routine 
+                                    INNER JOIN oncommand ON routine.name=oncommand.rname 
+                                    WHERE instr(?, oncommand.command) > 0"""
+
+                cursor.execute(statement, (on_command,))
+                routine_set: list[tuple] = cursor.fetchall()
 
             for rout in routine_set:
-                command_set: list[tuple] = self.exec_func(f'SELECT * FROM routinecommands WHERE rname=?', (rout[0],))
+                statement: str = 'SELECT * FROM routinecommands WHERE rname=?'
+                cursor.execute(statement, (rout[0],))
+                command_set: list[tuple] = cursor.fetchall()
                 text_set: list[tuple] = []
                 for command in command_set:
-                    for item in self.exec_func(f'SELECT * FROM commandtext WHERE cid=?', (command[0],)):
+                    statement = 'SELECT * FROM commandtext WHERE cid=?'
+                    cursor.execute(statement, (command[0],))
+                    for item in cursor.fetchall():
                         text_set.append(item)
-                date_set: list[tuple] = self.exec_func(f'SELECT * FROM routinedates WHERE rname=?', (rout[0],))
-                activation_set: list[tuple] = self.exec_func(
-                    f'SELECT * FROM routineactivationtime WHERE rname=?', (rout[0],))
 
-                on_command_set: list[tuple] = self.exec_func(f'SELECT command FROM oncommand WHERE rname=?', (rout[0],))
+                statement = 'SELECT * FROM routinedates WHERE rname=?'
+                cursor.execute(statement, (rout[0],))
+                date_set: list[tuple] = cursor.fetchall()
 
+                statement = 'SELECT * FROM routineactivationtime WHERE rname=?'
+                cursor.execute(statement, (rout[0],))
+                activation_set: list[tuple] = cursor.fetchall()
+
+                statement = 'SELECT command FROM oncommand WHERE rname=?'
+                cursor.execute(statement, (rout[0],))
+                on_command_set: list[tuple] = cursor.fetchall()
+
+                print(
+                    f'rout: {rout}, command_set: {command_set}, text_set: {text_set}, date_set: {date_set}, activation_set: {activation_set}, on_command_set: {on_command_set}')
                 routine_list.append(
                     self.__build_json(rout, command_set, text_set, date_set, activation_set, on_command_set))
 
+            cursor.close()
             return routine_list
 
         def add_routine(self, routine: dict) -> None:
-            statement: str = f'INSERT INTO routine (name, description, daily, monday, tuesday, wednesday, thursday, friday, ' \
-                             f'saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall)' \
-                             f'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            cursor: Cursor = self.db.cursor()
+            statement: str = """INSERT INTO routine (name, description, daily, monday, tuesday, wednesday, thursday, 
+                                friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
             values: list = [routine.get("name"), routine.get("description")]
             for key in ['daily', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
                 values.append(str(int(routine['retakes']['days'][key] is True)))
             for key in ['after_alarm', 'after_sunrise', 'after_sunset', 'after_call']:
                 values.append(str(int(routine["retakes"]["activation"][key] is True)))
-            self.exec_func(statement, tuple(values))
+            cursor.execute(statement, tuple(values))
 
-            name: str = self.exec_func('SELECT last_insert_rowid()', ())[0][0]
+            statement = 'SELECT last_insert_rowid()'
+            cursor.execute(statement)
 
-            self.__add_commands(routine['actions']['commands'], name)
+            self.__add_commands(routine['actions']['commands'], routine.get("name"))
 
+            statement = 'INSERT INTO routinedates (rname, day, month) VALUES (?, ?, ?)'
             for item in routine['retakes']['days']['date_of_day']:
-                self.exec_func(
-                    f'INSERT INTO routinedates (rname, day, month) VALUES (?, ?, ?)',
-                    (name, item.get("day"), item.get("month")))
+                cursor.execute(statement, (routine["name"], item.get("day"), item.get("month")))
 
+            statement = 'INSERT INTO routineactivationtime (rname, hour, minute) VALUES (?, ?, ?)'
             for item in routine['retakes']['activation']['clock_time']:
-                self.exec_func(f'INSERT INTO routineactivationtime VALUES (?, ?, ?)',
-                               (name, item["hour"], item["minute"]))
+                cursor.execute(statement, (routine["name"], item["hour"], item["minute"]))
 
+            statement = 'INSERT INTO oncommand (rname, command) VALUES(?, ?)'
             for item in routine['on_commands']:
-                self.exec_func(f'INSERT INTO oncommand VALUES(?, ?)', (name, item))
+                cursor.execute(statement, (routine["name"], item))
+
+            cursor.close()
 
         def update_routine(self, old_name: str, _name: str = None, _description: str = None, _daily: bool = None,
                            _monday: bool = None,
@@ -1161,9 +1191,12 @@ class DataBase:
                            _saturday: bool = None, _sunday: bool = None, _after_alarm: bool = None,
                            _after_sunrise: bool = None, _after_sunset: bool = None, _after_call: bool = None,
                            _dates: list = None, _clock_time: list = None, _commands: list = None):
-            try:
-                result_set: tuple = self.exec_func(f'SELECT * FROM routine WHERE name=?', (old_name,))[0]
-            except IndexError:
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'SELECT * FROM routine WHERE name=? LIMIT 1'
+            cursor.execute(statement, (old_name,))
+            result_set: tuple = cursor.fetchone()
+            if cursor.rowcount < 1:
+                cursor.close()
                 raise NoMatchingEntry(f'No matching routine with the name {old_name} was found in the database.')
 
             name, description, daily, monday, tuesday, wednesday, thursday, friday, saturday, sunday, after_alarm, \
@@ -1171,6 +1204,7 @@ class DataBase:
 
             if _name is not None:
                 if len(_name) > 50:
+                    cursor.close()
                     raise ValueError('Given name is too long!')
                 name = _name
                 # toDo: update names of other tables
@@ -1209,76 +1243,98 @@ class DataBase:
                              f'SET name=?, description=?, daily=?, monday=?, tuesday=?, wednesday=?, thursday=?, ' \
                              f'friday=?, saturday=?, sunday=?, afteralarm=?, aftersunrise=?, aftersunset=?, aftercall=? ' \
                              f'WHERE name=?'
-            self.exec_func(statement, (name, description, daily, monday, tuesday, wednesday, thursday, friday, saturday,
+            cursor.execute(statement, (name, description, daily, monday, tuesday, wednesday, thursday, friday, saturday,
                                        sunday, after_alarm, after_sunrise, after_sunset, after_call, old_name))
 
             if _dates is not None:
                 # delete old entries
-                self.exec_func(f'DELETE FROM routinedates WHERE rname=?', (name,))
+                statement = 'DELETE FROM routinedates WHERE rname=?'
+                cursor.execute(statement, (name,))
 
+                statement = 'INSERT INTO routinedates VALUES (?, ?, ?)'
                 for item in _dates:
-                    self.exec_func(
-                        f'INSERT INTO routinedates VALUES (?, ?, ?)', (name, item.get("day"), item.get("month")))
+                    cursor.execute(statement, (name, item.get("day"), item.get("month")))
 
             if _clock_time is not None:
                 # delete old entries
-                self.exec_func(f'DELETE FROM routineactivationtime WHERE rname=?', (name,))
+                statement = 'DELETE FROM routineactivationtime WHERE rname=?'
+                cursor.execute(statement, (name,))
+
+                statement = 'INSERT INTO routineactivationtime VALUES (?, ?, ?)'
                 for item in _clock_time:
-                    self.exec_func(f'INSERT INTO routineactivationtime '
-                                   f'VALUES (?, ?, ?)', (name, item.get("hour"), item.get("minute")))
+                    cursor.execute(statement, (name, item.get("hour"), item.get("minute")))
 
             if _commands is not None:
                 # delete old entries
-                result_set: list[tuple] = self.exec_func(f'SELECT cid FROM routinecommands WHERE rname=?', (name,))
-                for item in result_set:
-                    logging.info(item[0])
-                    self.exec_func(f'DELETE FROM commandtext WHERE cid=?', (item[0],))
-                    self.exec_func(f'DELETE FROM routinecommands WHERE cid=?', (item[0],))
+                statement = 'SELECT cid FROM routinecommands WHERE rname=?'
+                cursor.execute(statement, (name,))
+                for item in cursor.fetchall():
+                    statement = 'DELETE FROM commandtext WHERE cid=?'
+                    cursor.execute(statement, (item[0],))
+                    statement = 'DELETE FROM routinecommands WHERE cid=?'
+                    cursor.execute(statement, (item[0],))
 
                 self.__add_commands(_commands, name)
+            cursor.close()
 
-        def delete_routine(self, routine_id: int) -> None:
-            self.exec_func(f'DELETE FROM routineactivationtime WHERE rid=?', (routine_id,))
-            self.exec_func(f'DELETE FROM routinedates WHERE rid=?', (routine_id,))
-            self.exec_func(f'DELETE FROM commandtext WHERE rid=?', (routine_id,))
-            self.exec_func(f'DELETE FROM routinecommands WHERE rid=?', (routine_id,))
-            self.exec_func(f'DELETE FROM routine WHERE rid=?', (routine_id,))
+        def delete_routine(self, routine_name: int) -> None:
+            cursor: Cursor = self.db.cursor()
+            cursor.execute('DELETE FROM routineactivationtime WHERE rname=?', (routine_name,))
+            cursor.execute('DELETE FROM routinedates WHERE rname=?', (routine_name,))
+            cursor.execute('DELETE FROM commandtext WHERE rname=?', (routine_name,))
+            cursor.execute('DELETE FROM routinecommands WHERE rname=?', (routine_name,))
+            cursor.execute('DELETE FROM routine WHERE rname=?', (routine_name,))
+            cursor.close()
 
         def __add_commands(self, commands: list[dict], name: str):
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'INSERT INTO routinecommands (rname, modulename) VALUES (?, ?)'
             for module in commands:
-                self.exec_func(
-                    f'INSERT INTO routinecommands (name, modulename) VALUES (?, ?)', (name, module.get("module_name")))
-                module_id: int = self.exec_func('SELECT last_insert_rowid()', ())[0][0]
+                cursor.execute(statement, (name, module.get("module_name")))
+                cursor.execute('SELECT last_insert_rowid()')
+                module_id, = cursor.fetchone()
 
                 for text in module.get('text'):
-                    self.exec_func(f'INSERT INTO commandtext VALUES (?, ?)', (module_id, text))
+                    cursor.execute(f'INSERT INTO commandtext (cid, text) VALUES (?, ?)', (module_id, text))
+            cursor.close()
 
         @staticmethod
         def __build_json(routine: tuple, commands: list[tuple], commandtext: list[tuple], dates: list[tuple],
                          activation: list[tuple], on_commands: list[tuple]) -> routine_item:
+            """
+            rout: ('Morgenroutine', 'Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
+            command_set: [(1, 'Morgenroutine', 'phillips_hue')],
+            text_set: [(1, 'Mach das Bett grün'), (1, 'Mach den Schreibtisch blau')],
+            date_set: [(1, 'Morgenroutine', 5, 12)],
+            activation_set: [(2, 'Morgenroutine', 10, 30), (1, 'Morgenroutine', 12, 0)],
+            on_command_set: []
+
+            """
+            print(routine)
+            name, description, daily, monday, tuesday, wednesday, thursday, friday, saturday, sunday, afteralarm, \
+            aftersunrise, aftersunset, aftercall = routine
             result_dict = {
-                "id": routine[0],
-                "name": routine[1],
-                "descriptions": routine[2],
+                "name": name,
+                "descriptions": description,
                 "on_commands": [],
                 "retakes": {
                     "days": {
-                        "daily": (routine[3] == 1),
-                        "monday": (routine[4] == 1),
-                        "tuesday": (routine[5] == 1),
-                        "wednesday": (routine[6] == 1),
-                        "thursday": (routine[7] == 1),
-                        "friday": (routine[8] == 1),
-                        "saturday": (routine[9] == 1),
-                        "sunday": (routine[10] == 1),
+                        "daily": (daily == 1),
+                        "monday": (monday == 1),
+                        "tuesday": (tuesday == 1),
+                        "wednesday": (wednesday == 1),
+                        "thursday": (thursday == 1),
+                        "friday": (friday == 1),
+                        "saturday": (saturday == 1),
+                        "sunday": (sunday == 1),
                         "date_of_day": []
                     },
                     "activation": {
                         "clock_time": [],
-                        "after_alarm": (routine[11] == 1),
-                        "after_sunrise": (routine[12] == 1),
-                        "after_sunset": (routine[13] == 1),
-                        "after_call": (routine[14] == 1)
+                        "after_alarm": (afteralarm == 1),
+                        "after_sunrise": (aftersunrise == 1),
+                        "after_sunset": (aftersunset == 1),
+                        "after_call": (aftercall == 1)
                     }
                 },
                 "actions": {
@@ -1286,14 +1342,16 @@ class DataBase:
                 }
             }
 
-            for rid, day, month in dates:
+            for rdid, rid, day, month in dates:
                 result_dict["retakes"]["days"]["date_of_day"].append({
+                    "id": rdid,
                     "day": day,
                     "month": month
                 })
 
-            for rid, _hour, _min in activation:
+            for ratid, rid, _hour, _min in activation:
                 result_dict["retakes"]["activation"]["clock_time"].append({
+                    "id": ratid,
                     "hour": _hour,
                     "min": _min
                 })
@@ -1306,6 +1364,7 @@ class DataBase:
                         text_list.append(text)
 
                 result_dict["actions"]["commands"].append({
+                    "id": _id,
                     "module_name": module_name,
                     "text": text_list
                 })
@@ -1336,30 +1395,37 @@ class DataBase:
             pass
 
     class _MessangerInterface:
-        def __init__(self, execute: Callable[[str, tuple | None], list]) -> None:
-            self.exec_func: Callable = execute
+        def __init__(self) -> None:
+            pass
 
         def add_rejected_message(self, msg):
             if msg['content_type'] == 'text':
                 pass
 
     class _BirthdayInterface:
-        def __init__(self, execute: Callable[[str, tuple | None], list]) -> None:
-            self.exec_func: Callable = execute
+        def __init__(self, db: Connection) -> None:
+            self.db: Connection = db
 
         def add_birthday(self, first_name: str, last_name: str, day: int, month: int, year: int) -> None:
-            self.exec_func(f'INSERT INTO birthdays '
-                           f'VALUES (?, ?, ?, ?, ?)', (first_name, last_name, day, month, year))
+            cursor: Cursor = self.db.cursor()
+            cursor.execute('INSERT INTO birthdays VALUES (?, ?, ?, ?, ?)', (first_name, last_name, day, month, year))
+            cursor.close()
 
         def get_birthday(self, first_name: str, last_name: str) -> dict:
-            result_set: tuple = self.exec_func(f'SELECT * FROM birthdays '
-                                               f'WHERE firstname=? '
-                                               f'AND lastname=?', (first_name, last_name))[0]
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'SELECT * FROM birthdays WHERE firstname=? AND lastname=?'
+            cursor.execute(statement, (first_name, last_name))
+            result_set: tuple = cursor.fetchone()
+            cursor.close()
             return self.__build_json(result_set)
 
         def get_all_birthdays(self) -> list[dict]:
+            cursor: Cursor = self.db.cursor()
             result_list: list[dict] = []
-            result_set: list[tuple] = self.exec_func(f'SELECT * FROM birthdays', ())
+
+            cursor.execute(f'SELECT * FROM birthdays')
+            result_set: list[tuple] = cursor.fetchall()
+            cursor.close()
             for item in result_set:
                 result_list.append(self.__build_json(item))
 
@@ -1368,9 +1434,11 @@ class DataBase:
         def update_birthday(self, _old_first_name: str, _old_last_name: str, _new_first_name: str = None,
                             _new_last_name: str = None, _day: int = None, _month: int = None,
                             _year: int = None) -> None:
-            first_name, last_name, day, month, year = self.exec_func(f'SELECT * FROM birthdays '
-                                                                     f'WHERE firstname=? AND lastname=?',
-                                                                     (_old_first_name, _old_last_name))[0]
+
+            cursor: Cursor = self.db.cursor()
+            statement: str = 'SELECT * FROM birthdays WHERE firstname=? AND lastname=?'
+            cursor.execute(statement, (_old_first_name, _old_last_name))
+            first_name, last_name, day, month, year = cursor.fetchone()
 
             if _new_first_name is not None:
                 first_name = _new_first_name
@@ -1383,18 +1451,17 @@ class DataBase:
             if _year is not None:
                 year = _year
 
-            statement: str = f'UPDATE birthdays ' \
-                             f'SET firstname="{first_name}" ' \
-                             f'lastname="{last_name}" ' \
-                             f'day={day} ' \
-                             f'month={month} ' \
-                             f'year={year} ' \
-                             f'WHERE firstname=? ' \
-                             f'AND lastname=?'
-            self.exec_func(statement, (_old_first_name, _old_last_name))
+            statement: str = """UPDATE birthdays 
+                                SET firstname=?, lastname=?, day=?, month=?, year=? 
+                                WHERE firstname=? 
+                                AND lastname=?"""
+            cursor.execute(statement, (first_name, last_name, day, month, year, _old_first_name, _old_last_name))
+            cursor.close()
 
         def delete_birthday(self, first_name: str, last_name: str) -> None:
-            self.exec_func(f'DELETE FROM birthdays WHERE firstname=? AND lastname=?', (first_name, last_name))
+            cursor: Cursor = self.db.cursor()
+            cursor.execute('DELETE FROM birthdays WHERE firstname=? AND lastname=?', (first_name, last_name))
+            cursor.close()
 
         @staticmethod
         def __build_json(result_set: tuple) -> dict:
@@ -1406,7 +1473,7 @@ class DataBase:
                 'year': result_set[4]
             }
 
-    def __execute(self, command: str, values: tuple = ()) -> list | int:
+    """def __execute(self, command: str, values: tuple = ()) -> list | int:
         # cursor: Cursor = self.db.cursor()
         cursor: Cursor = self.db.cursor()
         try:
@@ -1422,4 +1489,4 @@ class DataBase:
             self.db.rollback()
             raise SQLException(f"Couldn't execute SQL Statement: {command} with Values {str(values)}\n{e}")
         finally:
-            cursor.close()
+            cursor.close()"""
