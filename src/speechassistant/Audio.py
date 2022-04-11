@@ -33,7 +33,7 @@ class AudioInput:
     """
 
     def __init__(self, _adjust_after_hot_word: Callable) -> None:
-        self.audio_output: AudioOutput = None
+        self.audio_output: AudioOutput
         self.adjust_after_hot_word: Callable = _adjust_after_hot_word
         logging.getLogger().setLevel(logging.INFO)
         self.stopped: bool = False
@@ -42,10 +42,11 @@ class AudioInput:
         self.speech_engine.pause_threshold = 0.5
 
         with sr.Microphone(device_index=None) as source:
-            self.speech_engine.pause_threshold = 1
-            self.speech_engine.energy_threshold = 50
+            self.speech_engine.pause_threshold = 0.8
+            self.speech_engine.energy_threshold = 300
+            self.speech_engine.dynamic_energy_threshold = True
+            self.speech_engine.dynamic_energy_adjustment_damping = 0.15
             self.speech_engine.adjust_for_ambient_noise(source)
-        self.audio_output: AudioOutput
         self.recording: bool = False
         self.sensitivity: float = 0.5
 
@@ -62,6 +63,7 @@ class AudioInput:
         porcupine: any = None
         try:
             keywords: list = ["jarvis"]
+            # toDo: access_key
             porcupine = pvporcupine.create(keywords=keywords, sensitivities=[sensitivity])
             pa = pyaudio.PyAudio()
             audio_stream: IO = pa.open(
