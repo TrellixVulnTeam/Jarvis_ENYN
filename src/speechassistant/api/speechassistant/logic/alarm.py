@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from flask import Response, request
+from flask import Response
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
 from src.speechassistant.database.database_connection import DataBase
 
@@ -12,7 +12,7 @@ database: DataBase = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\s
 def create_alarm(data: dict) -> Response:
     if 'user' not in data.keys():
         data['user'] = -1
-    if 'sound' not in data.keys():
+    if 'sound' not in data.keys() or data['sound'] is None:
         data['sound'] = 'standard.wav'
     database.alarm_interface.add_alarm(data['time'], data['text'], data['user'], data['repeating'], song=data['sound'])
     return Response('Alarm created successfully', status=201)

@@ -3,6 +3,7 @@ from src.speechassistant.api import settings
 from src.speechassistant.api.myapi import api
 from src.speechassistant.api.speechassistant.endpoints.audio_files import namespace as service_namespace
 from src.speechassistant.api.speechassistant.endpoints.alarm import namespace as alarm_namespace
+from src.speechassistant.api.speechassistant.endpoints.routine import namespace as routine_namespace
 import logging
 
 app: Flask = Flask(__name__)
@@ -23,6 +24,7 @@ def init_app(app) -> None:
     api.init_app(blueprint)
     api.add_namespace(service_namespace)
     api.add_namespace(alarm_namespace)
+    api.add_namespace(routine_namespace)
     app.register_blueprint(blueprint)
     logging.info('[SUCCESS] Init done')
 

@@ -18,14 +18,12 @@ namespace = api.namespace('alarm')
 class AlarmConnection(Resource):
 
     def get(self) -> Response:
-        args = request.args
-
+        args = request.get_json()
         return read_alarm(args.get('id'))
 
     @api.expect(alarm_file)
     def post(self) -> Response:
         data: dict = request.get_json()
-
         return create_alarm(data)
 
     @api.expect(alarm_file)
