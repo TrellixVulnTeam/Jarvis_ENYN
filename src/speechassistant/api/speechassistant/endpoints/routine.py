@@ -94,36 +94,52 @@ class CommandsConnection(Resource):
 
     def delete(self) -> Response:
         data: dict = parser.parse_args(request)
-        if 'name' not in data.keys():
+        if 'id' not in data.keys():
             data = request.get_json()
-        return delete_routine_command(data.get('id'))
+        return delete_routine_dates(data.get('id'))
 
 
 @namespace.route('/routineDates')
 class RoutineDatesConnection(Resource):
     def get(self) -> Response:
-        pass
+        data: dict = parser.parse_args(request)
+        if 'id' not in data.keys():
+            data = request.get_json()
+        return read_routine_dates(data.get('id'))
 
     def post(self) -> Response:
-        pass
+        data: dict = request.get_json()
+        return create_routine_dates(data.get('id'), data.get('day'), data.get('year'))
 
     def put(self) -> Response:
-        pass
+        data: dict = request.get_json()
+        return update_routine_dates(data.get('id'), data.get('day'), data.get('month'))
 
     def delete(self) -> Response:
-        pass
+        data: dict = parser.parse_args(request)
+        if 'id' not in data.keys():
+            data = request.get_json()
+        return delete_routine_command(data.get('id'))
 
 
 @namespace.route('/routineTimes')
 class RoutineTimesConnection(Resource):
     def get(self) -> Response:
-        pass
+        data: dict = parser.parse_args(request)
+        if 'id' not in data.keys():
+            data = request.get_json()
+        return read_routine_time(data.get('id'))
 
     def post(self) -> Response:
-        pass
+        data: dict = request.get_json()
+        return create_routine_time(data.get('routine_name'), data.get('hour'), data.get('minute'))
 
     def put(self) -> Response:
-        pass
+        data: dict = request.get_json()
+        return update_routine_time(data.get('id'), data.get('hour'), data.get('minute'))
 
     def delete(self) -> Response:
-        pass
+        data: dict = parser.parse_args(request)
+        if 'id' not in data.keys():
+            data = request.get_json()
+        return delete_routine_time(data.get('id'))
