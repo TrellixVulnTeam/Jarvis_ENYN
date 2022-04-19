@@ -70,7 +70,7 @@ days = api.inherit('days', retakes, {
     'date_of_day': fields.List(fields.Nested(one_date), description='Date, when this routine should be active')
 })
 
-routine_time = api.inherit('time', {
+routine_time = api.inherit('time', retakes, {
     'id': fields.Integer(),
     'hour': fields.Integer(),
     'minute': fields.Integer()

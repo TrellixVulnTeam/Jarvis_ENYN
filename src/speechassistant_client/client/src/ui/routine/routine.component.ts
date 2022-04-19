@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import { Routine, OnCommand } from "../../lib/data-access/models";
 import { JsonObject } from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 
@@ -8,8 +8,8 @@ import { JsonObject } from "@angular/compiler-cli/ngcc/src/packages/entry_point"
     styleUrls: ['./routine.component.scss']
 })
 export class RoutineComponent implements OnInit{
-    // @Input() routine: Routine;
-    routine: Routine;
+    @Input() routine: Routine;
+    @Input() editName: boolean;
     clockTimes: Date[] = [];
     onCommands: OnCommand[] = [];
 
@@ -18,12 +18,8 @@ export class RoutineComponent implements OnInit{
     @Output() private onRepeatDayChangeEvent: EventEmitter<[string, boolean]> = new EventEmitter<[string, boolean]>();
     @Output() private onAddClockTimeEvent: EventEmitter<any> = new EventEmitter<any>();
 
-    constructor() {
-      this.routine = {name:"Test", description:"Beschreibung", onCommands:["Befehl 1", "Befehl 2"], monday:false, tuesday:false, wednesday:false, thursday:true, friday:true, saturday:false, sunday:true, dateOfDay:[{"day": 1, "month": 12}], clock_time:[{"hour":1, "minute":0}, {"hour": 12, "minute":30}], after_alarm:true, after_sunrise:true, after_sunset:false, after_call:false, commands:[{"module_name": "modulname", "text":["Text1", "Text2", "Text3"]}]};
-
-    }
-
     ngOnInit(): void {
+        /*
         for (let i = 0; i < this.routine.clock_time.length; i++) {
           let time = this.routine.clock_time[i];
           let newDate = new Date();
@@ -31,6 +27,7 @@ export class RoutineComponent implements OnInit{
           newDate.setMinutes(<number>time["minute"]);
           this.clockTimes.push(newDate);
         }
+         */
         for (let i = 0; i < this.routine.onCommands.length; i++) {
             this.onCommands.push(new OnCommand(i, this.routine.onCommands[i]));
         }
@@ -64,7 +61,7 @@ export class RoutineComponent implements OnInit{
     }
 
     onAddClockTime(): void {
-        this.routine.clock_time.push({"hour": 0, "minute": 0});
+        //this.routine.clock_time.push({"hour": 0, "minute": 0});
         let newDate: Date = new Date();
         newDate.setHours(0);
         newDate.setMinutes(0);
@@ -80,16 +77,16 @@ export class RoutineComponent implements OnInit{
 
     onTimeChange(time: Date,  event: Date): void {
         const index = this.routine["clock_time"].findIndex(
-          (item: JsonObject) => (time.getHours() == item["hour"] && time.getMinutes() == item["minute"])
+          (item: Date) => (time.getHours() == item.getHours() && time.getMinutes() == item.getMinutes())
         )
-        this.routine["clock_time"][index] = {"hour": event.getHours(), "minute": event.getMinutes()};
+        //this.routine["clock_time"][index] = {"hour": event.getHours(), "minute": event.getMinutes()};
         this.clockTimes[index] = event;
     }
 
     onTimeDelete(event: Date): void {
         console.log("deleting " + event.getHours() + ":" + event.getMinutes());
         const index = this.routine["clock_time"].findIndex(
-          (item: JsonObject) => (event.getHours() == item["hour"] && event.getMinutes() == item["minute"])
+          (item: Date) => (event.getHours() == item.getHours() && event.getMinutes() == item.getMinutes())
         )
         this.routine["clock_time"].splice(index, 1);
         this.clockTimes.splice(index, 1);

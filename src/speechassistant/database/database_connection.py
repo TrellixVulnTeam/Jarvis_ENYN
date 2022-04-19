@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Callable, TypeAlias  # , TypeAlias
 import os
 import sqlite3
-from sqlite3 import Connection, Cursor
+from sqlite3 import Connection, Cursor, OperationalError
 
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
 from src.speechassistant.resources.enums import OutputTypes
@@ -1102,7 +1102,10 @@ class DataBase:
         def get_routine(self, name: str) -> routine_item:
             cursor: Cursor = self.db.cursor()
             statement: str = 'SELECT * FROM routine WHERE name=? LIMIT 1'
-            cursor.execute(statement, (name,))
+            try:
+                cursor.execute(statement, (name,))
+            except OperationalError:
+                raise NoMatchingEntry(f'Routine with name "{name}" not found!')
             if cursor.rowcount < 1:
                 raise NoMatchingEntry(f'Routine with name "{name}" not found!')
             routine_set: tuple = cursor.fetchone()
@@ -1242,6 +1245,16 @@ class DataBase:
             for item in routine['on_commands']:
                 cursor.execute(statement, (routine["name"], item))
 
+            cursor.close()
+
+        def add_routine_by_values(self, name, description, daily, monday, tuesday, wednesday, thursday,
+                                  friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall):
+            cursor: Cursor = self.db.cursor()
+            statement: str = """INSERT INTO routine (name, description, daily, monday, tuesday, wednesday, thursday, 
+                                            friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall) 
+                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
+            cursor.execute(statement, (name, description, daily, monday, tuesday, wednesday, thursday,
+                                       friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall))
             cursor.close()
 
         def create_routine_commands(self, rname: str, modulename: str, text: list[str]) -> int:

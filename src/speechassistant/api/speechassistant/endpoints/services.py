@@ -1,4 +1,3 @@
-
 from src.speechassistant.api.myapi import api
 from flask_restx import Resource
 

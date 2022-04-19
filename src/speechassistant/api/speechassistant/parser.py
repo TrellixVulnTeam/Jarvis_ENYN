@@ -1,4 +1,5 @@
 from flask_restx import reqparse
+from flask_restx.reqparse import RequestParser
 
 audio_file_parser = reqparse.RequestParser()
 audio_file_parser.add_argument('name', type=str, required=False, help='Name of a specific audio file')
@@ -69,6 +70,6 @@ routine_parser.add_argument('descriptions', type=str,
                             help='A more detailed description of what the routine does exactly')
 routine_parser.add_argument('on_commands', type=list[str], help='Commands (user says Jarvis, <command>), '
                                                                 'on which this routine starts.')
-routine_parser.add_argument('retakes', type=routine_retakes_parser)
-routine_parser.add_argument('actions', type=routine_action_parser)
+routine_parser.add_argument('retakes', type=RequestParser)
+routine_parser.add_argument('actions', type=RequestParser)
 

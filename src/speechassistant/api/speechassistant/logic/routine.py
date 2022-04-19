@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from sqlite3 import OperationalError
 
 from flask import Response
 
@@ -16,14 +17,16 @@ def create_routine(data: dict) -> Response:
 
 
 def read_routine(name: str | None) -> Response:
+    print(name)
     if name:
         try:
             routine: dict = database.routine_interface.get_routine(name)
         except NoMatchingEntry:
-            return Response(f'Routine with name "{name}" not found!', status=404)
+            routine = {}
         return Response(json.dumps(routine), mimetype='application/json', status=200)
     else:
         routines: list[dict] = database.routine_interface.get_routines()
+        print(routines)
         return Response(json.dumps({'routines': routines}), mimetype='application/json', status=200)
 
 
