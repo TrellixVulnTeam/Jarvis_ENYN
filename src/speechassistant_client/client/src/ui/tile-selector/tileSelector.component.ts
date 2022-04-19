@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostBinding, Input, Output} from "@angular/core";
+import {Component, EventEmitter, HostBinding, Input, NgModule, NO_ERRORS_SCHEMA, Output} from "@angular/core";
 
 @Component({
   selector: 'tile-selector',

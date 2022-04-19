@@ -11,8 +11,8 @@ export interface Routine {
   friday: boolean;
   saturday: boolean;
   sunday: boolean;
-  dateOfDay: JsonObject[];
-  clock_time: JsonObject[];
+  dateOfDay: Date[];
+  clock_time: Date[];
   after_alarm: boolean;
   after_sunrise: boolean;
   after_sunset: boolean;

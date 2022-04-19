@@ -1,9 +1,9 @@
-import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutModule } from '@angular/cdk/layout';
@@ -17,7 +17,17 @@ import { RoutineComponent } from "../ui/routine/routine.component";
 import { MatTimepickerModule } from "mat-timepicker";
 import { TileSelectorComponent } from "../ui/tile-selector/tileSelector.component";
 import {MatCheckboxModule} from "@angular/material/checkbox";
-
+import { AccordionModule } from 'ngx-bootstrap/accordion';
+import { AlertModule,AlertConfig } from 'ngx-bootstrap/alert';
+import { ButtonsModule } from 'ngx-bootstrap/buttons';
+import { CarouselModule } from 'ngx-bootstrap/carousel';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { BsDatepickerModule, BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
+import { BsDropdownModule,BsDropdownConfig } from 'ngx-bootstrap/dropdown';
+import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
+// import { AppBootstrapModule } from './app-bootstrap/app-bootstrap.module';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -34,12 +44,28 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
         MatIconModule,
         MatListModule,
         MatTimepickerModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        HttpClientModule,
+        BrowserModule,
+        BsDropdownModule.forRoot(),
+        TooltipModule.forRoot(),
+        ModalModule.forRoot(),
+        //AppBootstrapModule,
+        AccordionModule,
+        AlertModule,
+        ButtonsModule,
+        FormsModule,
+        CarouselModule,
+        CollapseModule,
+        BsDatepickerModule.forRoot(),
+        BsDropdownModule,
+        ModalModule
     ],
   providers: [Title],
+  bootstrap: [AppComponent],
   exports: [
 
   ],
-  bootstrap: [AppComponent]
+  schemas: [NO_ERRORS_SCHEMA]
 })
 export class AppModule { }
