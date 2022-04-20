@@ -1,14 +1,10 @@
-import json
-import os
 import platform
 import random
 import string
-import subprocess
-from base64 import b64encode, b64decode
 
 import requests
-from Crypto.Hash import SHA, HMAC
-from requests.auth import HTTPDigestAuth
+
+from src.speechassistant.resources.services.philips_tv.philips_tv import Pylips
 
 user = ''
 password = ''

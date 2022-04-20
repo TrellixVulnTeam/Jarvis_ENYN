@@ -16,12 +16,11 @@ class Pylips:
         self.sess = requests.session()
         self.sess.verify = False
         self.sess.mount('https://', requests.adapters.HTTPAdapter(pool_connections=1))
-
+        self.verbose = False
         # Key used for generated the HMAC signature
         self.secret_key = "JCqdN5AcnAHgJYseUn7ER5k3qgtemfUvMRghQpTfTZq7Cvv8EPQPqfz6dDxPQPSu4gKFPWkJGw32zyASgJkHwCjU"
 
     def run(self, host=None, user=None, password=None, body=None, command=None, verbose=None, apiv=None):
-        print("start")
         ini_file = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "settings.ini"
         self.args = {}
         self.args["host"] = host
@@ -32,7 +31,7 @@ class Pylips:
         self.args["verbose"] = verbose
         self.args["num_retries"] = 5
         self.args["apiv"] = apiv
-        # read config filem
+        # read config file
 
         # check verbose option
         if self.args["verbose"] == "True":
@@ -287,3 +286,4 @@ class Pylips:
                     "path"], verify=False, timeout=2)
         else:
             print("Unknown command")
+
