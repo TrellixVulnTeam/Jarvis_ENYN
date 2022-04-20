@@ -8,8 +8,10 @@ import pkgutil
 import random
 import time
 import traceback
+import urllib
 from threading import Thread
 from typing import AnyStr, Any
+from urllib.request import Request, urlopen
 
 import requests
 
@@ -35,7 +37,7 @@ class Core:
         self.analyzer: Sentence_Analyzer = analyzer
         self.skills: Skills = Skills()
         self.data_base = DataBase(os.path.join(self.path, 'database'), self.skills)
-        self.data_base.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
+        # self.data_base.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
         self.services: Services = Services(self, self.__data, conf_dat)
         self.messenger = None
         self.messenger_queued_users: list = []  # These users are waiting for a response
@@ -51,8 +53,6 @@ class Core:
         self.system_name: str = system_name
 
         self.ai: AIWrapper = AIWrapper(self)
-
-
 
         if self.local_storage["home_location"] == "":
             self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
@@ -70,7 +70,7 @@ class Core:
                     user: dict = self.users.get_user_by_name(msg['from']['first_name'].lower())
                 except KeyError:
                     # Messages from strangers will not be tolerated. They are nevertheless stored.
-                    self.local_storage['rejected_messenger_messages'].append(msg)
+                    self.data_base.messenger_interface.add_rejected_message(msg)
                     try:
                         logging.warning('[WARNING] Message from unknown Telegram user {}. Access denied.'.format(
                             msg['from']['first_name']))
@@ -268,7 +268,6 @@ class ModuleWrapper:
         else:
             return module_storage[module_name]
 
-    """
     @staticmethod
     def translate(text, target_lang='de'):
         try:
@@ -281,7 +280,6 @@ class ModuleWrapper:
             return answer[0][0][0]
         except Exception:
             return text
-    """
 
     def correct_output(self, core_array, messenger_array):
         if self.messenger_call is True:
@@ -764,7 +762,6 @@ def reload(core: Core) -> None:
 def stop(core: Core) -> None:
     logging.info('[ACTION] Stop System...')
     core.local_storage["users"]: dict = {}
-    core.local_storage["rejected_messenger_messages"]: list = []
     config_data["Local_storage"]: dict = core.local_storage
     core.modules.stop_continuous()
     core.audio_input.stop()
