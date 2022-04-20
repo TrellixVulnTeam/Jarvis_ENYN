@@ -9,4 +9,11 @@ def isValid(text: str) -> bool:
 
 
 def handle(text: str, core: ModuleWrapper, skills: Skills) -> None:
-    core.services.weather.get_current_weather()
+
+    city: str = core.analysis.get('town')
+    if city is None:
+        city = core.local_storage.get('city')
+
+    response: str = core.services.weather.get_current_weather_string(city)
+    core.say(response)
+
