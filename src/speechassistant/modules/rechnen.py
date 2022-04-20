@@ -25,7 +25,7 @@ numeratorMap = {
     'neun': '9',
     'zehn': '10',
     'elf': '11',
-    'zwölf': 12
+    'zwölf': '12'
 }
 
 denomintorMap = {

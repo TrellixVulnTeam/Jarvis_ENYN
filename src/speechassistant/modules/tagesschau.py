@@ -18,11 +18,10 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    DOWNLOAD_PATH = Path(core.path + "/modules/resources")
     try:
-        DOWNLOAD_PATH = Path(core.path + "/modules/resources")
+        download_path = Path(core.path + "/modules/resources")
         url = get_audio_url()
-        path = download_audio(url, DOWNLOAD_PATH)
+        path = download_audio(url, download_path)
 
         sound = AudioSegment.from_mp3(core.path + "/modules/resources" + "/tagesschau_100sec.mp3")
         sound.export(core.path + "/modules/resources/tagesschau_100sec.wav", format="wav")

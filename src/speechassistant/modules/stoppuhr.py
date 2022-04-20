@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from src.speechassistant.resources.module_skills import Skills
+
 
 def isValid(text):
     if 'stoppuhr' in text.lower():
@@ -10,45 +12,39 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    stop_watch = StopWatch(core, skills)
     if 'start' in text:
-        stop_watch.start()
+        start(core, skills)
     elif 'stop' in text or 'beend' in text:
-        stop_watch.stop()
+        stop(core, skills)
     else:
         core.say('Ich kann die Stoppuhr nur starten oder stoppen.')
-        # bald sollte noch eine Pause-Funktion hinzugefügt werden
 
 
-class StopWatch:
-    def __init__(self, core, skills):
-        self.core = core
-        self.skills = skills
-
-    def start(self):
-        if 'stopwatch' in self.core.local_storage.keys():
-            self.core.say('Es läuft bereits eine Stoppuhr. Soll ich diese erst stoppen?')
-            if self.skills.is_approved(self.core.listen()):
-                self.core.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(
-                    self.skills.get_time(self.core.local_storage['stoppuhr']),
-                    self.skills.get_time_difference(self.core.local_storage['stoppuhr'], self.skills)))
-                self.core.local_storage['stoppuhr'] = datetime.now()
-            else:
-                self.core.say('Alles klar, die alte Stoppuhr läuft weiter.')
+def start(core: ModuleWrapper, skills: Skills):
+    if 'stopwatch' in core.local_storage.keys():
+        core.say('Es läuft bereits eine Stoppuhr. Soll ich diese erst stoppen?')
+        if skills.is_desired(core.listen()):
+            core.say('Alles klar. Die alte Stoppuhr wurde bei {} gestoppt und eine neue gestartet.'.format(
+                skills.get_time(core.local_storage['stoppuhr']),
+                skills.get_time_difference(core.local_storage['stoppuhr'])))
+            core.local_storage['stoppuhr'] = datetime.now()
         else:
-            self.core.say(
-                'Alles klar, die Stoppuhr wurde um {} gestartet.'.format(self.skills.get_time(datetime.now())))
-            self.core.local_storage['stoppuhr'] = datetime.now()
+            core.say('Alles klar, die alte Stoppuhr läuft weiter.')
+    else:
+        core.say(
+            'Alles klar, die Stoppuhr wurde um {} gestartet.'.format(skills.get_time(datetime.now())))
+        core.local_storage['stoppuhr'] = datetime.now()
 
-    def stop(self):
-        if 'stoppuhr' in self.core.local_storage.keys() and self.core.local_storage['stoppuhr'] != '':
-            self.core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(
-                self.skills.get_time(datetime.now()),
-                self.skills.get_time_difference(self.core.local_storage["stoppuhr"], datetime.now())))
-            self.core.local_storage['stoppuhr'] = ''
-        else:
-            self.core.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')
-            if self.skills.is_approved(self.core.listen()):
-                self.core.say('Alles klar, Stoppuhr wurde um {} gestartet'.format(
-                    self.skills.get_time(datetime.now())))
-                self.core.local_storage['stoppuhr'] = datetime.now()
+
+def stop(core: ModuleWrapper, skills: Skills):
+    if 'stoppuhr' in core.local_storage.keys() and core.local_storage['stoppuhr'] != '':
+        core.say('Alles klar, die Stoppuhr wurde um {} gestoppt. Sie dauerte {}.'.format(
+            skills.get_time(datetime.now()),
+            skills.get_time_difference(core.local_storage["stoppuhr"], datetime.now())))
+        core.local_storage['stoppuhr'] = ''
+    else:
+        core.say('Es wurde noch keine Stoppuhr gestartet. Soll ich eine starten?')
+        if skills.is_desired(core.listen()):
+            core.say('Alles klar, Stoppuhr wurde um {} gestartet'.format(
+                skills.get_time(datetime.now())))
+            core.local_storage['stoppuhr'] = datetime.now()

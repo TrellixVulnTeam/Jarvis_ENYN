@@ -1,6 +1,6 @@
 import time
 
-from src.speechassistant.modules.philips_hue import PhilipsWrapper
+from src.speechassistant.resources.services.light_systems.Phue import PhilipsWrapper
 from threading import Thread
 
 
@@ -15,12 +15,11 @@ def handle(text, core, skills):
 
 
 def run(core):
-    wrapper = PhillipsWrapper(core)
-    lights = []
+    wrapper = PhilipsWrapper(core)
+    lights = wrapper.light_names.keys()
 
-    for name in wrapper.light_names.keys():
-        lights.append(name)
     wrapper.light_on(lights, change_brightness=False)
+    wrapper.light_change_color(lights, "weiß")
     wrapper.set_light_brightness(lights, 17)
 
     for i in range(14):

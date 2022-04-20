@@ -2,18 +2,21 @@
 
 from spacex_py import launches
 
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
+
 SECURE = True
 
 
 def isValid(text):
     hit_list = ["rakete", "spacex"]
-    if any((hit for hit in hit_list if hit in text.lower())) == True:
+    if any((hit for hit in hit_list if hit in text.lower())) is True:
         return True
     else:
         return False
 
 
-def handle(text, core, skills):
+def handle(text, core: ModuleWrapper, skills: Skills):
     ################################################################################
     # Wann (nächster Start)
     ################################################################################ 
@@ -21,11 +24,11 @@ def handle(text, core, skills):
     # Define hits
     hit_list = ["wann", "when"]
 
-    if any((hit for hit in hit_list if hit in text.lower())) == True:
+    if any((hit for hit in hit_list if hit in text.lower())) is True:
         # Get the launches launch 
         got_launches, header = launches.get_launches()
 
-        if core.messenger_call == True:
+        if core.messenger_call is True:
             return_string = ""
             return_string += f"Time (UTC): " + got_launches[-1]["launch_date_utc"] + "\n"
             core.say(return_string)
@@ -37,97 +40,9 @@ def handle(text, core, skills):
             minute = got_launches[-1]["launch_date_utc"][14:16]
             hour = got_launches[-1]["launch_date_utc"][11:13]
 
-            speech_dict_date = {
-                "01": "ersten",
-                "02": "zweiten",
-                "03": "dritten",
-                "04": "vierten",
-                "05": "fünften",
-                "06": "sechsten",
-                "07": "siebten",
-                "08": "achten",
-                "09": "neunten",
-                "10": "zehnten",
-                "11": "elften",
-                "12": "zwölten",
-                "13": "dreizehnten",
-                "14": "vierzehnten",
-                "15": "fünfzehnten",
-                "16": "sechzehnten",
-                "17": "siebzehnten",
-                "18": "achtzehnten",
-                "19": "neunzehnten",
-                "20": "zwanzigsten",
-                "21": "einundzwanzigsten",
-                "22": "zweiundzwanzigsten",
-                "23": "dreiundzwanzigsten",
-                "24": "vierundzwanzigsten",
-                "25": "fünfundzwanzigsten",
-                "26": "sechsundzwanzigsten",
-                "27": "siebenundzwanzigsten",
-                "28": "achtundzwanzigsten",
-                "29": "neunundzwanzigsten",
-                "30": "dreißigsten",
-                "31": "einunddreißigsten"
-            }
-
-            speech_dict_hour = {
-                "01": "ein",
-                "02": "zwei",
-                "03": "drei",
-                "04": "vier",
-                "05": "fünf",
-                "06": "sechs",
-                "07": "sieben",
-                "08": "acht",
-                "09": "neun",
-                "10": "zehn",
-                "11": "elf",
-                "12": "zwölf",
-                "13": "dreizehn",
-                "14": "vierzehn",
-                "15": "fünfzehn",
-                "16": "sechzehn",
-                "17": "siebzehn",
-                "18": "achtzehn",
-                "19": "neunzehn",
-                "20": "zwanzig",
-                "21": "einundzwanzig",
-                "22": "zweiundzwanzi",
-                "23": "dreiundzwanzi",
-                "24": "vierundzwanzi"
-            }
-
-            speech_dict_minute = {
-                "01": "eins",
-                "02": "zwei",
-                "03": "drei",
-                "04": "vier",
-                "05": "fünf",
-                "06": "sechs",
-                "07": "sieben",
-                "08": "acht",
-                "09": "neun",
-                "10": "zehn",
-                "11": "elf",
-                "12": "zwölf",
-                "13": "dreizehn",
-                "14": "vierzehn",
-                "15": "fünfzehn",
-                "16": "sechzehn",
-                "17": "siebzehn",
-                "18": "achtzehn",
-                "19": "neunzehn",
-                "20": "zwanzig",
-                "21": "einundzwanzig",
-                "22": "zweiundzwanzi",
-                "23": "dreiundzwanzi",
-                "24": "vierundzwanzi"
-            }
-
             return_string = ""
-            return_string += f"Der nächste Start ist am {speech_dict_date[day]} {speech_dict_date[month]} "
-            return_string += f"um {speech_dict_hour[hour]} Uhr {speech_dict_minute[minute]} U T C\n"
+            return_string += f"Der nächste Start ist am {skills.statics.numb_to_day_numb[day]} {skills.statics.numb_to_day_numb[month]} "
+            return_string += f"um {skills.statics.numb_to_hour[hour]} Uhr {skills.statics.numb_to_minute[minute]} U T C\n"
             core.say(return_string)
             return
 
@@ -181,11 +96,7 @@ def handle(text, core, skills):
     hit_list2 = ["nächster", "next"]
     hit2 = any((hit for hit in hit_list2 if hit in text.lower()))
 
-    if not core.messenger_call:
-        core.say('Diese Funktion ist nur auf Telegram verfügbar.')
-        retu
-
-    if hit1 == True and hit2 == True:
+    if hit1 is True and hit2 is True:
         # Get the launches launch 
         got_launches, header = launches.get_launches()
 

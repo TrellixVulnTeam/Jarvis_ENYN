@@ -23,66 +23,61 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    timer = Timer(core, skills)
+    timer_interface = core.data_base.timer_interface
     if 'stell' in text or 'beginn' in text:
-        timer.create_timer(text)
+        create_timer(core, skills, timer_interface, text)
     elif 'wie' in text and 'lange' in text:
-        core.say(timer.get_remain_duration())
+        core.say(get_remain_duration(timer_interface, skills))
     elif 'lösch' in text or 'beend' in text or 'stopp' in text:
-        timer.delete_timer()
+        delete_timer(core)
 
 
-class Timer:
+def create_timer(core: ModuleWrapper, skills: Skills, timer_interface, text: str) -> None:
+    # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
+    text = text.replace(' auf ', ' in ')
+    target_time: datetime = core.Analyzer.analyze(text)['datetime']
+    timer_text: str = "Dein Timer ist abgelaufen."
+    duration = get_duration(core, skills, text)
+    if duration is None:
+        return
 
-    def __init__(self, core: ModuleWrapper, skills: Skills):
-        self.core: ModuleWrapper = core
-        self.timer_interface = self.core.data_base.timer_interface
-        self.skills: Skills = skills
+    # Vermeidung von Redundanz. Wird für ein und mehrere Timer verwendet
+    # Aufzählung wenn mehrere Timer
+    position: int = timer_interface.add_timer(target_time, timer_text, user_id=core.user.get('id'))
+    if not core.messenger_call:
+        temp_text = core.skills.statics.numb_to_ordinal[position]
+    else:
+        temp_text = str(position) + "."
+    core.say(temp_text + ' Timer: ' + str(duration) + ' ab jetzt.')
 
-    def create_timer(self, text: str) -> None:
-        # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
-        text = text.replace(' auf ', ' in ')
-        target_time: datetime = self.core.Analyzer.analyze(text)['datetime']
-        timer_text: str = "Dein Timer ist abgelaufen."
-        duration = self.get_duration(text)
-        if duration is None:
-            return
 
-        # Vermeidung von Redundanz. Wird für ein und mehrere Timer verwendet
-        # Aufzählung wenn mehrere Timer
-        position: int = self.timer_interface.add_timer(target_time, timer_text, user_id=self.core.user.get('id'))
-        if not self.core.messenger_call:
-            temp_text = self.core.skills.statics.numb_to_ordinal[position]
-        else:
-            temp_text = str(position) + "."
-        self.core.say(temp_text + ' Timer: ' + str(duration) + ' ab jetzt.')
+def get_duration(core, skills, text: str) -> str | None:
+    text = text.replace(' auf ', ' in ')
+    text = text.replace(' von ', ' in ')
+    duration = skills.get_text_between('in', text, output='String')
+    if duration is "":
+        core.say('Ich habe nicht verstanden, wie lange der Timer dauern soll. Bitte versuche es erneut!')
+        return None
+    return duration
 
-    def get_duration(self, text: str) -> str | None:
-        text = text.replace(' auf ', ' in ')
-        text = text.replace(' von ', ' in ')
-        duration = self.skills.get_text_between('in', text, output='String')
-        if duration is "":
-            self.core.say('Ich habe nicht verstanden, wie lange der Timer dauern soll. Bitte versuche es erneut!')
-            return None
-        return duration
 
-    def get_remain_duration(self) -> str:
-        self.timer_interface.delete_passed_timer()
-        # Just query timer from user
-        # user_timer = self.timer_interface.get_timer_of_user(self.core.user['id'])
-        user_timer = self.timer_interface.get_all_timer(output_type=OutputTypes.TUPLE)
-        output = ''
+def get_remain_duration(timer_interface, skills: Skills) -> str:
+    timer_interface.delete_passed_timer()
+    # Just query timer from user
+    # user_timer = self.timer_interface.get_timer_of_user(self.core.user['id'])
+    user_timer = timer_interface.get_all_timer(output_type=OutputTypes.TUPLE)
+    output = ''
 
-        if len(user_timer) == 0:
-            output = "Du hast keinen aktiven Timer!"
-        else:
-            if len(user_timer) > 1:
-                output = f'Du hast {str(len(user_timer))} Timer gestellt.\n  '
+    if len(user_timer) == 0:
+        output = "Du hast keinen aktiven Timer!"
+    else:
+        if len(user_timer) > 1:
+            output = f'Du hast {str(len(user_timer))} Timer gestellt.\n  '
 
-            for timer_id, duration, time, text, uid in user_timer:
-                output += duration + 'Timer mit ' + self.skills.get_time_difference(datetime.now(),
-                                                                                    time) + ' verbleibend.\n '
-        return output
+        for timer_id, duration, time, text, uid in user_timer:
+            output += duration + 'Timer mit ' + skills.get_time_difference(datetime.now(), time) + ' verbleibend.\n '
+    return output
 
-    def delete_timer(self) -> None:
-        self.core.say('Diese Funktion wird derzeit auf das Webinterface ausgelagert.')
+
+def delete_timer(core: ModuleWrapper) -> None:
+    core.say('Diese Funktion wird derzeit auf das Webinterface ausgelagert.')
