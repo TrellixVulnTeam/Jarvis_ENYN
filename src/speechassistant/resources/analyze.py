@@ -1,12 +1,13 @@
-from __future__ import annotations      # compatibility for < 3.10
+from __future__ import annotations  # compatibility for < 3.10
 
 import datetime
 import re
 
-from typing import Tuple
+from typing import Tuple, List
 
-def split_text(text: str) -> str:
-    return (text.split(' '))
+
+def split_text(text: str) -> list[str]:
+    return text.split(' ')
 
 
 def lower_split_text(text_split: str) -> list:
@@ -26,7 +27,8 @@ def get_other_relative_times(text_split_lower: str) -> list:
     return add_times
 
 
-def zeit_setzen(start_time: datetime.datetime, microsecond: str = None, second: str = None, minute: str = None, hour: str = None, day: str = None, month: str = None, year: str = None) -> datetime.datetime:
+def zeit_setzen(start_time: datetime.datetime, microsecond: str = None, second: str = None, minute: str = None,
+                hour: str = None, day: str = None, month: str = None, year: str = None) -> datetime.datetime:
     # Setzt bei einer gegebenen Zeit gegebene Werte
     microsecond: int = int(microsecond) if microsecond is not None else start_time.microsecond
     second: int = int(second) if second is not None else start_time.second
@@ -172,7 +174,8 @@ class Sentence_Analyzer:
                     except IndexError:
                         town = town
                 # Checkt den erhaltenen Ort
-                if self.to_number(town) is not None or town.lower() in self.evil_words_after_in or town in self.room_list:
+                if self.to_number(
+                        town) is not None or town.lower() in self.evil_words_after_in or town in self.room_list:
                     town = self.default_false
                     offset = offset + in_index + 1
                 else:
@@ -314,7 +317,8 @@ class Sentence_Analyzer:
                     hours = text_split_lower[offset:][um_index + 1]
                 except IndexError:
                     raise ValueError
-                if self.to_number(hours) is not None and hours not in self.number_words_fractions and 0 <= self.to_number(
+                if self.to_number(
+                        hours) is not None and hours not in self.number_words_fractions and 0 <= self.to_number(
                         hours) < 24:
                     add_offset += 1
                     set_hours = self.to_number(hours)
@@ -474,7 +478,8 @@ class Sentence_Analyzer:
                     set_day = self.to_number(day)
                     offset += 1
                     # ..."3./März"...
-                    if self.to_number(month) is not None and month not in self.weekdays and 1 <= self.to_number(month) <= 12:
+                    if self.to_number(month) is not None and month not in self.weekdays and 1 <= self.to_number(
+                            month) <= 12:
                         set_month = self.to_number(month)
                         offset += 1
                         # ..."45/2045"!
@@ -509,7 +514,8 @@ class Sentence_Analyzer:
                         year = None
                         pass
                     # "den 12."...
-                    if den == 'den' and self.to_number(day) is not None and day not in self.weekdays and 0 < self.to_number(
+                    if den == 'den' and self.to_number(
+                            day) is not None and day not in self.weekdays and 0 < self.to_number(
                             day) <= 31:
                         set_day = self.to_number(day)
                         # ..."3./März"...
@@ -517,7 +523,8 @@ class Sentence_Analyzer:
                                 month) <= 12:
                             set_month = self.to_number(month)
                             # ..."45/2045"!
-                            if self.to_number(year) is not None and year not in self.weekdays and year not in self.months:
+                            if self.to_number(
+                                    year) is not None and year not in self.weekdays and year not in self.months:
                                 set_year = self.to_number(year)
 
                 else:
@@ -562,7 +569,8 @@ class Sentence_Analyzer:
                     set_day = self.to_number(day)
                     offset += 1
                     # ..."3./März"...
-                    if self.to_number(month) is not None and month not in self.weekdays and 1 <= self.to_number(month) <= 12:
+                    if self.to_number(month) is not None and month not in self.weekdays and 1 <= self.to_number(
+                            month) <= 12:
                         set_month = self.to_number(month)
                         offset += 1
                         # ..."45/2045"!
