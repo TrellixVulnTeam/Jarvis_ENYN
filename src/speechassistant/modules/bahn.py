@@ -519,7 +519,7 @@ def handle(text, core, skills):
     ziel = None
     try:
         start = core.analysis["town"]
-        if start == 'None' or start == None:
+        if start == 'None' or start is None:
             if not core.local_storage["home_location"] == "":
                 start = core.local_storage["home_location"]
             else:
@@ -713,3 +713,18 @@ def isValid(text):
         return True
     else:
         return False
+
+
+if __name__ == "__main__":
+    class Core:
+        def __init__(self):
+            pass
+
+        def say(self, text):
+            print(text)
+
+        def listen(self):
+            return input("Nutzereingabe")
+
+    core = Core()
+    handle('Wann fährt der nächste Zug von Würzburg nach Coburg', core, None)
