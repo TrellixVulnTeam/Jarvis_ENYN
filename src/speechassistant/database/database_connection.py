@@ -220,6 +220,7 @@ class DataBase:
             self.error_counter += 1
             logging.warning(f"[ERROR] Couldn't create table {command.split(' ')[5]}:\n {e}")
         cursor.close()
+        self.db.commit()
 
     def __remove_tables(self):
         pass
@@ -281,6 +282,7 @@ class DataBase:
                                        messenger_id, song_id))
             uid: int = cursor.lastrowid
             cursor.close()
+            self.db.commit()
             return uid
 
         def add_user_notification(self, user: int | str, notification: str) -> None:
@@ -292,6 +294,7 @@ class DataBase:
             statement: str = f'INSERT INTO notification (uid, text) VALUES (?, ?)'
             cursor.execute(statement, (user, notification))
             cursor.close()
+            self.db.commit()
 
         # The first line of attributes is for mapping purposes only, so that the user can be specified more easily
         def update_user(self, uid: int = None, alias: str = None, first_name: str = None, last_name: str = None,
@@ -352,6 +355,7 @@ class DataBase:
             cursor.execute(statement,
                            (alias, firstname, lastname, self.__birthday_to_string(birthday), mid, sname, uid))
             cursor.close()
+            self.db.commit()
 
         def delete_user_notification(self, user: int | str, text: str) -> None:
             cursor: Cursor = self.db.cursor()
@@ -362,6 +366,7 @@ class DataBase:
             statement: str = 'DELETE FROM notification WHERE uid=? AND text=?'
             cursor.execute(statement, (user, text))
             cursor.close()
+            self.db.commit()
 
         def delete_user(self, user: int | str) -> None:
             cursor: Cursor = self.db.cursor()
@@ -373,6 +378,7 @@ class DataBase:
 
             cursor.execute(statement, (user,))
             cursor.close()
+            self.db.commit()
 
         @staticmethod
         def __birthday_to_string(birthday: dict) -> str:
@@ -499,6 +505,7 @@ class DataBase:
             cursor.execute(statement, tuple(values))
             aid: int = cursor.lastrowid
             cursor.close()
+            self.db.commit()
             return aid
 
         def delete_alarm(self, aid: int) -> int:
@@ -515,6 +522,7 @@ class DataBase:
                 # toDo: maybe use another SQLException
                 raise UnsolvableException('Removed more alarm repeating´s than alarms!')
             cursor.close()
+            self.db.commit()
             return anz_removed_alarm
 
         def update_alarm(self, aid: int, _time: dict = None, _text: str = None, _user: int | str = None,
@@ -563,6 +571,7 @@ class DataBase:
             cursor.execute(statement, (sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed,
                                        aid))
             cursor.close()
+            self.db.commit()
 
         def update_repeating(self, aid: int, _monday: bool = None, _tuesday: bool = None, _wednesday: bool = None,
                              _thursday: bool = None, _friday: bool = None, _saturday: bool = None,
@@ -597,6 +606,7 @@ class DataBase:
                              f'WHERE aid=?'
             cursor.execute(statement, (monday, tuesday, wednesday, thursday, friday, saturday, sunday, aid))
             cursor.close()
+            self.db.commit()
 
         def __build_json(self, result_set: list[tuple], as_tuple: bool = False) -> list[dict] | list[tuple]:
             # toDo: add alarmrepeat
@@ -687,6 +697,7 @@ class DataBase:
             statement: str = 'INSERT INTO audio (name, path) VALUES (?, ?)'
             cursor.execute(statement, (name, path))
             cursor.close()
+            self.db.commit()
 
         def update_audio(self, _audio_name: str, _new_audio_name: str = None, _path: str = None,
                          _audio_file: io.BytesIO = None) -> str:
@@ -733,6 +744,7 @@ class DataBase:
                     os.remove(old_path)
                     logging.info(f'[ACTION] Audio file deleted ({old_path})')
             cursor.close()
+            self.db.commit()
             return name
 
         def get_audio_file(self, audio: str, as_tuple: bool = False) -> tuple | dict:
@@ -766,6 +778,7 @@ class DataBase:
             cursor.close()
             if type(anz_removed) is list:
                 raise UnsolvableException('DataBase returned wrong type while deleting an entry!')
+            self.db.commit()
             # delete file only after database access has worked
             os.remove(file_path)
             logging.info(f'[ACTION] Deleted audiofile "{file_path}".')
@@ -846,6 +859,7 @@ class DataBase:
             statement = 'SELECT id FROM timer LIMIT 1'
             cursor.execute(statement)
             cursor.close()
+            self.db.commit()
             # id from inserted timer - id from the first timer in the current database +1
             return result_set - cursor.rowcount + 1
 
@@ -896,6 +910,7 @@ class DataBase:
                                 WHERE id=?"""
             cursor.execute(statement, (duration, time, text, uid, tid))
             cursor.close()
+            self.db.commit()
 
         def delete_timer(self, timer_id: int) -> None:
             curser: Cursor = self.db.cursor()
@@ -976,6 +991,7 @@ class DataBase:
             cursor.execute(statement, (time, text, user))
             rid: int = cursor.lastrowid
             cursor.close()
+            self.db.commit()
             return rid
 
         def delete_reminder(self, _id: int) -> None:
@@ -983,6 +999,7 @@ class DataBase:
             statement: str = 'DELETE FROM reminder WHERE id=?'
             cursor.execute(statement, (_id,))
             cursor.close()
+            self.db.commit()
 
         @staticmethod
         def __build_json(result_set: list[tuple[int, str, str, int]]) -> list[dict]:
@@ -1029,6 +1046,7 @@ class DataBase:
                              f'VALUES (?, ?, ?)'
             cursor.execute(statement, (name, measure, quantity))
             cursor.close()
+            self.db.commit()
 
         def update_item(self, name: str, quantity: float) -> None:
             cursor: Cursor = self.db.cursor()
@@ -1046,18 +1064,21 @@ class DataBase:
                                 WHERE name=?"""
             cursor.execute(statement, (quantity, name))
             cursor.close()
+            self.db.commit()
 
         def remove_item(self, name: str) -> None:
             cursor: Cursor = self.db.cursor()
             statement: str = 'DELETE FROM shoppinglist WHERE name=?'
             cursor.execute(statement, (name,))
             cursor.close()
+            self.db.commit()
 
         def clear_list(self) -> None:
             cursor: Cursor = self.db.cursor()
             statement: str = 'DELETE FROM shoppinglist'
             cursor.execute(statement)
             cursor.close()
+            self.db.commit()
 
         def is_item_in_list(self, name) -> bool:
             cursor: Cursor = self.db.cursor()
@@ -1246,6 +1267,7 @@ class DataBase:
                 cursor.execute(statement, (routine["name"], item))
 
             cursor.close()
+            self.db.commit()
 
         def add_routine_by_values(self, name, description, daily, monday, tuesday, wednesday, thursday,
                                   friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall):
@@ -1256,6 +1278,7 @@ class DataBase:
             cursor.execute(statement, (name, description, daily, monday, tuesday, wednesday, thursday,
                                        friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall))
             cursor.close()
+            self.db.commit()
 
         def create_routine_commands(self, rname: str, modulename: str, text: list[str]) -> int:
             cursor: Cursor = self.db.cursor()
@@ -1268,6 +1291,7 @@ class DataBase:
                 cursor.executemany(statement, text)
 
             cursor.close()
+            self.db.commit()
             return rcid
 
         def create_on_command(self, rname: str, command: str) -> int:
@@ -1276,6 +1300,7 @@ class DataBase:
             cursor.execute(statement, (rname, command))
             ocid: int = cursor.lastrowid
             cursor.close()
+            self.db.commit()
             return ocid
 
         def create_routine_dates(self, rname: str, day: int, month: int):
@@ -1284,6 +1309,7 @@ class DataBase:
             cursor.execute(statement, (rname, day, month))
             rdid: int = cursor.lastrowid
             cursor.close()
+            self.db.commit()
             return rdid
 
         def create_routine_activation_time(self, rname: str, hour: int, minute: int) -> int:
@@ -1292,6 +1318,7 @@ class DataBase:
             cursor.execute(statement, (rname, hour, minute))
             ratid: int = cursor.lastrowid
             cursor.close()
+            self.db.commit()
             return ratid
 
         def update_routine(self, old_name: str, new_routine_dict: dict = None, _name: str = None,
@@ -1400,24 +1427,28 @@ class DataBase:
                 values: list[tuple] = [(item["text"], item["id"]) for item in _commands]
                 cursor.executemany(statement, values)
             cursor.close()
+            self.db.commit()
 
         def update_date_of_day(self, rdid: int, day: int, month: int):
             cursor: Cursor = self.db.cursor()
             statement: str = 'UPDATE routinedates SET day=?, month=? WHERE rdid=?'
             cursor.execute(statement, (day, month, rdid))
             cursor.close()
+            self.db.commit()
 
         def update_activation_time(self, ratid: int, hour: int, minute: int):
             cursor: Cursor = self.db.cursor()
             statement: str = 'UPDATE routineactivationtime SET hour=?, minute=? WHERE ratid=?'
             cursor.execute(statement, (hour, minute, ratid))
             cursor.close()
+            self.db.commit()
 
         def update_routine_commands(self, rcid: int, modulename: str, text: list[str]):
             cursor: Cursor = self.db.cursor()
             statement: str = 'UPDATE routinecommands SET modulename=? WHERE rcid=?'
             cursor.execute(statement, (modulename, rcid))
             cursor.close()
+            self.db.commit()
 
         def update_command_text(self, rcid: int, module_name: str, text: list[str]):
             cursor: Cursor = self.db.cursor()
@@ -1427,12 +1458,14 @@ class DataBase:
             values: list[tuple] = [(rcid, item) for item in text]
             cursor.executemany(statement, values)
             cursor.close()
+            self.db.commit()
 
         def update_on_command(self, ocid: int, command: str) -> None:
             cursor: Cursor = self.db.cursor()
             statement: str = 'UPDATE FROM oncommand SET command=? WHERE ocid=?'
             cursor.execute(statement, (command, ocid))
             cursor.close()
+            self.db.commit()
 
         def update_on_commands(self, rname: str, commands: list[str]):
             cursor: Cursor = self.db.cursor()
@@ -1448,6 +1481,7 @@ class DataBase:
                 raise e
 
             cursor.close()
+            self.db.commit()
 
         def update_attribute(self, routine_name: str, values: list[tuple[str, any]]):
             cursor: Cursor = self.db.cursor()
@@ -1465,6 +1499,7 @@ class DataBase:
                 elif attribute == 'commands':
                     self.update_routine(routine_name, _commands=value)
             cursor.close()
+            self.db.commit()
 
         def delete_routine(self, routine_name: str) -> int:
             cursor: Cursor = self.db.cursor()
@@ -1475,6 +1510,7 @@ class DataBase:
             cursor.execute('DELETE FROM routine WHERE rname=?', (routine_name,))
             counter: int = cursor.rowcount
             cursor.close()
+            self.db.commit()
             return counter
 
         def delete_routine_command(self, rcid: int):
@@ -1484,24 +1520,28 @@ class DataBase:
             statement: str = 'DELETE FROM routinecommands WHERE rcid=?'
             cursor.execute(statement, (rcid,))
             cursor.close()
+            self.db.commit()
 
         def delete_on_command(self, ocid: int):
             cursor: Cursor = self.db.cursor()
             statement: str = 'DELETE FROM oncommand WHERE ocid=?'
             cursor.execute(statement, (ocid,))
             cursor.close()
+            self.db.commit()
 
         def delete_routine_dates(self, rdid: int):
             cursor: Cursor = self.db.cursor()
             statement: str = 'DELETE FROM routinedates WHERE rdid=?'
             cursor.execute(statement, (rdid,))
             cursor.close()
+            self.db.commit()
 
         def delete_routine_activation_time(self, ratid: int):
             cursor: Cursor = self.db.cursor()
             statement: str = 'DELETE FROM routineactivationtime WHERE ratid=?'
             cursor.execute(statement, (ratid,))
             cursor.close()
+            self.db.commit()
 
         def __add_commands(self, commands: list[dict], name: str):
             cursor: Cursor = self.db.cursor()
@@ -1630,6 +1670,7 @@ class DataBase:
             cursor: Cursor = self.db.cursor()
             cursor.execute('INSERT INTO birthdays VALUES (?, ?, ?, ?, ?)', (first_name, last_name, day, month, year))
             cursor.close()
+            self.db.commit()
 
         def get_birthday(self, first_name: str, last_name: str) -> dict:
             cursor: Cursor = self.db.cursor()
@@ -1677,11 +1718,13 @@ class DataBase:
                                 AND lastname=?"""
             cursor.execute(statement, (first_name, last_name, day, month, year, _old_first_name, _old_last_name))
             cursor.close()
+            self.db.commit()
 
         def delete_birthday(self, first_name: str, last_name: str) -> None:
             cursor: Cursor = self.db.cursor()
             cursor.execute('DELETE FROM birthdays WHERE firstname=? AND lastname=?', (first_name, last_name))
             cursor.close()
+            self.db.commit()
 
         @staticmethod
         def __build_json(result_set: tuple) -> dict:
