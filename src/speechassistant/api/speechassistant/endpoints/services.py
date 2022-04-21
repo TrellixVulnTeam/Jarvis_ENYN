@@ -1,3 +1,5 @@
+from flask import Response
+
 from src.speechassistant.api.myapi import api
 from flask_restx import Resource
 
@@ -11,8 +13,17 @@ class Service(Resource):
 
 @namespace.route('/phue')
 class Phue(Resource):
-    pass
+    def get(self) -> Response:
+        pass
 
+    def post(self) -> Response:
+        pass
+
+    def put(self) -> Response:
+        pass
+
+    def delete(self) -> Response:
+        pass
 
 @namespace.route('/tv')
 class Tv(Resource):

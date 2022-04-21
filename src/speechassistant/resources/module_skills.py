@@ -130,7 +130,7 @@ class Skills:
     @staticmethod
     def get_text_between(start_word: str, text: str, end_word: str = '', output: str = 'array',
                          could_included: bool = True) -> str | list:
-        if not start_word in text:
+        if start_word not in text:
             start_index = 0
         else:
             temp_start = re.search(f'{start_word}', text)
