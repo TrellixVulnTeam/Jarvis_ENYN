@@ -1,4 +1,8 @@
+from datetime import datetime
 from time import sleep
+
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
 def isValid(text):
@@ -9,6 +13,7 @@ def isValid(text):
         return False
 
 
+# toDo: rework get_text
 def get_text(core, text):
     remembrall = ''
     e_ind = 0
@@ -138,92 +143,29 @@ def get_reply_time(core, dicanalyse):
     return reply
 
 
-def handle(text, core, skills):
+def handle(text: str, core: ModuleWrapper, skills: Skills):
     if 'lösch' in text:
-        time = core.analyze['time']
+        time: datetime = core.analysis['datetime']
         erinnerungen = core.local_storage['Erinnerungen']
-        founded = []
-        for item in erinnerungen:
-            if item['Zeit'] is time:
-                founded.append(item)
-        if len(founded) is 0:
-            core.say(
-                'Ich habe leider keine Erinnerung zu dieser Zeit gefunden. Ich werde mal nach deinen Einträgen gucken.')
-            sleep(2)
-            entries = []
-            for item in erinnerungen:
-                if item['Benutzer'] is core.user:
-                    entries.append(item)
-                core.say(
-                    'Ich habe folgendes herausgefunden: du hast {} Erinnerungseinträge. Soll ich sie dir Vorlesen und '
-                    'du sagst, wenn es das richtige ist?'.format(str(len(entries))))
-                answer = core.listen()
-                if 'ja' in answer:
-                    core.say(
-                        'Okay, ich werde dir einfach die Einträge vorlesen und nach jedem Eintrag sagst du entweder ja oder nein.')
-                    hit = False
-                    for item in entries:
-                        if not hit:
-                            core.say(item['Text'] + ' Ist das richtig?')
-                            response = core.listen()
-                            if 'ja' in response:
-                                founded = True
-                                erinnerungen.remove(item)
-                                core.local_storage['Erinnerungen'] = erinnerungen
-                else:
-                    core.say('Okay, vielleicht probierst du es erneut.')
-        if len(founded) > 1:
-            core.say('Zu dieser Zeit gibt es mehrere Erinnerungen. Soll ich alle löschen?')
-            response = core.listen()
-            if 'ja' in response:
-                core.say('Alles klar, ich werde alle Einträge zu diesem Zeitpunkt löschen.')
-                for item in founded:
-                    erinnerungen.remove(item)
-                core.local_storage['Erinnerungen'] = erinnerungen
-            else:
-                core.say('Soll ich dir jeden Eintrag vorlesen und du sagst mir, ob es der richtige war oder nicht?')
-                response = core.listen()
-                if 'ja' in response:
-                    core.say(
-                        'Okay, ich werde dir einfach die Einträge vorlesen und nach jedem Eintrag sagst du entweder ja oder nein.')
-                    for item in founded:
-                        core.say(response['Text'] + ' Ist das richt?')
-                        response = core.listen()
-                        if 'ja' in response:
-                            erinnerungen.remove(item)
-                            core.local_storage['Erinnerungen'] = erinnerungen
-                else:
-                    core.say('Alles klar, dann probiere es vielleicht nocheinmal.')
 
-    elif text != '_UNDO_':
-        reply = ''
-        Erinnerung = {}
-        r = get_text(core, text)
-        E_eins = {'Zeit': core.analysis['datetime'], 'Text': r, 'Benutzer': core.user}
-        if 'Erinnerungen' in core.local_storage.keys():
-            core.local_storage['Erinnerungen'].append(E_eins)
+        counter: int = core.data_base.reminder_interface.delete_reminder()
+        if counter == 0:
+            core.say(f'Du hast keine Erinnerungen am {time.day}.{time.month} um {skills.get_time(time)}.')
+        elif counter == 1:
+            core.say('Ich habe eine Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht.')
         else:
-            core.local_storage['Erinnerungen'] = [E_eins]
-        rep = get_reply_time(core, core.analysis)
-        if 'dass ' in r:
-            antwort = 'Alles klar, ich sage dir am ' + rep + ' bescheid, ' + r + '.'  ###
-        elif 'ans ' in text:
-            antwort = 'Alles klar, ich erinnere dich am ' + rep + ' ans ' + r + '.'
-        else:
-            antwort = 'Alles klar, ich sage dir am ' + rep + ' bescheid, dass du ' + r + ' musst.'
-        core.say(antwort)
+            core.say(f'Ich habe {counter} Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht.')
+
     else:
-        liste = core.local_storage.get('Erinnerungen')
-        element = liste[len(liste)]
-        if element.get('Benutzer') == core.user:
-            del liste[len(liste)]
+        reminder_text: str = get_text(core, text)
+        core.data_base.reminder_interface.add_reminder(reminder_text, core.analysis['datetime'], core.user)
+
+        rep = get_reply_time(core, core.analysis)
+        if 'dass ' in reminder_text:
+            antwort = 'Alles klar, ich sage dir am ' + rep + ' bescheid, ' + reminder_text + '.'  ###
+        elif 'ans ' in text:
+            antwort = 'Alles klar, ich erinnere dich am ' + rep + ' ans ' + reminder_text + '.'
         else:
-            element = liste[len(liste) - 1]
-            if element.get('Benutzer') == core.user:
-                del liste[len(liste) - 1]
-            else:
-                element = liste[len(liste) - 2]
-                if element.get('Benutzer') == core.user:
-                    del liste[len(liste) - 2]
-                else:
-                    del liste[len(liste) - 3]
+            antwort = 'Alles klar, ich sage dir am ' + rep + ' bescheid, dass du ' + reminder_text + ' musst.'
+        core.say(antwort)
+
