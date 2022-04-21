@@ -112,7 +112,7 @@ class DataBase:
 
         self.__create_table('CREATE TABLE IF NOT EXISTS reminder ('
                             'id INTEGER PRIMARY KEY,'
-                            'time VARCHAR(14),'
+                            'time VARCHAR(19),'
                             'text VARCHAR(255),'
                             'uid INTEGER,'
                             'FOREIGN KEY(uid) REFERENCES user(uid))')
@@ -961,10 +961,18 @@ class DataBase:
             self.user_interface = user_interface  # connection is necessary for __get_user_id()
             logging.info('[INFO] ReminderInterface initialized.')
 
-        def get_reminder(self):
+        def get_reminder(self, passed: bool = False):
             cursor: Cursor = self.db.cursor()
-            statement: str = 'SELECT * FROM reminder'
-            cursor.execute(statement)
+
+            if passed:
+                now: datetime = datetime.now()
+                date_string: str = now.strftime('%Y.%d.%m:%H:%M:%S')
+                statement: str = 'SELECT * FROM reminder ' \
+                                 'WHERE time<?'
+                cursor.execute(statement, (date_string,))
+            else:
+                statement: str = 'SELECT * FROM reminder'
+                cursor.execute(statement)
             result_set: list[tuple[int, str, str, int]] = cursor.fetchall()
             cursor.close()
             return self.__build_json(result_set)
@@ -973,7 +981,7 @@ class DataBase:
             if len(text) > 255:
                 raise ValueError('Given text is too long!')
 
-            if len(time) != 14:
+            if len(time) != 19:
                 raise ValueError("Given time doesn't match!")
 
             if user is None:
@@ -994,12 +1002,18 @@ class DataBase:
             self.db.commit()
             return rid
 
-        def delete_reminder(self, _id: int) -> None:
+        def delete_reminder(self, _id: int = None, time: str = None) -> int:
             cursor: Cursor = self.db.cursor()
-            statement: str = 'DELETE FROM reminder WHERE id=?'
-            cursor.execute(statement, (_id,))
+            if _id is not None:
+                statement: str = 'DELETE FROM reminder WHERE id=?'
+                cursor.execute(statement, (_id,))
+            else:
+                statement: str = 'DELTE FROM reminder WHERE time=?'
+                cursor.execute(statement, (time,))
+            counter: int = cursor.rowcount
             cursor.close()
             self.db.commit()
+            return counter
 
         @staticmethod
         def __build_json(result_set: list[tuple[int, str, str, int]]) -> list[dict]:
@@ -1151,19 +1165,22 @@ class DataBase:
             cursor.close()
             return self.__build_json(routine_set, command_set, text_set, date_set, activation_set, on_command_set)
 
-        def get_routines(self, on_command: str = None) -> list[routine_item]:
+        def get_routines(self, on_command: str = None, on_time: dict = None) -> list[routine_item]:
             cursor: Cursor = self.db.cursor()
             routine_list: list[dict] = []
             if on_command is None:
-                statement: str = 'SELECT * FROM routine'
-                cursor.execute(statement)
-                routine_set: list[tuple] = cursor.fetchall()
-            else:
-                statement: str = """SELECT * FROM  routine 
-                                    INNER JOIN oncommand ON routine.name=oncommand.rname 
-                                    WHERE instr(?, oncommand.command) > 0"""
+                statement: str = """SELECT * FROM routine 
+                                                    INNER JOIN oncommand ON routine.name=oncommand.rname 
+                                                    WHERE instr(?, oncommand.command) > 0"""
 
                 cursor.execute(statement, (on_command,))
+                routine_set: list[tuple] = cursor.fetchall()
+
+            elif on_time:
+                statement: str = """SELECT * FROM routine"""
+            else:
+                statement: str = """SELECT rname FROM routine"""
+                cursor.execute(statement)
                 routine_set: list[tuple] = cursor.fetchall()
 
             for rout in routine_set:
