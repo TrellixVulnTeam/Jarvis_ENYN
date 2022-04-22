@@ -11,7 +11,7 @@ from src.speechassistant.api.speechassistant.logic.alarm import \
     update_alarm, \
     delete_alarm
 
-namespace = api.namespace('alarm')
+namespace = api.namespace('/alarms')
 
 
 @namespace.route('/')
@@ -19,7 +19,10 @@ class AlarmConnection(Resource):
 
     def get(self) -> Response:
         args = request.get_json()
-        return read_alarm(args.get('id'))
+        aid: int = None
+        if args:
+            aid = args.get('id')
+        return read_alarm(aid)
 
     @api.expect(alarm_file)
     def post(self) -> Response:

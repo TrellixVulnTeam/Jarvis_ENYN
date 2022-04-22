@@ -21,10 +21,12 @@ def create_alarm(data: dict) -> Response:
 def read_alarm(data: int | None) -> Response:
     if data:
         alarm: dict = database.alarm_interface.get_alarm(data)
+        print(alarm)
         return Response(json.dumps(alarm), mimetype='application/json')
     else:
         alarms: list[dict] = database.alarm_interface.get_alarms(unsorted=True)
-        return Response(json.dumps({"alarms": alarms}), mimetype='application/json')
+        print(alarms)
+        return Response(json.dumps(alarms), mimetype='application/json')
 
 
 def update_alarm(data: dict) -> Response:
