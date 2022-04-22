@@ -1,0 +1,56 @@
+<div class="d-flex justify-content-between">
+  <button class="btn btn-primary"
+    (click)="changeEditMode()">
+    {{ getEditButtonText() }}
+  </button>
+
+  <button class="btn btn-success">
+    <mat-icon>add_circle</mat-icon>
+  </button>
+</div>
+
+
+<div class="list-group overflow-auto" *ngIf="alarms">
+  <a [routerLink]="[alarm.id]" *ngFor="let alarm of alarms" class="list-group-item list-group-item-action">
+    <div class="d-flex justify-content-between">
+      <div class="p-2">
+        <div>
+          <div><h2>{{getTimeString(alarm)}}</h2></div> <br/>
+          <div><h5>{{getRepeatingString(alarm)}}</h5></div>
+        </div>
+      </div>
+      <div class="form-check form-switch">
+        <input class="form-check-input p-2" type="checkbox" id="alarm-{{alarm.id}}-activation" [checked]="alarm.active">
+      </div>
+    </div>
+  </a>
+  <a class="list-group-item list-group-item-action" (click)="onAddAlarm(createAlarmModal)">
+    <mat-icon class="add-button">add_circle</mat-icon>
+  </a>
+</div>
+
+<ng-template #createAlarmModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Wecker erstellen</h4>
+    <button type="button" class="btn-close close pull-right" aria-label="Close" (click)="modalRef?.hide()">
+      <span aria-hidden="true" class="visually-hidden">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <timepicker [(ngModel)]="tempAlarm.time"></timepicker>
+
+     <div class="list-group">
+        <a class="list-group-item">Wiederholen</a>
+        <a class="list-group-item">
+          Beschreibung
+        </a>
+        <a class="list-group-item">Ton</a>
+     </div>
+    <div class="btn-group d-flex">
+      <button type="button" class="btn btn-success">Speichern</button>
+      <button type="button" class="btn btn-danger">Verwerfen</button>
+   </div>
+  </div>
+
+
+</ng-template>
