@@ -94,7 +94,8 @@ class DataBase:
                             'friday INTEGER ,'
                             'saturday INTEGER,'
                             'sunday INTEGER, '
-                            'regular INTEGER)')
+                            'regular INTEGER, '
+                            'FOREIGN KEY(aid) REFERENCES alarm(aid))')
 
         self.__create_table('CREATE TABLE IF NOT EXISTS timer ('
                             'id INTEGER PRIMARY KEY,'
@@ -192,7 +193,7 @@ class DataBase:
                             'PRIMARY KEY(uid, text),'
                             'FOREIGN KEY(uid) REFERENCES user(uid))')
 
-        # self.__create_table('CREATE TABLE IF NOT EXISTS messengernotifications')
+        # self.__create_table('CREATE TABLE IF NOT EXISTS messenger notifications')
         self.__create_table('CREATE TABLE IF NOT EXISTS birthdays ('
                             'firstname VARCHAR(15), '
                             'lastname VARCHAR(30), '
@@ -621,7 +622,7 @@ class DataBase:
                 return result_list
 
             result_list: list[dict] = []
-            for aid, sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed, _, monda, tuesday, wednesday, thursday, friday, saturday, sunday, regular in result_set:
+            for aid, sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed, _, monday, tuesday, wednesday, thursday, friday, saturday, sunday, regular in result_set:
                 statement: str = 'SELECT path FROM audio WHERE name=?'
                 cursor.execute(statement, (sname,))
                 sound_path: str = cursor.fetchone()
@@ -637,7 +638,15 @@ class DataBase:
                     "text": text,
                     "active": (active == 1),
                     "initiated": (initiated == 1),
-                    "last_executed": last_executed
+                    "last_executed": last_executed,
+                    "monday": monday,
+                    "tuesday": tuesday,
+                    "wednesday": wednesday,
+                    "thursday": thursday,
+                    "friday": friday,
+                    "saturday": saturday,
+                    "sunday": sunday,
+                    "regular": regular
                 })
             cursor.close()
             return result_list
@@ -1168,18 +1177,19 @@ class DataBase:
         def get_routines(self, on_command: str = None, on_time: dict = None) -> list[routine_item]:
             cursor: Cursor = self.db.cursor()
             routine_list: list[dict] = []
-            if on_command is None:
+            if on_command is not None:
                 statement: str = """SELECT * FROM routine 
-                                                    INNER JOIN oncommand ON routine.name=oncommand.rname 
-                                                    WHERE instr(?, oncommand.command) > 0"""
+                                    JOIN oncommand ON routine.name=oncommand.rname 
+                                    WHERE instr(?, oncommand.command) > 0"""
 
                 cursor.execute(statement, (on_command,))
                 routine_set: list[tuple] = cursor.fetchall()
-
-            elif on_time:
+            elif on_time is not None:
                 statement: str = """SELECT * FROM routine"""
+                cursor.execute(statement)
+                routine_set: list[tuple] = cursor.fetchall()
             else:
-                statement: str = """SELECT rname FROM routine"""
+                statement: str = """SELECT * FROM routine"""
                 cursor.execute(statement)
                 routine_set: list[tuple] = cursor.fetchall()
 
@@ -1196,7 +1206,7 @@ class DataBase:
 
                 statement = 'SELECT * FROM routinedates WHERE rname=?'
                 cursor.execute(statement, (rout[0],))
-                date_set: list[tuple] = cursor.fetchall()
+                data_set: list[tuple] = cursor.fetchall()
 
                 statement = 'SELECT * FROM routineactivationtime WHERE rname=?'
                 cursor.execute(statement, (rout[0],))
@@ -1206,10 +1216,9 @@ class DataBase:
                 cursor.execute(statement, (rout[0],))
                 on_command_set: list[tuple] = cursor.fetchall()
 
-                print(
-                    f'rout: {rout}, command_set: {command_set}, text_set: {text_set}, date_set: {date_set}, activation_set: {activation_set}, on_command_set: {on_command_set}')
+                #print(f'rout: {rout}, command_set: {command_set}, text_set: {text_set}, date_set: {data_set}, activation_set: {activation_set}, on_command_set: {on_command_set}')
                 routine_list.append(
-                    self.__build_json(rout, command_set, text_set, date_set, activation_set, on_command_set))
+                    self.__build_json(rout, command_set, text_set, data_set, activation_set, on_command_set))
 
             cursor.close()
             return routine_list
@@ -1770,3 +1779,9 @@ class DataBase:
             raise SQLException(f"Couldn't execute SQL Statement: {command} with Values {str(values)}\n{e}")
         finally:
             cursor.close()"""
+
+if __name__ == "__main__":
+    db = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\', None)
+    print(db.routine_interface.get_routines())
+    # db.alarm_interface.add_alarm({"hour": 10, "minute": 0, "total_seconds":5234324}, "Hallo Welt", -1, {"monday": True, "tuesday": True, "wednesday": True, "thursday": True, "friday": True, "saturday": False, "sunday": False, "regular": True})
+    # print(db.alarm_interface.get_alarms())
