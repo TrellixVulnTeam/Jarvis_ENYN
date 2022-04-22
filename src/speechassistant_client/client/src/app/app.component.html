@@ -1,4 +1,3 @@
-
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #drawer class="sidenav" fixedInViewport
                [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
@@ -6,9 +5,9 @@
                [opened]="(isHandset$ | async) === false">
     <mat-toolbar></mat-toolbar>
     <mat-nav-list>
-      <a mat-list-item href="#">Link 1</a>
-      <a mat-list-item href="#">Link 2</a>
-      <a mat-list-item href="#">Routinen</a>
+      <a mat-list-item routerLink="">Link 1</a>
+      <a mat-list-item routerLink="/alarms">Wecker</a>
+      <a mat-list-item routerLink="/routines">Routinen</a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -21,10 +20,12 @@
         *ngIf="isHandset$ | async">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <span>client</span>
+      <span>{{titleService.getTitle()}}</span>
     </mat-toolbar>
 
-    <routines></routines>
+    <router-outlet></router-outlet>
+
 
   </mat-sidenav-content>
 </mat-sidenav-container>
+

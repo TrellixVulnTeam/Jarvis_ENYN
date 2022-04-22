@@ -12,10 +12,10 @@ import {Title} from "@angular/platform-browser";
 export class AppComponent {
   title: string = 'client';
 
-  constructor( private titleService: Title, private breakpointObserver: BreakpointObserver) { }
+  constructor(public titleService: Title, private breakpointObserver: BreakpointObserver) { }
 
   ngOnInit() {
-    this.titleService.setTitle('Menü')
+    this.titleService.setTitle('Alarm')
   }
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)

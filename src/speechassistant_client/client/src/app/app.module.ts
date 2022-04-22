@@ -1,8 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
-
-import { AppRoutingModule } from './app-routing.module';
+import { RouterModule, Routes } from "@angular/router";
 import { AppComponent } from './app.component';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -16,7 +15,7 @@ import { RoutinesComponent } from "../lib/pages/routines/routines.component";
 import { RoutineComponent } from "../ui/routine/routine.component";
 import { MatTimepickerModule } from "mat-timepicker";
 import { TileSelectorComponent } from "../ui/tile-selector/tileSelector.component";
-import {MatCheckboxModule} from "@angular/material/checkbox";
+import { MatCheckboxModule } from "@angular/material/checkbox";
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { AlertModule,AlertConfig } from 'ngx-bootstrap/alert';
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
@@ -27,15 +26,23 @@ import { BsDropdownModule,BsDropdownConfig } from 'ngx-bootstrap/dropdown';
 import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 // import { AppBootstrapModule } from './app-bootstrap/app-bootstrap.module';
-import {FormsModule} from "@angular/forms";
+import { FormsModule } from "@angular/forms";
+import { AlarmsComponent } from "../lib/pages/alarms/alarms.component";
+import { AlarmComponent } from "../lib/pages/alarm/alarm.component";
+import {TimepickerModule} from "ngx-bootstrap/timepicker";
+
+const routes: Routes = [
+  { path: 'alarms', component: AlarmsComponent },
+  { path: 'alarms/:id', component: AlarmComponent },
+  { path: 'routines', component: RoutinesComponent }
+]
 
 @NgModule({
   declarations: [
-    AppComponent, RoutinesComponent, RoutineComponent, TileSelectorComponent
+    AppComponent, RoutinesComponent, RoutineComponent, TileSelectorComponent, AlarmsComponent, AlarmComponent
   ],
     imports: [
         BrowserModule,
-        AppRoutingModule,
         BrowserAnimationsModule,
         LayoutModule,
         MatToolbarModule,
@@ -59,7 +66,9 @@ import {FormsModule} from "@angular/forms";
         CollapseModule,
         BsDatepickerModule.forRoot(),
         BsDropdownModule,
-        ModalModule
+        ModalModule,
+        RouterModule.forRoot(routes),
+        TimepickerModule,
     ],
   providers: [Title],
   bootstrap: [AppComponent],
