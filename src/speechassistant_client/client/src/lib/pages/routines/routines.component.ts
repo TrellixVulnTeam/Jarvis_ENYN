@@ -6,6 +6,8 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {Command} from "../../data-access/models/command";
 import {materialModuleSpecifier} from "@angular/material/schematics/ng-update/typescript/module-specifiers";
 import {retry} from "rxjs";
+import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
+import {Title} from "@angular/platform-browser";
 
 @Component({
   selector: 'routines',
@@ -21,15 +23,41 @@ export class RoutinesComponent implements OnInit{
   postRoutine: boolean = false;
   moduleNames: string[] = [];
 
-  @Input() routines: Routine[] = [];
+  @Input() routines: Routine[];
 
-  constructor(private backendService: BackendService, private modalService: BsModalService) { }
+  constructor(private titleService: Title, private backendService: BackendService, private modalService: BsModalService) { }
 
   ngOnInit(): void {
-    this.backendService.loadAllRoutines().subscribe((routines: Routine[]) => this.routines = routines);
-    this.backendService.getAllModuleNames().subscribe(modules => {
-      this.moduleNames = modules;
+    this.titleService.setTitle('Routinen Übersicht');
+    this.backendService.loadAllRoutines().subscribe((routines: Routine[]) =>
+    {
+      this.routines = routines;
+      for (let i = 0; i < this.routines.length; i++) {
+        // @ts-ignore
+        let dates: JsonObject[] = this.routines.dateOfDay;
+        // @ts-ignore
+        let times: JsonObject[] = this.routines.clock_time;
+        this.routines[i].dateOfDay = [];
+        this.routines[i].clock_time = [];
+
+        dates.forEach(date => {
+          let newDate: Date = new Date();
+          newDate.setMonth(date["month"] as number);
+          newDate.setDate(date["day"] as number);
+          routines[i].dateOfDay.push(newDate);
+        });
+
+        times.forEach(time => {
+          let newTime: Date = new Date();
+          newTime.setHours(time["hour"] as number);
+          newTime.setMinutes(time["minute"] as number);
+          routines[i].dateOfDay.push(newTime);
+        });
+      }
     });
+    /*this.backendService.getAllModuleNames().subscribe(modules => {
+      this.moduleNames = modules;
+    });*/
   }
 
   openModal(template: TemplateRef<any>, modalSize: string = ""): void {

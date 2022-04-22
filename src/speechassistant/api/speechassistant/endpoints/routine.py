@@ -6,12 +6,12 @@ from src.speechassistant.api.speechassistant.logic.routine import *
 from src.speechassistant.api.speechassistant.api_definition import routine
 from src.speechassistant.api.speechassistant.parser import routine_parser as parser
 
-namespace = api.namespace('routine')
+namespace = api.namespace('routines')
 
 
 @namespace.route('/')
 class RoutineConnection(Resource):
-    @api.marshal_with(routine)
+    # @api.marshal_with(routine)
     def get(self) -> Response:
         data: dict = parser.parse_args(request)
         if 'name' not in data.keys():
@@ -20,7 +20,7 @@ class RoutineConnection(Resource):
             data['name'] = None
         return read_routine(data.get('name'))
 
-    @api.marshal_with(routine)
+    # @api.marshal_with(routine)
     def post(self) -> Response:
         data: dict = request.get_json()
         return create_routine(data)
@@ -40,11 +40,11 @@ class RoutineConnection(Resource):
 
 @namespace.route('/<name>')
 class RoutineConnection(Resource):
-    @api.marshal_with(routine)
+    # @api.marshal_with(routine)
     def get(self, name: str) -> Response:
         return read_routine(name)
 
-    @api.marshal_with(routine)
+    # @api.marshal_with(routine)
     def post(self, name: str) -> Response:
         return create_routine(name)
 

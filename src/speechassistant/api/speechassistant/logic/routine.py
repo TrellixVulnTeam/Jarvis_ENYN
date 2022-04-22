@@ -17,8 +17,7 @@ def create_routine(data: dict) -> Response:
 
 
 def read_routine(name: str | None) -> Response:
-    print(name)
-    if name:
+    if name is not None:
         try:
             routine: dict = database.routine_interface.get_routine(name)
         except NoMatchingEntry:
@@ -26,8 +25,28 @@ def read_routine(name: str | None) -> Response:
         return Response(json.dumps(routine), mimetype='application/json', status=200)
     else:
         routines: list[dict] = database.routine_interface.get_routines()
-        print(routines)
-        return Response(json.dumps({'routines': routines}), mimetype='application/json', status=200)
+        preparedData: list[dict] = []
+        for routine in routines:
+            preparedData.append({
+                "name": routine.get("name"),
+                "description": routine.get("description"),
+                "onCommands": routine.get("onCommands"),
+                "monday": routine["retakes"]["days"].get("monday"),
+                "tuesday": routine["retakes"]["days"].get("tuesday"),
+                "wednesday": routine["retakes"]["days"].get("wednesday"),
+                "thursday": routine["retakes"]["days"].get("thursday"),
+                "friday": routine["retakes"]["days"].get("friday"),
+                "saturday": routine["retakes"]["days"].get("saturday"),
+                "sunday": routine["retakes"]["days"].get("sunday"),
+                "dateOfDay": routine["retakes"]["days"].get("date_of_day"),
+                "clock_time": routine["retakes"]["activation"].get("clock_time"),
+                "after_alarm": routine["retakes"]["activation"].get("after_alarm"),
+                "after_sunrise": routine["retakes"]["activation"].get("after_sunrise"),
+                "after_sunset": routine["retakes"]["activation"].get("after_sunset"),
+                "after_call": routine["retakes"]["activation"].get("after_call"),
+                "commands": routine["actions"].get("commands")
+            })
+        return Response(json.dumps(preparedData), mimetype='application/json', status=200)
 
 
 def update_routine(data: dict) -> Response:

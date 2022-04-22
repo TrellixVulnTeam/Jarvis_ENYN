@@ -40,7 +40,6 @@ export class RoutineComponent implements OnInit{
     }
 
     onOnCommandDelete(id: number): void {
-        console.log("Deleting " + id);
         const index = this.onCommands.findIndex(
           (item: OnCommand) => item.getID() === id
         )
