@@ -1,0 +1,111 @@
+<div class="p-3">
+
+  <timepicker style="font-size:30px;text-align: center" [(ngModel)]="this.alarm.time" [showMeridian]="false"></timepicker>
+
+  <div class="btn-group-vertical d-flex space-before">
+    <button type="button" class="btn btn-outline-primary" (click)="openRepeatingModal()">Wiederholen</button>
+    <button type="button" class="btn btn-outline-primary" (click)="openTextModal()">
+      Text
+    </button>
+    <div class="btn-group">
+      <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">Ton</button>
+
+      <div class="dropdown-menu">
+        <a class="dropdown-item" *ngFor="">Tablet</a>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-outline-danger float-end space-bottom space-before">Wecker löschen</button>
+
+
+  <ng-template #alarmChangeRepeating>
+    <div class="modal-header">
+      <h4 class="modal-title pull-left">Wiederholungen</h4>
+      <button type="button" class="btn-close close pull-right" aria-label="Close" (click)="closeAllModals()">
+        <span aria-hidden="true" class="visually-hidden">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <button class="btn btn-primary"
+              (click)="closeRepeatingModal()">
+        <mat-icon>keyboard_arrow_left</mat-icon>
+      </button>
+
+      <div class="btn-group-vertical d-flex space-before">
+        <button type="button" class="btn btn-outline-primary"
+                (click)="this.alarm.monday = !this.alarm.monday">
+          <div class="d-flex justify-content-between">
+            Montag
+            <mat-icon class="add-button" *ngIf="this.alarm.monday">done</mat-icon>
+          </div>
+        </button>
+        <button type="button" class="btn btn-outline-primary"
+                (click)="this.alarm.tuesday = !this.alarm.tuesday">
+          <div class="d-flex justify-content-between">
+            Dienstag
+            <mat-icon class="add-button" *ngIf="this.alarm.tuesday">done</mat-icon>
+          </div>
+        </button>
+        <button type="button" class="btn btn-outline-primary"
+                (click)="this.alarm.wednesday = !this.alarm.wednesday">
+          <div class="d-flex justify-content-between">
+            Mittwoch
+            <mat-icon class="add-button" *ngIf="this.alarm.wednesday">done</mat-icon>
+          </div>
+        </button>
+        <button type="button" class="btn btn-outline-primary"
+                (click)="this.alarm.thursday = !this.alarm.thursday">
+          <div class="d-flex justify-content-between">
+            Donnerstag
+            <mat-icon class="add-button" *ngIf="this.alarm.thursday">done</mat-icon>
+          </div>
+        </button>
+        <button type="button" class="btn btn-outline-primary"
+                (click)="this.alarm.friday = !this.alarm.friday">
+          <div class="d-flex justify-content-between">
+            Freitag
+            <mat-icon class="add-button" *ngIf="this.alarm.friday">done</mat-icon>
+          </div>
+        </button>
+        <button type="button" class="btn btn-outline-primary"
+                (click)="this.alarm.saturday = !this.alarm.saturday">
+          <div class="d-flex justify-content-between">
+            Samstag
+            <mat-icon class="add-button" *ngIf="this.alarm.saturday">done</mat-icon>
+          </div>
+        </button>
+        <button type="button" class="btn btn-outline-primary"
+                (click)="this.alarm.sunday = !this.alarm.sunday">
+          <div class="d-flex justify-content-between">
+            Sonntag
+            <mat-icon class="add-button" *ngIf="this.alarm.sunday">done</mat-icon>
+          </div>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #alarmChangeText>
+    <div class="modal-header">
+      <h4 class="modal-title pull-left">Text</h4>
+      <button type="button" class="btn-close close pull-right" aria-label="Close" (click)="closeAllModals()">
+        <span aria-hidden="true" class="visually-hidden">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <button class="btn btn-primary"
+              (click)="closeTextModal()">
+        <mat-icon>keyboard_arrow_left</mat-icon>
+      </button>
+
+      <div class="mb-3 mt-3">
+        <label for="text" class="form-label">Text, der nach dem Weckton gesagt wird:</label>
+        <input #input type="text" class="form-control" id="text" placeholder="Text" name="text"
+               [value]="alarm.text"
+               (change)="this.alarm.text = input.value">
+      </div>
+
+    </div>
+  </ng-template>
+</div>
