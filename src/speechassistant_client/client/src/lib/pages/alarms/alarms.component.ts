@@ -1,10 +1,11 @@
-import {Component, Input, OnInit, TemplateRef} from "@angular/core";
+import {Component, ElementRef, Input, OnInit, TemplateRef, ViewChild} from "@angular/core";
 import {Alarm} from "../../data-access/models/alarm";
 import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {BackendService} from "../../data-access/service/backend.service";
 import { ActivatedRoute } from "@angular/router";
 import {Title} from "@angular/platform-browser";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
+import {AlarmStore} from "../../data-access/service/alarm.store";
 
 @Component({
   selector: 'alarms',
@@ -13,39 +14,43 @@ import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
 })
 export class AlarmsComponent implements OnInit{
 
-  alarms: Alarm[];
-  editMode: boolean = false;
-  modalRef?: BsModalRef;
+  alarms: Alarm[] = [];
+  editMode: boolean = false
+  createModalRef?: BsModalRef;
+  repeatingModalRef? : BsModalRef;
+  textModalRef?: BsModalRef;
+  @ViewChild('createAlarmModal') createModal: TemplateRef<any>;
+  @ViewChild('createAlarmChangeRepeating') createRepeatModal: TemplateRef<any>;
+  @ViewChild('createAlarmChangeText') createTextModal: TemplateRef<unknown>;
   tempAlarm: Alarm = new Alarm({}, true, true, false, true, true, false, false, false, "Guten Morgen!", "standard.wav", true);
+  sounds: string[] = [];
 
   constructor(private route: ActivatedRoute,
               private backendService: BackendService,
               private titleService: Title,
-              private modalService: BsModalService) {
+              private modalService: BsModalService,
+              private alarmService: AlarmStore) {
   }
 
   ngOnInit() {
-    this.titleService.setTitle('Wecker Übersicht');
-    this.backendService.loadAlarms().subscribe(alarms => this.alarms = alarms);
+    // this.titleService.setTitle('Wecker Übersicht');
+    this.alarmService.loadAndGetAlarms().subscribe(alarms => this.alarms = alarms);
+    // this.backendService.ge
   }
 
   onAddAlarm(template: TemplateRef<any>): void {
     this.tempAlarm = new Alarm({}, false, false, false, false, false, false, false, false, "Guten Morgen!", "standard.wav", true);
-    this.modalRef = this.modalService.show(template);
+    this.createModalRef = this.modalService.show(template);
   }
 
   onSaveNewAlarm(): void {
-    this.alarms.push(this.tempAlarm);
-    this.backendService.createAlarm(this.tempAlarm).subscribe(resultSet => {
-      this.tempAlarm.id = resultSet.id;
-      this.tempAlarm.text = resultSet.text; // in case that the input was malicious
-    });
+    this.closeAllModals();
+    this.alarmService.addAlarm( this.tempAlarm );
+    this.tempAlarm = new Alarm({}, true, true, false, true, true, false, false, false, "Guten Morgen!", "standard.wav", true);
   }
 
   onDeleteAlarm(id: number): void {
-    let index: number = this.alarms.findIndex(item => item.id === id);
-    this.alarms.splice(index, 1);
-    this.backendService.deleteAlarm(id).subscribe();
+    this.alarmService.deleteAlarm( id );
   }
 
   onChangeAlarm(alarm: JsonObject): void {
@@ -66,31 +71,32 @@ export class AlarmsComponent implements OnInit{
   getRepeatingString(alarm: Alarm): string {
     let repeatString: string = "";
     if (alarm.regular) {
-      repeatString += "jeden ";
-      if (alarm.monday && alarm.tuesday && alarm.wednesday && alarm.thursday && alarm.friday) {
-        if (alarm.saturday && alarm.sunday) {
-          repeatString += "Tag";
-        } else if (!alarm.saturday && !alarm.sunday) {
-          repeatString += "Wochentag";
-        }
+      repeatString += "immer ";
+    }
+
+    if (alarm.monday && alarm.tuesday && alarm.wednesday && alarm.thursday && alarm.friday) {
+      if (alarm.saturday && alarm.sunday) {
+        repeatString += "an allen Tagen";
+      } else if (!alarm.saturday && !alarm.sunday) {
+        repeatString += "Wochentags";
       }
       return repeatString;
     }
 
     if (alarm.monday) {
-    repeatString += "Montag, ";
+    repeatString += "Montags, ";
     } if (alarm.tuesday) {
-      repeatString += "Dienstag, ";
+      repeatString += "Dienstags, ";
     } if (alarm.wednesday) {
-      repeatString += "Mittwoch, ";
+      repeatString += "Mittwochs, ";
     } if (alarm.thursday) {
-      repeatString += "Donnerstag, ";
+      repeatString += "Donnerstags, ";
     } if (alarm.friday) {
-      repeatString += "Freitag, ";
+      repeatString += "Freitags, ";
     } if (alarm.saturday) {
-      repeatString += "Samstag, ";
+      repeatString += "Samstags, ";
     } if (alarm.sunday) {
-      repeatString += "Sonntag, ";
+      repeatString += "Sonntags, ";
     }
     return this.rtrim(repeatString, ", ");
   }
@@ -103,12 +109,38 @@ export class AlarmsComponent implements OnInit{
     return this.editMode ? "Fertig" : "Bearbeiten";
   }
 
-  openModal(template: TemplateRef<any>) {
-    this.modalRef = this.modalService.show(template);
+  openCreateModal(): void {
+    this.createModalRef = this.modalService.show(this.createModal);
+  }
+
+  openRepeatingModal(): void {
+    this.repeatingModalRef = this.modalService.show(this.createRepeatModal);
+  }
+
+  openTextModal(): void {
+    this.textModalRef = this.modalService.show(this.createTextModal);
+    this.modalService.hide(this.createModalRef?.id);
+  }
+
+  closeCreateModal(): void {
+    this.modalService.hide(this.createModalRef?.id);
+  }
+
+  closeRepeatingModal(): void {
+    this.modalService.hide(this.repeatingModalRef?.id);
+  }
+
+  closeTextModal(): void {
+    this.createModalRef = this.modalService.show(this.createModal);
+    this.modalService.hide(this.textModalRef?.id);
+  }
+
+  closeAllModals(): void {
+    this.modalService.hide(this.repeatingModalRef?.id);
+    this.modalService.hide(this.createModalRef?.id);
   }
 
   rtrim(input: string, characters: string): string {
-    let start = 0;
     let end = input.length - 1;
     while (characters.indexOf(input[end]) >= 0) {
       end -= 1;
