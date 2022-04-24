@@ -30,6 +30,7 @@ import { FormsModule } from "@angular/forms";
 import { AlarmsComponent } from "../lib/pages/alarms/alarms.component";
 import { AlarmComponent } from "../lib/pages/alarm/alarm.component";
 import {TimepickerModule} from "ngx-bootstrap/timepicker";
+import {NgxMaterialTimepickerModule} from 'ngx-material-timepicker';
 
 const routes: Routes = [
   { path: 'alarms', component: AlarmsComponent },
@@ -69,6 +70,7 @@ const routes: Routes = [
         ModalModule,
         RouterModule.forRoot(routes),
         TimepickerModule,
+        NgxMaterialTimepickerModule
     ],
   providers: [Title],
   bootstrap: [AppComponent],
