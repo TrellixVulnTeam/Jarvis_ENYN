@@ -3,10 +3,8 @@ import {HttpClient, HttpEvent, HttpRequest, HttpResponse} from '@angular/common/
 import { Injectable } from '@angular/core';
 import {Observable, retry} from 'rxjs';
 import { Routine } from '../models';
-import {Router} from "@angular/router";
 import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {Alarm} from "../models/alarm";
-import {temporaryAllocator} from "@angular/compiler/src/render3/view/util";
 import {map} from "rxjs/operators";
 
 @Injectable({
@@ -53,7 +51,6 @@ export class BackendService {
 
   createRoutine(routine: Routine): Observable<Routine> {
     let routinePayload = BackendService.getRoutinePayload(routine);
-
     return this.httpClient.post<Routine>(this.url + 'routines/', routinePayload);
   }
 
@@ -83,7 +80,18 @@ export class BackendService {
   }
 
   loadAlarmWithId(id: number): Observable<Alarm> {
-    return this.httpClient.get<Alarm>(this.url + 'alarms/'+id)
+    return this.httpClient.get<Alarm>(this.url + 'alarms/'+id).pipe(
+      map (alarm => {
+          // @ts-ignore
+          let hours = alarm.time["hour"] as number;
+          // @ts-ignore
+          let minutes = alarm.time["minute"] as number;
+          alarm.time = new Date();
+          alarm.time.setHours(hours);
+          alarm.time.setMinutes(minutes);
+          return alarm;
+        })
+      );
   }
 
   createAlarm(alarm: Alarm): Observable<Alarm> {
@@ -178,6 +186,11 @@ export class BackendService {
     return this.httpClient.get<string[]>(this.url + 'modules/names');
   }
 
+  getAllAlarmSounds(): Observable<string[]> {
+    return this.httpClient.get<JsonObject>(this.url + 'audio/names').pipe(
+      map(response => { // @ts-ignore
+        return response.get('sound_files')})
+    );
+  }
+
 }
-
-
