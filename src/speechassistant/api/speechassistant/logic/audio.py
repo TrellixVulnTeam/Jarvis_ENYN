@@ -47,8 +47,12 @@ def read_audio(data: str) -> Response:
 
         return Response(generate(), mimetype='audio/x-wav')
     else:
-        file_names: list[str] = database.audio_interface.get_file_names()
-        return Response(json.dumps(file_names), mimetype='application/json')
+        return Response(status=404)
+
+
+def read_audio_names() -> Response:
+    file_names: list[str] = database.audio_interface.get_file_names()
+    return Response(json.dumps({"sound_files": file_names}), mimetype='application/json')
 
 
 def update_audio_file(data: tuple[str, str]) -> str:

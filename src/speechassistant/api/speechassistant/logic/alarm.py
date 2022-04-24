@@ -14,14 +14,13 @@ def create_alarm(data: dict) -> Response:
         data['user'] = -1
     if 'sound' not in data.keys() or data['sound'] is None:
         data['sound'] = 'standard.wav'
-    database.alarm_interface.add_alarm(data['time'], data['text'], data['user'], data['repeating'], song=data['sound'])
-    return Response('Alarm created successfully', status=201)
+    result_set: dict = database.alarm_interface.add_alarm(data['time'], data['text'], data['user'], data['repeating'], song=data['sound'])
+    return Response(result_set, mimetype='application/json', status=201)
 
 
 def read_alarm(data: int | None) -> Response:
     if data:
         alarm: dict = database.alarm_interface.get_alarm(data)
-        print(alarm)
         return Response(json.dumps(alarm), mimetype='application/json')
     else:
         alarms: list[dict] = database.alarm_interface.get_alarms(unsorted=True)
@@ -46,7 +45,7 @@ def update_alarm(data: dict) -> Response:
                                               repeating['saturday'],
                                               repeating['sunday']
                                               )
-    return Response(f'Alarm (ID={data["aid"]}) successfully updated!', status=200)
+    return Response(status=200)
 
 
 def delete_alarm(aid: int) -> Response:

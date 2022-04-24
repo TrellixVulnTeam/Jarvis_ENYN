@@ -12,7 +12,7 @@
     ],
     "messenger_allowed_id_table": [],
     "rejected_messenger_messages": [],
-    "module_storage": {
+    "service_storage": {
       "philips_hue": {
         "Bridge-IP": ""
       },

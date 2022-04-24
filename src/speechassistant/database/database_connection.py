@@ -436,7 +436,7 @@ class DataBase:
 
         def get_alarm(self, aid: int, as_tuple: bool = False) -> tuple | dict:
             cursor: Cursor = self.db.cursor()
-            statement: str = 'SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid WHERE aid=? LIMIT 1'
+            statement: str = 'SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid WHERE a.aid=? LIMIT 1'
             cursor.execute(statement, (aid,))
             result_set: tuple = cursor.fetchone()
             cursor.close()
@@ -464,14 +464,14 @@ class DataBase:
                 now_seconds = now.hour * 3600 + now.minute * 60 + now.second
                 active_alarms_statement: str = f'SELECT * FROM alarm as a ' \
                                                f'JOIN alarmrepeat as ar ON a.aid = ar.aid ' \
-                                               f'WHERE aid.{weekday}=1 ' \
+                                               f'WHERE ar.{weekday}=1 ' \
                                                f'AND a.hour >= {now.hour} ' \
                                                f'AND a.minute >= {now.minute} ' \
                                                f'AND a.active=1 ' \
                                                f'AND a.last_executed != {now.day}.{now.month}.{now.year}'
                 init_alarms_statement: str = f'SELECT * FROM alarm as a ' \
                                              f'JOIN alarmrepeat as ar ON a.aid = ar.aid ' \
-                                             f'WHERE aid.{weekday}=1 ' \
+                                             f'WHERE ar.{weekday}=1 ' \
                                              f'AND a.total_seconds <= {now_seconds + 1800}'
                 cursor.execute(init_alarms_statement)
                 init_result_set: list[tuple] = cursor.fetchall()
@@ -486,7 +486,7 @@ class DataBase:
             return active_returning_list, init_returning_list
 
         def add_alarm(self, time: dict, text: str, user: int | str, repeating: dict, active: bool = True,
-                      initiated: bool = False, song: str = 'standard.wav') -> int:
+                      initiated: bool = False, song: str = 'standard.wav') -> dict:
             cursor: Cursor = self.db.cursor()
             if type(user) is str:
                 user = self.__get_user_id(user)
@@ -507,7 +507,7 @@ class DataBase:
             aid: int = cursor.lastrowid
             cursor.close()
             self.db.commit()
-            return aid
+            return self.get_alarm(alarm_id)
 
         def delete_alarm(self, aid: int) -> int:
             cursor: Cursor = self.db.cursor()
@@ -672,7 +672,7 @@ class DataBase:
             logging.info('[INFO] AudioInterface initialized.')
 
         def add_audio(self, name: str, path: str = None, audio_file: io.BytesIO = None,
-                      file_stored: bool = False) -> None:
+                      file_stored: bool = False) -> int:
             # IMPORTANT: file_stored allows the developer to add a file to the database which is still in the file
             # folder of the system. There will be problems, if the name is not correct or the file is not in the
             # path. Be carefully while using this attribute !!!

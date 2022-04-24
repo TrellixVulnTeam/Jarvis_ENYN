@@ -11,14 +11,14 @@ from src.speechassistant.api.speechassistant.logic.alarm import \
     update_alarm, \
     delete_alarm
 
-namespace = api.namespace('/alarms')
+namespace = api.namespace('alarms')
 
 
 @namespace.route('/')
 class AlarmConnection(Resource):
 
     def get(self) -> Response:
-        args = request.get_json()
+        args = request.args
         aid: int = None
         if args:
             aid = args.get('id')
@@ -43,3 +43,23 @@ class AlarmConnection(Resource):
             return Response('No ID was given!', status=400)
         aid: int = args['id']
         return delete_alarm(aid)
+
+
+@namespace.route('/<alarm_id>')
+class AlarmConnectionById(Resource):
+
+    def get(self, alarm_id) -> Response:
+        return read_alarm(alarm_id)
+
+    @api.expect(alarm_file)
+    def put(self, alarm_id) -> Response:
+        args: ParseResult = alarm.parse_args(request)
+        if 'id' not in args.keys():
+            return Response('No ID was given!', status=400)
+        if args.get('id') != alarm_id:
+            return Response(status=500)
+        return update_alarm(args)
+
+    @api.expect(alarm_file)
+    def delete(self, alarm_id) -> Response:
+        return delete_alarm(alarm_id)

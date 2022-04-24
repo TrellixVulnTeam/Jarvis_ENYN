@@ -7,6 +7,7 @@ from src.speechassistant.api.speechassistant.parser import audio_file_parser as 
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
 from src.speechassistant.api.speechassistant.logic.audio import \
     read_audio, \
+    read_audio_names, \
     create_audio_file, \
     update_audio_file, \
     delete_audio_file
@@ -18,9 +19,10 @@ namespace = api.namespace('audio', desciption='Handles audiofiles of the speech-
 class AudioFiles(Resource):
 
     def get(self) -> Response:
-        args: ParseResult = audio_file.parse_args(request)
-        name: str = args.get('name', None)
-
+        args: dict = request.args
+        name: str = None
+        if 'name' in args.keys():
+            name = args.get('name', None)
         return read_audio(name)
 
     @api.expect(audio_file)
@@ -53,3 +55,9 @@ class AudioFiles(Resource):
         except UnsolvableException:
             return Response('Internal Server Error', 500)
 
+
+@namespace.route('/names')
+class AudioNamesConnection(Resource):
+
+    def get(self) -> Response:
+        return read_audio_names()
