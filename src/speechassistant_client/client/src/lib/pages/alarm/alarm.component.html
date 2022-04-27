@@ -1,6 +1,6 @@
 <div class="p-3">
 
-  <timepicker style="font-size:30px;text-align: center" [(ngModel)]="this.alarm.time" [showMeridian]="false"></timepicker>
+  <timepicker style="font-size:30px;text-align: center" [(ngModel)]="this.alarm.time"></timepicker>
 
   <div class="btn-group-vertical d-flex space-before">
     <button type="button" class="btn btn-outline-primary" (click)="openRepeatingModal()">Wiederholen</button>
@@ -11,7 +11,7 @@
       <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">Ton</button>
 
       <div class="dropdown-menu">
-        <a class="dropdown-item" *ngFor="">Tablet</a>
+        <a class="dropdown-item" *ngFor="let name of this.soundNames">{{ name }}</a>
       </div>
     </div>
   </div>

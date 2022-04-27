@@ -56,7 +56,6 @@ export class RoutineComponent implements OnInit{
         else if (day == "sunday") this.routine.sunday = value;
 
         this.onRepeatDayChangeEvent.emit([day, value]);
-        console.log(this.routine.saturday);
     }
 
     onAddClockTime(): void {
@@ -67,7 +66,7 @@ export class RoutineComponent implements OnInit{
         this.clockTimes.push(newDate);
     }
 
-    onAfterChange(event: string, value: boolean): void {
+    onAfterChange(event: string, value: any): void {
         if (event == "alarm") this.routine.after_alarm = value;
         if (event == "sunrise") this.routine.after_sunrise = value;
         if (event == "sunset") this.routine.after_sunset = value;
@@ -83,7 +82,6 @@ export class RoutineComponent implements OnInit{
     }
 
     onTimeDelete(event: Date): void {
-        console.log("deleting " + event.getHours() + ":" + event.getMinutes());
         const index = this.routine["clock_time"].findIndex(
           (item: Date) => (event.getHours() == item.getHours() && event.getMinutes() == item.getMinutes())
         )

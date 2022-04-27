@@ -33,9 +33,8 @@ export class AlarmsComponent implements OnInit{
   }
 
   ngOnInit() {
-    // this.titleService.setTitle('Wecker Übersicht');
-    this.alarmService.loadAndGetAlarms().subscribe(alarms => this.alarms = alarms);
-    // this.backendService.ge
+    this.titleService.setTitle('Wecker Übersicht');
+    this.alarmService.loadAndGetAlarms( ).subscribe( alarms => this.alarms = alarms );
   }
 
   onAddAlarm(template: TemplateRef<any>): void {
@@ -44,8 +43,8 @@ export class AlarmsComponent implements OnInit{
   }
 
   onSaveNewAlarm(): void {
-    this.closeAllModals();
     this.alarmService.addAlarm( this.tempAlarm );
+    this.closeAllModals();
     this.tempAlarm = new Alarm({}, true, true, false, true, true, false, false, false, "Guten Morgen!", "standard.wav", true);
   }
 
@@ -53,12 +52,12 @@ export class AlarmsComponent implements OnInit{
     this.alarmService.deleteAlarm( id );
   }
 
-  onChangeAlarm(alarm: JsonObject): void {
-    let index: number = this.alarms.findIndex(item => item.id === alarm["id"]);
+  onChangeAlarm( alarm: Alarm ): void {
+    this.alarmService.updateAlarm( alarm );
   }
 
   onChangeActivationAlarm(id: number, active: boolean): void {
-    this.backendService.updateAlarmActiveState(id, active);
+    this.alarmService.updateAlarmActiveStatus( id, active );
   }
 
   getTimeString(alarm: Alarm): string {

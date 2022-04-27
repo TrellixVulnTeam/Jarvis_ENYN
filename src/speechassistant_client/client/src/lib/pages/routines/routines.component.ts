@@ -6,6 +6,7 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {Command} from "../../data-access/models/command";
 import {materialModuleSpecifier} from "@angular/material/schematics/ng-update/typescript/module-specifiers";
 import {retry} from "rxjs";
+import {RoutineStore} from "../../data-access/service/routine.store";
 
 @Component({
   selector: 'routines',
@@ -23,13 +24,11 @@ export class RoutinesComponent implements OnInit{
 
   @Input() routines: Routine[] = [];
 
-  constructor(private backendService: BackendService, private modalService: BsModalService) { }
+  constructor(private modalService: BsModalService,
+              private routineService: RoutineStore) { }
 
   ngOnInit(): void {
-    this.backendService.loadAllRoutines().subscribe((routines: Routine[]) => this.routines = routines);
-    this.backendService.getAllModuleNames().subscribe(modules => {
-      this.moduleNames = modules;
-    });
+    this.routineService.loadAndGetRoutines().subscribe( routines => this.routines = routines );
   }
 
   openModal(template: TemplateRef<any>, modalSize: string = ""): void {
@@ -47,11 +46,10 @@ export class RoutinesComponent implements OnInit{
   onAddRoutine(): void {
     this.postRoutine = true;
     this.emptyCommands.forEach(command => this.emptyRoutine.commands.push(command.toJson()))
-    this.backendService.createRoutine(this.emptyRoutine).subscribe((routine) => {
-      this.routines.push(routine);
-      this.postRoutine = false;
-      this.closeModal()
-    });
+    this.routineService.addRoutine( this.emptyRoutine ).subscribe( );
+
+    this.postRoutine = false;
+    this.closeModal()
 
     this.emptyRoutine = {name:"", description:"", onCommands:[], monday:false, tuesday:false, wednesday:false, thursday:false, friday:false, saturday:false, sunday:false, dateOfDay:[], clock_time:[], after_alarm:false, after_sunrise:false, after_sunset:false, after_call:false, commands:[]}
   }

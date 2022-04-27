@@ -25,12 +25,10 @@ import { BsDatepickerModule, BsDatepickerConfig } from 'ngx-bootstrap/datepicker
 import { BsDropdownModule,BsDropdownConfig } from 'ngx-bootstrap/dropdown';
 import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
-// import { AppBootstrapModule } from './app-bootstrap/app-bootstrap.module';
 import { FormsModule } from "@angular/forms";
 import { AlarmsComponent } from "../lib/pages/alarms/alarms.component";
 import { AlarmComponent } from "../lib/pages/alarm/alarm.component";
 import {TimepickerModule} from "ngx-bootstrap/timepicker";
-import {NgxMaterialTimepickerModule} from 'ngx-material-timepicker';
 
 const routes: Routes = [
   { path: 'alarms', component: AlarmsComponent },
@@ -69,8 +67,7 @@ const routes: Routes = [
         BsDropdownModule,
         ModalModule,
         RouterModule.forRoot(routes),
-        TimepickerModule,
-        NgxMaterialTimepickerModule
+        TimepickerModule
     ],
   providers: [Title],
   bootstrap: [AppComponent],

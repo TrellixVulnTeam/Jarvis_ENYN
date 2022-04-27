@@ -11,9 +11,14 @@ import {BackendService} from "./backend.service";
 export class RoutineStore {
 
   routines: Routine[] = [];
-  routineChange$: Subject<Routine[]> = new Subject<Routine[]>();
+  routineSubject: Subject<Routine[]> = new Subject<Routine[]>();
 
-  constructor( private backendService: BackendService ) { }
+  constructor( private backendService: BackendService ) {
+    this.backendService.loadAllRoutines().subscribe( routines => {
+      this.routineSubject.next( routines );
+      this.routines = routines;
+    });
+  }
 
   getRoutine( name: string ): Observable<Routine> {
     let index: number = this.routines.findIndex( routine => routine.name === name );
@@ -21,26 +26,41 @@ export class RoutineStore {
   }
 
   getRoutines( ): Subject<Routine[]> {
-    this.routineChange$.next(this.routines);
-    return this.routineChange$;
+    this.routineSubject.next( this.routines );
+    return this.routineSubject;
   }
 
   loadAndGetRoutines( ): Subject<Routine[]> {
-    this.backendService.loadAllRoutines().subscribe((routines: Routine[]) => this.routines = routines);
-    this.routineChange$.next( this.routines );
-    return this.routineChange$;
+    this.backendService.loadAllRoutines().subscribe(routines => {
+      this.routineSubject.next( routines );
+      this.routines = routines;
+    });
+
+    return this.routineSubject;
   }
 
-  addRoutine( newRoutine: Routine ): void {
-    this.routineChange$.next(this.routines);
+  addRoutine( newRoutine: Routine ): Subject<Routine[]> {
+    this.routines.push( newRoutine );
+    this.routineSubject.next( this.routines );
+    this.backendService.createRoutine( newRoutine ).subscribe(resultSet => {
+      newRoutine.name = resultSet.name;
+    });
+    this.routineSubject.next( this.routines );
+    return this.routineSubject;
   }
 
   updateRoutine( newRoutine: Routine ): void {
-    this.routineChange$.next(this.routines);
+    let index: number = this.routines.findIndex( routine => routine.name === newRoutine.name );
+    this.routines[ index ] = newRoutine;
+    this.routineSubject.next( this.routines );
+    this.backendService.updateRoutine( newRoutine ).subscribe( );
   }
 
   deleteRoutine( name: string ): void {
-    this.routineChange$.next(this.routines);
+    let index: number = this.routines.findIndex(item => item.name === name);
+    this.routines.splice(index, 1);
+    this.routineSubject.next( this.routines );
+    this.backendService.deleteRoutine( name ).subscribe( );
   }
 
 }

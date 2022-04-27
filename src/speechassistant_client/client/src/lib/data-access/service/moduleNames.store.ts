@@ -1,6 +1,6 @@
 
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {Alarm} from "../models/alarm";
 import {Routine} from "../models";
 import {BackendService} from "./backend.service";
@@ -11,18 +11,15 @@ import {BackendService} from "./backend.service";
 export class ModuleNamesStore {
 
   moduleNames: string[] = [];
+  moduleNamesSubject: Subject<string[]> = new Subject<string[]>();
 
-  constructor( private backendService: BackendService ) { }
-
-  getModuleNames( ): Observable<string[]> {
-    return new Observable( observer => observer.next(this.moduleNames));
+  constructor( private backendService: BackendService ) {
+    this.backendService.loadAllModuleNames().subscribe( moduleNames =>this.moduleNames = moduleNames );
   }
 
-  loadAndGetModuleNames( ): Observable<string[]> {
-    this.backendService.getAllModuleNames().subscribe(modules => {
-      this.moduleNames = modules;
-    });
-    return new Observable( observer => observer.next(this.moduleNames));
+  loadModuleNames( ): Subject<string[]> {
+    this.moduleNamesSubject.next( this.moduleNames );
+    return this.moduleNamesSubject;
   }
 
 }

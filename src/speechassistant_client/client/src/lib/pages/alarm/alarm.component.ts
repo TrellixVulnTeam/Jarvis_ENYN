@@ -6,6 +6,8 @@ import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
 import {AlarmStore} from "../../data-access/service/alarm.store";
+import {ModuleNamesStore} from "../../data-access/service/moduleNames.store";
+import {SoundStore} from "../../data-access/service/sound.store";
 
 @Component({
   selector: 'alarm',
@@ -20,20 +22,26 @@ export class AlarmComponent implements OnInit{
   @ViewChild('alarmChangeText') createTextModal: TemplateRef<any>;
   repeatingModalRef? : BsModalRef;
   textModalRef?: BsModalRef;
+  soundNames: string[] = [];
+
 
   // public mode: PickerInteractionMode = PickerInteractionMode.DropDown;
 
   constructor( private alarmStore: AlarmStore,
+               private soundStore: SoundStore,
                private titleService: Title,
                private route: ActivatedRoute,
-               private modalService: BsModalService ) {
-  }
+               private modalService: BsModalService ) { }
 
   ngOnInit() {
     this.titleService.setTitle('Wecker');
     this.route.params.subscribe(params => {
-      this.alarmStore.getAlarm(params['id']).subscribe(alarm => this.alarm = alarm);
+      this.alarmStore.getAlarm(params['id']). subscribe(alarm => this.alarm = alarm);
     });
+    this.soundStore.loadSoundNames().subscribe( names => {
+      this.soundNames = names;
+    });
+
   }
 
   onDeleteAlarm( id: number ): void {
