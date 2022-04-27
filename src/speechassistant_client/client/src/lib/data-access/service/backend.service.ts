@@ -182,14 +182,17 @@ export class BackendService {
     }
   }
 
-  getAllModuleNames(): Observable<string[]> {
-    return this.httpClient.get<string[]>(this.url + 'modules/names');
+  loadAllModuleNames(): Observable<string[]> {
+    return this.httpClient.get<string[]>(this.url + 'module/names');
   }
 
-  getAllAlarmSounds(): Observable<string[]> {
-    return this.httpClient.get<JsonObject>(this.url + 'audio/names').pipe(
-      map(response => { // @ts-ignore
-        return response.get('sound_files')})
+  loadAllSounds(): Observable<string[]> {
+    interface SoundFiles {
+      sound_files: string[];
+    }
+    return this.httpClient.get<SoundFiles>(this.url + 'audio/names').pipe(
+      map(response => {
+        return response.sound_files})
     );
   }
 
