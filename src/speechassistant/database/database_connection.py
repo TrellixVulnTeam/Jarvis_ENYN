@@ -771,6 +771,7 @@ class DataBase:
         def get_file_names(self) -> list[str]:
             cursor: Cursor = self.db.cursor()
             statement: str = 'SELECT name FROM audio'
+            cursor.execute(statement)
             result_set: list[tuple] = cursor.fetchall()
             cursor.close()
             # return only filenames
