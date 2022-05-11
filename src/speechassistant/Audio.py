@@ -9,6 +9,7 @@ import struct
 import time
 import traceback
 import urllib.request
+from abc import ABCMeta
 from datetime import datetime
 from threading import Thread
 from typing import IO, Callable
@@ -24,7 +25,7 @@ from pygame import mixer as mixer
 from src.speechassistant.resources.tts import TTS
 
 
-class AudioInput:
+class AudioInput(metaclass=ABCMeta):
     """
     -------------------------
     AudioInput:
@@ -32,9 +33,20 @@ class AudioInput:
     -------------------------
     """
 
-    def __init__(self, _adjust_after_hot_word: Callable) -> None:
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if AudioInput.__instance is None:
+            AudioInput()
+        return AudioInput.__instance
+
+    def __init__(self) -> None:
+        if AudioInput.__instance is not None:
+            raise Exception("Singleton cannot be instantiated more than once!")
+
         self.audio_output: AudioOutput
-        self.adjust_after_hot_word: Callable = _adjust_after_hot_word
+        self.adjust_after_hot_word: Callable = AudioOutput.get_instance()
         logging.getLogger().setLevel(logging.INFO)
         self.stopped: bool = False
         # load microphone
@@ -49,9 +61,12 @@ class AudioInput:
             self.speech_engine.adjust_for_ambient_noise(source)
         self.recording: bool = False
         self.sensitivity: float = 0.5
+        AudioInput.__instance = self
+
+        logging.info('[SUCCESS] Audio Input initialized!')
 
     def start(self, sensitivity: float, _hot_word_detected: Callable) -> None:
-        # starts the hotword detection
+        # starts the hot-word detection
         logging.info("[ACTION] Starting audio input module...")
         self.sensitivity = sensitivity
         self.stopped = False
@@ -164,18 +179,31 @@ class MusicPlayer:
     -------------------------
     """
 
-    def __init__(self, _audio_output: AudioOutput) -> None:
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if MusicPlayer.__instance is None:
+            MusicPlayer()
+        return MusicPlayer.__instance
+
+    def __init__(self) -> None:
+        if MusicPlayer.__instance is not None:
+            raise Exception("Singleton cannot be instantiated more than once!")
+
         self.music_thread: Thread = None
         self.playlist: list = []
         self.instance: vlc.Instance = vlc.Instance()
         self.player = self.instance.media_player_new()
-        self.audio_output: AudioOutput = _audio_output
+        self.audio_output: AudioOutput = AudioOutput.get_instance()
         self.player_alive: bool = True
         self.is_playing: bool = False
         self.stopped: bool = False
         self.paused: bool = False
         self.skip: bool = False
         self.old_volume: int = 50
+
+        MusicPlayer.__instance = self
 
     def start(self) -> MusicPlayer:
         self.music_thread: Thread = Thread(target=self.run)
@@ -303,15 +331,30 @@ class AudioOutput:
     -------------------------
     """
 
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if AudioOutput.__instance is None:
+            AudioOutput("default")
+        return AudioOutput.__instance
+
     def __init__(self, voice: str) -> None:
         # The channel are splittet on the buffers:
         # Channel(0): notification
         # Channel(1): music
         # Channel(2): playback
 
+        if AudioOutput.__instance is not None:
+            raise Exception("Singleton cannot be instantiated more than once!")
+
+        if voice is None:
+            # toDo
+            pass
+
         self.listen: bool = False
 
-        # music means "Backgroundmusic" or something like that
+        # music means "Background music" or something like that
         self.music: list = []
         # playback are similar to music, but don´t contain "music"
         self.playback: list = []
@@ -326,6 +369,9 @@ class AudioOutput:
         self.tts.start(voice)
 
         self.stopped: bool = True
+
+        AudioOutput.__instance = self
+        logging.info('[SUCCESS] Audio Output initialized!')
 
     def start(self) -> AudioOutput:
         logging.info("[ACTION] Starting audio output module...")

@@ -1,26 +1,48 @@
 import logging
+import os
 from threading import Thread
 from datetime import datetime
 from datetime import timedelta
 import requests
 import time
 
+from src.speechassistant.core import Core
+
 
 class Weather:
-    def __init__(self, _api_key, _city, _skills):
-        self.__api_key = _api_key
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if Weather.__instance is None:
+            Weather("default")
+        return Weather.__instance
+
+    def __init__(self):
+        if Weather.__instance is not None:
+            raise Exception("Singleton cannot be instantiated more than once!")
+
+        self.__api_key: str = ''
         self.__minutely_forecast = None
         self.__hourly_forecast = None
         self.__daily_forcast = None
         self.__sunrise_sunset = None
-        self.__skills = _skills
-        self.__geo_data = self.__skills.get_data_of_city(_city)
+        self.__skills = Skills()
+        self.city = ''
+        self.__fill_data()
+        self.__geo_data = self.__skills.get_data_of_city(self.city)
         self.__last_updated = datetime.now()
-        self.city = _city
         self.old_weather_inf = []
         self.current_weather = None
 
         self.updating = True
+
+        Weather.__instance = self
+
+    def __fill_data(self) -> None:
+        core: Core = Core.get_instance()
+        self.__api_key = core.data["api_keys"]["open_weather_map"]
+        self.city = core.local_storage['actual_location']
 
     def start(self) -> None:
         logging.info("[ACTION] Starting weather module...")
@@ -107,7 +129,8 @@ class Weather:
                 geo_data = self.__skills.get_data_of_city(self.city)
                 lat = geo_data["lat"]
                 lon = geo_data["lon"]
-            url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=current,minutely,hourly&appid={self.__api_key}&lang=de&units=metric'
+            url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=current,minutely,' \
+                  f'hourly&appid={self.__api_key}&lang=de&units=metric '
             data = requests.get(url).json()
             return data["daily"][day_offset]
 
@@ -168,7 +191,8 @@ class Weather:
             if offset > 47:
                 raise ValueError('Offset too big! Choose an offset between 0 and 47')
             geo_data: dict = self.__skills.get_data_of_city(city)
-            url: str = f'https://api.openweathermap.org/data/2.5/onecall?lat={geo_data["lat"]}&lon={geo_data["lon"]}&units=metric&appid={self.__api_key}&lang=de '
+            url: str = f'https://api.openweathermap.org/data/2.5/onecall?lat={geo_data["lat"]}&lon={geo_data["lon"]}' \
+                       f'&units=metric&appid={self.__api_key}&lang=de '
             _forecast = requests.get(url).json()["hourly"][offset]
         elif lat is not None and lon is not None:
             # since the data is retrieved anew, there is no "delay" of the data and
@@ -222,7 +246,8 @@ class Weather:
             # since the data is retrieved anew, there is no "delay" of the data and
             # self.get_offset_ does not have to be observed
             city = self.__skills.get_data_of_lat_lon(lat, lon)['city']
-            url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid={self.__api_key}&lang=de '
+            url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid=' \
+                  f'{self.__api_key}&lang=de '
             _forecast = requests.get(url).json()["daily"][offset]
         else:
             raise ValueError()
@@ -250,14 +275,16 @@ class Weather:
             if last_raining_index < 15:
                 output = f'Der Regen wird in etwa {last_raining_index} Minuten abgeklungen sein.'
             elif last_raining_index == 59:
-                output = f'Nimm am besten einen Regenschirm mit. Der Regen dauert wahrscheinlich noch länger als eine Stunde an.'
+                output = f'Nimm am besten einen Regenschirm mit. Der Regen dauert wahrscheinlich noch länger als ' \
+                         f'eine Stunde an. '
         elif self.__minutely_forecast[0]['precipitation'] > 0:
             first_raining_index = 0
             for i in range(59):
                 if self.__minutely_forecast[0]['precipitation'] > 0:
                     first_raining_index = i
                     break
-            output = f'Es wird in etwa {first_raining_index} Minuten beginnen zu regnen. Nimm vielleicht einen Regenschirm mit.'
+            output = f'Es wird in etwa {first_raining_index} Minuten beginnen zu regnen. Nimm vielleicht einen ' \
+                     f'Regenschirm mit. '
 
         max_uvi = 0
 
@@ -313,7 +340,8 @@ class Weather:
 
     def __get_current_weather(self, city: str = None, lat: int = None, lon: int = None) -> dict:
         if city is None and lat is None and lon is None:
-            url = f'https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}&lang=de'
+            url = f'https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}' \
+                  f'&lang=de'
             self.current_weather = requests.get(url).json()
             return self.current_weather
 
@@ -339,11 +367,17 @@ class Weather:
         if city is None:
             city = self.city
         if weather_id in self.Statics.will_be_description_map.keys():
-            weather_description = f'In {city} wird es {self.__get_time_string(days_offset=days_offset, hours_offset=hours_offset)} {self.Statics.will_be_description_map.get(weather_id)} {temp_inf} geben. '
+            weather_description = f'In {city} wird es ' \
+                                  f'{self.__get_time_string(days_offset=days_offset, hours_offset=hours_offset)} ' \
+                                  f'{self.Statics.will_be_description_map.get(weather_id)} {temp_inf} geben. '
         elif weather_id in self.Statics.give_description_map.keys():
-            weather_description = f'In {city} wird es {self.__get_time_string(days_offset=days_offset, hours_offset=hours_offset)} {self.Statics.give_description_map.get(weather_id)} {temp_inf} geben.'
+            weather_description = f'In {city} wird es ' \
+                                  f'{self.__get_time_string(days_offset=days_offset, hours_offset=hours_offset)} ' \
+                                  f'{self.Statics.give_description_map.get(weather_id)} {temp_inf} geben.'
         elif weather_id in self.Statics.will_description_map.keys():
-            weather_description = f'In {city} wird es {self.__get_time_string(days_offset=days_offset, hours_offset=hours_offset)} {self.Statics.will_description_map.get(weather_id)} {temp_inf}.'
+            weather_description = f'In {city} wird es ' \
+                                  f'{self.__get_time_string(days_offset=days_offset, hours_offset=hours_offset)} ' \
+                                  f'{self.Statics.will_description_map.get(weather_id)} {temp_inf}.'
         return weather_description
 
     """Converts an offset (days, hours, minutes) into a time specification
@@ -407,7 +441,8 @@ class Weather:
             None
     """
     def __update_current_weather(self):
-        url = f'https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}&lang=de'
+        url = f'https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}' \
+              f'&lang=de'
         self.current_weather = requests.get(url).json()
         self.__last_updated = datetime.now()
         return self.current_weather
@@ -423,7 +458,8 @@ class Weather:
     def __update_weather_forcast(self) -> dict:
         lat = self.__geo_data["lat"]
         lon = self.__geo_data["lon"]
-        url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid={self.__api_key}&lang=de'
+        url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric' \
+              f'&appid={self.__api_key}&lang=de'
         _forecast = requests.get(url).json()
 
         return _forecast
@@ -439,7 +475,8 @@ class Weather:
     def __update_all(self):
         lat = self.__geo_data["lat"]
         lon = self.__geo_data["lon"]
-        url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid={self.__api_key}&lang=de'
+        url = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}' \
+              f'&units=metric&appid={self.__api_key}&lang=de'
 
         if len(self.old_weather_inf) >= 10 and self.old_weather_inf:
             self.old_weather_inf.pop(0)
@@ -531,7 +568,7 @@ class Weather:
 if __name__ == "__main__":
     from src.speechassistant.resources.module_skills import Skills
 
-    w = Weather('bd4d17c6eedcff6efc70b9cefda99082', 'Würzburg', Skills())
+    w = Weather()
     th = Thread(target=w.run, args=())
     th.start()
     time.sleep(1)

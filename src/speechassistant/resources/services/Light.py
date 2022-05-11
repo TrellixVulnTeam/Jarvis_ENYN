@@ -1,15 +1,28 @@
 from .light_systems import Phue
+from ...core import Core
 
 
 class LightController:
-    def __init__(self, core):
-        self.core = core
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if LightController.__instance is None:
+            LightController()
+        return LightController.__instance
+
+    def __init__(self):
+        if LightController.__instance is not None:
+            raise Exception("Singleton cannot be instantiated more than once!")
+        self.core: Core = Core.get_instance()
         self.systems = []
         self.lights = []
 
+        LightController.__instance = self
+
     def generate_light_systems(self):
         system_list = []
-        phue = Phue.PhilipsWrapper(self.core)
+        phue = Phue.PhilipsWrapper(self.core.local_storage['service_storage']['philips_hue']['Bridge-IP'])
         system_list.append({
             "name": "phue",
             "systemObject": phue

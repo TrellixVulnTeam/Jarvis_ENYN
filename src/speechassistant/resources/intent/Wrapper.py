@@ -3,25 +3,24 @@ from __future__ import annotations  # compatibility for < 3.10
 import json
 import logging
 
-# from src.speechassistant.core import Core
-import traceback
+from src.speechassistant.core import Core
 
 from src.speechassistant.resources.intent.AI import GenericAssistant
 
 
 class IntentWrapper:
-    def __init__(self, core, path='/resources/intent') -> None:
-        self.core = core
+    def __init__(self, path='/resources/intent') -> None:
+        self.core = Core.get_instance()
         # with open(core.path + "/resources/intent/mappings.json", 'r') as mapping_file:
-        with open(core.path + path + '/mappings.json', 'r') as mapping_file:
+        with open(self.core.path + path + '/mappings.json', 'r') as mapping_file:
             mappings = json.loads(mapping_file.read())
-            self.ai = GenericAssistant('intents.json', core.path + '/resources/intent/', intent_methods=mappings)
+            self.ai = GenericAssistant('intents.json', self.core.path + '/resources/intent/', intent_methods=mappings)
             try:
                 self.ai.load_model()
                 logging.info("[SUCCESS] Model loaded successfully")
             except FileNotFoundError as e:
                 logging.info("[WARNING] Couldn't find a model. Disable AI-function...")
-                core.use_ai = False
+                self.core.use_ai = False
                 logging.info("[SUCCESS] AI-function disabled.")
 
         logging.info("AI initialized successfully!")
@@ -74,7 +73,7 @@ if __name__ == "__main__":
             print(text)
 
 
-    iw = IntentWrapper(Core(), path='\\resources\\intent')
+    iw = IntentWrapper(path='\\resources\\intent')
 
     iw.test_model()
 

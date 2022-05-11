@@ -28,14 +28,25 @@ from src.speechassistant.resources.module_skills import Skills
 # toDo: close cursor before raise
 
 class DataBase:
-    def __init__(self, root_path: str, skills: Skills) -> None:
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if DataBase.__instance is None:
+            DataBase()
+        return DataBase.__instance
+
+    def __init__(self) -> None:
+        if DataBase.__instance is not None:
+            raise Exception("Singleton cannot be instantiated more than once!")
+
         logging.basicConfig(level=logging.DEBUG)
         logging.info('[ACTION] Initialize DataBase...\n')
-        self.db: Connection = sqlite3.connect(os.path.join(root_path, 'database', 'data_base'), check_same_thread=False)
+        self.db: Connection = sqlite3.connect(os.getcwd().join('data_base'), check_same_thread=False)
         self.error_counter: int = 0
 
         self.user_interface = self._UserInterface(self.db)
-        self.alarm_interface = self._AlarmInterface(self.db, skills)
+        self.alarm_interface = self._AlarmInterface(self.db)
         self.timer_interface = self._TimerInterface(self.db, self.user_interface)
         self.reminder_interface = self._ReminderInterface(self.db, self.user_interface)
         self.quiz_interface = self._QuizInterface(self.db)
@@ -47,6 +58,8 @@ class DataBase:
         self.__audio_path: str = ''
 
         self.create_tables()
+
+        DataBase.__instance = self
 
         logging.info('[INFO] DataBase successfully initialized.')
 
@@ -429,9 +442,9 @@ class DataBase:
             }
 
     class _AlarmInterface:
-        def __init__(self, db: Connection, skills: Skills) -> None:
+        def __init__(self, db: Connection) -> None:
             self.db: Connection = db
-            self.skills = skills
+            self.skills = Skills()
             logging.info('[INFO] AlarmInterface initialized.')
 
         def get_alarm(self, aid: int, as_tuple: bool = False) -> tuple | dict:
@@ -1217,7 +1230,7 @@ class DataBase:
                 cursor.execute(statement, (rout[0],))
                 on_command_set: list[tuple] = cursor.fetchall()
 
-                #print(f'rout: {rout}, command_set: {command_set}, text_set: {text_set}, date_set: {data_set}, activation_set: {activation_set}, on_command_set: {on_command_set}')
+                # print(f'rout: {rout}, command_set: {command_set}, text_set: {text_set}, date_set: {data_set}, activation_set: {activation_set}, on_command_set: {on_command_set}')
                 routine_list.append(
                     self.__build_json(rout, command_set, text_set, data_set, activation_set, on_command_set))
 
@@ -1780,6 +1793,7 @@ class DataBase:
             raise SQLException(f"Couldn't execute SQL Statement: {command} with Values {str(values)}\n{e}")
         finally:
             cursor.close()"""
+
 
 if __name__ == "__main__":
     db = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\', None)
