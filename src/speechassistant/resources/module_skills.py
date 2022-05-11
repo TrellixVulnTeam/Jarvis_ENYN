@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import re
 from geopy.geocoders import Nominatim
+from geopy.location import Location
 
 
 class Statics:
@@ -397,7 +398,7 @@ class Skills:
     """
 
     def get_data_of_city(self, city: str) -> dict:
-        location = self.geo_location.geocode(city)
+        location: Location = self.geo_location.geocode(city)
         return self.__location_to_json(location.raw)
 
     """ Returns geological data of a city
@@ -408,9 +409,9 @@ class Skills:
         dict: Dictionary with the values of the city
     """
 
-    def get_data_of_lat_lon(self, lat: int, lon: int) -> dict:
-        location = self.geo_location.reverse((lat, lon))
-        return self.__location_to_json(location)
+    def get_data_of_lat_lon(self, lat: float, lon: float) -> dict:
+        location = self.geo_location.reverse(f'{lat}, {lon}')
+        return self.__location_to_json(location.raw)
 
     @staticmethod
     def __location_to_json(location: dict) -> dict:
