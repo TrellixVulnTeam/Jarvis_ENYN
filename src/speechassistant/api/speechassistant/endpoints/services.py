@@ -25,6 +25,7 @@ class Phue(Resource):
     def delete(self) -> Response:
         pass
 
+
 @namespace.route('/tv')
 class Tv(Resource):
     pass
