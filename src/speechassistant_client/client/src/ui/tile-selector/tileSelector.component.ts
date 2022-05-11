@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostBinding, Input, NgModule, NO_ERRORS_SCHEMA, Output} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 
 @Component({
   selector: 'tile-selector',
@@ -6,12 +6,12 @@ import {Component, EventEmitter, HostBinding, Input, NgModule, NO_ERRORS_SCHEMA,
   styleUrls: ['./tileSelector.component.scss']
 })
 export class TileSelectorComponent {
-    @Input() text: string = "";
-    @Input() checked: boolean = false;
-    @Input() @HostBinding("style.--height") height: number = 100;
+
+    // @ts-ignore
+  @Input() text: string;
+    // @ts-ignore
+  @Input() checked: boolean;
     @Output() onCheckedEvent = new EventEmitter<boolean>();
-
-
 
     onSateChanged(): void {
         this.checked = !this.checked;
