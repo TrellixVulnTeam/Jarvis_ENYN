@@ -1,6 +1,7 @@
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
 from phue import Bridge
-from datetime import datetime
+
+from src.speechassistant.resources.module_skills import Skills
 
 colors = ['blau', 'rot', 'gelb', 'grün', 'pink', 'lila', 'türkis', 'weiß', 'orange', 'warmweiß']
 # color_code = ['0000ff', 'ff0000', 'ffff00', '00FF00', 'ff1493', '9400d3', '00ffff', 'ffffff', '006400', '8b4513', 'ff8c00',
@@ -10,40 +11,33 @@ color_code = [[0.1548, 0.1117], [0.6778, 0.3017], [0.439, 0.4446], [0.2015, 0.67
 
 
 class PhilipsWrapper:
-    def __init__(self, core):
-        bridge_ip = core.local_storage["module_storage"]["philips_hue"]["Bridge-IP"]
+    def __init__(self, ip: str):
+        bridge_ip = ip
         self.bridge = Bridge(bridge_ip)
         self.bridge.connect()
 
-        self.skills = core.skills
-        self.core = core
+        self.skills = Skills()
 
         self.lights = self.bridge.lights
         self.light_names = self.bridge.get_light_objects('name')
 
-        if bridge_ip == "":
-            core.say(
-                "Um Philips HUE zu nutzen, musst du zuerst die Bridge IP im System eintragen. Besuche dafür die Einrichtungswebsite.")
-            return
-
-    def wrapper(self, text):
+    def wrapper(self, text: str) -> str:
         lights = self.Logic.get_lights(text, self)
-        # self.core.say("Okay.")
         if 'aus' in text:
             self.light_off(lights)
-            return
+            return ''
 
         elif 'an' in text:
             # toDo: distinguish between different times
             self.light_on(lights)
-            return
+            return ''
 
         elif 'heller' in text:
             if 'viel' in text:
                 self.inc_dec_brightness(lights, 140)
             else:
                 self.inc_dec_brightness(lights, 60)
-            return
+            return ''
 
         elif 'wärmer' in text:
             self.set_light_color_temp(lights, 25)
@@ -56,26 +50,25 @@ class PhilipsWrapper:
                 self.inc_dec_brightness(lights, -140)
             else:
                 self.inc_dec_brightness(lights, -60)
-            return
+            return ''
 
         elif 'hell' in text:
             self.set_light_brightness(lights, 254)
-            return
+            return ''
 
         elif 'prozent' in text or '%' in text:
             self.set_light_brightness(lights, self.Logic.get_percent_as_brightness(text))
-            return
+            return ''
 
         else:
             for item in colors:
                 if item in text:
                     self.light_change_color(lights, text)
-                    return
+                    return ''
 
-        self.core.say('Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.')
+        return 'Leider habe ich nicht verstanden, was ich mit dem Licht machen soll.'
 
     def set_light_powerstate(self, lights, powerstate):
-
         if powerstate is None and (type(lights) is type("") or len(lights) <= 1):
             if self.bridge.get_light(lights, 'on'):
                 powerstate = 'off'
@@ -108,14 +101,14 @@ class PhilipsWrapper:
     def light_off(self, lights):
         self.bridge.set_light(lights, 'on', False)
 
-    def light_change_color(self, lights, text):
+    def light_change_color(self, lights, text) -> str:
         color = self.Logic.get_named_color(text)
         if color is not None:
             self.light_on(lights)
             self.bridge.set_light(lights, 'xy', [color[0], color[1]])
             # self.bridge.set_light(lights, 'bri', 254)
         else:
-            self.core.say('Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.')
+            return 'Es tut mir leid, leider konnte ich nicht heraus filtern, welche Farbe du wünschst.'
 
     def inc_dec_ct(self, lights, value):
         for light in lights:
@@ -145,11 +138,11 @@ class PhilipsWrapper:
             self.bridge.set_light(light, 'bri', brightness)
 
     def get_light_in_json(self, light_name):
-        tempLight = self.bridge.get_light(light_name)
+        temp_tight = self.bridge.get_light(light_name)
         return {
-            "on": self.bridge.get_light(tempLight["name"], 'on'),
-            "brightness": self.bridge.get_light(tempLight["name"], 'bri'),
-            "name": tempLight["name"]
+            "on": self.bridge.get_light(temp_tight["name"], 'on'),
+            "brightness": self.bridge.get_light(temp_tight["name"], 'bri'),
+            "name": temp_tight["name"]
         }
 
     def get_lights_in_json(self, order_by_id=False):

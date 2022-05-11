@@ -11,7 +11,17 @@ from requests.auth import HTTPDigestAuth
 
 
 class Pylips:
+    __instance = None
+
+    @staticmethod
+    def get_instance(param):
+        if Pylips.__instance is None:
+            Pylips(param)
+        return Pylips.__instance
+
     def __init__(self):
+        if Pylips.__instance is not None:
+            raise Exception("Singleton cannot be instantiated more than once!")
         requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
         self.sess = requests.session()
         self.sess.verify = False
@@ -19,6 +29,8 @@ class Pylips:
         self.verbose = False
         # Key used for generated the HMAC signature
         self.secret_key = "JCqdN5AcnAHgJYseUn7ER5k3qgtemfUvMRghQpTfTZq7Cvv8EPQPqfz6dDxPQPSu4gKFPWkJGw32zyASgJkHwCjU"
+
+        Pylips.__instance = self
 
     def run(self, host=None, user=None, password=None, body=None, command=None, verbose=None, apiv=None):
         ini_file = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "settings.ini"
