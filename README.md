@@ -99,5 +99,3 @@ def handle(text, core, profile):
 `PRIORITY` defines the priority in which the modules are called. If this is not set, the value 0 is automatically assigned. The modules are ordered lexically in the respective priority level. Since LUNA cannot know what your module can do, the modules must decide in a first rough run whether they can do something with the text. For this the method `isValid()` is used, which returns True if this is the case. This function only checks if a keyword is included in the command or not. Your word selection should be well considered. If this is the case, the method `handle()` or `run()` is called.
 
 For all other core (or core) calls, you can look into the `module wrapper` class in main.py
-
-After writing the whole readme, I noticed that all language editions are in German and therefore the English README doesn't make 100% sense anymore LOL :(
