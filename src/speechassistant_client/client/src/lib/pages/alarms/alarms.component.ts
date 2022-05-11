@@ -1,6 +1,5 @@
 import {Component, ElementRef, Input, OnInit, TemplateRef, ViewChild} from "@angular/core";
 import {Alarm} from "../../data-access/models/alarm";
-import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {BackendService} from "../../data-access/service/backend.service";
 import { ActivatedRoute } from "@angular/router";
 import {Title} from "@angular/platform-browser";
@@ -19,8 +18,11 @@ export class AlarmsComponent implements OnInit{
   createModalRef?: BsModalRef;
   repeatingModalRef? : BsModalRef;
   textModalRef?: BsModalRef;
+  // @ts-ignore
   @ViewChild('createAlarmModal') createModal: TemplateRef<any>;
+  // @ts-ignore
   @ViewChild('createAlarmChangeRepeating') createRepeatModal: TemplateRef<any>;
+  // @ts-ignore
   @ViewChild('createAlarmChangeText') createTextModal: TemplateRef<unknown>;
   tempAlarm: Alarm = new Alarm({}, true, true, false, true, true, false, false, false, "Guten Morgen!", "standard.wav", true);
   sounds: string[] = [];
@@ -34,7 +36,7 @@ export class AlarmsComponent implements OnInit{
 
   ngOnInit() {
     this.titleService.setTitle('Wecker Übersicht');
-    this.alarmService.loadAndGetAlarms( ).subscribe( alarms => this.alarms = alarms );
+    this.alarmService.getAlarms( ).subscribe( alarms => this.alarms = alarms );
   }
 
   onAddAlarm(template: TemplateRef<any>): void {

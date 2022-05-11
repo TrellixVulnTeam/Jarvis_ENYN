@@ -6,6 +6,8 @@ import { Routine } from '../models';
 import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {Alarm} from "../models/alarm";
 import {map} from "rxjs/operators";
+import {Light} from "../models/light";
+import {LightGroup} from "../models/lightGroup";
 
 @Injectable({
   providedIn: 'root',
@@ -92,6 +94,14 @@ export class BackendService {
           return alarm;
         })
       );
+  }
+
+  loadGroupById(id: number): Observable<LightGroup> {
+    return this.httpClient.get<LightGroup>(this.url + 'groups/' +id);
+  }
+
+  loadAllGroups(): Observable<LightGroup[]> {
+    return this.httpClient.get<LightGroup[]>(this.url + 'groups');
   }
 
   createAlarm(alarm: Alarm): Observable<Alarm> {
@@ -194,6 +204,30 @@ export class BackendService {
       map(response => {
         return response.sound_files})
     );
+  }
+
+  loadAllLights(): Observable<Light[]> {
+    return this.httpClient.get<Light[]>(this.url + 'services/phue/lights');
+  }
+
+  loadLightById(id: number): Observable<Light> {
+    return this.httpClient.get<Light>(this.url + 'services/phue/lights/' + id);
+  }
+
+  loadLightsOfGroupByGroupId(id: number): Observable<Light[]> {
+    return this.httpClient.get<Light[]>(this.url + 'services/phue/groups/' + id);
+  }
+
+  updateLightById(id: number, color: string, powerState: boolean, brightness: number, temperature: number): Observable<any> {
+    return this.httpClient.put(this.url + 'services/phue/lights/' + id, {"color": color});
+  }
+
+  updateGroup(id: number, color: string, powerState: boolean, brightness: number, temperature: number): Observable<any> {
+    return this.httpClient.put(this.url + 'services/phue/groups/' + id, {"color": color});
+  }
+
+  updateAllLights(color: string, powerState: boolean, brightness: number, temperature: number): Observable<any> {
+    return this.httpClient.put(this.url + 'services/phue/lights', {"color": color});
   }
 
 }

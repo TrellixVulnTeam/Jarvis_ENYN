@@ -38,16 +38,12 @@ export class AlarmStore {
   }
 
   getAlarms( ): Subject<Alarm[]> {
-      this.alarmSubject.next( this.alarms );
-      return this.alarmSubject;
-  }
-
-  loadAndGetAlarms( ): Observable<Alarm[]> {
-    this.backendService.loadAlarms().subscribe(alarms => {
-      this.alarmSubject.next( alarms );
-      this.alarms = alarms;
-    });
-
+    if (this.alarms == []) {
+      this.backendService.loadAlarms().subscribe(alarms => {
+        this.alarms = alarms;
+        this.alarmSubject.next( this.alarms );
+      })
+    }
     return this.alarmSubject;
   }
 

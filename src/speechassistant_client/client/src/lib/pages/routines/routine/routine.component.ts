@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import { Routine, OnCommand } from "../../lib/data-access/models";
+import { Routine, OnCommand } from "../../../data-access/models";
 import { JsonObject } from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 
 @Component({

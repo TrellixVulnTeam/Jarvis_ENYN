@@ -1,11 +1,8 @@
 
 import {Component, Input, OnInit, TemplateRef} from "@angular/core";
 import { Routine } from "../../data-access/models";
-import {BackendService} from "../../data-access/service/backend.service";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {Command} from "../../data-access/models/command";
-import {materialModuleSpecifier} from "@angular/material/schematics/ng-update/typescript/module-specifiers";
-import {retry} from "rxjs";
 import {RoutineStore} from "../../data-access/service/routine.store";
 
 @Component({

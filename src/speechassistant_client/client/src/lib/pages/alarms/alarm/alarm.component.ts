@@ -1,13 +1,12 @@
 
 import {Component, Input, OnInit, TemplateRef, ViewChild} from "@angular/core";
-import {Alarm} from "../../data-access/models/alarm";
+import {Alarm} from "../../../data-access/models/alarm";
 import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
-import {AlarmStore} from "../../data-access/service/alarm.store";
-import {ModuleNamesStore} from "../../data-access/service/moduleNames.store";
-import {SoundStore} from "../../data-access/service/sound.store";
+import {AlarmStore} from "../../../data-access/service/alarm.store";
+import {SoundStore} from "../../../data-access/service/sound.store";
 
 @Component({
   selector: 'alarm',
@@ -16,9 +15,12 @@ import {SoundStore} from "../../data-access/service/sound.store";
 })
 export class AlarmComponent implements OnInit{
 
+  // @ts-ignore
   @Input() alarm: Alarm;
 
+  // @ts-ignore
   @ViewChild('alarmChangeRepeating') createRepeatModal: TemplateRef<any>;
+  // @ts-ignore
   @ViewChild('alarmChangeText') createTextModal: TemplateRef<any>;
   repeatingModalRef? : BsModalRef;
   textModalRef?: BsModalRef;
