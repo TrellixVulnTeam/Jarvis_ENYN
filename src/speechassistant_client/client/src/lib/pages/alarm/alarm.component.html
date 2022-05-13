@@ -23,7 +23,7 @@
         <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" type="button">Ton</button>
 
         <div class="dropdown-menu">
-          <a *ngFor="let name of this.soundNames" class="dropdown-item">{{ name }}</a>
+          <a (change)="onChangeSound()" *ngFor="let name of this.soundNames" class="dropdown-item">{{ name }}</a>
         </div>
       </div>
     </div>
@@ -46,49 +46,53 @@
         </button>
 
         <div class="btn-group-vertical d-flex space-before">
-          <button (click)="this.alarm.monday = !this.alarm.monday" class="btn btn-outline-primary"
+          <button (click)="this.alarm.monday = !this.alarm.monday; onChangeRepeating()" class="btn btn-outline-primary"
                   type="button">
             <div class="d-flex justify-content-between">
               Montag
               <mat-icon *ngIf="this.alarm.monday" class="add-button">done</mat-icon>
             </div>
           </button>
-          <button (click)="this.alarm.tuesday = !this.alarm.tuesday" class="btn btn-outline-primary"
+          <button (click)="this.alarm.tuesday = !this.alarm.tuesday; onChangeRepeating()"
+                  class="btn btn-outline-primary"
                   type="button">
             <div class="d-flex justify-content-between">
               Dienstag
               <mat-icon *ngIf="this.alarm.tuesday" class="add-button">done</mat-icon>
             </div>
           </button>
-          <button (click)="this.alarm.wednesday = !this.alarm.wednesday" class="btn btn-outline-primary"
+          <button (click)="this.alarm.wednesday = !this.alarm.wednesday; onChangeRepeating()"
+                  class="btn btn-outline-primary"
                   type="button">
             <div class="d-flex justify-content-between">
               Mittwoch
               <mat-icon *ngIf="this.alarm.wednesday" class="add-button">done</mat-icon>
             </div>
           </button>
-          <button (click)="this.alarm.thursday = !this.alarm.thursday" class="btn btn-outline-primary"
+          <button (click)="this.alarm.thursday = !this.alarm.thursday; onChangeRepeating()"
+                  class="btn btn-outline-primary"
                   type="button">
             <div class="d-flex justify-content-between">
               Donnerstag
               <mat-icon *ngIf="this.alarm.thursday" class="add-button">done</mat-icon>
             </div>
           </button>
-          <button (click)="this.alarm.friday = !this.alarm.friday" class="btn btn-outline-primary"
+          <button (click)="this.alarm.friday = !this.alarm.friday; onChangeRepeating()" class="btn btn-outline-primary"
                   type="button">
             <div class="d-flex justify-content-between">
               Freitag
               <mat-icon *ngIf="this.alarm.friday" class="add-button">done</mat-icon>
             </div>
           </button>
-          <button (click)="this.alarm.saturday = !this.alarm.saturday" class="btn btn-outline-primary"
+          <button (click)="this.alarm.saturday = !this.alarm.saturday; onChangeRepeating()"
+                  class="btn btn-outline-primary"
                   type="button">
             <div class="d-flex justify-content-between">
               Samstag
               <mat-icon *ngIf="this.alarm.saturday" class="add-button">done</mat-icon>
             </div>
           </button>
-          <button (click)="this.alarm.sunday = !this.alarm.sunday" class="btn btn-outline-primary"
+          <button (click)="this.alarm.sunday = !this.alarm.sunday; onChangeRepeating()" class="btn btn-outline-primary"
                   type="button">
             <div class="d-flex justify-content-between">
               Sonntag
@@ -114,7 +118,7 @@
 
         <div class="mb-3 mt-3">
           <label class="form-label" for="text">Text, der nach dem Weckton gesagt wird:</label>
-          <input #input (change)="this.alarm.text = input.value" [value]="alarm.text" class="form-control" id="text"
+          <input #input (change)="onChangeText(input.value)" [value]="alarm.text" class="form-control" id="text"
                  name="text"
                  placeholder="Text"
                  type="text">

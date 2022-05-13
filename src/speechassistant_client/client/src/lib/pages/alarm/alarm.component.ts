@@ -1,6 +1,5 @@
 import {Component, Input, OnInit, TemplateRef, ViewChild} from "@angular/core";
 import {Alarm} from "../../data-access/models/alarm";
-import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute, Router} from "@angular/router";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
@@ -16,18 +15,14 @@ export class AlarmComponent implements OnInit {
 
   // @ts-ignore
   @Input() alarm: Alarm;
-
   // @ts-ignore
   @ViewChild('alarmChangeRepeating') createRepeatModal: TemplateRef<any>;
   // @ts-ignore
   @ViewChild('alarmChangeText') createTextModal: TemplateRef<any>;
+
   repeatingModalRef?: BsModalRef;
   textModalRef?: BsModalRef;
   soundNames: string[] = [];
-  englishDays: string[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  germanDays: string[] = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
-
-  // public mode: PickerInteractionMode = PickerInteractionMode.DropDown;
 
   constructor(private alarmStore: AlarmStore,
               private soundStore: SoundStore,
@@ -56,13 +51,19 @@ export class AlarmComponent implements OnInit {
     this.route.navigate(['/alarms'])
   }
 
-  onChangeAlarm(alarm: JsonObject): void {
-
+  onChangeRepeating(): void {
+    this.alarmStore.updateAlarm(this.alarm);
   }
 
-  onChangeActivationAlarm(id: number, active: boolean): void {
-    this.alarmStore.updateAlarmActiveStatus(id, active);
+  onChangeText(value: string): void {
+    this.alarm.text = value;
+    this.alarmStore.updateAlarm(this.alarm);
   }
+
+  onChangeSound(): void {
+    this.alarmStore.updateAlarm(this.alarm);
+  }
+
 
   openRepeatingModal(): void {
     this.repeatingModalRef = this.modalService.show(this.createRepeatModal);
@@ -83,52 +84,6 @@ export class AlarmComponent implements OnInit {
   closeAllModals(): void {
     this.modalService.hide(this.repeatingModalRef?.id);
     this.modalService.hide(this.textModalRef?.id);
-  }
-
-  getTimeString(alarm: Alarm): string {
-    // @ts-ignore
-    let time: Date = alarm.timeObject;
-    let hours: string = time.getHours().toString().padStart(2, '0');
-    let minutes: string = time.getMinutes().toString().padStart(2, '0');
-    return hours + ":" + minutes;
-  }
-
-  getRepeatingString(alarm: Alarm): string {
-    let repeatString: string = "";
-    if (alarm.regular) {
-      repeatString += "jeden "
-    }
-
-    if (alarm.monday && alarm.tuesday && alarm.wednesday && alarm.thursday && alarm.friday) {
-      if (alarm.saturday && alarm.sunday) {
-        repeatString += "Tag"
-      } else if (!alarm.saturday && !alarm.sunday) {
-        repeatString += "Wochentag"
-      }
-    } else {
-      if (alarm.monday) {
-        repeatString += "Montag, ";
-      }
-      if (alarm.tuesday) {
-        repeatString += "Dienstag, ";
-      }
-      if (alarm.wednesday) {
-        repeatString += "Mittwoch, ";
-      }
-      if (alarm.thursday) {
-        repeatString += "Donnerstag, ";
-      }
-      if (alarm.friday) {
-        repeatString += "Freitag, ";
-      }
-      if (alarm.saturday) {
-        repeatString += "Samstag, ";
-      }
-      if (alarm.sunday) {
-        repeatString += "Sonntag, ";
-      }
-    }
-    return this.rtrim(repeatString, ", ");
   }
 
   rtrim(input: string, characters: string): string {

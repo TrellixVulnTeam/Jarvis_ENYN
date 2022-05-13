@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import traceback
 
 from flask import Response
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
@@ -29,6 +30,8 @@ def read_alarm(data: int | None) -> Response:
         return Response(json.dumps(alarm), mimetype='application/json')
     else:
         alarms: list[dict] = database.alarm_interface.get_alarms(unsorted=True)
+        if not alarms:
+            return Response([], mimetype='application/json')
         for alarm in alarms:
             alarm["sound"] = "standard"
         logging.info(alarms)
@@ -36,14 +39,21 @@ def read_alarm(data: int | None) -> Response:
 
 
 def update_alarm(data: dict) -> Response:
-    database.alarm_interface.update_alarm(data['aid'],
+    if type(data['active']) is int:
+        data['active'] = data['active'] == 1
+
+    repeating: dict = data['repeating']
+    for day in ['regular', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
+        if type(repeating[day]) is int:
+            repeating[day] = repeating[day] == 1
+    database.alarm_interface.update_alarm(data['id'],
                                           _time=data['time'],
                                           _text=data['text'],
                                           _active=data['active'],
                                           _sound=data['sound'],
-                                          _regular=data['regular'])
-    repeating: dict = data['repeating']
-    database.alarm_interface.update_repeating(data['aid'],
+                                          _regular=repeating['regular'])
+
+    database.alarm_interface.update_repeating(data['id'],
                                               repeating['monday'],
                                               repeating['tuesday'],
                                               repeating['wednesday'],

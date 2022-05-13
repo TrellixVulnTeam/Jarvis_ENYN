@@ -43,7 +43,6 @@ export class AlarmStore {
     this.alarms.push(newAlarm);
     this.alarmSubject.next(this.alarms);
     this.backendService.createAlarm(newAlarm).subscribe(resultSet => {
-      console.log(resultSet);
       let index = this.alarms.findIndex(alarm => alarm == newAlarm);
       // @ts-ignore
       let location = resultSet.headers.get('location');
