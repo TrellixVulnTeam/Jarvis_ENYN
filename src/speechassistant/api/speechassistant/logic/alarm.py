@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 
 from flask import Response
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
 from src.speechassistant.database.database_connection import DataBase
 
-database: DataBase = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\', None)
+database: DataBase = DataBase.get_instance()
 
 
 def create_alarm(data: dict) -> Response:
@@ -15,16 +16,22 @@ def create_alarm(data: dict) -> Response:
     if 'sound' not in data.keys() or data['sound'] is None:
         data['sound'] = 'standard.wav'
     result_set: dict = database.alarm_interface.add_alarm(data['time'], data['text'], data['user'], data['repeating'], song=data['sound'])
-    return Response(result_set, mimetype='application/json', status=201)
+    result_set["sound"] = "standard"
+    print(result_set)
+    return Response(mimetype='application/json', status=201, headers={'location': f'/alarms/{result_set["id"]}'})
 
 
 def read_alarm(data: int | None) -> Response:
     if data:
         alarm: dict = database.alarm_interface.get_alarm(data)
+        alarm["sound"] = "standard"
+        logging.info(alarm)
         return Response(json.dumps(alarm), mimetype='application/json')
     else:
         alarms: list[dict] = database.alarm_interface.get_alarms(unsorted=True)
-        print(alarms)
+        for alarm in alarms:
+            alarm["sound"] = "standard"
+        logging.info(alarms)
         return Response(json.dumps(alarms), mimetype='application/json')
 
 

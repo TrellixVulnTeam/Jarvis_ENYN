@@ -11,4 +11,6 @@
   vertical-align: middle !important;
 }
 
-
+::ng-deep .cdk-overlay-container mat-datepicker-content{
+  z-index: 100000 !important;
+}

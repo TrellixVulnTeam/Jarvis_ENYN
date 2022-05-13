@@ -1,22 +1,22 @@
-import {Component, ElementRef, Input, OnInit, TemplateRef, ViewChild} from "@angular/core";
+import {Component, OnInit, TemplateRef, ViewChild} from "@angular/core";
 import {Alarm} from "../../data-access/models/alarm";
 import {BackendService} from "../../data-access/service/backend.service";
-import { ActivatedRoute } from "@angular/router";
+import {ActivatedRoute} from "@angular/router";
 import {Title} from "@angular/platform-browser";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
-import {AlarmStore} from "../../data-access/service/alarm.store";
+import {AlarmStore} from "../../data-access/service/store/alarm.store";
 
 @Component({
   selector: 'alarms',
   templateUrl: './alarms.component.html',
   styleUrls: ['./alarms.component.scss']
 })
-export class AlarmsComponent implements OnInit{
+export class AlarmsComponent implements OnInit {
 
   alarms: Alarm[] = [];
   editMode: boolean = false
   createModalRef?: BsModalRef;
-  repeatingModalRef? : BsModalRef;
+  repeatingModalRef?: BsModalRef;
   textModalRef?: BsModalRef;
   // @ts-ignore
   @ViewChild('createAlarmModal') createModal: TemplateRef<any>;
@@ -24,7 +24,22 @@ export class AlarmsComponent implements OnInit{
   @ViewChild('createAlarmChangeRepeating') createRepeatModal: TemplateRef<any>;
   // @ts-ignore
   @ViewChild('createAlarmChangeText') createTextModal: TemplateRef<unknown>;
-  tempAlarm: Alarm = new Alarm({}, true, true, false, true, true, false, false, false, "Guten Morgen!", "standard.wav", true);
+  // @ts-ignore
+  tempAlarm: Alarm = {
+    time: {},
+    timeObject: new Date(),
+    monday: false,
+    tuesday: false,
+    wednesday: false,
+    thursday: false,
+    friday: false,
+    saturday: false,
+    sunday: false,
+    regular: false,
+    active: true,
+    text: "Guten Morgen!",
+    sound: "standard"
+  };
   sounds: string[] = [];
 
   constructor(private route: ActivatedRoute,
@@ -36,37 +51,60 @@ export class AlarmsComponent implements OnInit{
 
   ngOnInit() {
     this.titleService.setTitle('Wecker Übersicht');
-    this.alarmService.getAlarms( ).subscribe( alarms => this.alarms = alarms );
+    this.alarmService.getAlarms().subscribe(alarms => {
+      this.alarms = alarms;
+    });
   }
 
   onAddAlarm(template: TemplateRef<any>): void {
-    this.tempAlarm = new Alarm({}, false, false, false, false, false, false, false, false, "Guten Morgen!", "standard.wav", true);
+    this.tempAlarm = {
+      time: {},
+      timeObject: new Date(),
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false,
+      saturday: false,
+      sunday: false,
+      regular: false,
+      active: true,
+      text: "Guten Morgen!",
+      sound: "standard",
+      last_executed: "",
+      user: -1,
+      initiated: false
+    };
+    // @ts-ignore
+    this.tempAlarm.timeObject.setHours(12);
+    // @ts-ignore
+    this.tempAlarm.timeObject.setMinutes(0);
     this.createModalRef = this.modalService.show(template);
   }
 
   onSaveNewAlarm(): void {
-    this.alarmService.addAlarm( this.tempAlarm );
+    this.alarmService.addAlarm(this.tempAlarm);
     this.closeAllModals();
-    this.tempAlarm = new Alarm({}, true, true, false, true, true, false, false, false, "Guten Morgen!", "standard.wav", true);
   }
 
   onDeleteAlarm(id: number): void {
-    this.alarmService.deleteAlarm( id );
+    this.alarmService.deleteAlarm(id);
   }
 
-  onChangeAlarm( alarm: Alarm ): void {
-    this.alarmService.updateAlarm( alarm );
+  onChangeAlarm(alarm: Alarm): void {
+    this.alarmService.updateAlarm(alarm);
   }
 
   onChangeActivationAlarm(id: number, active: boolean): void {
-    this.alarmService.updateAlarmActiveStatus( id, active );
+    this.alarmService.updateAlarmActiveStatus(id, active);
   }
 
   getTimeString(alarm: Alarm): string {
-    let time: Date = alarm.time;
-    let hours: string = time.getHours().toString().padStart(2, '0');
-    let minutes: string = time.getMinutes().toString().padStart(2, '0');
-    return hours+":"+minutes;
+    // @ts-ignore
+    let timeObject: Date = alarm.timeObject;
+    let hours: string = timeObject.getHours().toString().padStart(2, '0');
+    let minutes: string = timeObject.getMinutes().toString().padStart(2, '0');
+    return hours + ":" + minutes;
   }
 
   getRepeatingString(alarm: Alarm): string {
@@ -85,18 +123,24 @@ export class AlarmsComponent implements OnInit{
     }
 
     if (alarm.monday) {
-    repeatString += "Montags, ";
-    } if (alarm.tuesday) {
+      repeatString += "Montags, ";
+    }
+    if (alarm.tuesday) {
       repeatString += "Dienstags, ";
-    } if (alarm.wednesday) {
+    }
+    if (alarm.wednesday) {
       repeatString += "Mittwochs, ";
-    } if (alarm.thursday) {
+    }
+    if (alarm.thursday) {
       repeatString += "Donnerstags, ";
-    } if (alarm.friday) {
+    }
+    if (alarm.friday) {
       repeatString += "Freitags, ";
-    } if (alarm.saturday) {
+    }
+    if (alarm.saturday) {
       repeatString += "Samstags, ";
-    } if (alarm.sunday) {
+    }
+    if (alarm.sunday) {
       repeatString += "Sonntags, ";
     }
     return this.rtrim(repeatString, ", ");

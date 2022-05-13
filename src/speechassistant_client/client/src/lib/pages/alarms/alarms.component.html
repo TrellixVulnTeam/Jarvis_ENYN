@@ -1,63 +1,65 @@
-<div class="alert alert-info"
-     *ngIf="alarms.length == 0; else alarmOverview">
-  Aktuell hast du noch <strong>keinen Wecker</strong> eingerichtet.
-  <button type="button"
-          class="btn btn-primary"
-          (click)="openCreateModal()"
-  >Ersten Wecker erstellen</button>
-</div>
-
-<ng-template #alarmOverview>
-  <div class="d-flex justify-content-between">
-    <button class="btn btn-primary"
-            (click)="changeEditMode()">
-      {{ getEditButtonText() }}
-    </button>
-
-    <button class="btn btn-success"
-      (click)="openCreateModal()">
-      <mat-icon>add_circle</mat-icon>
+<loading *ngIf="alarms == undefined; else content"></loading>
+<ng-template #content class="container">
+  <div
+    *ngIf="alarms.length == 0"
+    class="alert alert-info">
+    Aktuell hast du noch <strong>keinen Wecker</strong> eingerichtet.
+    <button (click)="openCreateModal()"
+            class="btn btn-primary"
+            type="button"
+    >Ersten Wecker erstellen
     </button>
   </div>
 
+  <div *ngIf="alarms.length > 0">
+    <div class="d-flex justify-content-between">
+      <button (click)="changeEditMode()"
+              class="btn btn-primary">
+        {{ getEditButtonText() }}
+      </button>
 
-  <div class="list-group overflow-md-auto" *ngIf="alarms">
-    <a [routerLink]="[alarm.id]" *ngFor="let alarm of alarms" class="list-group-item list-group-item-action">
-      <div class="d-flex justify-content-between">
-        <div class="p-2">
-          <div>
-            <div><h2>{{getTimeString(alarm)}}</h2></div> <br/>
-            <div><h5>{{getRepeatingString(alarm)}}</h5></div>
+      <button (click)="openCreateModal()"
+              class="btn btn-success">
+        <mat-icon>add_circle</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="alarms" class="list-group overflow-md-auto">
+      <a *ngFor="let alarm of alarms" [routerLink]="[alarm.id]" class="list-group-item list-group-item-action">
+        <div class="d-flex justify-content-between">
+          <div class="p-2">
+            <div>
+              <div class="display-5">{{getTimeString(alarm)}}</div>
+              <br/>
+              <div>{{getRepeatingString(alarm)}}</div>
+            </div>
+          </div>
+          <div class="form-check form-switch">
+            <input [checked]="alarm.active" class="form-check-input p-2" id="alarm-{{alarm.id}}-activation"
+                   type="checkbox">
           </div>
         </div>
-        <div class="form-check form-switch">
-          <input class="form-check-input p-2" type="checkbox" id="alarm-{{alarm.id}}-activation" [checked]="alarm.active">
-        </div>
-      </div>
-    </a>
-    <a class="list-group-item list-group-item-action" (click)="onAddAlarm(createAlarmModal)">
-      <mat-icon class="add-button">add_circle</mat-icon>
-    </a>
+      </a>
+    </div>
   </div>
 </ng-template>
 
 <ng-template #createAlarmModal>
   <div class="modal-header">
     <h4 class="modal-title pull-left">Wecker erstellen</h4>
-    <button type="button" class="btn-close close pull-right" aria-label="Close" (click)="closeAllModals()">
+    <button (click)="closeAllModals()" aria-label="Close" class="btn-close close pull-right" type="button">
       <span aria-hidden="true" class="visually-hidden">&times;</span>
     </button>
   </div>
   <div class="modal-body">
-    <timepicker [(ngModel)]="tempAlarm.time" [showMeridian]="false"></timepicker>
+    <timepicker [(ngModel)]="tempAlarm.timeObject" [showMeridian]="false"></timepicker>
 
     <div class="btn-group-vertical d-flex space-before">
-      <button type="button" class="btn btn-outline-primary" (click)="openRepeatingModal()">Wiederholen</button>
-      <button type="button" class="btn btn-outline-primary" (click)="openTextModal()">
-          Text
+      <button (click)="openRepeatingModal()" class="btn btn-outline-primary" type="button">Wiederholen</button>
+      <button (click)="openTextModal()" class="btn btn-outline-primary" type="button">
+        Text
       </button>
       <div class="btn-group">
-        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">Ton</button>
+        <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" type="button">Ton</button>
 
         <div class="dropdown-menu">
           <a class="dropdown-item" href="#">Tablet</a>
@@ -65,73 +67,73 @@
       </div>
     </div>
     <div class="btn-group d-flex space-before">
-      <button type="button" class="btn btn-success" (click)="onSaveNewAlarm()">erstellen</button>
-      <button type="button" class="btn btn-danger">verwerfen</button>
-   </div>
+      <button (click)="onSaveNewAlarm()" class="btn btn-success" type="button">erstellen</button>
+      <button class="btn btn-danger" type="button">verwerfen</button>
+    </div>
   </div>
 </ng-template>
 
 <ng-template #createAlarmChangeRepeating>
   <div class="modal-header">
     <h4 class="modal-title pull-left">Wecker erstellen - Wiederholungen</h4>
-    <button type="button" class="btn-close close pull-right" aria-label="Close" (click)="closeAllModals()">
+    <button (click)="closeAllModals()" aria-label="Close" class="btn-close close pull-right" type="button">
       <span aria-hidden="true" class="visually-hidden">&times;</span>
     </button>
   </div>
   <div class="modal-body">
-    <button class="btn btn-primary"
-    (click)="closeRepeatingModal()">
+    <button (click)="closeRepeatingModal()"
+            class="btn btn-primary">
       <mat-icon>keyboard_arrow_left</mat-icon>
     </button>
 
     <div class="btn-group-vertical d-flex space-before">
-      <button type="button" class="btn btn-outline-primary"
-              (click)="this.tempAlarm.monday = !this.tempAlarm.monday">
+      <button (click)="this.tempAlarm.monday = !this.tempAlarm.monday" class="btn btn-outline-primary"
+              type="button">
         <div class="d-flex justify-content-between">
           Montag
-          <mat-icon class="add-button" *ngIf="this.tempAlarm.monday">done</mat-icon>
+          <mat-icon *ngIf="this.tempAlarm.monday" class="add-button">done</mat-icon>
         </div>
       </button>
-      <button type="button" class="btn btn-outline-primary"
-              (click)="this.tempAlarm.tuesday = !this.tempAlarm.tuesday">
+      <button (click)="this.tempAlarm.tuesday = !this.tempAlarm.tuesday" class="btn btn-outline-primary"
+              type="button">
         <div class="d-flex justify-content-between">
           Dienstag
-          <mat-icon class="add-button" *ngIf="this.tempAlarm.tuesday">done</mat-icon>
+          <mat-icon *ngIf="this.tempAlarm.tuesday" class="add-button">done</mat-icon>
         </div>
       </button>
-      <button type="button" class="btn btn-outline-primary"
-              (click)="this.tempAlarm.wednesday = !this.tempAlarm.wednesday">
+      <button (click)="this.tempAlarm.wednesday = !this.tempAlarm.wednesday" class="btn btn-outline-primary"
+              type="button">
         <div class="d-flex justify-content-between">
           Mittwoch
-          <mat-icon class="add-button" *ngIf="this.tempAlarm.wednesday">done</mat-icon>
+          <mat-icon *ngIf="this.tempAlarm.wednesday" class="add-button">done</mat-icon>
         </div>
       </button>
-      <button type="button" class="btn btn-outline-primary"
-              (click)="this.tempAlarm.thursday = !this.tempAlarm.thursday">
+      <button (click)="this.tempAlarm.thursday = !this.tempAlarm.thursday" class="btn btn-outline-primary"
+              type="button">
         <div class="d-flex justify-content-between">
           Donnerstag
-          <mat-icon class="add-button" *ngIf="this.tempAlarm.thursday">done</mat-icon>
+          <mat-icon *ngIf="this.tempAlarm.thursday" class="add-button">done</mat-icon>
         </div>
       </button>
-      <button type="button" class="btn btn-outline-primary"
-              (click)="this.tempAlarm.friday = !this.tempAlarm.friday">
+      <button (click)="this.tempAlarm.friday = !this.tempAlarm.friday" class="btn btn-outline-primary"
+              type="button">
         <div class="d-flex justify-content-between">
           Freitag
-          <mat-icon class="add-button" *ngIf="this.tempAlarm.friday">done</mat-icon>
+          <mat-icon *ngIf="this.tempAlarm.friday" class="add-button">done</mat-icon>
         </div>
       </button>
-      <button type="button" class="btn btn-outline-primary"
-              (click)="this.tempAlarm.saturday = !this.tempAlarm.saturday">
+      <button (click)="this.tempAlarm.saturday = !this.tempAlarm.saturday" class="btn btn-outline-primary"
+              type="button">
         <div class="d-flex justify-content-between">
           Samstag
-          <mat-icon class="add-button" *ngIf="this.tempAlarm.saturday">done</mat-icon>
+          <mat-icon *ngIf="this.tempAlarm.saturday" class="add-button">done</mat-icon>
         </div>
       </button>
-      <button type="button" class="btn btn-outline-primary"
-              (click)="this.tempAlarm.sunday = !this.tempAlarm.sunday">
+      <button (click)="this.tempAlarm.sunday = !this.tempAlarm.sunday" class="btn btn-outline-primary"
+              type="button">
         <div class="d-flex justify-content-between">
           Sonntag
-          <mat-icon class="add-button" *ngIf="this.tempAlarm.sunday">done</mat-icon>
+          <mat-icon *ngIf="this.tempAlarm.sunday" class="add-button">done</mat-icon>
         </div>
       </button>
     </div>
@@ -141,21 +143,23 @@
 <ng-template #createAlarmChangeText>
   <div class="modal-header">
     <h4 class="modal-title pull-left">Wecker erstellen - Text</h4>
-    <button type="button" class="btn-close close pull-right" aria-label="Close" (click)="closeAllModals()">
+    <button (click)="closeAllModals()" aria-label="Close" class="btn-close close pull-right" type="button">
       <span aria-hidden="true" class="visually-hidden">&times;</span>
     </button>
   </div>
   <div class="modal-body">
-    <button class="btn btn-primary"
-            (click)="closeTextModal()">
+    <button (click)="closeTextModal()"
+            class="btn btn-primary">
       <mat-icon>keyboard_arrow_left</mat-icon>
     </button>
 
     <div class="mb-3 mt-3">
-      <label for="text" class="form-label">Text, der nach dem Weckton gesagt wird:</label>
-      <input #input type="text" class="form-control" id="text" placeholder="Text" name="text"
-             [value]="tempAlarm.text"
-             (change)="this.tempAlarm.text = input.value">
+      <label class="form-label" for="text">Text, der nach dem Weckton gesagt wird:</label>
+      <input #input (change)="this.tempAlarm.text = input.value" [value]="tempAlarm.text" class="form-control"
+             id="text"
+             name="text"
+             placeholder="Text"
+             type="text">
     </div>
 
   </div>

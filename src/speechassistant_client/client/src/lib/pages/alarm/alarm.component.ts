@@ -1,19 +1,18 @@
-
 import {Component, Input, OnInit, TemplateRef, ViewChild} from "@angular/core";
-import {Alarm} from "../../../data-access/models/alarm";
+import {Alarm} from "../../data-access/models/alarm";
 import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {Title} from "@angular/platform-browser";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {BsModalRef, BsModalService} from "ngx-bootstrap/modal";
-import {AlarmStore} from "../../../data-access/service/alarm.store";
-import {SoundStore} from "../../../data-access/service/sound.store";
+import {AlarmStore} from "../../data-access/service/store/alarm.store";
+import {SoundStore} from "../../data-access/service/store/sound.store";
 
 @Component({
   selector: 'alarm',
   templateUrl: './alarm.component.html',
   styleUrls: ['./alarm.component.scss']
 })
-export class AlarmComponent implements OnInit{
+export class AlarmComponent implements OnInit {
 
   // @ts-ignore
   @Input() alarm: Alarm;
@@ -22,40 +21,47 @@ export class AlarmComponent implements OnInit{
   @ViewChild('alarmChangeRepeating') createRepeatModal: TemplateRef<any>;
   // @ts-ignore
   @ViewChild('alarmChangeText') createTextModal: TemplateRef<any>;
-  repeatingModalRef? : BsModalRef;
+  repeatingModalRef?: BsModalRef;
   textModalRef?: BsModalRef;
   soundNames: string[] = [];
-
+  englishDays: string[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  germanDays: string[] = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 
   // public mode: PickerInteractionMode = PickerInteractionMode.DropDown;
 
-  constructor( private alarmStore: AlarmStore,
-               private soundStore: SoundStore,
-               private titleService: Title,
-               private route: ActivatedRoute,
-               private modalService: BsModalService ) { }
+  constructor(private alarmStore: AlarmStore,
+              private soundStore: SoundStore,
+              private titleService: Title,
+              private activatedRoute: ActivatedRoute,
+              private route: Router,
+              private modalService: BsModalService) {
+  }
 
   ngOnInit() {
     this.titleService.setTitle('Wecker');
-    this.route.params.subscribe(params => {
-      this.alarmStore.getAlarm(params['id']). subscribe(alarm => this.alarm = alarm);
+    this.activatedRoute.params.subscribe(params => {
+      this.alarmStore.getAlarm(params['id']).subscribe(alarm => {
+        this.alarm = alarm;
+      });
     });
-    this.soundStore.loadSoundNames().subscribe( names => {
+    this.soundStore.loadSoundNames().subscribe(names => {
       this.soundNames = names;
     });
+  }
+
+  onDeleteAlarm(): void {
+    if (this.alarm.id != null) {
+      this.alarmStore.deleteAlarm(this.alarm.id);
+    }
+    this.route.navigate(['/alarms'])
+  }
+
+  onChangeAlarm(alarm: JsonObject): void {
 
   }
 
-  onDeleteAlarm( id: number ): void {
-    this.alarmStore.deleteAlarm( id );
-  }
-
-  onChangeAlarm( alarm: JsonObject ): void {
-
-  }
-
-  onChangeActivationAlarm( id: number, active: boolean ): void {
-    this.alarmStore.updateAlarmActiveStatus( id, active );
+  onChangeActivationAlarm(id: number, active: boolean): void {
+    this.alarmStore.updateAlarmActiveStatus(id, active);
   }
 
   openRepeatingModal(): void {
@@ -80,10 +86,11 @@ export class AlarmComponent implements OnInit{
   }
 
   getTimeString(alarm: Alarm): string {
-    let time: Date = alarm.time;
+    // @ts-ignore
+    let time: Date = alarm.timeObject;
     let hours: string = time.getHours().toString().padStart(2, '0');
     let minutes: string = time.getMinutes().toString().padStart(2, '0');
-    return hours+":"+minutes;
+    return hours + ":" + minutes;
   }
 
   getRepeatingString(alarm: Alarm): string {
@@ -100,7 +107,7 @@ export class AlarmComponent implements OnInit{
       }
     } else {
       if (alarm.monday) {
-      repeatString += "Montag, ";
+        repeatString += "Montag, ";
       }
       if (alarm.tuesday) {
         repeatString += "Dienstag, ";

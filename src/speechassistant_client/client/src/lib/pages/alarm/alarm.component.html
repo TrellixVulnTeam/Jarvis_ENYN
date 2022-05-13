@@ -1,0 +1,126 @@
+<ng-template #loading>
+  <div class="spinner-grow text-primary mx-auto"></div>
+</ng-template>
+
+<div *ngIf="alarm; else loading">
+  <div class="p-3">
+
+    <!--  <timepicker class="mx-auto" [(ngModel)]="this.alarm.time"></timepicker>-->
+
+    <input #t="matTimepicker" [(ngModel)]="this.alarm.timeObject"
+           [strict]="false"
+           class="form-control text-center fs-1 timeInput"
+           matTimepicker
+           mode="24h"
+    >
+
+    <div class="btn-group-vertical d-flex space-before">
+      <button (click)="openRepeatingModal()" class="btn btn-outline-primary" type="button">Wiederholen</button>
+      <button (click)="openTextModal()" class="btn btn-outline-primary" type="button">
+        Text
+      </button>
+      <div class="btn-group">
+        <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" type="button">Ton</button>
+
+        <div class="dropdown-menu">
+          <a *ngFor="let name of this.soundNames" class="dropdown-item">{{ name }}</a>
+        </div>
+      </div>
+    </div>
+
+    <button (click)="onDeleteAlarm()" class="btn btn-danger float-end space-bottom space-before">Wecker löschen
+    </button>
+
+
+    <ng-template #alarmChangeRepeating>
+      <div class="modal-header">
+        <h1 class="modal-title pull-left">Wiederholungen</h1>
+        <button (click)="closeAllModals()" aria-label="Close" class="btn-close close pull-right" type="button">
+          <span aria-hidden="true" class="visually-hidden">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <button (click)="closeRepeatingModal()"
+                class="btn btn-primary">
+          <mat-icon>keyboard_arrow_left</mat-icon>
+        </button>
+
+        <div class="btn-group-vertical d-flex space-before">
+          <button (click)="this.alarm.monday = !this.alarm.monday" class="btn btn-outline-primary"
+                  type="button">
+            <div class="d-flex justify-content-between">
+              Montag
+              <mat-icon *ngIf="this.alarm.monday" class="add-button">done</mat-icon>
+            </div>
+          </button>
+          <button (click)="this.alarm.tuesday = !this.alarm.tuesday" class="btn btn-outline-primary"
+                  type="button">
+            <div class="d-flex justify-content-between">
+              Dienstag
+              <mat-icon *ngIf="this.alarm.tuesday" class="add-button">done</mat-icon>
+            </div>
+          </button>
+          <button (click)="this.alarm.wednesday = !this.alarm.wednesday" class="btn btn-outline-primary"
+                  type="button">
+            <div class="d-flex justify-content-between">
+              Mittwoch
+              <mat-icon *ngIf="this.alarm.wednesday" class="add-button">done</mat-icon>
+            </div>
+          </button>
+          <button (click)="this.alarm.thursday = !this.alarm.thursday" class="btn btn-outline-primary"
+                  type="button">
+            <div class="d-flex justify-content-between">
+              Donnerstag
+              <mat-icon *ngIf="this.alarm.thursday" class="add-button">done</mat-icon>
+            </div>
+          </button>
+          <button (click)="this.alarm.friday = !this.alarm.friday" class="btn btn-outline-primary"
+                  type="button">
+            <div class="d-flex justify-content-between">
+              Freitag
+              <mat-icon *ngIf="this.alarm.friday" class="add-button">done</mat-icon>
+            </div>
+          </button>
+          <button (click)="this.alarm.saturday = !this.alarm.saturday" class="btn btn-outline-primary"
+                  type="button">
+            <div class="d-flex justify-content-between">
+              Samstag
+              <mat-icon *ngIf="this.alarm.saturday" class="add-button">done</mat-icon>
+            </div>
+          </button>
+          <button (click)="this.alarm.sunday = !this.alarm.sunday" class="btn btn-outline-primary"
+                  type="button">
+            <div class="d-flex justify-content-between">
+              Sonntag
+              <mat-icon *ngIf="this.alarm.sunday" class="add-button">done</mat-icon>
+            </div>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #alarmChangeText>
+      <div class="modal-header">
+        <h1 class="modal-title pull-left">Text</h1>
+        <button (click)="closeAllModals()" aria-label="Close" class="btn-close close pull-right" type="button">
+          <span aria-hidden="true" class="visually-hidden">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <button (click)="closeTextModal()"
+                class="btn btn-primary">
+          <mat-icon>keyboard_arrow_left</mat-icon>
+        </button>
+
+        <div class="mb-3 mt-3">
+          <label class="form-label" for="text">Text, der nach dem Weckton gesagt wird:</label>
+          <input #input (change)="this.alarm.text = input.value" [value]="alarm.text" class="form-control" id="text"
+                 name="text"
+                 placeholder="Text"
+                 type="text">
+        </div>
+
+      </div>
+    </ng-template>
+  </div>
+</div>

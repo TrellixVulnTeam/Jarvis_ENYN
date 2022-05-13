@@ -1,27 +1,25 @@
 import {BrowserModule} from "@angular/platform-browser";
 import {NgModule} from '@angular/core';
-import {AlarmsComponent} from "./alarms.component";
-import {TimepickerModule} from "ngx-bootstrap/timepicker";
 import {FormsModule} from "@angular/forms";
 import {RouterModule} from "@angular/router";
 import {MatIconModule} from "@angular/material/icon";
-import {LoadingModule} from "../../shared/loading/loading.module";
+import {AlarmComponent} from "./alarm.component";
+import {MatTimepickerModule} from "mat-timepicker";
 
 @NgModule({
   declarations: [
-    AlarmsComponent
+    AlarmComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     RouterModule,
     MatIconModule,
-    TimepickerModule,
-    LoadingModule,
+    MatTimepickerModule,
   ],
   providers: [],
   bootstrap: [],
-  exports: [AlarmsComponent]
+  exports: [AlarmComponent]
 })
-export class AlarmsModule {
+export class AlarmModule {
 }
