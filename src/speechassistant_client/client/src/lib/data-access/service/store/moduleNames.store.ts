@@ -1,9 +1,9 @@
 
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
-import {Alarm} from "../models/alarm";
-import {Routine} from "../models";
-import {BackendService} from "./backend.service";
+import {Alarm} from "../../models/alarm";
+import {Routine} from "../../models";
+import {BackendService} from "../backend.service";
 
 @Injectable({
   providedIn: 'root'

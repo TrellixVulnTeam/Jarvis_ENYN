@@ -1,13 +1,13 @@
 
 import {Injectable} from '@angular/core';
 import {async, BehaviorSubject, filter, Observable, Observer, Subject} from 'rxjs';
-import {Alarm} from "../models/alarm";
-import {BackendService} from "./backend.service";
+import {Alarm} from "../../models/alarm";
+import {BackendService} from "../backend.service";
 import {map} from "rxjs/operators";
 import {NONE_TYPE} from "@angular/compiler";
 import {chunkByNumber} from "ngx-bootstrap/carousel/utils";
-import {Light} from "../models/light";
-import {LightGroup} from "../models/lightGroup";
+import {Light} from "../../models/light";
+import {LightGroup} from "../../models/lightGroup";
 
 @Injectable({
   providedIn: 'root'
