@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from threading import Thread
 
-import src.speechassistant.core as core
+from src.speechassistant.core import Core
 
 if __name__ == "__main__":
     relPath: str = str(Path(__file__).parent) + "/src/speechassistant/"
@@ -12,6 +12,4 @@ if __name__ == "__main__":
         # don't log loading file, because it is a config too
         config_data["correct_output"]: dict = json.load(correct_output)
     webThr: Thread = None
-    core.relPath = relPath
-    core.config_data = config_data
-    core.start(config_data)
+    core = Core.get_instance()
