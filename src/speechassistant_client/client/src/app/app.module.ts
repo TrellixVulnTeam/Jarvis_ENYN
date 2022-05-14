@@ -23,11 +23,12 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { FormsModule } from "@angular/forms";
 import { AlarmsComponent } from "../lib/pages/alarms/alarms.component";
-import { AlarmComponent } from "../lib/pages/alarms/alarm/alarm.component";
+import { AlarmComponent } from "../lib/pages/alarm/alarm.component";
 import {TimepickerModule} from "ngx-bootstrap/timepicker";
 import {AlarmsModule} from "../lib/pages/alarms/alarms.module";
 import {PhueModule} from "../lib/pages/phue/phue.module";
 import {RoutinesModule} from "../lib/pages/routines/routines.module";
+import {AlarmModule} from "../lib/pages/alarm/alarm.module";
 
 const routes: Routes = [
   { path: 'alarms', component: AlarmsComponent },
@@ -66,7 +67,8 @@ const routes: Routes = [
     AlarmsModule,
     PhueModule,
     RoutinesModule,
-    MatIconModule
+    MatIconModule,
+    AlarmModule
   ],
   providers: [Title],
   bootstrap: [AppComponent],
