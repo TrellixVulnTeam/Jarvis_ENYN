@@ -7,6 +7,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {TileSelectorComponent} from "../../../ui/tile-selector/tileSelector.component";
 import {MatTimepickerModule} from "mat-timepicker";
 import {MatIconModule} from "@angular/material/icon";
+import {TimepickerModule} from "ngx-bootstrap/timepicker";
 
 
 @NgModule({
@@ -18,10 +19,12 @@ import {MatIconModule} from "@angular/material/icon";
     MatTimepickerModule,
     FormsModule,
     RouterModule,
-    MatIconModule
+    MatIconModule,
+    TimepickerModule
   ],
   providers: [],
   bootstrap: [],
   exports: [RoutinesComponent]
 })
-export class RoutinesModule { }
+export class RoutinesModule {
+}

@@ -1,9 +1,8 @@
-from flask import request, Response
+from flask import request
 from flask_restx import Resource
 
 from src.speechassistant.api.myapi import api
 from src.speechassistant.api.speechassistant.logic.routine import *
-from src.speechassistant.api.speechassistant.api_definition import routine
 from src.speechassistant.api.speechassistant.parser import routine_parser as parser
 
 namespace = api.namespace('routines')

@@ -8,7 +8,7 @@ from flask import Response
 from src.speechassistant.database.database_connection import DataBase
 from src.speechassistant.exceptions.SQLException import NoMatchingEntry
 
-database: DataBase = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\', None)
+database: DataBase = DataBase.get_instance()
 
 
 def create_routine(data: dict) -> Response:

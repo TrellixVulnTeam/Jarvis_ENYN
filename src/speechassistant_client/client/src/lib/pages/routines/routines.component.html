@@ -3,18 +3,19 @@
     <routine-collapse *ngFor="let routine of  routines"
         [routine]="routine"
   ></routine-collapse>-->
-  <div class="alert alert-info"
-    *ngIf="routines.length == 0">
+  <div *ngIf="routines.length == 0"
+       class="alert alert-info">
     Aktuell hast du noch <strong>keine Routinen</strong> eingerichtet.
-    <button type="button"
+    <button (click)="openModal(addRoutineModal, 'xl')"
             class="btn btn-primary"
-            (click)="openModal(addRoutineModal, 'xl')"
-    >Neue Routine erzeugen</button>
+            type="button"
+    >Neue Routine erzeugen
+    </button>
   </div>
   <routine-collapse
     *ngFor="let routine of routines"
-    [routine]="routine"
     [editName]="true"
+    [routine]="routine"
   ></routine-collapse>
 
 </div>
@@ -23,7 +24,7 @@
   <!-- Modal Header -->
   <div class="modal-header">
     <h4 class="modal-title">Neue Routine anlegen</h4>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
   </div>
 
   <!-- Modal body -->
@@ -31,14 +32,15 @@
     <div *ngIf="postRoutine; else inputFields" class="spinner-border text-primary" style="justify-content: center">
     </div>
     <ng-template #inputFields>
-      <form action="/action_page.php">
+      <form>
         <div class="mb-3 mt-3">
-          <label for="name" class="form-label">Name:</label>
-          <input type="text" class="form-control" id="name" placeholder="Gib den Namen der Routine ein" name="name">
+          <label class="form-label" for="name">Name:</label>
+          <input class="form-control" id="name" name="name" placeholder="Gib den Namen der Routine ein" type="text">
         </div>
         <div class="mb-3">
-          <label for="description" class="form-label">Beschreibung:</label>
-          <input type="text" class="form-control" id="description" placeholder="Gib eine Beschreibung an" name="description">
+          <label class="form-label" for="description">Beschreibung:</label>
+          <input class="form-control" id="description" name="description" placeholder="Gib eine Beschreibung an"
+                 type="text">
         </div>
         <div class="row">
           <div class="col-lg-2 border-end">
@@ -49,25 +51,25 @@
                   <div class="form-check">
                     <label class="form-check-label mb-auto">
                       Montag
-                      <input class="form-check-input" type="checkbox" name="monday">
+                      <input class="form-check-input" name="monday" type="checkbox">
                     </label>
                   </div>
                   <div class="form-check mb-auto">
                     <label class="form-check-label">
                       Dienstag
-                      <input class="form-check-input" type="checkbox" name="tuesday">
+                      <input class="form-check-input" name="tuesday" type="checkbox">
                     </label>
                   </div>
                   <div class="form-check">
                     <label class="form-check-label">
                       Mittwoch
-                      <input class="form-check-input" type="checkbox" name="wednesday">
+                      <input class="form-check-input" name="wednesday" type="checkbox">
                     </label>
                   </div>
                   <div class="form-check">
                     <label class="form-check-label">
                       Donnerstag
-                      <input class="form-check-input" type="checkbox" name="thursday">
+                      <input class="form-check-input" name="thursday" type="checkbox">
                     </label>
                   </div>
                 </div>
@@ -76,105 +78,121 @@
                   <div class="form-check">
                     <label class="form-check-label">
                       Freitag
-                      <input class="form-check-input" type="checkbox" name="friday">
+                      <input class="form-check-input" name="friday" type="checkbox">
                     </label>
                   </div>
                   <div class="form-check">
                     <label class="form-check-label">
                       Samstag
-                      <input class="form-check-input" type="checkbox" name="saturday">
+                      <input class="form-check-input" name="saturday" type="checkbox">
                     </label>
                   </div>
                   <div class="form-check">
                     <label class="form-check-label">
                       Sonntag
-                      <input class="form-check-input" type="checkbox" name="sunday">
+                      <input class="form-check-input" name="sunday" type="checkbox">
                     </label>
                   </div>
                 </div>
               </div>
-          </div>
+            </div>
             <div class="border-top">
               <div>
                 an einem bestimmten Datum:
                 <div *ngIf="emptyRoutine.dateOfDay">
                   <div *ngFor="let date of emptyRoutine.dateOfDay">
-                    <input type="date"
+                    <input (change)="onEmptyRoutineDateChange($event)"
                            placeholder="Datum eingeben"
-                           (change)="onEmptyRoutineDateChange($event)">
+                           type="date">
                   </div>
                 </div>
                 <div style="justify-items: center">
-                  <mat-icon class="add-button"
-                            (click)="onAddDateToEmptyRoutine()"
-                  >add_circle</mat-icon>
+                  <mat-icon (click)="onAddDateToEmptyRoutine()"
+                            class="add-button"
+                  >add_circle
+                  </mat-icon>
                 </div>
               </div>
             </div>
-        </div>
-        <div class="col-lg-2">
-          um x Uhr:
-          <ul class="list-group" *ngIf="emptyRoutine.clock_time.length > 0; else createFirstTime" id="times">
-            <div class="input-group mb-3" *ngFor="let time of emptyRoutine.clock_time">
-              <input matTimepicker class="form-control"
-                     #t="matTimepicker"
-                     mode="24h"
-                     [value]=time
-                     [strict]="false"
-                     (timeChange)="onEmptyRoutineTimeChange($event)"
-              >
-              <button class="btn btn-primary" type="button" (click)="t.showDialog()"><mat-icon>edit</mat-icon></button>
-              <button class="btn btn-danger" type="button" (click)="onEmptyTimeDelete(time)"><mat-icon>delete_forever</mat-icon></button>
-            </div>
-            <mat-icon class="add-button" (click)="onAddTimeToEmptyRoutine()">add_circle</mat-icon>
-          </ul>
-          <ng-template #createFirstTime>
-            <div class="alert alert-sm alert-secondary">
-              <strong>Aktuell wird die Rutine zu keiner festen Uhrzeit gestartet!</strong> Wenn du möchtest, kannst du jetzt <button class="btn btn-secondary btn-sm" (click)="onAddTimeToEmptyRoutine()">eine Uhrzeit bestimmen</button>.
-            </div>
-          </ng-template>
-          <div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="afterSunrise" name="afterSunrise" (click)="onEmptyRepeatChange('sunrise', $event)">
-              <label class="form-check-label" for="afterSunrise">nach Sonnenaufgang</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="afterSunset" name="afterSunrise" (click)="onEmptyRepeatChange('sunset', $event)">
-              <label class="form-check-label" for="afterSunset">nach Sonnenuntergang</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="afterAlarm" name="afterAlarm"  (click)="onEmptyRepeatChange('alarm', $event)">
-              <label class="form-check-label" for="afterAlarm">nach Wecker</label>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="afterCall" name="afterCall"  (click)="onEmptyRepeatChange('call', $event)">
-              <label class="form-check-label" for="afterSunrise">nach Nutzeraufruf</label>
+          </div>
+          <div class="col-lg-2">
+            um x Uhr:
+            <ul *ngIf="emptyRoutine.clock_time.length > 0; else createFirstTime" class="list-group" id="times">
+              <div *ngFor="let time of emptyRoutine.clock_time" class="mb-3 d-flex flex-row justify-content-between">
+                <timepicker [(ngModel)]="this.emptyRoutine.clock_time[getIndexOfTimeOfEmptyRoutine(time)]"
+                            [showMeridian]="false"
+                            [showSpinners]="false"></timepicker>
+                <button (click)="onEmptyTimeDelete(time)" class="btn btn-danger" type="button">
+                  <mat-icon>delete_forever</mat-icon>
+                </button>
+              </div>
+              <mat-icon (click)="onAddTimeToEmptyRoutine()" class="add-button">add_circle</mat-icon>
+            </ul>
+            <ng-template #createFirstTime>
+              <div class="alert alert-sm alert-secondary">
+                <strong>Aktuell wird die Rutine zu keiner festen Uhrzeit gestartet!</strong> Wenn du möchtest, kannst du
+                jetzt
+                <button (click)="onAddTimeToEmptyRoutine()" class="btn btn-secondary btn-sm">eine Uhrzeit bestimmen
+                </button>
+                .
+              </div>
+            </ng-template>
+            <div>
+              <div class="form-check form-switch">
+                <input (click)="onEmptyRepeatChange('sunrise', $event)" class="form-check-input" id="afterSunrise"
+                       name="afterSunrise"
+                       type="checkbox">
+                <label class="form-check-label" for="afterSunrise">nach Sonnenaufgang</label>
+              </div>
+              <div class="form-check form-switch">
+                <input (click)="onEmptyRepeatChange('sunset', $event)" class="form-check-input" id="afterSunset"
+                       name="afterSunrise"
+                       type="checkbox">
+                <label class="form-check-label" for="afterSunset">nach Sonnenuntergang</label>
+              </div>
+              <div class="form-check form-switch">
+                <input (click)="onEmptyRepeatChange('alarm', $event)" class="form-check-input" id="afterAlarm"
+                       name="afterAlarm"
+                       type="checkbox">
+                <label class="form-check-label" for="afterAlarm">nach Wecker</label>
+              </div>
+              <div class="form-check form-switch">
+                <input (click)="onEmptyRepeatChange('call', $event)" class="form-check-input" id="afterCall"
+                       name="afterCall"
+                       type="checkbox">
+                <label class="form-check-label" for="afterSunrise">nach Nutzeraufruf</label>
+              </div>
             </div>
           </div>
-        </div>
         </div>
         <div>
           aufgerufene Module:
           <ul class="list-group">
             <li *ngFor="let item of emptyCommands">
-              <select class="form-select" [value]="item.moduleName">
+              <select [value]="item.moduleName" class="form-select">
                 <option *ngFor="let name in moduleNames">name</option>
               </select>
               <ul class="list-group">
-                <li class="list-group-item" *ngFor="let text of item.text">
+                <li *ngFor="let text of item.text" class="list-group-item">
                   <div class="input-group">
-                    <input type="text" #input class="form-control" [value]="text" (change)="onChangeCommandOfEmptyRoutine(item.id, input.value)">
+                    <input #input (change)="onChangeCommandOfEmptyRoutine(item.id, input.value)" [value]="text"
+                           class="form-control"
+                           type="text">
                   </div>
                 </li>
               </ul>
-              <button class="btn btn-danger" type="button" (click)="onEmptyTimeDelete(item.id)"><mat-icon>delete_forever</mat-icon></button>
+              <button (click)="onEmptyTimeDelete(item.id)" class="btn btn-danger" type="button">
+                <mat-icon>delete_forever</mat-icon>
+              </button>
             </li>
-            <li class="list-group-item"><mat-icon class="add-button" (click)="onAddCommandToEmptyRoutine()">add_circle</mat-icon></li>
+            <li class="list-group-item">
+              <mat-icon (click)="onAddCommandToEmptyRoutine()" class="add-button mx-auto">add_circle</mat-icon>
+            </li>
           </ul>
         </div>
         <div class="form-check mb-3">
           <label class="form-check-label">
-            <input class="form-check-input" type="checkbox" name="remember"> Remember me
+            <input class="form-check-input" name="remember" type="checkbox"> Remember me
           </label>
         </div>
       </form>
@@ -185,8 +203,8 @@
   <!-- Modal footer -->
   <div class="modal-footer">
     <div class="btn-group">
-      <button type="button" class="btn btn-primary" (click)="onAddRoutine()">speichern</button>
-      <button type="button" class="btn btn-danger" (click)="onDiscardRoutine()">verwerfen</button>
+      <button (click)="onAddRoutine()" class="btn btn-primary" type="button">speichern</button>
+      <button (click)="onDiscardRoutine()" class="btn btn-danger" type="button">verwerfen</button>
     </div>
   </div>
 </ng-template>
