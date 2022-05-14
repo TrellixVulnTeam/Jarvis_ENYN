@@ -6,7 +6,7 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {Command} from "../../data-access/models/command";
 import {materialModuleSpecifier} from "@angular/material/schematics/ng-update/typescript/module-specifiers";
 import {retry} from "rxjs";
-import {RoutineStore} from "../../data-access/service/routine.store";
+import {RoutineStore} from "../../data-access/service/store/routine.store";
 
 @Component({
   selector: 'routines',
