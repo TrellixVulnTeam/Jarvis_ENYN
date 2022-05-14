@@ -2,6 +2,7 @@ from __future__ import annotations  # compatibility for < 3.10
 
 import io
 import json
+import logging
 import pathlib
 from datetime import datetime
 from typing import Callable, TypeAlias  # , TypeAlias
@@ -42,7 +43,8 @@ class DataBase:
 
         logging.basicConfig(level=logging.DEBUG)
         logging.info('[ACTION] Initialize DataBase...\n')
-        self.db: Connection = sqlite3.connect(os.getcwd().join('data_base'), check_same_thread=False)
+        logging.info(os.path.dirname(os.path.realpath(__file__)) + '\data_base')
+        self.db: Connection = sqlite3.connect(os.path.dirname(os.path.realpath(__file__)) + '\data_base', check_same_thread=False)
         self.error_counter: int = 0
 
         self.user_interface = self._UserInterface(self.db)
@@ -62,6 +64,11 @@ class DataBase:
         DataBase.__instance = self
 
         logging.info('[INFO] DataBase successfully initialized.')
+
+    def close(self):
+        self.db.close()
+        DataBase.__instance = None
+        logging.info('[ACTION] DataBase closed!')
 
     def create_tables(self) -> None:
         # toDo: CONSTRAINTS
@@ -499,7 +506,9 @@ class DataBase:
             return active_returning_list, init_returning_list
 
         def add_alarm(self, time: dict, text: str, user: int | str, repeating: dict, active: bool = True,
-                      initiated: bool = False, song: str = 'standard.wav') -> dict:
+                      initiated: bool = False, song: str = 'standard') -> dict:
+            if song is None:
+                song = 'standard'
             cursor: Cursor = self.db.cursor()
             if type(user) is str:
                 user = self.__get_user_id(user)
@@ -581,7 +590,7 @@ class DataBase:
                 last_executed = _last_executed
 
             statement: str = f'UPDATE alarm SET sname=?, uid=?, hour=?, minute=?, total_seconds=?, text=?, active=?, ' \
-                             f'initiaded=?, last_executed=? WHERE aid=?'
+                             f'initiated=?, last_executed=? WHERE aid=?'
             cursor.execute(statement, (sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed,
                                        aid))
             cursor.close()
@@ -598,7 +607,7 @@ class DataBase:
                 raise NoMatchingEntry(f'No matching element with the id {aid} was found in the database.')
             result_set: tuple = cursor.fetchone()
 
-            aid, monday, tuesday, wednesday, thursday, friday, saturday, sunday = result_set
+            aid, monday, tuesday, wednesday, thursday, friday, saturday, sunday, repeat = result_set
 
             if _monday is not None:
                 monday = int(_monday is True)
@@ -635,6 +644,8 @@ class DataBase:
                 return result_list
 
             result_list: list[dict] = []
+            if not result_set:
+                return []
             for aid, sname, uid, hour, minute, total_seconds, text, active, initiated, last_executed, _, monday, tuesday, wednesday, thursday, friday, saturday, sunday, regular in result_set:
                 statement: str = 'SELECT path FROM audio WHERE name=?'
                 cursor.execute(statement, (sname,))
