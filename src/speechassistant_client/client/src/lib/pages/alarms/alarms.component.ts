@@ -40,7 +40,6 @@ export class AlarmsComponent implements OnInit {
     text: "Guten Morgen!",
     sound: "standard"
   };
-  sounds: string[] = [];
 
   constructor(private route: ActivatedRoute,
               private backendService: BackendService,

@@ -1,11 +1,12 @@
-import {BrowserModule} from "@angular/platform-browser";
-import {NgModule} from '@angular/core';
+import {NgModule} from "@angular/core";
 import {AlarmsComponent} from "./alarms.component";
-import {TimepickerModule} from "ngx-bootstrap/timepicker";
+import {BrowserModule} from "@angular/platform-browser";
 import {FormsModule} from "@angular/forms";
 import {RouterModule} from "@angular/router";
 import {MatIconModule} from "@angular/material/icon";
 import {LoadingModule} from "../../shared/loading/loading.module";
+import {TimepickerModule} from "ngx-bootstrap/timepicker";
+
 
 @NgModule({
   declarations: [

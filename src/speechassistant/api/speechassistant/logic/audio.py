@@ -12,7 +12,7 @@ from src.speechassistant.exceptions.SQLException import FileNameAlreadyExists
 from src.speechassistant.database.database_connection import DataBase
 
 folder: str = 'C:\\Users\\Jakob\\PycharmProjects\\Jarvis'
-database: DataBase = DataBase('C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\', None)
+database: DataBase = DataBase.get_instance()
 
 
 def create_audio_file(filename: str, data: request) -> Response:

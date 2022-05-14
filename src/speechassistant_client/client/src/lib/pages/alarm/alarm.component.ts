@@ -22,7 +22,7 @@ export class AlarmComponent implements OnInit {
 
   repeatingModalRef?: BsModalRef;
   textModalRef?: BsModalRef;
-  soundNames: string[] = [];
+  soundNames: string[] = ['standard', 'test'];
 
   constructor(private alarmStore: AlarmStore,
               private soundStore: SoundStore,
