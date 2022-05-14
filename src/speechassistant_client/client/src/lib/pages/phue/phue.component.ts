@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from "@angular/core";
-import {LightStore} from "../../data-access/service/light.store";
+import {LightStore} from "../../data-access/service/store/light.store";
 import {Light} from "../../data-access/models/light";
 import {LightGroup} from "../../data-access/models/lightGroup";
 
