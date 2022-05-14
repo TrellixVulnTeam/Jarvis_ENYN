@@ -1,8 +1,7 @@
-
-import {HttpClient, HttpEvent, HttpRequest, HttpResponse} from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import {Observable, retry} from 'rxjs';
-import { Routine } from '../models';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {Routine} from '../models';
 import {JsonObject} from "@angular/compiler-cli/ngcc/src/packages/entry_point";
 import {Alarm} from "../models/alarm";
 import {map} from "rxjs/operators";
@@ -15,112 +14,7 @@ import {LightGroup} from "../models/lightGroup";
 export class BackendService {
   readonly url: string = 'http://localhost:4200/api/v1/'
 
-  constructor(private httpClient: HttpClient) { }
-
-  loadRoutine(name: string): Observable<Routine> {
-    return this.httpClient.get<Routine>(this.url + 'routines/'+name);
-  }
-
-  loadAllRoutines(): Observable<Routine[]> {
-    return this.httpClient.get<Routine[]>(this.url + 'routines/').pipe(
-      map ((routines: Routine[]) => {
-        for (let i = 0; i < routines.length; i++) {
-          // @ts-ignore
-            let dates: JsonObject[] = routines[i].dateOfDay;
-            // @ts-ignore
-            let times: JsonObject[] = routines[i].clock_time;
-            routines[i].dateOfDay = [];
-            routines[i].clock_time = [];
-
-            dates.forEach(date => {
-              let newDate: Date = new Date();
-              newDate.setMonth(date["month"] as number);
-              newDate.setDate(date["day"] as number);
-              routines[i].dateOfDay.push(newDate);
-            });
-
-            times.forEach(time => {
-              let newTime: Date = new Date();
-              newTime.setHours(time["hour"] as number);
-              newTime.setMinutes(time["minute"] as number);
-              routines[i].dateOfDay.push(newTime);
-            });
-        }
-        return routines;
-    })
-    );
-  }
-
-  createRoutine(routine: Routine): Observable<Routine> {
-    let routinePayload = BackendService.getRoutinePayload(routine);
-    return this.httpClient.post<Routine>(this.url + 'routines/', routinePayload);
-  }
-
-  deleteRoutine(name: string): Observable<void> {
-    return this.httpClient.delete<void>(this.url + 'routines/' + name);
-  }
-
-  updateRoutine(routine: Routine): Observable<Routine> {
-    let routinePayload = BackendService.getRoutinePayload(routine);
-    return this.httpClient.put<Routine>(this.url + 'routines/', routinePayload);
-  }
-
-  loadAlarms(): Observable<Alarm[]> {
-    return this.httpClient.get<Alarm[]>(this.url + 'alarms/').pipe(
-      map (alarms => {
-        alarms.forEach(alarm => {
-          // @ts-ignore
-          let hours = alarm.time["hour"] as number;
-          // @ts-ignore
-          let minutes = alarm.time["minute"] as number;
-          alarm.time = new Date();
-          alarm.time.setHours(hours);
-          alarm.time.setMinutes(minutes);
-        })
-        return alarms;
-      }));
-  }
-
-  loadAlarmWithId(id: number): Observable<Alarm> {
-    return this.httpClient.get<Alarm>(this.url + 'alarms/'+id).pipe(
-      map (alarm => {
-          // @ts-ignore
-          let hours = alarm.time["hour"] as number;
-          // @ts-ignore
-          let minutes = alarm.time["minute"] as number;
-          alarm.time = new Date();
-          alarm.time.setHours(hours);
-          alarm.time.setMinutes(minutes);
-          return alarm;
-        })
-      );
-  }
-
-  loadGroupById(id: number): Observable<LightGroup> {
-    return this.httpClient.get<LightGroup>(this.url + 'groups/' +id);
-  }
-
-  loadAllGroups(): Observable<LightGroup[]> {
-    return this.httpClient.get<LightGroup[]>(this.url + 'groups');
-  }
-
-  createAlarm(alarm: Alarm): Observable<Alarm> {
-    let alarmPayload = BackendService.getAlarmPayload(alarm);
-    return this.httpClient.post<Alarm>(this.url + 'alarms/', alarmPayload);
-  }
-
-  deleteAlarm(id: number): Observable<Alarm> {
-    return this.httpClient.delete<Alarm>(this.url + 'alarms/'+id);
-  }
-
-  updateAlarm(alarm: Alarm): Observable<Alarm> {
-    let alarmPayload = BackendService.getAlarmPayload(alarm);
-    return this.httpClient.put<Alarm>(this.url + 'alarms/', alarmPayload);
-  }
-
-  updateAlarmActiveState(id: number, active: boolean): Observable<any> {
-    let alarmPayload = { "active": active };
-    return this.httpClient.put<any>(this.url + 'alarms/'+id, alarmPayload);
+  constructor(private httpClient: HttpClient) {
   }
 
   private static getRoutinePayload(routine: Routine): JsonObject {
@@ -171,38 +65,175 @@ export class BackendService {
   }
 
   private static getAlarmPayload(alarm: Alarm): JsonObject {
-    return {
-      "time": {
-        "hour": alarm.time.getHours(),
-        "minute": alarm.time.getMinutes(),
-        "total_seconds": alarm.time.getHours()*3600+alarm.time.getMinutes()*60
-      },
-      "repeating": {
-        "monday": alarm.monday,
-        "tuesday": alarm.tuesday,
-        "wednesday": alarm.wednesday,
-        "thursday": alarm.thursday,
-        "friday": alarm.friday,
-        "saturday": alarm.saturday,
-        "sunday": alarm.sunday,
-        "regular": alarm.regular
-      },
-      "text": alarm.text,
-      "sound": alarm.sound
+    if (alarm.timeObject) {
+      return {
+        "time": {
+          "hour": alarm.timeObject.getHours(),
+          "minute": alarm.timeObject.getMinutes(),
+          "total_seconds": alarm.timeObject.getHours() * 3600 + alarm.timeObject.getMinutes() * 60
+        },
+        "repeating": {
+          "monday": alarm.monday,
+          "tuesday": alarm.tuesday,
+          "wednesday": alarm.wednesday,
+          "thursday": alarm.thursday,
+          "friday": alarm.friday,
+          "saturday": alarm.saturday,
+          "sunday": alarm.sunday,
+          "regular": alarm.regular
+        },
+        "text": alarm.text,
+        "sound": alarm.sound,
+        "active": alarm.active
+      }
+    } else {
+      return {
+        "time": {
+          "hour": -1,
+          "minute": -1,
+          "total_seconds": -1
+        },
+        "repeating": {
+          "monday": alarm.monday,
+          "tuesday": alarm.tuesday,
+          "wednesday": alarm.wednesday,
+          "thursday": alarm.thursday,
+          "friday": alarm.friday,
+          "saturday": alarm.saturday,
+          "sunday": alarm.sunday,
+          "regular": alarm.regular
+        },
+        "text": alarm.text,
+        "sound": alarm.sound,
+        "active": alarm.active
+      }
     }
   }
 
-  loadAllModuleNames(): Observable<string[]> {
-    return this.httpClient.get<string[]>(this.url + 'module/names');
+  loadRoutine(name: string): Observable<Routine> {
+    return this.httpClient.get<Routine>(this.url + 'routines/' + name);
+  }
+
+  loadAllRoutines(): Observable<Routine[]> {
+    return this.httpClient.get<Routine[]>(this.url + 'routines/').pipe(
+      map((routines: Routine[]) => {
+        for (let i = 0; i < routines.length; i++) {
+          // @ts-ignore
+          let dates: JsonObject[] = routines[i].dateOfDay;
+          // @ts-ignore
+          let times: JsonObject[] = routines[i].clock_time;
+          routines[i].dateOfDay = [];
+          routines[i].clock_time = [];
+
+          dates.forEach(date => {
+            let newDate: Date = new Date();
+            newDate.setMonth(date["month"] as number);
+            newDate.setDate(date["day"] as number);
+            routines[i].dateOfDay.push(newDate);
+          });
+
+          times.forEach(time => {
+            let newTime: Date = new Date();
+            newTime.setHours(time["hour"] as number);
+            newTime.setMinutes(time["minute"] as number);
+            routines[i].dateOfDay.push(newTime);
+          });
+        }
+        return routines;
+      })
+    );
+  }
+
+  createRoutine(routine: Routine): Observable<Routine> {
+    let routinePayload = BackendService.getRoutinePayload(routine);
+    return this.httpClient.post<Routine>(this.url + 'routines/', routinePayload);
+  }
+
+  deleteRoutine(name: string): Observable<any> {
+    return this.httpClient.delete(this.url + 'routines/' + name);
+  }
+
+  updateRoutine(routine: Routine): Observable<Routine> {
+    let routinePayload = BackendService.getRoutinePayload(routine);
+    return this.httpClient.put<Routine>(this.url + 'routines/', routinePayload);
+  }
+
+  loadAlarms(): Observable<Alarm[]> {
+    return this.httpClient.get<Alarm[]>(this.url + 'alarms/').pipe(
+      map(alarms => {
+        alarms.forEach(alarm => {
+          // @ts-ignore
+          let hours = alarm.time["hour"] as number;
+          // @ts-ignore
+          let minutes = alarm.time["minute"] as number;
+          alarm.timeObject = new Date();
+          alarm.timeObject.setHours(hours);
+          alarm.timeObject.setMinutes(minutes);
+        })
+        return alarms;
+      }));
+  }
+
+  loadAlarmWithId(id: number): Observable<Alarm> {
+    return this.httpClient.get<Alarm>(this.url + 'alarms/' + id).pipe(
+      map(alarm => {
+        // @ts-ignore
+        let hours = alarm.time["hour"] as number;
+        // @ts-ignore
+        let minutes = alarm.time["minute"] as number;
+        alarm.timeObject = new Date();
+        alarm.timeObject.setHours(hours);
+        alarm.timeObject.setMinutes(minutes);
+        return alarm;
+      })
+    );
+  }
+
+  loadGroupById(id: number): Observable<LightGroup> {
+    return this.httpClient.get<LightGroup>(this.url + 'groups/' + id);
+  }
+
+  loadAllGroups(): Observable<LightGroup[]> {
+    return this.httpClient.get<LightGroup[]>(this.url + 'groups');
+  }
+
+  createAlarm(alarm: Alarm): Observable<HttpResponse<Object>> {
+    let alarmPayload = BackendService.getAlarmPayload(alarm);
+    return this.httpClient.post(this.url + 'alarms/', alarmPayload, {observe: 'response'});
+  }
+
+  deleteAlarm(id: number): Observable<any> {
+    return this.httpClient.delete(this.url + 'alarms/' + id);
+  }
+
+  updateAlarm(alarm: Alarm): Observable<Alarm> {
+    let alarmPayload = BackendService.getAlarmPayload(alarm);
+    return this.httpClient.put<Alarm>(this.url + 'alarms/' + alarm.id, alarmPayload);
+  }
+
+  updateAlarmActiveState(id: number, active: boolean): Observable<any> {
+    let alarmPayload = {"active": active};
+    return this.httpClient.put<any>(this.url + 'alarms/' + id, alarmPayload);
+  }
+
+  loadModuleNames(): Observable<string[]> {
+    return this.httpClient.get<JsonObject>(this.url + 'modules/names').pipe(
+      map(json => {
+        console.log(json);
+        return ['str', 'str'];
+      })
+    );
   }
 
   loadAllSounds(): Observable<string[]> {
     interface SoundFiles {
       sound_files: string[];
     }
+
     return this.httpClient.get<SoundFiles>(this.url + 'audio/names').pipe(
       map(response => {
-        return response.sound_files})
+        return response.sound_files
+      })
     );
   }
 
