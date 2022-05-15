@@ -217,10 +217,13 @@ export class BackendService {
   }
 
   loadModuleNames(): Observable<string[]> {
-    return this.httpClient.get<JsonObject>(this.url + 'modules/names').pipe(
+    return this.httpClient.get(this.url + 'modules/names', {
+      observe: 'body',
+      responseType: 'text'
+    }).pipe(
       map(json => {
-        console.log(json);
-        return ['str', 'str'];
+        console.log("json:" + json);
+        return JSON.parse(json)["names"];
       })
     );
   }
