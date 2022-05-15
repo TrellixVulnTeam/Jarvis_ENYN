@@ -4,30 +4,36 @@
       {{ routine.name }}
     </a>
   </div>
-  <div id="collapseOne" class="collapse show" data-bs-parent="#accordion">
+  <div class="collapse show" data-bs-parent="#accordion" id="collapseOne">
     <div class="card-body">
       <form>
         <form>
           <fieldset class="border col">
             <legend class="float-none w-auto">Beschreibung</legend>
-            <input type="text" class="form-control" id="description" placeholder="Neue Beschreibung eingeben" name="description" value="{{ routine.description }}">
+            <input class="form-control" id="description" name="description" placeholder="Neue Beschreibung eingeben"
+                   type="text" value="{{ routine.description }}">
           </fieldset>
         </form>
 
         <fieldset class="border col">
           <legend class="float-none w-auto">Spezifische Sprachbefehle des Nutzers</legend>
-          <ul class="list-group" *ngIf="routine.onCommands.length > 0; else createFirstCommand" >
-            <div class="input-group mb-3" *ngFor="let command of onCommands">
-              <input #input type="text" class="form-control"
-                     value="{{ command.getText() }}"
-                      (change)="command.setText(input.value)">
-              <button class="btn btn-danger" type="button" (click)="onOnCommandDelete(command.getID())"><mat-icon>delete_forever</mat-icon></button>
+          <ul *ngIf="routine.onCommands.length > 0; else createFirstCommand" class="list-group">
+            <div *ngFor="let command of onCommands" class="input-group mb-3">
+              <input #input (change)="command.setText(input.value)" class="form-control"
+                     type="text"
+                     value="{{ command.getText() }}">
+              <button (click)="onOnCommandDelete(command.getID())" class="btn btn-danger" type="button">
+                <mat-icon>delete_forever</mat-icon>
+              </button>
             </div>
-            <mat-icon class="add-button" (click)="onAddOnCommand()">add_circle</mat-icon>
+            <mat-icon (click)="onAddOnCommand()" class="add-button">add_circle</mat-icon>
           </ul>
           <ng-template #createFirstCommand>
             <div class="alert alert-sm alert-secondary">
-              <strong>Aktuell wird die Rutine von noch keinem spezifischen Befehl gestartet!</strong> Wenn du möchtest, kannst du jetzt <button class="btn btn-secondary btn-sm" (click)="onAddOnCommand()">ein Kommando anlegen</button>.
+              <strong>Aktuell wird die Rutine von noch keinem spezifischen Befehl gestartet!</strong> Wenn du möchtest,
+              kannst du jetzt
+              <button (click)="onAddOnCommand()" class="btn btn-secondary btn-sm">ein Kommando anlegen</button>
+              .
             </div>
           </ng-template>
         </fieldset>
@@ -39,52 +45,52 @@
               <div class="smaller d-sm">
                 <div class="row">
                   <tile-selector
-                    class="col p-2"
-                    [text]="'Montag'"
-                    [checked]="routine['monday']"
                     (onCheckedEvent)="onRepeatDayChange('monday', $event)"
-                  ></tile-selector>
-                  <tile-selector
-                    class="col p-2"
-                    [text]="'Dienstag'"
-                    [checked]="routine['tuesday']"
-                    (onCheckedEvent)="onRepeatDayChange('tuesday', $event)"
-                  ></tile-selector>
-                </div>
-                <div class="row">
-                  <tile-selector
-                    class="col p-2"
-                    [text]="'Mittwoch'"
-                    [checked]="routine['wednesday']"
-                    (onCheckedEvent)="onRepeatDayChange('wednesday', $event)"
-                  ></tile-selector>
-                  <tile-selector
-                    class="col p-2"
-                    [text]="'Donnerstag'"
                     [checked]="routine['monday']"
+                    [text]="'Montag'"
+                    class="col p-2"
+                  ></tile-selector>
+                  <tile-selector
+                    (onCheckedEvent)="onRepeatDayChange('tuesday', $event)"
+                    [checked]="routine['tuesday']"
+                    [text]="'Dienstag'"
+                    class="col p-2"
+                  ></tile-selector>
+                </div>
+                <div class="row">
+                  <tile-selector
+                    (onCheckedEvent)="onRepeatDayChange('wednesday', $event)"
+                    [checked]="routine['wednesday']"
+                    [text]="'Mittwoch'"
+                    class="col p-2"
+                  ></tile-selector>
+                  <tile-selector
                     (onCheckedEvent)="onRepeatDayChange('thursday', $event)"
+                    [checked]="routine['monday']"
+                    [text]="'Donnerstag'"
+                    class="col p-2"
                   ></tile-selector>
                 </div>
                 <div class="row">
                   <tile-selector
-                    class="col p-2"
-                    [text]="'Freitag'"
-                    [checked]="routine['friday']"
                     (onCheckedEvent)="onRepeatDayChange('friday', $event)"
+                    [checked]="routine['friday']"
+                    [text]="'Freitag'"
+                    class="col p-2"
                   ></tile-selector>
                   <tile-selector
-                    class="col p-2"
-                    [text]="'Samstag'"
-                    [checked]="routine['saturday']"
                     (onCheckedEvent)="onRepeatDayChange('saturday', $event)"
+                    [checked]="routine['saturday']"
+                    [text]="'Samstag'"
+                    class="col p-2"
                   ></tile-selector>
                 </div>
                 <div class="row">
                   <tile-selector
-                    class="col p-2"
-                    [text]="'Sonntag'"
-                    [checked]="routine['sunday']"
                     (onCheckedEvent)="onRepeatDayChange('sunday', $event)"
+                    [checked]="routine['sunday']"
+                    [text]="'Sonntag'"
+                    class="col p-2"
                   ></tile-selector>
                 </div>
               </div>
@@ -94,57 +100,66 @@
             <div class="col p-2">
               <form>
                 <div class="mb-md-auto mt-md-auto">
-                  <label for="activation" class="form-label">Aktivierung an Tagen:</label>
+                  <label class="form-label" for="activation">Aktivierung an Tagen:</label>
                   <div id="activation">
                     <form>
                       <div class="mb-md-auto mt-md-auto">
                         <label for="times">Zu bestimmten Zeiten:</label>
-                        <ul class="list-group" *ngIf="routine.clock_time.length > 0; else createFirstTime" id="times">
-                          <div class="input-group mb-3" *ngFor="let time of clockTimes">
-                            <input matTimepicker class="form-control"
-                                   #t="matTimepicker"
-                                   mode="24h"
-                                   [value]=time
+                        <ul *ngIf="routine.clock_time.length > 0; else createFirstTime" class="list-group" id="times">
+                          <div *ngFor="let time of clockTimes" class="input-group mb-3">
+                            <input #t="matTimepicker" (timeChange)="onTimeChange(time, $event)"
                                    [strict]="false"
-                                   (timeChange)="onTimeChange(time, $event)"
+                                   [value]=time
+                                   class="form-control"
+                                   matTimepicker
+                                   mode="24h"
                             >
-                            <button class="btn btn-primary" type="button" (click)="t.showDialog()"><mat-icon>edit</mat-icon></button>
-                            <button class="btn btn-danger" type="button" (click)="onTimeDelete(time)"><mat-icon>delete_forever</mat-icon></button>
+                            <input class="form-control" id="datepicker" name="datepicker" type="text"/>
+                            <button (click)="t.showDialog()" class="btn btn-primary" type="button">
+                              <mat-icon>edit</mat-icon>
+                            </button>
+                            <button (click)="onTimeDelete(time)" class="btn btn-danger" type="button">
+                              <mat-icon>delete_forever</mat-icon>
+                            </button>
                           </div>
-                          <mat-icon class="add-button" (click)="onAddClockTime()">add_circle</mat-icon>
+                          <mat-icon (click)="onAddClockTime()" class="add-button">add_circle</mat-icon>
                         </ul>
                         <ng-template #createFirstTime>
                           <div class="alert alert-sm alert-secondary">
-                            <strong>Aktuell wird die Rutine zu keiner festen Uhrzeit gestartet!</strong> Wenn du möchtest, kannst du jetzt <button class="btn btn-secondary btn-sm" (click)="onAddClockTime()">eine Uhrzeit bestimmen</button>.
+                            <strong>Aktuell wird die Rutine zu keiner festen Uhrzeit gestartet!</strong> Wenn du
+                            möchtest, kannst du jetzt
+                            <button (click)="onAddClockTime()" class="btn btn-secondary btn-sm">eine Uhrzeit bestimmen
+                            </button>
+                            .
                           </div>
                         </ng-template>
                         <div class="space-before">
                           <div class="row p-2" style="white-space: nowrap">
                             <tile-selector
-                              class="col-md"
-                              [text]="'Nach Wecker'"
-                              [checked]="routine.after_alarm"
                               (onCheckedEvent)="onAfterChange('alarm', $event)"
+                              [checked]="routine.after_alarm"
+                              [text]="'Nach Wecker'"
+                              class="col-md"
                             ></tile-selector>
                             <tile-selector
-                              class="col-md"
-                              [text]="'Nach Sonnenaufgang'"
-                              [checked]="routine.after_sunrise"
                               (onCheckedEvent)="onAfterChange('sunrise', $event)"
+                              [checked]="routine.after_sunrise"
+                              [text]="'Nach Sonnenaufgang'"
+                              class="col-md"
                             ></tile-selector>
                           </div>
                           <div class="row p-2">
                             <tile-selector
-                              class="col-md"
-                              [text]="'Nach Sonnenuntergang'"
-                              [checked]="routine.after_sunset"
                               (onCheckedEvent)="onAfterChange('sunset', $event)"
+                              [checked]="routine.after_sunset"
+                              [text]="'Nach Sonnenuntergang'"
+                              class="col-md"
                             ></tile-selector>
                             <tile-selector
-                              class="col-md"
-                              [text]="'Nach Nutzeraufruf'"
-                              [attr.checked]="routine.after_call"
                               (onCheckedEvent)="onAfterChange('call', $event)"
+                              [attr.checked]="routine.after_call"
+                              [text]="'Nach Nutzeraufruf'"
+                              class="col-md"
                             ></tile-selector>
                           </div>
                         </div>
@@ -159,7 +174,8 @@
 
         <fieldset class="border col">
           <legend class="float-none w-auto">von Rutine aufgerufene Module</legend>
-          <input type="text" class="form-control" id="commands" placeholder="Neue Beschreibung eingeben" name="description">
+          <input class="form-control" id="commands" name="description" placeholder="Neue Beschreibung eingeben"
+                 type="text">
         </fieldset>
       </form>
     </div>

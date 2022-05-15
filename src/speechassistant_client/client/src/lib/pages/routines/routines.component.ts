@@ -36,6 +36,8 @@ export class RoutinesComponent implements OnInit {
   modalRef?: BsModalRef;
   postRoutine: boolean = false;
   moduleNames: string[] = [];
+  lastFocusedItemIndex: number = -1;
+
 
   @Input() routines: Routine[] = [];
 
@@ -48,7 +50,6 @@ export class RoutinesComponent implements OnInit {
     this.routineService.loadRoutines().subscribe(routines => this.routines = routines);
     this.moduleStore.loadModuleNames().subscribe(moduleNames => {
       this.moduleNames = moduleNames;
-      console.log(moduleNames);
     });
   }
 
@@ -125,12 +126,24 @@ export class RoutinesComponent implements OnInit {
     this.emptyCommands.push(new Command(this.emptyCommands.length, "", []));
   }
 
+  onAddTextToCommandOnEmptyRoutine(id: number): void {
+    this.emptyCommands[id].text.push("");
+  }
+
+  onChangeTextOfCommandOnEmptyRoutine(id: number, newValue: string): void {
+    this.emptyCommands[id].text[this.lastFocusedItemIndex] = newValue;
+  }
+
   onChangeCommandOfEmptyRoutine(id: number, moduleName: string): void {
     let index: number = this.emptyCommands.findIndex(item => {
       return item.id === id;
     });
 
     this.emptyCommands[index].moduleName = moduleName;
+  }
+
+  updateFocusedIndex(id: number, value: string): void {
+    this.lastFocusedItemIndex = this.emptyCommands[id].text.findIndex(t => t == value);
   }
 
   onDeleteCommandOfEmptyRoutine(id: number): void {

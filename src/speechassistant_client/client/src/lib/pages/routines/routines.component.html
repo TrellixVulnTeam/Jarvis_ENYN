@@ -168,32 +168,36 @@
         <div>
           aufgerufene Module:
           <ul class="list-group">
-            <li *ngFor="let item of emptyCommands">
-              <select [value]="item.moduleName" class="form-select">
-                <option *ngFor="let name in moduleNames">name</option>
-              </select>
+            <li *ngFor="let item of emptyCommands" class="list-group-item list-group">
+              <div class="input-group mb-3">
+                <input class="form-control" id="exampleDataList" list="datalistOptions" placeholder="Type to search...">
+                <datalist id="datalistOptions">
+                  <option *ngFor="let name of moduleNames" [value]="name">
+                </datalist>
+
+                <button (click)="onEmptyTimeDelete(item.id)" class="btn btn-danger" type="button">
+                  <mat-icon>delete_forever</mat-icon>
+                </button>
+              </div>
+
+              Modul mit folgenden Texten aufrufen.
               <ul class="list-group">
                 <li *ngFor="let text of item.text" class="list-group-item">
-                  <div class="input-group">
-                    <input #input (change)="onChangeCommandOfEmptyRoutine(item.id, input.value)" [value]="text"
-                           class="form-control"
-                           type="text">
-                  </div>
+                  <input #input (change)="onChangeTextOfCommandOnEmptyRoutine(item.id, input.value)"
+                         (focus)="updateFocusedIndex(item.id, input.value)" [value]="text"
+                         class="form-control"
+                         type="text">
+                </li>
+                <li class="list-group-item">
+                  <mat-icon (click)="onAddTextToCommandOnEmptyRoutine(item.id)" class="add-button mx-auto">add_circle
+                  </mat-icon>
                 </li>
               </ul>
-              <button (click)="onEmptyTimeDelete(item.id)" class="btn btn-danger" type="button">
-                <mat-icon>delete_forever</mat-icon>
-              </button>
             </li>
             <li class="list-group-item">
               <mat-icon (click)="onAddCommandToEmptyRoutine()" class="add-button mx-auto">add_circle</mat-icon>
             </li>
           </ul>
-        </div>
-        <div class="form-check mb-3">
-          <label class="form-check-label">
-            <input class="form-check-input" name="remember" type="checkbox"> Remember me
-          </label>
         </div>
       </form>
     </ng-template>

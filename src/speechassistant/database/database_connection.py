@@ -1289,6 +1289,11 @@ class DataBase:
             return {'id': ratid, 'rname': rname, 'command': command}
 
         def add_routine(self, routine: dict) -> None:
+            days: dict = routine['retakes']['days']
+            if days['monday'] and days['tuesday'] and days['wednesday'] and days['friday'] and days['saturday'] and days['sunday']:
+                routine['retakes']['days']['daily'] = True
+            else:
+                routine['retakes']['days']['daily'] = False
             cursor: Cursor = self.db.cursor()
             statement: str = """INSERT INTO routine (name, description, daily, monday, tuesday, wednesday, thursday, 
                                 friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall) 
