@@ -14,8 +14,34 @@
 # !!!ACHTUNG!!! Bei den Audio-Dateien muss es sich um wav-Dateien handeln
 import json
 
-ALPHABET = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
-            "v", "w", "x", "y", "z"]
+ALPHABET = [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
+    "z",
+]
 
 
 def isValid(text):
@@ -25,20 +51,23 @@ def isValid(text):
 def handle(text, core, skills):
     text = text.lower()
     AUDIO_PFAD = core.path + "/modules/resources/Quiz/Audio"
-    with open(core.path + "/modules/resources/Quiz/questions.json", 'r') as question_file:
+    with open(
+        core.path + "/modules/resources/Quiz/questions.json", "r"
+    ) as question_file:
         FRAGEN = json.load(question_file)
 
     richtig = 0
     insgesamt = 0
     core.say(
-        "Willkommen im Quiz! Wenn du keine Lust mehr hast, antworte auf eine Frage einfach mit 'Stopp' oder 'Abbruch'.")
+        "Willkommen im Quiz! Wenn du keine Lust mehr hast, antworte auf eine Frage einfach mit 'Stopp' oder 'Abbruch'."
+    )
     # Anschließend werden die richtigen Fragen "geladen"
-    if 'über' in text or 'zu' in text:
-        if 'allgemeinwissen' in text:
+    if "über" in text or "zu" in text:
+        if "allgemeinwissen" in text:
             possibilities = FRAGEN["allgemeinwissen"]
-        elif 'geo' in text:
+        elif "geo" in text:
             possibilities = FRAGEN["geographie"]
-        elif 'musik' in text:
+        elif "musik" in text:
             possibilities = FRAGEN["musik"]
     else:
         pos = ["allgemeinwissen", "geographie", "musik"]
@@ -54,6 +83,7 @@ def handle(text, core, skills):
     on_going = True
     while on_going and len(fragen) > 0:
         import random
+
         item = random.choice(fragen)
 
         if item["erste_ausgabe"] == "Frage":
@@ -75,13 +105,16 @@ def handle(text, core, skills):
                         # Daher sagen wir es einfach dem Nutzer und überspringen die Frage
                         # scheinbar gibt es die Audio nicht.
                         core.say(
-                            "Leider gab es ein Problem beim Abspielen einer Audio-Datei. Daher machen wir einfach mit der nächsten Frage weiter!")
+                            "Leider gab es ein Problem beim Abspielen einer Audio-Datei. Daher machen wir einfach mit der nächsten Frage weiter!"
+                        )
                         fragen.remove(item)
                         # ToDO Log-Eintrag schreiben
                         continue
                 # Wenn es keine Audio gibt, einfach nichts machen. Eine Frage wurde ja schon gestellt...
-                if item["Antwortmoeglichkeiten"] != [] and len(
-                        item["Antwortmoeglichkeiten"]) <= 26:  # ich hoffe einfahc mal, dass letzteres zutrifft :)
+                if (
+                    item["Antwortmoeglichkeiten"] != []
+                    and len(item["Antwortmoeglichkeiten"]) <= 26
+                ):  # ich hoffe einfahc mal, dass letzteres zutrifft :)
                     moeglichkeiten = item["Antwortmoeglichkeiten"]
                     for i in range(len(item["Antwortmoeglichkeiten"])):
                         text = ALPHABET[i] + ": " + moeglichkeiten[i]
@@ -122,20 +155,33 @@ def handle(text, core, skills):
         # Das Leerzeichen vor und hinter dem listen() wird
         # benötigt, damit später die Überprüfung einer Re-
         # aktion auf eine Antwortmöglichkeit überprüft werden kann
-        if 'abbruch' in user_response or 'stopp' in user_response or (
-                "ich" in user_response and "kein" in user_response and (
-                "lust" in user_response or "bock" in user_response) or "spaß" in user_response):
+        if (
+            "abbruch" in user_response
+            or "stopp" in user_response
+            or (
+                "ich" in user_response
+                and "kein" in user_response
+                and ("lust" in user_response or "bock" in user_response)
+                or "spaß" in user_response
+            )
+        ):
             if insgesamt == 0:
                 core.say("Okay, Quiz beendet.")
             elif insgesamt == 1:
                 beantwortung = "falsch"
                 if richtig == 1:
                     beantwortung = "richtig"
-                core.say("Okay, Quiz beendet. Du hast eine Frage beantwortet, diese war {}.".format(beantwortung))
+                core.say(
+                    "Okay, Quiz beendet. Du hast eine Frage beantwortet, diese war {}.".format(
+                        beantwortung
+                    )
+                )
             else:
-                core.say("Okay, Quiz beendet. Du hast {} Fragen beantwortet, davon waren {}% richtig".format(insgesamt,
-                                                                                                             round(
-                                                                                                                 richtig / insgesamt * 100)))
+                core.say(
+                    "Okay, Quiz beendet. Du hast {} Fragen beantwortet, davon waren {}% richtig".format(
+                        insgesamt, round(richtig / insgesamt * 100)
+                    )
+                )
 
             on_going = False
         else:
@@ -199,19 +245,36 @@ def handle(text, core, skills):
                 richtig += 1
             elif prozentual >= 0.5:
                 richtig += 1
-                text = random.choice(["Das könnte stimmen.", "Ich bin mir nicht sicher, ob das richtig ist."])
+                text = random.choice(
+                    [
+                        "Das könnte stimmen.",
+                        "Ich bin mir nicht sicher, ob das richtig ist.",
+                    ]
+                )
                 text += " Die richtige Antwort lautet wie folgt: " + item["Antwort"]
-            elif prozentual >= 0.2:  # hier bin ich mir nicht sicher, ob der Wert zu großzügig gewählt wurde. TESTEN!!!
-                text = random.choice(["Das dürfte nicht stimmen.", "Ich glaube nicht, dass das richtig ist."])
+            elif (
+                prozentual >= 0.2
+            ):  # hier bin ich mir nicht sicher, ob der Wert zu großzügig gewählt wurde. TESTEN!!!
+                text = random.choice(
+                    [
+                        "Das dürfte nicht stimmen.",
+                        "Ich glaube nicht, dass das richtig ist.",
+                    ]
+                )
                 text += " Die richtige Antwort lautet wie folgt: " + item["Antwort"]
             else:  # <= 0.2
                 # Obwohl 20% richtig sind, müsste es falsch sein, da standartwörter wie 'und'
                 # auch als richtig gewertet werden, aber in den meisten deutschen Sätzen vorkommen
-                text = random.choice(["Das stimmt nicht. ", "Das ist leider falsch. ", ""])
+                text = random.choice(
+                    ["Das stimmt nicht. ", "Das ist leider falsch. ", ""]
+                )
                 text += "Die richtige Antwort lautet wie folgt: " + item["Antwort"]
             core.say(text)
 
     if len(fragen) == 0:
         core.say("Scheinbar habe ich keine Fragen mehr zu diesem Thema.")
-        core.say("Du hast {} Fragen beantwortet, davon waren {}% richtig".format(insgesamt, round(
-            richtig / insgesamt * 100)))
+        core.say(
+            "Du hast {} Fragen beantwortet, davon waren {}% richtig".format(
+                insgesamt, round(richtig / insgesamt * 100)
+            )
+        )

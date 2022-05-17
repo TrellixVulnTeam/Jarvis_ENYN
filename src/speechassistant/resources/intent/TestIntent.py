@@ -54,10 +54,10 @@ class Modules:
     def load_modules(self):
         self.local_storage["modules"] = {}
         time.sleep(1)
-        print('---------- MODULES...  ----------')
-        self.modules = self.get_modules('modules')
+        print("---------- MODULES...  ----------")
+        self.modules = self.get_modules("modules")
         if self.modules is []:
-            print('[INFO] -- (None present)')
+            print("[INFO] -- (None present)")
 
     def get_modules(self, directory, continuous=False):
         dirname = os.path.abspath("C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\Jarvis")
@@ -73,16 +73,19 @@ class Modules:
             except Exception:
                 traceback.print_exc()
                 self.local_storage["modules"][name] = {"name": name, "status": "error"}
-                print('[WARNING] Modul {} is incorrect and was skipped!'.format(name))
+                print("[WARNING] Modul {} is incorrect and was skipped!".format(name))
                 continue
             else:
                 if continuous:
-                    print('[INFO] Continuous module {} loaded'.format(name))
+                    print("[INFO] Continuous module {} loaded".format(name))
                     modules.append(mod)
                 else:
-                    print('[INFO] Modul {} loaded'.format(name))
+                    print("[INFO] Modul {} loaded".format(name))
                     modules.append(mod)
-        modules.sort(key=lambda mod: mod.PRIORITY if hasattr(mod, 'PRIORITY') else 0, reverse=True)
+        modules.sort(
+            key=lambda mod: mod.PRIORITY if hasattr(mod, "PRIORITY") else 0,
+            reverse=True,
+        )
         return modules
 
     def query_threaded(self, name, text, user, messenger=False):
@@ -97,33 +100,42 @@ class Modules:
                 analysis = self.core.analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
-                print('[ERROR] Sentence analysis failed!')
+                print("[ERROR] Sentence analysis failed!")
                 analysis = {}
         if name is not None:
             # Module was called via start_module
             for module in self.modules:
                 if module.__name__ == name:
-                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
-                                                                              user)
-                    mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
+                    self.core.active_modules[str(text)] = self.module_wrapper(
+                        self.core, text, analysis, messenger, user
+                    )
+                    mt = Thread(
+                        target=self.run_threaded_module, args=(text, module, mod_skill)
+                    )
                     mt.daemon = True
                     mt.start()
                     return True
-            print('[ERROR] Modul {} could not be found!'.format(name))
+            print("[ERROR] Modul {} could not be found!".format(name))
         elif text is not None:
             # Search the modules normally
             for module in self.modules:
                 try:
                     if module.isValid(str(text).lower()):
-                        self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
-                                                                                  user)
-                        mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
+                        self.core.active_modules[str(text)] = self.module_wrapper(
+                            self.core, text, analysis, messenger, user
+                        )
+                        mt = Thread(
+                            target=self.run_threaded_module,
+                            args=(text, module, mod_skill),
+                        )
                         mt.daemon = True
                         mt.start()
                         return True
                 except:
                     traceback.print_exc()
-                    print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
+                    print(
+                        "[ERROR] Modul {} could not be queried!".format(module.__name__)
+                    )
         return False
 
     def start_module(self, user=None, text=None, name=None, messenger=False):
@@ -138,15 +150,22 @@ class Modules:
                 # logging.info('Analysis: ' + str(analysis))
             except:
                 traceback.print_exc()
-                logging.warning('[WARNING] Sentence analysis failed!')
+                logging.warning("[WARNING] Sentence analysis failed!")
 
         if name is not None:
             for module in self.modules:
                 if module.__name__ == name:
-                    logging.info('[ACTION] --Modul {} was called directly (Parameter: {})--'.format(name, text))
-                    self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
-                                                                              user)
-                    mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
+                    logging.info(
+                        "[ACTION] --Modul {} was called directly (Parameter: {})--".format(
+                            name, text
+                        )
+                    )
+                    self.core.active_modules[str(text)] = self.module_wrapper(
+                        self.core, text, analysis, messenger, user
+                    )
+                    mt = Thread(
+                        target=self.run_threaded_module, args=(text, module, mod_skill)
+                    )
                     mt.daemon = True
                     mt.start()
                     break
@@ -155,22 +174,28 @@ class Modules:
                 analysis = self.core.analyzer.analyze(str(text))
             except:
                 traceback.print_exc()
-                print('[ERROR] Sentence analysis failed!')
+                print("[ERROR] Sentence analysis failed!")
                 analysis = {}
             for module in self.modules:
                 try:
                     if module.isValid(text.lower()):
-                        self.core.active_modules[str(text)] = self.module_wrapper(self.core, text, analysis, messenger,
-                                                                                  user)
-                        mt = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
+                        self.core.active_modules[str(text)] = self.module_wrapper(
+                            self.core, text, analysis, messenger, user
+                        )
+                        mt = Thread(
+                            target=self.run_threaded_module,
+                            args=(text, module, mod_skill),
+                        )
                         mt.daemon = True
                         mt.start()
                         mt.join()  # wait until Module is done...
-                        self.start_module(user=user, name='wartende_benachrichtigung')
+                        self.start_module(user=user, name="wartende_benachrichtigung")
                         break
                 except:
                     traceback.print_exc()
-                    print('[ERROR] Modul {} could not be queried!'.format(module.__name__))
+                    print(
+                        "[ERROR] Modul {} could not be queried!".format(module.__name__)
+                    )
         return False
 
     def run_threaded_module(self, text, module, mod_skill):
@@ -178,9 +203,16 @@ class Modules:
             module.handle(text, self.core.active_modules[str(text)], mod_skill)
         except:
             traceback.print_exc()
-            print('[ERROR] Runtime error in module {}. The module was terminated.\n'.format(module.__name__))
+            print(
+                "[ERROR] Runtime error in module {}. The module was terminated.\n".format(
+                    module.__name__
+                )
+            )
             self.core.active_modules[str(text)].say(
-                'Entschuldige, es gab ein Problem mit dem Modul {}.'.format(module.__name__))
+                "Entschuldige, es gab ein Problem mit dem Modul {}.".format(
+                    module.__name__
+                )
+            )
         finally:
             try:
                 del self.core.active_modules[str(text)]
@@ -204,10 +236,10 @@ class skills:
         # print(array)
         new_array = []  # array=['Apfel', 'Birne', 'Gemüse', 'wiederlich']
         for item in array:
-            new_array.append(item.strip(' '))
+            new_array.append(item.strip(" "))
 
         # print(new_array)
-        ausgabe = ''
+        ausgabe = ""
         # print('Länge: {}'.format(len(new_array)))
         if len(new_array) == 0:
             pass
@@ -215,27 +247,30 @@ class skills:
             ausgabe = array[0]
         else:
             for item in range(len(new_array) - 1):
-                ausgabe += new_array[item] + ', '
-            ausgabe = ausgabe.rsplit(', ', 1)[0]
-            ausgabe = ausgabe + ' und ' + new_array[-1]
+                ausgabe += new_array[item] + ", "
+            ausgabe = ausgabe.rsplit(", ", 1)[0]
+            ausgabe = ausgabe + " und " + new_array[-1]
         return ausgabe
 
     @staticmethod
     def is_approved(text):
-        if ('ja' in text or 'gerne' in text or 'bitte' in text) and not (
-                'nein' in text or 'nicht' in text or 'nö' in text or 'ne' in text):
+        if ("ja" in text or "gerne" in text or "bitte" in text) and not (
+            "nein" in text or "nicht" in text or "nö" in text or "ne" in text
+        ):
             return True
         else:
             return False
 
     @staticmethod
-    def get_text_beetween(start_word, text, end_word='', output='array', split_text=True):
+    def get_text_beetween(
+        start_word, text, end_word="", output="array", split_text=True
+    ):
         ausgabe = []
         index = -1
         start_word = start_word.lower()
         text = text.replace(".", "")
         if split_text:
-            text = text.split(' ')
+            text = text.split(" ")
             for i in range(len(text) - 1):
                 # toDo: Maybe check if text[i].lower == start_word or this option
                 # First here .lower to keep upper and lower case
@@ -243,7 +278,7 @@ class skills:
                     index = i + 1
 
         if index is not -1:
-            if end_word == '':
+            if end_word == "":
                 for i in range(index, len(text)):
                     ausgabe.append(text[i])
             else:
@@ -254,12 +289,12 @@ class skills:
                     else:
                         ausgabe.append(text[index])
                         index += 1
-        if output is 'array':
+        if output is "array":
             return ausgabe
-        elif output is 'String':
-            ausgabe_neu = ''
+        elif output is "String":
+            ausgabe_neu = ""
             for item in ausgabe:
-                ausgabe_neu += item + ' '
+                ausgabe_neu += item + " "
             return ausgabe_neu
 
     @staticmethod
@@ -281,7 +316,11 @@ class skills:
                 except:
                     item2 = field.lower()
                 # print(f"value1: {item1}, {number1}, {value1};    value2: {item2}, {number2}, {value2}")
-                if item1 == item2 or item1.rstrip(item1[-1]) == item2 or item1 == item2.rstrip(item2[-1]):
+                if (
+                    item1 == item2
+                    or item1.rstrip(item1[-1]) == item2
+                    or item1 == item2.rstrip(item2[-1])
+                ):
                     if item1[-1] == "e":
                         item1 += "n"
                     if value1 == value2:
@@ -294,7 +333,9 @@ class skills:
                         final_value = ""
                         final_number = -1
                     if final_number != -1:
-                        new_array.append(str(final_number) + final_value + " " + item1.capitalize())
+                        new_array.append(
+                            str(final_number) + final_value + " " + item1.capitalize()
+                        )
                     else:
                         new_array.append(item1.capitalize())
                 else:
@@ -314,14 +355,17 @@ class skills:
                 item_position = position.split(" ", 1)[1].lower()
             except:
                 item_position = position.lower()
-            if item_position == item or item_position.rstrip(item_position[-1]) == item or item_position == item.rstrip(
-                    item[-1]):
+            if (
+                item_position == item
+                or item_position.rstrip(item_position[-1]) == item
+                or item_position == item.rstrip(item[-1])
+            ):
                 valid = False
         return valid
 
     @staticmethod
     def get_value_number(item):
-        first_value = item.split(' ', 1)[0]
+        first_value = item.split(" ", 1)[0]
         value = ""
         number = -1
         if "kg" in first_value:
@@ -365,34 +409,34 @@ class skills:
         next_hour = hour + 1
         if next_hour == 24:
             next_hour = 0
-        hour = str(hour) if hour > 9 else '0' + str(hour)
-        minute = str(minute) if minute > 9 else '0' + str(minute)
+        hour = str(hour) if hour > 9 else "0" + str(hour)
+        minute = str(minute) if minute > 9 else "0" + str(minute)
         if minute == 0:
-            output = hour + ' Uhr.'
+            output = hour + " Uhr."
         elif minute == 5:
-            output = 'fünf nach ' + hour
+            output = "fünf nach " + hour
         elif minute == 10:
-            output = 'zehn nach ' + hour
+            output = "zehn nach " + hour
         elif minute == 15:
-            output = 'viertel nach ' + hour
+            output = "viertel nach " + hour
         elif minute == 20:
-            output = 'zwanzig nach ' + hour
+            output = "zwanzig nach " + hour
         elif minute == 25:
-            output = 'fünf vor halb ' + hour
+            output = "fünf vor halb " + hour
         elif minute == 30:
-            output = 'halb ' + next_hour
+            output = "halb " + next_hour
         elif minute == 35:
-            output = 'fünf nach halb ' + next_hour
+            output = "fünf nach halb " + next_hour
         elif minute == 40:
-            output = 'zwanzig vor ' + next_hour
+            output = "zwanzig vor " + next_hour
         elif minute == 45:
-            output = 'viertel vor ' + next_hour
+            output = "viertel vor " + next_hour
         elif minute == 50:
-            output = 'zehn vor ' + next_hour
+            output = "zehn vor " + next_hour
         elif minute == 55:
-            output = 'fünf vor ' + next_hour
+            output = "fünf vor " + next_hour
         else:
-            output = hour + ':' + minute + ' Uhr'
+            output = hour + ":" + minute + " Uhr"
         return output
 
     def get_time_differenz(self, start_time, time=None):
@@ -422,30 +466,30 @@ class skills:
             seconds += 1
 
         if years == 1:
-            aussage.append('einem Jahr')
+            aussage.append("einem Jahr")
         elif years > 1:
-            aussage.append(str(years) + ' Jahren')
+            aussage.append(str(years) + " Jahren")
         if days == 1:
-            aussage.append('einem Tag')
+            aussage.append("einem Tag")
         elif days > 1:
-            aussage.append(str(days) + ' Tagen')
+            aussage.append(str(days) + " Tagen")
         if hours == 1:
-            aussage.append('einer Stunde')
+            aussage.append("einer Stunde")
         elif hours > 1:
-            aussage.append(str(hours) + ' Stunden')
+            aussage.append(str(hours) + " Stunden")
         if minutes == 1:
-            aussage.append('einer Minute')
+            aussage.append("einer Minute")
         elif minutes > 1:
-            aussage.append(str(minutes) + ' Minuten')
+            aussage.append(str(minutes) + " Minuten")
         if seconds == 1:
-            aussage.append('einer Sekunde')
+            aussage.append("einer Sekunde")
         elif seconds > 1:
-            aussage.append(str(seconds) + ' Sekunden')
+            aussage.append(str(seconds) + " Sekunden")
         return self.get_enumerate(aussage)
 
     @staticmethod
     def get_word_index(text, word):
-        text = text.split(' ')
+        text = text.split(" ")
         for i in range(len(text)):
             if text[i] == word:
                 return i
@@ -455,11 +499,11 @@ class skills:
     def is_desired(text):
         # returns True, if user want this option
         text = text.lower()
-        if 'ja' in text or 'gern' in text or ('bitte' in text and 'nicht' not in text):
+        if "ja" in text or "gern" in text or ("bitte" in text and "nicht" not in text):
             return True
-        elif 'bitte' in text and 'nicht' not in text:
+        elif "bitte" in text and "nicht" not in text:
             return True
-        elif 'danke' in text and 'nein' not in text:
+        elif "danke" in text and "nein" not in text:
             return True
         return False
 
@@ -473,7 +517,7 @@ class skills:
             "blau": "blue",
             "rot": "red",
             "gelb": "yellow",
-            "grün": "green"
+            "grün": "green",
         }
 
         color_eng_to_ger = {
@@ -481,31 +525,47 @@ class skills:
             "blue": "blau",
             "red": "rot",
             "yellow": "gelb",
-            "green": "grün"
+            "green": "grün",
         }
 
         # Weekdays
-        weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
-        weekdays_engl = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        weekdays = [
+            "Montag",
+            "Dienstag",
+            "Mittwoch",
+            "Donnerstag",
+            "Freitag",
+            "Samstag",
+            "Sonntag",
+        ]
+        weekdays_engl = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
 
         weekdays_ger_to_eng = {
-            'montag': 'monday',
-            'dienstag': 'tuesday',
-            'mittwoch': 'wednesday',
-            'donnerstag': 'thursday',
-            'freitag': 'friday',
-            'samstag': 'saturday',
-            'sonntag': 'sunday'
+            "montag": "monday",
+            "dienstag": "tuesday",
+            "mittwoch": "wednesday",
+            "donnerstag": "thursday",
+            "freitag": "friday",
+            "samstag": "saturday",
+            "sonntag": "sunday",
         }
 
         weekdays_eng_to_ger = {
-            'monday': 'montag',
-            'tuesday': 'dienstag',
-            'wednesday': 'mittwoch',
-            'thursday': 'donnerstag',
-            'friday': 'freitag',
-            'saturday': 'samstag',
-            'sunday': 'sonntag'
+            "monday": "montag",
+            "tuesday": "dienstag",
+            "wednesday": "mittwoch",
+            "thursday": "donnerstag",
+            "friday": "freitag",
+            "saturday": "samstag",
+            "sunday": "sonntag",
         }
 
         numb_to_day = {
@@ -515,37 +575,108 @@ class skills:
             "4": "thursday",
             "5": "friday",
             "6": "saturday",
-            "7": "sunday"}
+            "7": "sunday",
+        }
 
-        numb_to_day_numb = {'01': 'ersten', '02': 'zweiten', '03': 'dritten', '04': 'vierten', '05': 'fünften',
-                            '06': 'sechsten', '07': 'siebten', '08': 'achten', '09': 'neunten', '10': 'zehnten',
-                            '11': 'elften', '12': 'zwölften', '13': 'dreizehnten', '14': 'vierzehnten',
-                            '15': 'fünfzehnten',
-                            '16': 'sechzehnten', '17': 'siebzehnten', '18': 'achtzehnten', '19': 'neunzehnten',
-                            '20': 'zwanzigsten',
-                            '21': 'einundzwanzigsten', '22': 'zweiundzwanzigsten', '23': 'dreiundzwanzigsten',
-                            '24': 'vierundzwanzigsten',
-                            '25': 'fünfundzwanzigsten', '26': 'sechsundzwanzigsten', '27': 'siebenundzwanzigsten',
-                            '28': 'achtundzwanzigsten',
-                            '29': 'neunundzwanzigsten', '30': 'dreißigsten', '31': 'einunddreißigsten',
-                            '32': 'zweiunddreißigsten'}
+        numb_to_day_numb = {
+            "01": "ersten",
+            "02": "zweiten",
+            "03": "dritten",
+            "04": "vierten",
+            "05": "fünften",
+            "06": "sechsten",
+            "07": "siebten",
+            "08": "achten",
+            "09": "neunten",
+            "10": "zehnten",
+            "11": "elften",
+            "12": "zwölften",
+            "13": "dreizehnten",
+            "14": "vierzehnten",
+            "15": "fünfzehnten",
+            "16": "sechzehnten",
+            "17": "siebzehnten",
+            "18": "achtzehnten",
+            "19": "neunzehnten",
+            "20": "zwanzigsten",
+            "21": "einundzwanzigsten",
+            "22": "zweiundzwanzigsten",
+            "23": "dreiundzwanzigsten",
+            "24": "vierundzwanzigsten",
+            "25": "fünfundzwanzigsten",
+            "26": "sechsundzwanzigsten",
+            "27": "siebenundzwanzigsten",
+            "28": "achtundzwanzigsten",
+            "29": "neunundzwanzigsten",
+            "30": "dreißigsten",
+            "31": "einunddreißigsten",
+            "32": "zweiunddreißigsten",
+        }
 
-        numb_to_hour = {'01': 'ein', '02': 'zwei', '03': 'drei', '04': 'vier', '05': 'fünf', '06': 'sechs',
-                        '07': 'sieben', '08': 'acht', '09': 'neun', '10': 'zehn', '11': 'elf', '12': 'zwölf',
-                        '13': 'dreizehn', '14': 'vierzehn', '15': 'fünfzehn', '16': 'sechzehn', '17': 'siebzehn',
-                        '18': 'achtzehn', '19': 'neunzehn', '20': 'zwanzig', '21': 'einundzwanzig',
-                        '22': 'zweiundzwanzig',
-                        '23': 'dreiundzwanzig', '24': 'vierundzwanzig'}
+        numb_to_hour = {
+            "01": "ein",
+            "02": "zwei",
+            "03": "drei",
+            "04": "vier",
+            "05": "fünf",
+            "06": "sechs",
+            "07": "sieben",
+            "08": "acht",
+            "09": "neun",
+            "10": "zehn",
+            "11": "elf",
+            "12": "zwölf",
+            "13": "dreizehn",
+            "14": "vierzehn",
+            "15": "fünfzehn",
+            "16": "sechzehn",
+            "17": "siebzehn",
+            "18": "achtzehn",
+            "19": "neunzehn",
+            "20": "zwanzig",
+            "21": "einundzwanzig",
+            "22": "zweiundzwanzig",
+            "23": "dreiundzwanzig",
+            "24": "vierundzwanzig",
+        }
 
-        numb_to_month = {'01': 'Januar', '02': 'Februar', '03': 'März', '04': 'April', '05': 'Mai', '06': 'Juni',
-                         '07': 'Juli', '08': 'August', '09': 'September', '10': 'Oktober', '11': 'November',
-                         '12': 'Dezember'}
+        numb_to_month = {
+            "01": "Januar",
+            "02": "Februar",
+            "03": "März",
+            "04": "April",
+            "05": "Mai",
+            "06": "Juni",
+            "07": "Juli",
+            "08": "August",
+            "09": "September",
+            "10": "Oktober",
+            "11": "November",
+            "12": "Dezember",
+        }
 
-        numb_to_ordinal = {"1": "erster", "2": "zweiter", "3": "dritter", "4": "vierter", "5": "fünfter",
-                           "6": "sechster", "7": "siebter", "8": "achter", "9": "neunter", "10": "zehnter",
-                           "11": "elfter", "12": "zwölfter", "13": "dreizehnter", "14": "vierzehnter",
-                           "15": "fünfzehnter", "16": "sechzehnter", "17": "siebzehnter", "18": "achtzehnter",
-                           "19": "neunzehnter", "20": "zwanzigster"}
+        numb_to_ordinal = {
+            "1": "erster",
+            "2": "zweiter",
+            "3": "dritter",
+            "4": "vierter",
+            "5": "fünfter",
+            "6": "sechster",
+            "7": "siebter",
+            "8": "achter",
+            "9": "neunter",
+            "10": "zehnter",
+            "11": "elfter",
+            "12": "zwölfter",
+            "13": "dreizehnter",
+            "14": "vierzehnter",
+            "15": "fünfzehnter",
+            "16": "sechzehnter",
+            "17": "siebzehnter",
+            "18": "achtzehnter",
+            "19": "neunzehnter",
+            "20": "zwanzigster",
+        }
 
 
 class Audio_Input:
@@ -587,12 +718,12 @@ class Modulewrapper:
         self.path = core.path
         self.user = user
 
-    def say(self, text, output='auto'):
+    def say(self, text, output="auto"):
         text = self.speechVariation(text)
-        if output == 'auto':
+        if output == "auto":
             if self.messenger_call:
-                output = 'messenger'
-        if 'messenger' in output.lower() or self.messenger_call:
+                output = "messenger"
+        if "messenger" in output.lower() or self.messenger_call:
             self.messenger_say(text)
         else:
             text = self.correct_output_automate(text)
@@ -600,13 +731,16 @@ class Modulewrapper:
 
     def messenger_say(self, text):
         try:
-            self.messenger.say(text, self.user['telegram_id'])
+            self.messenger.say(text, self.user["telegram_id"])
         except KeyError:
             logging.warning(
                 '[WARNING] Sending message "{}" to messenger failed, because there is no Telegram-ID for this user '
-                '({}) '.format(text, self.user["name"]))
+                "({}) ".format(text, self.user["name"])
+            )
         except AttributeError:
-            logging.info('[WARNING] Sending message to messenger failed,  because there is no key for it!')
+            logging.info(
+                "[WARNING] Sending message to messenger failed,  because there is no key for it!"
+            )
         return
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
@@ -622,12 +756,28 @@ class Modulewrapper:
         else:
             self.Audio_Output.play_playback(data, next)
 
-    def play_music(self, by_name=None, url=None, path=None, next=None, now=None, playlist=None, announce=None):
+    def play_music(
+        self,
+        by_name=None,
+        url=None,
+        path=None,
+        next=None,
+        now=None,
+        playlist=None,
+        announce=None,
+    ):
         if by_name is not None:
             by_name = "'" + by_name + "'"
         # simply forward information
-        self.Audio_Output.music_player.play(by_name=by_name, url=url, path=path, next=next, now=now, playlist=playlist,
-                                            announce=announce)
+        self.Audio_Output.music_player.play(
+            by_name=by_name,
+            url=url,
+            path=path,
+            next=next,
+            now=now,
+            playlist=playlist,
+            announce=announce,
+        )
 
     def listen(self, text=None, messenger=None):
         if messenger is None:
@@ -664,12 +814,14 @@ class Modulewrapper:
             return module_storage[module_name]
 
     @staticmethod
-    def translate(text, target_lang='de'):
+    def translate(text, target_lang="de"):
         try:
             request = Request(
-                'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + urllib.parse.quote(
-                    target_lang) + '&dt=t&q=' + urllib.parse.quote(
-                    text))
+                "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl="
+                + urllib.parse.quote(target_lang)
+                + "&dt=t&q="
+                + urllib.parse.quote(text)
+            )
             response = urlopen(request)
             answer = json.loads(response.read())
             return answer[0][0][0]
@@ -714,29 +866,37 @@ class Modulewrapper:
             middle = sp1[0].split("|", 1)
             end = sp1[1]
             parse = front + random.choice(middle) + end
-            """
+        """
         # toDo
         return userInput
 
 
 def testValidationData(intent_wrapper):
-    with open("validation_data.json", encoding='utf-8') as validation_file:
+    with open("validation_data.json", encoding="utf-8") as validation_file:
         print(validation_file.encoding)
         val_data = json.load(validation_file)
         for item in val_data["validation"]:
             response = intent_wrapper.test_module(item)
             if response != val_data["validation"][item]:
-                print("FEHLER: " + item + " was not working, result: " + response + "\n")
+                print(
+                    "FEHLER: " + item + " was not working, result: " + response + "\n"
+                )
 
 
 def testIntentData(intent_wrapper):
-    with open("intents.json", encoding='utf-8') as validation_file:
+    with open("intents.json", encoding="utf-8") as validation_file:
         data = json.load(validation_file)
         for item in data["intents"]:
             for sentence in item["patterns"]:
                 response = intent_wrapper.test_module(sentence)
                 if response != item["tag"]:
-                    print("FEHLER: " + sentence + " was not working, result: " + response + "\n")
+                    print(
+                        "FEHLER: "
+                        + sentence
+                        + " was not working, result: "
+                        + response
+                        + "\n"
+                    )
 
 
 if __name__ == "__main__":

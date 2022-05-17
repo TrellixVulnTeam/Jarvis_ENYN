@@ -1,37 +1,54 @@
 {
-  "description": "Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an",
-  "retakes": {
-    "days": {
-      "daily": true,
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": false,
-      "sunday": false,
-      "date_of_day": [
-        ""
-      ]
+    "name": "Morgenroutine",
+    "descriptions": "Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an",
+    "on_commands": [],
+    "retakes": {
+        "days": {
+            "daily": true,
+            "monday": false,
+            "tuesday": false,
+            "wednesday": false,
+            "thursday": false,
+            "friday": false,
+            "saturday": false,
+            "sunday": false,
+            "date_of_day": [
+                {
+                    "id": 1,
+                    "day": 5,
+                    "month": 12
+                }
+            ]
+        },
+        "activation": {
+            "clock_time": [
+                {
+                    "id": 2,
+                    "hour": 10,
+                    "min": 30
+                },
+                {
+                    "id": 1,
+                    "hour": 12,
+                    "min": 0
+                }
+            ],
+            "after_alarm": false,
+            "after_sunrise": false,
+            "after_sunset": true,
+            "after_call": false
+        }
     },
-    "activation": {
-      "clock_time": [
-        ""
-      ],
-      "after_alarm": false,
-      "after_sunrise": false,
-      "after_sunset": true
-    }
-  },
-  "actions": {
-    "commands": [
-      {
-        "module_name": "phillips_hue",
-        "text": [
-          "Mach den Schreibtisch blau",
-          "Mach das Bett grün"
+    "actions": {
+        "commands": [
+            {
+                "id": 1,
+                "module_name": "phillips_hue",
+                "text": [
+                    "Mach das Bett gr\u00fcn",
+                    "Mach den Schreibtisch blau"
+                ]
+            }
         ]
-      }
-    ]
-  }
+    }
 }

@@ -4,10 +4,10 @@ from src.speechassistant.api.myapi import api
 from flask_restx import Resource
 
 
-namespace = api.namespace('phue', desciption='Handle Philips-HUE devices')
+namespace = api.namespace("phue", desciption="Handle Philips-HUE devices")
 
 
-@namespace.route('/')
+@namespace.route("/")
 class Phue(Resource):
     def get(self) -> Response:
         pass
@@ -22,7 +22,7 @@ class Phue(Resource):
         pass
 
 
-@namespace.route('/lights')
+@namespace.route("/lights")
 class Phue(Resource):
     def get(self) -> Response:
         pass
@@ -37,7 +37,7 @@ class Phue(Resource):
         pass
 
 
-@namespace.route('/lights/<id>')
+@namespace.route("/lights/<id>")
 class Phue(Resource):
     def get(self) -> Response:
         pass

@@ -43,14 +43,14 @@ class ModuleWrapper:
         self.path: str = self.core.path
         self.user: dict = user
 
-    def say(self, text: str | list, output: str = 'auto') -> None:
+    def say(self, text: str | list, output: str = "auto") -> None:
         if type(text) is list:
             text = random.choice(text)
         text: str = self.speech_variation(text)
-        if output == 'auto':
+        if output == "auto":
             if self.messenger_call:
-                output = 'messenger'
-        if 'messenger' in output.lower() or self.messenger_call:
+                output = "messenger"
+        if "messenger" in output.lower() or self.messenger_call:
             self.messenger_say(text)
         else:
             text = self.correct_output_automate(text)
@@ -58,17 +58,25 @@ class ModuleWrapper:
 
     def messenger_say(self, text: str) -> None:
         try:
-            self.messenger.say(text, self.user['telegram_id'])
+            self.messenger.say(text, self.user["telegram_id"])
         except KeyError:
             logging.warning(
                 '[WARNING] Sending message "{}" to messenger failed, because there is no Telegram-ID for this user '
-                '({}) '.format(text, self.user["name"]))
+                "({}) ".format(text, self.user["name"])
+            )
         except AttributeError:
-            logging.info('[WARNING] Sending message to messenger failed,  because there is no key for it!')
+            logging.info(
+                "[WARNING] Sending message to messenger failed,  because there is no key for it!"
+            )
         return
 
-    def play(self, path: str = None, audiofile: str = None, as_next: bool = False,
-             notification: bool = False) -> None:
+    def play(
+        self,
+        path: str = None,
+        audiofile: str = None,
+        as_next: bool = False,
+        notification: bool = False,
+    ) -> None:
         if path is not None:
             with open(path, "rb") as wav_file:
                 input_wav: AnyStr = wav_file.read()
@@ -81,16 +89,32 @@ class ModuleWrapper:
         else:
             self.audio_output.play_playback(data, as_next)
 
-    def play_music(self, by_name: str = None, url: str = None, path: str = None, as_next: bool = False,
-                   now: bool = False, playlist: bool = False, announce: bool = False) -> None:
+    def play_music(
+        self,
+        by_name: str = None,
+        url: str = None,
+        path: str = None,
+        as_next: bool = False,
+        now: bool = False,
+        playlist: bool = False,
+        announce: bool = False,
+    ) -> None:
         if by_name is not None:
             by_name = "'" + by_name + "'"
         # simply forward information
-        self.audio_output.music_player.play(by_name=by_name, url=url, path=path, as_next=as_next, now=now,
-                                            playlist=playlist,
-                                            announce=announce)
+        self.audio_output.music_player.play(
+            by_name=by_name,
+            url=url,
+            path=path,
+            as_next=as_next,
+            now=now,
+            playlist=playlist,
+            announce=announce,
+        )
 
-    def listen(self, text: str = None, messenger: bool = None, play_sound: bool = False) -> str:
+    def listen(
+        self, text: str = None, messenger: bool = None, play_sound: bool = False
+    ) -> str:
         if messenger is None:
             messenger: bool = self.messenger_call
         if text is not None:
@@ -98,8 +122,11 @@ class ModuleWrapper:
         if messenger:
             return self.core.messenger_listen(self.user["first_name"].lower())
         else:
-            return self.audio_input.recognize_input(self.core.hotword_detected, listen=True,
-                                                    play_bling_before_listen=play_sound)
+            return self.audio_input.recognize_input(
+                self.core.hotword_detected,
+                listen=True,
+                play_bling_before_listen=play_sound,
+            )
 
     def recognize(self, audio_file: Any) -> str:
         return self.audio_input.recognize_file(audio_file)
@@ -111,10 +138,14 @@ class ModuleWrapper:
                 return False
         return True
 
-    def start_module(self, name: str = None, text: str = None, user: dict = None) -> None:
+    def start_module(
+        self, name: str = None, text: str = None, user: dict = None
+    ) -> None:
         self.core.start_module(text, name, user)
 
-    def start_module_and_confirm(self, name: str = None, text: str = None, user: dict = None) -> bool:
+    def start_module_and_confirm(
+        self, name: str = None, text: str = None, user: dict = None
+    ) -> bool:
         return self.core.start_module(text, name, user)
 
     def module_storage(self, module_name=None):
@@ -126,12 +157,14 @@ class ModuleWrapper:
             return module_storage[module_name]
 
     @staticmethod
-    def translate(text, target_lang='de'):
+    def translate(text, target_lang="de"):
         try:
             request = Request(
-                'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + urllib.parse.quote(
-                    target_lang) + '&dt=t&q=' + urllib.parse.quote(
-                    text))
+                "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl="
+                + urllib.parse.quote(target_lang)
+                + "&dt=t&q="
+                + urllib.parse.quote(text)
+            )
             response = urlopen(request)
             answer = json.loads(response.read())
             return answer[0][0][0]
@@ -158,7 +191,9 @@ class ModuleWrapper:
         return text
 
     def start_hotword_detection(self):
-        self.audio_input.start(self.local_storage['wakeword_sentensivity'], self.core.hotword_detected)
+        self.audio_input.start(
+            self.local_storage["wakeword_sentensivity"], self.core.hotword_detected
+        )
 
     def stopp_hotword_detection(self):
         self.audio_input.stop()
@@ -177,12 +212,12 @@ class ModuleWrapper:
             middle = sp1[0].split("|", 1)
             end = sp1[1]
             parse = front + random.choice(middle) + end
-            """
+        """
         # toDo
         return user_input
 
 
-def translate(text, target_lang='de'):
+def translate(text, target_lang="de"):
     return ModuleWrapper.translate(text, target_lang)
 
 

@@ -3,15 +3,15 @@ from flask import Response
 from src.speechassistant.api.myapi import api
 from flask_restx import Resource
 
-namespace = api.namespace('service', desciption='Get information of services')
+namespace = api.namespace("service", desciption="Get information of services")
 
 
-@namespace.route('/')
+@namespace.route("/")
 class Service(Resource):
     pass
 
 
-@namespace.route('/phue')
+@namespace.route("/phue")
 class Phue(Resource):
     def get(self) -> Response:
         pass
@@ -26,11 +26,11 @@ class Phue(Resource):
         pass
 
 
-@namespace.route('/tv')
+@namespace.route("/tv")
 class Tv(Resource):
     pass
 
 
-@namespace.route('/weather')
+@namespace.route("/weather")
 class Weather(Resource):
     pass

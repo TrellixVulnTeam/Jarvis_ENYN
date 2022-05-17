@@ -28,12 +28,12 @@ class Test_Modulewrapper:
         self.path = core.path
         self.user = user
 
-    def say(self, text, output='auto'):
+    def say(self, text, output="auto"):
         text = self.speechVariation(text)
-        if output == 'auto':
+        if output == "auto":
             if self.messenger_call:
-                output = 'messenger'
-        if 'messenger' in output.lower() or self.messenger_call:
+                output = "messenger"
+        if "messenger" in output.lower() or self.messenger_call:
             self.messenger_say(text)
         else:
             text = self.correct_output_automate(text)
@@ -41,13 +41,16 @@ class Test_Modulewrapper:
 
     def messenger_say(self, text):
         try:
-            self.messenger.say(text, self.user['telegram_id'])
+            self.messenger.say(text, self.user["telegram_id"])
         except KeyError:
             logging.warning(
                 '[WARNING] Sending message "{}" to messenger failed, because there is no Telegram-ID for this user '
-                '({}) '.format(text, self.user["name"]))
+                "({}) ".format(text, self.user["name"])
+            )
         except AttributeError:
-            logging.info('[WARNING] Sending message to messenger failed,  because there is no key for it!')
+            logging.info(
+                "[WARNING] Sending message to messenger failed,  because there is no key for it!"
+            )
         return
 
     def play(self, path=None, audiofile=None, next=False, notification=False):
@@ -63,12 +66,28 @@ class Test_Modulewrapper:
         else:
             self.Audio_Output.play_playback(data, next)
 
-    def play_music(self, by_name=None, url=None, path=None, next=None, now=None, playlist=None, announce=None):
+    def play_music(
+        self,
+        by_name=None,
+        url=None,
+        path=None,
+        next=None,
+        now=None,
+        playlist=None,
+        announce=None,
+    ):
         if by_name is not None:
             by_name = "'" + by_name + "'"
         # simply forward information
-        self.Audio_Output.music_player.play(by_name=by_name, url=url, path=path, next=next, now=now, playlist=playlist,
-                                            announce=announce)
+        self.Audio_Output.music_player.play(
+            by_name=by_name,
+            url=url,
+            path=path,
+            next=next,
+            now=now,
+            playlist=playlist,
+            announce=announce,
+        )
 
     def listen(self, text=None, messenger=None):
         if messenger is None:
@@ -105,12 +124,14 @@ class Test_Modulewrapper:
             return module_storage[module_name]
 
     @staticmethod
-    def translate(text, target_lang='de'):
+    def translate(text, target_lang="de"):
         try:
             request = Request(
-                'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + urllib.parse.quote(
-                    target_lang) + '&dt=t&q=' + urllib.parse.quote(
-                    text))
+                "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl="
+                + urllib.parse.quote(target_lang)
+                + "&dt=t&q="
+                + urllib.parse.quote(text)
+            )
             response = urlopen(request)
             answer = json.loads(response.read())
             return answer[0][0][0]
@@ -155,6 +176,6 @@ class Test_Modulewrapper:
             middle = sp1[0].split("|", 1)
             end = sp1[1]
             parse = front + random.choice(middle) + end
-            """
-        #toDo
+        """
+        # toDo
         return userInput

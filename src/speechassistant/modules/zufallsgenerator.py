@@ -5,88 +5,92 @@ from time import sleep
 PRIORITY = 3
 SECURE = True
 
-zwischenPattern = re.compile(r'.*(von|zwischen) (-?\d+) (und|bis) (-?\d+).*', re.I)
-bisPattern = re.compile(r'.*(bis|kleiner gleich) (-?\d+).*', re.I)
-kleinerPattern = re.compile(r'.*(unter|kleiner) (als)? (-?\d+).*', re.I)
+zwischenPattern = re.compile(r".*(von|zwischen) (-?\d+) (und|bis) (-?\d+).*", re.I)
+bisPattern = re.compile(r".*(bis|kleiner gleich) (-?\d+).*", re.I)
+kleinerPattern = re.compile(r".*(unter|kleiner) (als)? (-?\d+).*", re.I)
 
 
 def output(text, core):
-    output = ''
+    output = ""
     text = text.lower()
     t = str.split(text)
-    if 'münze' in text or ('kopf' in text and 'oder' in text and 'zahl' in text):
+    if "münze" in text or ("kopf" in text and "oder" in text and "zahl" in text):
         q = random.randint(1, 2)
         if q == 1:
-            output = 'kopf'
+            output = "kopf"
         else:
-            output = 'zahl'
-    elif 'würfel' in text or 'alea iacta est' in text:
+            output = "zahl"
+    elif "würfel" in text or "alea iacta est" in text:
         q = random.randint(1, 6)
         if q == 1:
-            output = 'eins'
+            output = "eins"
         elif q == 2:
-            output = 'zwei'
+            output = "zwei"
         elif q == 3:
-            output = 'drei'
+            output = "drei"
         elif q == 4:
-            output = 'vier'
+            output = "vier"
         elif q == 5:
-            output = 'fünf'
+            output = "fünf"
         else:
-            output = 'sechs'
-    elif ('zufall' in text or 'zufällig' in text) and 'zahl' in text:
+            output = "sechs"
+    elif ("zufall" in text or "zufällig" in text) and "zahl" in text:
         match = zwischenPattern.match(text)
-        if output == '' and match is not None:
-            if (int(match.group(2)) < int(match.group(4))):
+        if output == "" and match is not None:
+            if int(match.group(2)) < int(match.group(4)):
                 output = str(random.randint(int(match.group(2)), int(match.group(4))))
             else:
                 output = str(random.randint(int(match.group(4)), int(match.group(2))))
         match = bisPattern.match(text)
-        if output == '' and match is not None:
-            if (match.group(2) > 0):
+        if output == "" and match is not None:
+            if match.group(2) > 0:
                 output = str(random.randint(1, int(match.group(2))))
             else:
                 output = str(random.randint(int(match.group(2)), 1))
         match = kleinerPattern.match(text)
-        if output == '' and match is not None:
-            if (match.group(3) > 0):
+        if output == "" and match is not None:
+            if match.group(3) > 0:
                 output = str(random.randrange(1, int(match.group(3))))
             else:
                 output = str(random.randrange(int(match.group(3)), 1))
 
-    elif 'schere' in text or 'stein' in text or 'papier' in text:
-        possibilities = ['Schere', 'Stein', 'Papier']
+    elif "schere" in text or "stein" in text or "papier" in text:
+        possibilities = ["Schere", "Stein", "Papier"]
         zufall = random.randint(0, 2)
         output = possibilities[zufall]
 
-    elif 'grade' in text and 'ungerade' in text:
-        possibilities = ['grade', 'ungerade']
+    elif "grade" in text and "ungerade" in text:
+        possibilities = ["grade", "ungerade"]
         output = random.choice(possibilities)
 
-    if output == '':
+    if output == "":
         output = str(random.randint(1, 100))
     return output
 
 
 def handle(text, core, skills):
     ausgabe = output(text, core).strip()
-    if ausgabe.startswith('-'):
-        ausgabe = 'minus ' + ausgabe[1:]
-    core.say('drei')
+    if ausgabe.startswith("-"):
+        ausgabe = "minus " + ausgabe[1:]
+    core.say("drei")
     sleep(1)
-    core.say('zwei')
+    core.say("zwei")
     sleep(1)
-    core.say('eins')
+    core.say("eins")
     sleep(1)
     core.say(ausgabe)
 
 
 def isValid(text):
     text = text.lower()
-    if 'münze' in text or ('kopf' in text and 'oder' in text and 'zahl' in text) or 'würfel' in text or (
-            ('zufall' in text or 'zufällig' in text) and 'zahl' in text):
+    if (
+        "münze" in text
+        or ("kopf" in text and "oder" in text and "zahl" in text)
+        or "würfel" in text
+        or (("zufall" in text or "zufällig" in text) and "zahl" in text)
+    ):
         return True
-    elif 'schere' in text and 'stein' in text and 'papier' in text:
+    elif "schere" in text and "stein" in text and "papier" in text:
         return True
-    elif 'grade' in text and 'ungerade' in text:
+    elif "grade" in text and "ungerade" in text:
         return True

@@ -5,18 +5,21 @@ from wordcloud import WordCloud
 
 
 def isValid(text):
-    if ('erstell' in text or 'generier' in text) and ('wortfeld' in text or 'wordmap' in text or 'wortwolke' in text):
+    if ("erstell" in text or "generier" in text) and (
+        "wortfeld" in text or "wordmap" in text or "wortwolke" in text
+    ):
         return True
     return False
 
 
 def handle(text, core, skills):
     # toDo: img not found
-    char_mask = np.array(Image.open('Jarvis/modules/resources/temp/word_field.png'))
+    char_mask = np.array(Image.open("Jarvis/modules/resources/temp/word_field.png"))
 
     words = core.listen(
-        'Bitte nenne nun die Wörter, die in einem Bild zusammengefasst werden sollen. Jedes Wort muss mit einem "," oder einem "und" voneinander abgetrennt werden.')
-    words = words.replace(' und ', ', ')
+        'Bitte nenne nun die Wörter, die in einem Bild zusammengefasst werden sollen. Jedes Wort muss mit einem "," oder einem "und" voneinander abgetrennt werden.'
+    )
+    words = words.replace(" und ", ", ")
 
     bg_color = "black"
     for color in skills.statics.color_ger_to_eng.keys():

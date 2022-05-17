@@ -24,7 +24,7 @@ def isValid(text):
         "was weißt du über",
         "[was|wer] [ist|sind|war|waren]",
     ]
-    if ' mal ' in text or ' plus ' in text or ' minus ' in text or ' geteilt ' in text:
+    if " mal " in text or " plus " in text or " minus " in text or " geteilt " in text:
         return False
     elif batchMatch(batch, text) or "was versteh" in text or "definier" in text:
         return True
@@ -37,15 +37,44 @@ def handle(text, core, skills):
     try:
         if "über" in text:
             article = text.split("über ")[1]
-        elif "was ist" in text or "wer ist" in text or "wer war" in text or "was war" in text:
-            article = text.split("ist ")[1] if len(text.split("ist ")) >= 2 else text.split(" war")[1]
-        elif "was sind" in text or "wer sind" in text or "wer waren" in text or "was waren" in text:
-            article = text.split("sind ")[1].rstrip("s") if len(text.split("ist ")) >= 2 else text.split(" waren")[
-                1].rstrip("s")
+        elif (
+            "was ist" in text
+            or "wer ist" in text
+            or "wer war" in text
+            or "was war" in text
+        ):
+            article = (
+                text.split("ist ")[1]
+                if len(text.split("ist ")) >= 2
+                else text.split(" war")[1]
+            )
+        elif (
+            "was sind" in text
+            or "wer sind" in text
+            or "wer waren" in text
+            or "was waren" in text
+        ):
+            article = (
+                text.split("sind ")[1].rstrip("s")
+                if len(text.split("ist ")) >= 2
+                else text.split(" waren")[1].rstrip("s")
+            )
         elif "was " in text and (" ist" in text or " sind" in text):
-            article = text.split("was ")[1].split(" ist")[0].split(" sind")[0].split(" war")[0].split(" waren")[0]
+            article = (
+                text.split("was ")[1]
+                .split(" ist")[0]
+                .split(" sind")[0]
+                .split(" war")[0]
+                .split(" waren")[0]
+            )
         elif "wer " in text and (" ist" in text or " sind" in text):
-            article = text.split("wer ")[1].split(" ist")[0].split(" sind")[0].split(" war")[0].split(" waren")[0]
+            article = (
+                text.split("wer ")[1]
+                .split(" ist")[0]
+                .split(" sind")[0]
+                .split(" war")[0]
+                .split(" waren")[0]
+            )
         elif "unter" in text:
             article = text.split("unter ")[1]
         elif "definier" in text:
@@ -54,7 +83,10 @@ def handle(text, core, skills):
         else:
             article = "fehler"
         article = article.strip().strip("bitte")
-        article = masstrip(article, ["ein ", "eine ", "einen ", "der ", "die ", "das ", " ist", " sind"])
+        article = masstrip(
+            article,
+            ["ein ", "eine ", "einen ", "der ", "die ", "das ", " ist", " sind"],
+        )
         try:
             wikitext = wikipedia.summary(article)
             wikitext = shorten(wikitext)
@@ -68,8 +100,16 @@ def handle(text, core, skills):
                 try:
                     wikitext = wikipedia.summary(next)
                     wikitext = shorten(wikitext)
-                    outstr = "Leider bin ich mir nicht ganz sicher, was du mit dem Begriff " + article + " meintest. "
-                    outstr += "Am ehesten passte für mich der Begriff " + next + ", den ich deshalb für dich beschreibe. "
+                    outstr = (
+                        "Leider bin ich mir nicht ganz sicher, was du mit dem Begriff "
+                        + article
+                        + " meintest. "
+                    )
+                    outstr += (
+                        "Am ehesten passte für mich der Begriff "
+                        + next
+                        + ", den ich deshalb für dich beschreibe. "
+                    )
                     outstr += wikitext
                     succ = True
                 except wikipedia.exceptions.DisambiguationError as ef:
@@ -77,17 +117,21 @@ def handle(text, core, skills):
                     outstr = "Leider kann ich dir im Moment nichts darüber erzählen. vielleicht versuchst du, deine Frage klarer zu formulieren?"
                 except wikipedia.exceptions.PageError:
                     core.say(
-                        "Ich habe zwar Antworten gefunden, aber keine davon passt so richtig auf deine Frage. Entschuldige.")
+                        "Ich habe zwar Antworten gefunden, aber keine davon passt so richtig auf deine Frage. Entschuldige."
+                    )
             core.say(outstr)
         except wikipedia.exceptions.PageError:
             core.say(
-                "Leider weiß ich keine Antwort auf deine Frage. Vielleicht hilft dir eine Suche im Internet weiter?")
+                "Leider weiß ich keine Antwort auf deine Frage. Vielleicht hilft dir eine Suche im Internet weiter?"
+            )
     except IndexError:
         core.say(
-            "Leider hast du deine Frage so forumliert, dass ich sie nicht verstehen konnte. Das tut mir leid, versuch s doch einfach erneut!")
+            "Leider hast du deine Frage so forumliert, dass ich sie nicht verstehen konnte. Das tut mir leid, versuch s doch einfach erneut!"
+        )
 
 
 ## WIKIPEDIA-extract first sentence
+
 
 def shorten(long):
     short = ""
@@ -103,7 +147,13 @@ def shorten(long):
             output = t_output
             cutsen = 10
         cutsen += 1
-    output = output.replace("  ", " ").replace("..", ".").replace(". .", ".").replace(" ,", ",").replace(" . ", ". ")
+    output = (
+        output.replace("  ", " ")
+        .replace("..", ".")
+        .replace(". .", ".")
+        .replace(" ,", ",")
+        .replace(" . ", ". ")
+    )
     return output
 
 

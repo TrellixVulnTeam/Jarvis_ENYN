@@ -16,10 +16,16 @@ def isValid(text):
 
 def handle(text, core, skill):
     decNumber = getNumber(text)
-    if decNumber != 'UNDO':
-        core.say('Die Zahl ' + decNumber + ' ist ' + binary(int(decNumber)) + ' in dem Binären.')
+    if decNumber != "UNDO":
+        core.say(
+            "Die Zahl "
+            + decNumber
+            + " ist "
+            + binary(int(decNumber))
+            + " in dem Binären."
+        )
     else:
-        core.say('Ich konnte die Zahl leider nicht herausfiltern.')
+        core.say("Ich konnte die Zahl leider nicht herausfiltern.")
 
 
 def binary(n):
@@ -31,9 +37,9 @@ def binary(n):
 
 
 def getNumber(text):
-    answer = 'UNDO'
-    hotWord = ['wandle', 'wandel', 'gib', 'ist']
-    sentence = text.split(' ')
+    answer = "UNDO"
+    hotWord = ["wandle", "wandel", "gib", "ist"]
+    sentence = text.split(" ")
     index = -1
     for item in sentence:
         i = 0

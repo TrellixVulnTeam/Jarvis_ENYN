@@ -81,6 +81,7 @@ def sayAsync(core, text):
 
 # Source https://github.com/diego-80/solar_calc
 
+
 class sunsetTimes(object):
     def __init__(self, lat_d, lon_d, day_of_year, time_zone=0):
         """
@@ -96,14 +97,28 @@ class sunsetTimes(object):
         lat = math.radians(lat_d)
         lon = math.radians(lon_d)
         frac_year = ((math.pi * 2) / (365)) * (day_of_year - 1)  # radians
-        eq_time = 229.18 * (0.000075 + (0.001868 * math.cos(frac_year)) - (0.032077 * math.sin(frac_year)) - (
-                    0.014615 * math.cos(2 * frac_year)) - (0.040849 * math.sin(2 * frac_year)))  # minutes
-        decl = 0.006918 - (0.399912 * math.cos(frac_year)) + (0.070257 * math.sin(frac_year)) \
-               - (0.006758 * math.cos(2 * frac_year)) + (0.000907 * math.sin(2 * frac_year)) \
-               - (0.002697 * math.cos(3 * frac_year)) + (0.00148 * math.sin(3 * frac_year))  # radians
-        hour_angle = math.degrees(math.acos(
-            math.cos(math.radians(90.833)) / (math.cos(lat) * math.cos(decl))
-            - (math.tan(lat) * math.tan(decl))))  # degrees
+        eq_time = 229.18 * (
+            0.000075
+            + (0.001868 * math.cos(frac_year))
+            - (0.032077 * math.sin(frac_year))
+            - (0.014615 * math.cos(2 * frac_year))
+            - (0.040849 * math.sin(2 * frac_year))
+        )  # minutes
+        decl = (
+            0.006918
+            - (0.399912 * math.cos(frac_year))
+            + (0.070257 * math.sin(frac_year))
+            - (0.006758 * math.cos(2 * frac_year))
+            + (0.000907 * math.sin(2 * frac_year))
+            - (0.002697 * math.cos(3 * frac_year))
+            + (0.00148 * math.sin(3 * frac_year))
+        )  # radians
+        hour_angle = math.degrees(
+            math.acos(
+                math.cos(math.radians(90.833)) / (math.cos(lat) * math.cos(decl))
+                - (math.tan(lat) * math.tan(decl))
+            )
+        )  # degrees
 
         times = self.utc_times(lon_d, hour_angle, eq_time)
         self.converted = ((times[0] + time_zone * 60), (times[1] + time_zone * 60))
@@ -132,7 +147,9 @@ def handle(text, core, skills):
 
     # Call Nominatim-API
     place = place.replace(" ", "+")
-    r = requests.get("https://nominatim.openstreetmap.org/search?q={0}&format=json".format(place))
+    r = requests.get(
+        "https://nominatim.openstreetmap.org/search?q={0}&format=json".format(place)
+    )
     if r.status_code == 200:
         try:
             response = json.loads(r.text)
@@ -143,12 +160,14 @@ def handle(text, core, skills):
             lon = float(placeData["lon"])
 
             if lat > 66.5 or lat < -66.5:
-                core.say(speechVariation(
-                    "Es ist mir etwas peinlich, aber für diesen Ort kann ich "
-                    "leider den Sonnen auf beziehungsweise Untergang nicht "
-                    "berechnen. Dafür ist mein hinterlegter Algorithmus nicht "
-                    "ausgelegt worden."
-                ))
+                core.say(
+                    speechVariation(
+                        "Es ist mir etwas peinlich, aber für diesen Ort kann ich "
+                        "leider den Sonnen auf beziehungsweise Untergang nicht "
+                        "berechnen. Dafür ist mein hinterlegter Algorithmus nicht "
+                        "ausgelegt worden."
+                    )
+                )
             else:
                 datetimeTemp = core.analysis["datetime"]
 
@@ -160,32 +179,38 @@ def handle(text, core, skills):
                     timezone = 1
                 sT = sunsetTimes(lat, lon, day_of_year, timezone)
                 sunrise, sunset = sT.converted
-                core.say(speechVariation(
-                    "In {0} geht die Sonne [nach meinen Berechnungen|] um "
-                    " {1} Uhr {2} auf und um {3} Uhr {4} wieder unter. Du "
-                    "kannst also volle {5} Stunden und {6} Minuten "
-                    "Tageslicht genießen.".format(
-                        placeName,
-                        round(sunrise // 60),
-                        round(sunrise % 60),
-                        round(sunset // 60),
-                        round(sunrise % 60),
-                        round((sunset - sunrise) // 60),
-                        round((sunset - sunrise) % 60)
+                core.say(
+                    speechVariation(
+                        "In {0} geht die Sonne [nach meinen Berechnungen|] um "
+                        " {1} Uhr {2} auf und um {3} Uhr {4} wieder unter. Du "
+                        "kannst also volle {5} Stunden und {6} Minuten "
+                        "Tageslicht genießen.".format(
+                            placeName,
+                            round(sunrise // 60),
+                            round(sunrise % 60),
+                            round(sunset // 60),
+                            round(sunrise % 60),
+                            round((sunset - sunrise) // 60),
+                            round((sunset - sunrise) % 60),
+                        )
                     )
-                ))
+                )
         except IndexError:
-            core.say(speechVariation(
-                "Oh je, ich konnte zu [deinem angefragten Ort|] {0} leider keine"
-                "Position[sdaten|] finden. Vielleicht willst du es mit einer"
-                "anderen Aussprache-Variante ausprobieren?".format(place)
-            ))
+            core.say(
+                speechVariation(
+                    "Oh je, ich konnte zu [deinem angefragten Ort|] {0} leider keine"
+                    "Position[sdaten|] finden. Vielleicht willst du es mit einer"
+                    "anderen Aussprache-Variante ausprobieren?".format(place)
+                )
+            )
     else:
-        core.say(speechVariation(
-            "Oh, ich habe gerade [Probleme|Schwierigkeiten], "
-            "[an die Koordinaten zu kommen|die Koordinaten zu übersetzen]. "
-            "Vielleicht probierst du es einfach später nochmal[, okay|]?"
-        ))
+        core.say(
+            speechVariation(
+                "Oh, ich habe gerade [Probleme|Schwierigkeiten], "
+                "[an die Koordinaten zu kommen|die Koordinaten zu übersetzen]. "
+                "Vielleicht probierst du es einfach später nochmal[, okay|]?"
+            )
+        )
 
 
 def isValid(text):

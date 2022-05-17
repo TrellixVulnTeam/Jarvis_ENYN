@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 import main
 
 
-class mThr():
+class mThr:
     """
     the mThr-Class wraps around the main JARVIS-Server. JARVIS is started in a
     seperate Process and not a Thread - so you can kill them without modifying

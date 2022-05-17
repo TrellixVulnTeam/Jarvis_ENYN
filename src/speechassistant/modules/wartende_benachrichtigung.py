@@ -6,7 +6,7 @@ SECURE = True
 
 
 def isValid(text):
-    #toDo
+    # toDo
     return False
 
 
@@ -65,5 +65,7 @@ def handle(text, core, skills):
                     core.say(txt)
                 core.user["waiting_notifications"].remove(item)
     except RuntimeError:
-        logging.warning('[WARNING] Something went wrong in Module "wartende_benachrichtigungen"')
+        logging.warning(
+            '[WARNING] Something went wrong in Module "wartende_benachrichtigungen"'
+        )
         traceback.print_exc()

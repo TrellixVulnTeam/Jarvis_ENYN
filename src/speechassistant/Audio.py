@@ -63,14 +63,20 @@ class AudioInput(metaclass=ABCMeta):
         self.sensitivity: float = 0.5
         AudioInput.__instance = self
 
-        logging.info('[SUCCESS] Audio Input initialized!')
+        logging.info("[SUCCESS] Audio Input initialized!")
 
     def start(self, sensitivity: float, _hot_word_detected: Callable) -> None:
         # starts the hot-word detection
         logging.info("[ACTION] Starting audio input module...")
         self.sensitivity = sensitivity
         self.stopped = False
-        audio_input_thread: Thread = Thread(target=self.run, args=(sensitivity, _hot_word_detected,))
+        audio_input_thread: Thread = Thread(
+            target=self.run,
+            args=(
+                sensitivity,
+                _hot_word_detected,
+            ),
+        )
         audio_input_thread.daemon = True
         audio_input_thread.start()
 
@@ -79,16 +85,19 @@ class AudioInput(metaclass=ABCMeta):
         try:
             keywords: list = ["jarvis"]
             # toDo: access_key
-            porcupine = pvporcupine.create(keywords=keywords, sensitivities=[sensitivity])
+            porcupine = pvporcupine.create(
+                keywords=keywords, sensitivities=[sensitivity]
+            )
             pa = pyaudio.PyAudio()
             audio_stream: IO = pa.open(
                 rate=porcupine.sample_rate,
                 channels=1,
                 format=pyaudio.paInt16,
                 input=True,
-                frames_per_buffer=porcupine.frame_length)
+                frames_per_buffer=porcupine.frame_length,
+            )
 
-            logging.info('\nListening {%s}' % keywords)
+            logging.info("\nListening {%s}" % keywords)
 
             while not self.stopped:
                 pcm: tuple[any, ...] = audio_stream.read(porcupine.frame_length)
@@ -97,8 +106,9 @@ class AudioInput(metaclass=ABCMeta):
                 if keyword_index >= 0 and not self.recording:
                     self.recording = True
                     logging.info(
-                        f'[ACTION] Detected {keywords[keyword_index]} at '
-                        f'{datetime.now().hour}:{datetime.now().minute}')
+                        f"[ACTION] Detected {keywords[keyword_index]} at "
+                        f"{datetime.now().hour}:{datetime.now().minute}"
+                    )
                     self.recognize_input(_hot_word_detected)
 
         except MemoryError:
@@ -113,9 +123,14 @@ class AudioInput(metaclass=ABCMeta):
             text = self.speech_engine.recognize_google(audio, language="de-DE")
             return text
 
-    def recognize_input(self, _hot_word_detected: Callable, listen: bool = False, play_bling_before_listen: bool = False) -> str:
+    def recognize_input(
+        self,
+        _hot_word_detected: Callable,
+        listen: bool = False,
+        play_bling_before_listen: bool = False,
+    ) -> str:
         self.recording = True
-        logging.info('[Listening] for user-input')
+        logging.info("[Listening] for user-input")
         # recognize user input through the microphone
         try:
             with sr.Microphone(device_index=None) as source:
@@ -127,14 +142,18 @@ class AudioInput(metaclass=ABCMeta):
                 # self.speech_engine.record(source)
                 try:
                     # translate audio to text
-                    text: str = self.speech_engine.recognize_google(audio, language="de-DE")
+                    text: str = self.speech_engine.recognize_google(
+                        audio, language="de-DE"
+                    )
                     logging.info("[USER INPUT]\t" + text)
                 except sr.UnknownValueError:
                     try:
                         # if it didn't worked, adjust the ambient-noise and try again
                         self.__adjusting()
-                        text: str = self.speech_engine.recognize_google(audio, language="de-DE")
-                        logging.info('[USER INPUT]\t' + text)
+                        text: str = self.speech_engine.recognize_google(
+                            audio, language="de-DE"
+                        )
+                        logging.info("[USER INPUT]\t" + text)
                     except sr.UnknownValueError:
                         text: str = "Audio could not be recorded"
             if not listen and not play_bling_before_listen:
@@ -233,8 +252,16 @@ class MusicPlayer:
         self.is_playing = False
         self.player.stop()
 
-    def play(self, by_name: str = None, url: str = False, path: str = False, as_next: bool = False, now: bool = False,
-             playlist: bool = False, announce: bool = False) -> None:
+    def play(
+        self,
+        by_name: str = None,
+        url: str = False,
+        path: str = False,
+        as_next: bool = False,
+        now: bool = False,
+        playlist: bool = False,
+        announce: bool = False,
+    ) -> None:
         self.stopped = False
         if not self.is_playing and not self.paused:
             self.is_playing = True
@@ -243,9 +270,13 @@ class MusicPlayer:
         """if playlist:
             self.add_playlist(url, by_name, next)"""
         if by_name is not None:
-            _url = f'https://www.youtube.com/results?search_query={str(by_name)}'.replace("'", "").replace(' ',
-                                                                                                           '+').rstrip(
-                '+')
+            _url = (
+                f"https://www.youtube.com/results?search_query={str(by_name)}".replace(
+                    "'", ""
+                )
+                .replace(" ", "+")
+                .rstrip("+")
+            )
             html = urllib.request.urlopen(_url)
             video_ids: list = re.findall(r"watch\?v=(\S{11})", html.read().decode())
             while True:
@@ -371,7 +402,7 @@ class AudioOutput:
         self.stopped: bool = True
 
         AudioOutput.__instance = self
-        logging.info('[SUCCESS] Audio Output initialized!')
+        logging.info("[SUCCESS] Audio Output initialized!")
 
     def start(self) -> AudioOutput:
         logging.info("[ACTION] Starting audio output module...")
@@ -391,7 +422,11 @@ class AudioOutput:
                     mixer.Channel(1).set_volume(0.1)
                     mixer.Channel(2).set_volume(0.1)
                     self.music_player.set_volume(0.1)
-                if not self.notification == [] and mixer.Channel(0).get_busy() == 0 and not self.tts.is_reading:
+                if (
+                    not self.notification == []
+                    and mixer.Channel(0).get_busy() == 0
+                    and not self.tts.is_reading
+                ):
                     if mixer.Channel(0).get_busy() == 1:
                         mixer.Channel(1).set_volume(0.10)
                         mixer.Channel(2).set_volume(0.10)
@@ -407,18 +442,20 @@ class AudioOutput:
                             track: mixer.Sound = mixer.Sound(self.notification[0])
                             mixer.Channel(0).play(track)
                         except TypeError:
-                            logging.warning(f'Could not handle type of "{self.notification[0]}" (=> Type: {type(self.notification[0])})')
+                            logging.warning(
+                                f'Could not handle type of "{self.notification[0]}" (=> Type: {type(self.notification[0])})'
+                            )
                         finally:
                             self.notification.pop(0)
 
                 if not self.music == [] and mixer.Channel(2).get_busy() == 0:
                     if isinstance(self.music[0], str):
-                        logging.info(f'Play music with name {self.music[0]}')
+                        logging.info(f"Play music with name {self.music[0]}")
                         topic = self.music[0]
                         self.music.pop(0)
                         self.music_player.play(by_name=topic)
                     else:
-                        logging.info(f'Play track with path {self.music[0]}')
+                        logging.info(f"Play track with path {self.music[0]}")
                         track = mixer.Sound(self.music[0])
                         mixer.Channel(2).play(track)
                         self.playback.pop(0)
@@ -426,8 +463,11 @@ class AudioOutput:
                     track = mixer.Sound(self.playback[0])
                     self.playback.pop(0)
                     mixer.Channel(1).play(track)
-                if not mixer.Channel(0).get_busy() is 1 and mixer.Channel(1).get_volume != 1 and mixer.Channel(
-                        2).get_volume != 1:
+                if (
+                    not mixer.Channel(0).get_busy() is 1
+                    and mixer.Channel(1).get_volume != 1
+                    and mixer.Channel(2).get_volume != 1
+                ):
                     mixer.Channel(1).set_volume(1)
                     mixer.Channel(2).set_volume(1)
                 time.sleep(0.2)
@@ -437,8 +477,8 @@ class AudioOutput:
     def say(self, text: str, wait_until_done: bool = True) -> None:
         # Forwards the given text to the text-to-speech function and waits
         # until the announcement has ended.
-        if text == '' or text is None:
-            text: str = 'Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr.'
+        if text == "" or text is None:
+            text: str = "Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr."
         self.notification.append(text)
         # block while not done
         if wait_until_done:

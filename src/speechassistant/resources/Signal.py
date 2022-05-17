@@ -8,5 +8,5 @@ class SignalBot:
 
     def send_message(self, message, user):
         phone_number = user.get("phone-number")
-        req = f'https://api.callmebot.com/signal/send.php?phone={phone_number}&apikey={self.api_key}&text={message}'
+        req = f"https://api.callmebot.com/signal/send.php?phone={phone_number}&apikey={self.api_key}&text={message}"
         requests.request(req)

@@ -7,14 +7,24 @@ PRIORITY = -1
 # Das paket stellt irgendwelche sätze oder zitate bereit.
 # Das Modul wird nur aktiv, wenn `fortunes-de` installiert ist.
 
+
 def isValid(text):
-    if ('erzähl' in text.lower() or 'sag' in text.lower()) and (
-            'irgendwas' in text.lower() or 'irgendetwas' in text.lower() or 'etwas' in text or 'was' in text):
+    if ("erzähl" in text.lower() or "sag" in text.lower()) and (
+        "irgendwas" in text.lower()
+        or "irgendetwas" in text.lower()
+        or "etwas" in text
+        or "was" in text
+    ):
         try:
-            installedStr = subprocess.check_output(
-                "dpkg-query --show --showformat='${db:Status-Status}\n' 'fortunes-de'", shell=True).decode(
-                'utf-8').lower()
-            if 'installed' in installedStr and 'not' not in installedStr:
+            installedStr = (
+                subprocess.check_output(
+                    "dpkg-query --show --showformat='${db:Status-Status}\n' 'fortunes-de'",
+                    shell=True,
+                )
+                .decode("utf-8")
+                .lower()
+            )
+            if "installed" in installedStr and "not" not in installedStr:
                 return True
         except subprocess.CalledProcessError:
             return False
@@ -23,15 +33,20 @@ def isValid(text):
 
 def handle(text, core, skills):
     try:
-        fortune = subprocess.check_output("fortune", shell=True).decode('utf-8').strip().lower()
-        if (fortune != ''):
+        fortune = (
+            subprocess.check_output("fortune", shell=True)
+            .decode("utf-8")
+            .strip()
+            .lower()
+        )
+        if fortune != "":
             core.say(fortune)
-        elif 'irgendetwas' in text.lower():
-            core.say('irgendetwas')
+        elif "irgendetwas" in text.lower():
+            core.say("irgendetwas")
         else:
-            core.say('irgendwas')
+            core.say("irgendwas")
     except subprocess.CalledProcessError:
-        if 'irgendetwas' in text.lower():
-            core.say('irgendetwas')
+        if "irgendetwas" in text.lower():
+            core.say("irgendetwas")
         else:
-            core.say('irgendwas')
+            core.say("irgendwas")

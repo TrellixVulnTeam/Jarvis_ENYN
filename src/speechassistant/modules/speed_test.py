@@ -6,8 +6,11 @@ from speedtest import Speedtest
 
 def isValid(text):
     text = text.lower()
-    if "speedtest" in text or ("geschwindigkeit" in text and "internet" in text) or (
-            "schnell" in text and "verbindung" in text):
+    if (
+        "speedtest" in text
+        or ("geschwindigkeit" in text and "internet" in text)
+        or ("schnell" in text and "verbindung" in text)
+    ):
         return True
     elif "besteht" in text and "verbindung" in text and "internet" in text:
         return True
@@ -17,8 +20,11 @@ def isValid(text):
 
 def handle(text, core, skills):
     text = text.lower()
-    if "speedtest" in text or ("geschwindigkeit" in text and "internet" in text) or (
-            "schnell" in text and "verbindung" in text):
+    if (
+        "speedtest" in text
+        or ("geschwindigkeit" in text and "internet" in text)
+        or ("schnell" in text and "verbindung" in text)
+    ):
         run_speedtest(core)
     elif "besteht" in text and "verbindung" in text and "internet" in text:
         internet_availability(core)
@@ -41,15 +47,18 @@ def run_speedtest(core):
         up_mbps = uplink_bps / 1000000
         down_mbps = downlink_bps / 1000000
 
-        core.say("Der Ping beträgt %s ms,\n"
-                 "der Upload %0.2f Mbps\n"
-                 "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
-                 )
+        core.say(
+            "Der Ping beträgt %s ms,\n"
+            "der Upload %0.2f Mbps\n"
+            "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
+        )
 
     except Exception:
         traceback.print_exc()
-        core.say("Es gab ein Problem beim Starten des Speedtests. Bitte versuche es zu einem späteren Zeitpunkt "
-                 "erneut oder melde den Fehler.")
+        core.say(
+            "Es gab ein Problem beim Starten des Speedtests. Bitte versuche es zu einem späteren Zeitpunkt "
+            "erneut oder melde den Fehler."
+        )
 
 
 def internet_availability(core):
@@ -62,7 +71,7 @@ def internet_availability(core):
         core.say("Derzeit besteht keine Verbingung zum Internet.")
 
 
-def internet_connectivity_check(url='https://www.google.com/', timeout=2):
+def internet_connectivity_check(url="https://www.google.com/", timeout=2):
     """
     Checks for internet connection availability based on google page.
     """

@@ -8,9 +8,18 @@ class Users:
     def get_user_list(self) -> list:
         return self.user_interface.get_users()
 
-    def add_user(self, alias: str, first_name: str, last_name: str, birthday: dict, messenger_id: int,
-                 song_id: int = 1) -> None:
-        self.user_interface.add_user(alias, first_name, last_name, birthday, messenger_id, song_id)
+    def add_user(
+        self,
+        alias: str,
+        first_name: str,
+        last_name: str,
+        birthday: dict,
+        messenger_id: int,
+        song_id: int = 1,
+    ) -> None:
+        self.user_interface.add_user(
+            alias, first_name, last_name, birthday, messenger_id, song_id
+        )
 
     def get_user_by_name(self, name: str) -> dict:
         return self.user_interface.get_user(name)

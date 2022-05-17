@@ -1,39 +1,48 @@
 {
-  "description": "beschreibt, was die Routine macht",
-  "retakes": {
-    "days": {
-      "daily": false,
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": false,
-      "sunday": false,
-      "date_of_day": [
-        "3",
-        "7"
-      ]
+    "name": "",
+    "descriptions": "",
+    "on_commands": ["", ""],
+    "retakes": {
+        "days": {
+            "daily": true,
+            "monday": false,
+            "tuesday": false,
+            "wednesday": false,
+            "thursday": false,
+            "friday": false,
+            "saturday": false,
+            "sunday": false,
+            "date_of_day": [
+                {
+                    "id": 1,
+                    "day": 1,
+                    "month": 1
+                }
+            ]
+        },
+        "activation": {
+            "clock_time": [
+                {
+                    "id": 1,
+                    "hour": 1,
+                    "min": 1
+                }
+            ],
+            "after_alarm": false,
+            "after_sunrise": false,
+            "after_sunset": true,
+            "after_call": false
+        }
     },
-    "activation": {
-      "clock_time": [
-        "1:11",
-        "2:22"
-      ],
-      "after_alarm": false,
-      "after_sunrise": false,
-      "after_sunset": false,
-      "after_call": false
-    }
-  },
-  "actions": {
-    "commands": [
-      {
-        "module_name": "name des aufzurufenden Moduls",
-        "text": [
-          "Befehl, den das Modul übergeben bekommt"
+    "actions": {
+        "commands": [
+            {
+                "id": 1,
+                "module_name": "",
+                "text": [
+                    "", ""
+                ]
+            }
         ]
-      }
-    ]
-  }
+    }
 }

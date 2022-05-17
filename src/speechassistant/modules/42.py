@@ -4,7 +4,7 @@ SECURE = True
 
 def isValid(text):
     text = text.lower()
-    if ('was' in text or 'wie' in text) and 'die antwort' in text:
+    if ("was" in text or "wie" in text) and "die antwort" in text:
         return True
 
     text = text.lower()
@@ -16,7 +16,7 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    core.say('42')
+    core.say("42")
 
 
 def batchGen(batch):

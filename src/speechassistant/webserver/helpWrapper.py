@@ -45,10 +45,7 @@ class InstallWrapper:
         return packList
 
     def getInstallerStatus(self):
-        state = {
-            "status": self.installStatus,
-            "log": self.installLog
-        }
+        state = {"status": self.installStatus, "log": self.installLog}
         return state
 
     def startInstallation(self, packageName):
@@ -96,7 +93,9 @@ class InstallWrapper:
                 command = ["sudo", "apt-get", "install", packageName, "-y"]
             elif type == "pip3":
                 command = ["sudo", "pip3", "install", packageName]
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
             while process.returncode == None:
                 text = process.stdout.read()
                 if len(text) > 0:
@@ -107,12 +106,21 @@ class InstallWrapper:
                 self.installLog += "poll" + str(process.poll())
             if process.returncode == 0:
                 self.installLog += "\n " + str(packageName) + " got installed properly."
-                self.installLog += " Took " + str(round(time.time() - t_2, 1)) + " seconds."
+                self.installLog += (
+                    " Took " + str(round(time.time() - t_2, 1)) + " seconds."
+                )
             else:
-                self.installLog += "\n Installation for " + str(
-                    packageName) + " failed. (apt returned a non-zero code: " + str(process.returncode) + ")"
+                self.installLog += (
+                    "\n Installation for "
+                    + str(packageName)
+                    + " failed. (apt returned a non-zero code: "
+                    + str(process.returncode)
+                    + ")"
+                )
         except OSError as e:
-            self.installLog += "\n Installation for " + str(packageName) + " failed. (" + str(e) + ")"
+            self.installLog += (
+                "\n Installation for " + str(packageName) + " failed. (" + str(e) + ")"
+            )
 
     def readConfig(self):
         """
@@ -120,7 +128,7 @@ class InstallWrapper:
         services.json-config-file. Additionally it returns the class-internal
         packagesRaw-Variable where the contents of the services.json files are stored
         """
-        config = str(Path(__file__).parent) + '/services.json'
+        config = str(Path(__file__).parent) + "/services.json"
         self.packagesRaw = json.load(open(config, encoding="utf-8"))
 
         return self.packagesRaw
@@ -140,7 +148,11 @@ class InstallWrapper:
             if "import" in v:
                 try:
                     library = importlib.import_module(v["import"])
-                    version = str(library.__version__) if hasattr(library, "__version__") else ""
+                    version = (
+                        str(library.__version__)
+                        if hasattr(library, "__version__")
+                        else ""
+                    )
                     status = (True, version)
                 except ImportError as e:
                     status = (False, e)

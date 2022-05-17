@@ -1,4 +1,4 @@
-from __future__ import annotations      # compatibility for < 3.10
+from __future__ import annotations  # compatibility for < 3.10
 
 import json
 import logging
@@ -9,7 +9,7 @@ from typing import Tuple
 import numpy as np
 import tensorflow.lite.python.lite
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import nltk
 from nltk.stem import WordNetLemmatizer
@@ -19,14 +19,20 @@ from tensorflow.keras.optimizers import SGD, Adadelta
 
 import matplotlib.pyplot as plt
 
-nltk.download('omw-1.4', quiet=True)
-nltk.download('punkt', quiet=True)
-nltk.download('wordnet', quiet=True)
+nltk.download("omw-1.4", quiet=True)
+nltk.download("punkt", quiet=True)
+nltk.download("wordnet", quiet=True)
 
 
 class GenericAssistant:
-
-    def __init__(self, intents: dict, path_extension: str, intent_methods: dict = {}, model_name: str = "assistant_model", json_encoding: str = 'utf-8') -> None:
+    def __init__(
+        self,
+        intents: dict,
+        path_extension: str,
+        intent_methods: dict = {},
+        model_name: str = "assistant_model",
+        json_encoding: str = "utf-8",
+    ) -> None:
         self.intents: dict = intents
         self.intent_methods: dict = intent_methods
         self.model_name: str = model_name
@@ -39,24 +45,30 @@ class GenericAssistant:
         self.lemmatizer: WordNetLemmatizer = WordNetLemmatizer()
 
     def load_json_intents(self, intents: str) -> None:
-        self.intents: dict = json.loads(open(self.path_extension + intents, encoding=self.json_encoding).read())
+        self.intents: dict = json.loads(
+            open(self.path_extension + intents, encoding=self.json_encoding).read()
+        )
 
     def train_model(self, epoch_times: int = 1000) -> None:
 
         self.words: list = []
         self.classes: list = []
         documents: list = []
-        ignore_letters: list = ['!', '?', ',', '.']
+        ignore_letters: list = ["!", "?", ",", "."]
 
-        for intent in self.intents['intents']:
-            for pattern in intent['patterns']:
+        for intent in self.intents["intents"]:
+            for pattern in intent["patterns"]:
                 word: list[str] = nltk.word_tokenize(pattern)
                 self.words.extend(word)
-                documents.append((word, intent['tag']))
-                if intent['tag'] not in self.classes:
-                    self.classes.append(intent['tag'])
+                documents.append((word, intent["tag"]))
+                if intent["tag"] not in self.classes:
+                    self.classes.append(intent["tag"])
 
-        self.words = [self.lemmatizer.lemmatize(w.lower()) for w in self.words if w not in ignore_letters]
+        self.words = [
+            self.lemmatizer.lemmatize(w.lower())
+            for w in self.words
+            if w not in ignore_letters
+        ]
         self.words = sorted(list(set(self.words)))
 
         self.classes = sorted(list(set(self.classes)))
@@ -66,7 +78,9 @@ class GenericAssistant:
         for doc in documents:
             bag: list = []
             word_patterns = doc[0]
-            word_patterns = [self.lemmatizer.lemmatize(word.lower()) for word in word_patterns]
+            word_patterns = [
+                self.lemmatizer.lemmatize(word.lower()) for word in word_patterns
+            ]
             for word in self.words:
                 bag.append(1) if word in word_patterns else bag.append(0)
 
@@ -82,39 +96,49 @@ class GenericAssistant:
 
         self.model = Sequential()
         self.prepare_model(1024, 64, 0.5)
-        self.model.add(Dense(len(train_y[0]), activation='softmax'))
+        self.model.add(Dense(len(train_y[0]), activation="softmax"))
 
         validation_data = self.load_validataion_data()
 
-        adelta = Adadelta(learning_rate=0.1, rho=0.95, epsilon=1e-8, name='Adadelta')
+        adelta = Adadelta(learning_rate=0.1, rho=0.95, epsilon=1e-8, name="Adadelta")
         sgd = SGD(learning_rate=0.0025, decay=1e-8, momentum=0.95, nesterov=True)
-        self.model.compile(loss='categorical_crossentropy', optimizer=adelta, metrics=['accuracy'])
-        self.hist = self.model.fit(np.array(train_x), np.array(train_y), epochs=epoch_times,
-                                   validation_data=validation_data, batch_size=15, shuffle=True,
-                                   steps_per_epoch=50, verbose=1, workers=15)
+        self.model.compile(
+            loss="categorical_crossentropy", optimizer=adelta, metrics=["accuracy"]
+        )
+        self.hist = self.model.fit(
+            np.array(train_x),
+            np.array(train_y),
+            epochs=epoch_times,
+            validation_data=validation_data,
+            batch_size=15,
+            shuffle=True,
+            steps_per_epoch=50,
+            verbose=1,
+            workers=15,
+        )
         # self.show_result(self.hist)
 
     def prepare_model(self, max: int, min: int, steps: int) -> None:
         actual: int = max
         while actual > min:
-            self.model.add(Dense(actual, activation='relu'))
+            self.model.add(Dense(actual, activation="relu"))
             self.model.add(Dropout(steps))
             actual -= actual * steps
 
     def show_result(self, history_dict):
-        acc = history_dict['accuracy']
-        val_acc = history_dict['val_accuracy']
-        loss = history_dict['loss']
-        val_loss = history_dict['val_loss']
+        acc = history_dict["accuracy"]
+        val_acc = history_dict["val_accuracy"]
+        loss = history_dict["loss"]
+        val_loss = history_dict["val_loss"]
 
         epochs = range(1, len(acc) + 1)
 
         # "bo" is for "blue dot"
-        plt.plot(epochs, acc, 'bo', label='Training acc')
-        plt.plot(epochs, val_acc, 'b', label='Validation acc')
-        plt.title('Training and validation accuracy')
-        plt.xlabel('Epochs')
-        plt.ylabel('Accuracy')
+        plt.plot(epochs, acc, "bo", label="Training acc")
+        plt.plot(epochs, val_acc, "b", label="Validation acc")
+        plt.title("Training and validation accuracy")
+        plt.xlabel("Epochs")
+        plt.ylabel("Accuracy")
         plt.legend()
 
         plt.show()
@@ -122,24 +146,58 @@ class GenericAssistant:
     def save_model(self, model_name: str = None) -> None:
         if model_name is None:
             self.model.save("{}.h5".format(self.model_name), self.hist)
-            pickle.dump(self.words, open('{}{}_words.pkl'.format(self.path_extension, self.model_name), 'wb'))
-            pickle.dump(self.classes, open('{}{}_classes.pkl'.format(self.path_extension, self.model_name), 'wb'))
+            pickle.dump(
+                self.words,
+                open(
+                    "{}{}_words.pkl".format(self.path_extension, self.model_name), "wb"
+                ),
+            )
+            pickle.dump(
+                self.classes,
+                open(
+                    "{}{}_classes.pkl".format(self.path_extension, self.model_name),
+                    "wb",
+                ),
+            )
         else:
             self.model.save("{}.h5".format(model_name), self.hist)
-            pickle.dump(self.words, open('{}{}_words.pkl'.format(self.path_extension, model_name), 'wb'))
-            pickle.dump(self.classes, open('{}{}_classes.pkl'.format(self.path_extension, model_name), 'wb'))
+            pickle.dump(
+                self.words,
+                open("{}{}_words.pkl".format(self.path_extension, model_name), "wb"),
+            )
+            pickle.dump(
+                self.classes,
+                open("{}{}_classes.pkl".format(self.path_extension, model_name), "wb"),
+            )
 
     def load_model(self, model_name: str = None) -> None:
         if model_name is None:
-            self.words = pickle.load(open('{}{}_words.pkl'.format(self.path_extension, self.model_name), 'rb'))
-            self.classes = pickle.load(open('{}{}_classes.pkl'.format(self.path_extension, self.model_name), 'rb'))
-            self.model = load_model('{}{}.h5'.format(self.path_extension, self.model_name), compile=True)
+            self.words = pickle.load(
+                open(
+                    "{}{}_words.pkl".format(self.path_extension, self.model_name), "rb"
+                )
+            )
+            self.classes = pickle.load(
+                open(
+                    "{}{}_classes.pkl".format(self.path_extension, self.model_name),
+                    "rb",
+                )
+            )
+            self.model = load_model(
+                "{}{}.h5".format(self.path_extension, self.model_name), compile=True
+            )
             # self.model = tensorflow.lite.Interpreter('{}{}.h5'.format(self.path_extension, self.model_name))
             # self.model.allocate_tensors()
         else:
-            self.words = pickle.load(open('{}{}_words.pkl'.format(self.path_extension, model_name), 'rb'))
-            self.classes = pickle.load(open('{}{}_classes.pkl'.format(self.path_extension, model_name), 'rb'))
-            self.model = load_model('{}{}.h5'.format(self.path_extension, model_name), compile=True)
+            self.words = pickle.load(
+                open("{}{}_words.pkl".format(self.path_extension, model_name), "rb")
+            )
+            self.classes = pickle.load(
+                open("{}{}_classes.pkl".format(self.path_extension, model_name), "rb")
+            )
+            self.model = load_model(
+                "{}{}.h5".format(self.path_extension, model_name), compile=True
+            )
 
     def load_validataion_data(self) -> Tuple[list, list]:
         with open(self.path_extension + "validation_data.json", "r") as validation_file:
@@ -154,7 +212,9 @@ class GenericAssistant:
             for doc in documents:
                 bag = []
                 word_patterns = doc[0]
-                word_patterns = [self.lemmatizer.lemmatize(word.lower()) for word in word_patterns]
+                word_patterns = [
+                    self.lemmatizer.lemmatize(word.lower()) for word in word_patterns
+                ]
                 for word in self.words:
                     bag.append(1) if word in word_patterns else bag.append(0)
 
@@ -170,7 +230,9 @@ class GenericAssistant:
 
     def _clean_up_sentence(self, sentence: str) -> list:
         sentence_words: list = nltk.word_tokenize(sentence)
-        sentence_words = [self.lemmatizer.lemmatize(word.lower()) for word in sentence_words]
+        sentence_words = [
+            self.lemmatizer.lemmatize(word.lower()) for word in sentence_words
+        ]
         return sentence_words
 
     def _bag_of_words(self, sentence: str, words: list) -> list:
@@ -192,16 +254,16 @@ class GenericAssistant:
         results.sort(key=lambda x: x[1], reverse=True)
         return_list = []
         for r in results:
-            return_list.append({'intent': self.classes[r[0]], 'probability': r[1]})
+            return_list.append({"intent": self.classes[r[0]], "probability": r[1]})
         return return_list
 
     def _get_response(self, ints: list, intents_json) -> str:
         try:
-            tag = ints[0]['intent']
-            list_of_intents = intents_json['intents']
+            tag = ints[0]["intent"]
+            list_of_intents = intents_json["intents"]
             for i in list_of_intents:
-                if i['tag'] == tag:
-                    result = random.choice(i['responses'])
+                if i["tag"] == tag:
+                    result = random.choice(i["responses"])
                     break
         except IndexError:
             result = "I don't understand!"
@@ -210,18 +272,21 @@ class GenericAssistant:
     def request(self, message: str) -> dict | str:
         for item in message:
             if item not in self.words:
-                message.replace(item, '*')
+                message.replace(item, "*")
         ints: dict = self._predict_class(message)
         if not ints:
-            raise Exception('Couldn\'n find a matching entry')
-        if ints[0]['probability'] < 0.5:
+            raise Exception("Couldn'n find a matching entry")
+        if ints[0]["probability"] < 0.5:
             return None
-        if ints[0]['intent'] in self.intent_methods.keys():
-            return {"module": self.intent_methods.get(ints[0]['intent']), "intent": ints[0]['intent']}
+        if ints[0]["intent"] in self.intent_methods.keys():
+            return {
+                "module": self.intent_methods.get(ints[0]["intent"]),
+                "intent": ints[0]["intent"],
+            }
         else:
             return self._get_response(ints, self.intents)
 
     def test_request(self, message: str) -> dict | str:
         ints: dict = self._predict_class(message)
         # print(f'{message} : {ints[0]}')
-        return ints[0]['intent']
+        return ints[0]["intent"]

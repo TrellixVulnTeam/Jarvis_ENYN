@@ -22,10 +22,12 @@ def read_modules() -> Response:
 
 def read_module_names() -> Response:
     module_names = []
-    module_path = Path(os.path.dirname(__file__)).parents[2].joinpath('modules')
+    module_path = Path(os.path.dirname(__file__)).parents[2].joinpath("modules")
     for finder, name, ispkg in pkgutil.walk_packages([str(module_path)]):
         module_names.append(name)
-    return Response(json.dumps({'names': module_names}), mimetype='application/json', status=200)
+    return Response(
+        json.dumps({"names": module_names}), mimetype="application/json", status=200
+    )
 
 
 def update_module(data: dict) -> Response:

@@ -14,7 +14,9 @@ from resources.tts import Text_to_Speech
 
 
 class FirstStart:
-    def __init__(self, ):
+    def __init__(
+        self,
+    ):
         self.relPath = str(Path(__file__).parent).strip("setup")
         with open(self.relPath + "config.json", "r") as config_file:
             self.config_data = json.load(config_file)
@@ -24,7 +26,8 @@ class FirstStart:
 
     def run(self):
         self.say(
-            "Hallo, ich bin Jarvis dein neuer Sprachassistent. Ich werde jetzt zusammen mit dir die Einrichtung durchführen.")
+            "Hallo, ich bin Jarvis dein neuer Sprachassistent. Ich werde jetzt zusammen mit dir die Einrichtung durchführen."
+        )
         self.say("Wir beginnen mit der Einrichtung deiner Nutzerrepräsentation.")
         self.add_user()
         self.set_voice_gender()
@@ -36,9 +39,12 @@ class FirstStart:
         self.set_phillips_hue()
         self.set_phillips_tv()
         self.say(
-            "Zum Schluss werde ich noch ein paar Dinge erledigen und anschließend automatisch starten. Das kann etwas dauern.")
+            "Zum Schluss werde ich noch ein paar Dinge erledigen und anschließend automatisch starten. Das kann etwas dauern."
+        )
         self.set_Network_Key()
-        self.say('Die Einrichtung ist abgeschlossen. Ich werde jetzt meine Systeme starten.')
+        self.say(
+            "Die Einrichtung ist abgeschlossen. Ich werde jetzt meine Systeme starten."
+        )
         return self.config_data
 
     def say(self, text):
@@ -47,7 +53,9 @@ class FirstStart:
     def listen(self):
         _input = self.Audio.recognize_input()
         while _input == "Audio konnte nicht aufgenommen werden":
-            self.say("Leider habe ich das nicht verstanden, bitte wiederhole deine Eingabe:")
+            self.say(
+                "Leider habe ich das nicht verstanden, bitte wiederhole deine Eingabe:"
+            )
             _input = self.Audio.recognize_input()
         return _input
 
@@ -67,22 +75,20 @@ class FirstStart:
         user_first_name = self.ask_with_answer("Was ist dein Vorname?")
         user_last_name = self.ask_with_answer("Was ist dein Nachname?")
         user_age = self.ask_with_answer(
-            "An welchem Datum wurdest du gebohren? Bitte verwende keine Namen für Monate.").split('.')
-        user = {
-            "name": user_first_name,
-            "age": user_age
-        }
+            "An welchem Datum wurdest du gebohren? Bitte verwende keine Namen für Monate."
+        ).split(".")
+        user = {"name": user_first_name, "age": user_age}
         self.config_data["Local_storage"]["user"] = user_first_name
         self.config_data["Local_storage"]["users"][user_first_name] = user
 
         path = self.relPath + "users"
-        subprocess.call(f'mkdir path/{user_first_name}')
-        subprocess.call(f'mkdir {path}/{user_first_name}/resources')
-        subprocess.call(f'cat {path}/data.json')
-        subprocess.call(f'cat {path}/resources/user_storage.json')
+        subprocess.call(f"mkdir path/{user_first_name}")
+        subprocess.call(f"mkdir {path}/{user_first_name}/resources")
+        subprocess.call(f"cat {path}/data.json")
+        subprocess.call(f"cat {path}/resources/user_storage.json")
 
-        with open(self.relPath + '/temp_files/user_temp/data.json', 'r') as data:
-            with open(f'{path}/data.json', 'w'):
+        with open(self.relPath + "/temp_files/user_temp/data.json", "r") as data:
+            with open(f"{path}/data.json", "w"):
                 data_conf = json.load(data)
                 data_conf["name"] = user_first_name
                 data_conf["first_name"] = "user_first_name"
@@ -93,7 +99,9 @@ class FirstStart:
                 data_conf["uid"] = ""
                 json.dump(data_conf, data)
 
-        with open(self.relPath + '/temp_files/user_temp/resources/user_storage.json', 'r') as user_storage:
+        with open(
+            self.relPath + "/temp_files/user_temp/resources/user_storage.json", "r"
+        ) as user_storage:
             empty_json = {}
             json.dump(empty_json, user_storage)
 
@@ -103,14 +111,19 @@ class FirstStart:
             home_location.replace("in ", "")
         if home_location.startswith("bei "):
             home_location.replace("bei ", "")
-        if home_location.startswith('auf '):
-            home_location.replace('auf ', '')
+        if home_location.startswith("auf "):
+            home_location.replace("auf ", "")
         self.config_data["Local_storage"]["home_location"] = home_location
-        print("[INFO] Place of residence fixed: ", self.config_data["Local_storage"]["home_location"])
+        print(
+            "[INFO] Place of residence fixed: ",
+            self.config_data["Local_storage"]["home_location"],
+        )
 
     def set_voice_gender(self):
         gender = "female"
-        voice_gender = self.ask_with_answer("Soll meine Stimme männlich oder weiblich sein?")
+        voice_gender = self.ask_with_answer(
+            "Soll meine Stimme männlich oder weiblich sein?"
+        )
         if "männlich" in voice_gender or "mann" in voice_gender:
             gender = "male"
         self.config_data["voice"] = gender
@@ -118,32 +131,48 @@ class FirstStart:
         print("[INFO] voice gender fixed: ", self.config_data["voice"])
 
     def set_phillips_hue(self):
-        use_phillip_hue = True if self.is_desired(
-            self.ask_with_answer("Besitzt du ein Phillips Hue System und möchtest es über Jarvis steuern?")) else False
+        use_phillip_hue = (
+            True
+            if self.is_desired(
+                self.ask_with_answer(
+                    "Besitzt du ein Phillips Hue System und möchtest es über Jarvis steuern?"
+                )
+            )
+            else False
+        )
         if use_phillip_hue:
             self.say(
                 "Alles klar. Bitte such die Bridch EI PI heraus. Diese findest du in der Phillips Hue App. Ich gebe "
                 "dir 30 Sekunden Zeit und spiel dann ein Signalton ab. Bitte sag danach die IP laut und "
-                "deutlich. Die Punkte müssen auch genannt werden.")
+                "deutlich. Die Punkte müssen auch genannt werden."
+            )
             time.sleep(30)
             # self.Audio.play_bling_sound()
             self.say("Okay. Sprich bitte laut und deutlich.")
-            self.config_data["Local_storage"]["module_storage"]["Bridge-IP"] = self.listen()
-            print("[INFO] Phillips HUE --> BridgeIP fixed: ",
-                  self.config_data["Local_storage"]["module_storage"]["Bridge-IP"])
+            self.config_data["Local_storage"]["module_storage"][
+                "Bridge-IP"
+            ] = self.listen()
+            print(
+                "[INFO] Phillips HUE --> BridgeIP fixed: ",
+                self.config_data["Local_storage"]["module_storage"]["Bridge-IP"],
+            )
         else:
             print("[INFO] Phillips HUE not wanted.")
 
     def set_messenger(self):
         use_messenger = self.ask_with_answer(
-            "Möchtest du Telegram verwenden? Bedenke, dass die Sicherheit des Messengers nicht garantiert ist.")
+            "Möchtest du Telegram verwenden? Bedenke, dass die Sicherheit des Messengers nicht garantiert ist."
+        )
         if self.is_desired(use_messenger):
             now = self.ask_with_answer(
-                "Alles klar. Möchtest du den benötigten Schlüssel jetzt diktieren oder später selber eingeben")
+                "Alles klar. Möchtest du den benötigten Schlüssel jetzt diktieren oder später selber eingeben"
+            )
             if "jetzt" in now:
-                self.say("Bitte suche deine Bot-ID heraus. Diese findest du, indem du den "
-                         "Bot-father auf Telegram anschreibst und dann släsh start eingibst. Ich warte 30 "
-                         "Sekunden und gebe dir dann bescheid. Bitte diktiere danach deutlich die Bot-ID.")
+                self.say(
+                    "Bitte suche deine Bot-ID heraus. Diese findest du, indem du den "
+                    "Bot-father auf Telegram anschreibst und dann släsh start eingibst. Ich warte 30 "
+                    "Sekunden und gebe dir dann bescheid. Bitte diktiere danach deutlich die Bot-ID."
+                )
                 time.sleep(30)
                 while True:
                     try:
@@ -151,21 +180,30 @@ class FirstStart:
                         self.say("Okay. Sprich bitte laut und deutlich.")
                         token = int(self.listen())
                         self.config_data["messenger_allowed_id_table"].append(token)
-                        print("[INFO] Telegram Key fixed: ", self.config_data["messenger_key"])
+                        print(
+                            "[INFO] Telegram Key fixed: ",
+                            self.config_data["messenger_key"],
+                        )
                         break
                     except:
-                        self.say("Tut mir leid, es gab ein Problem, bitte versuche es erneut!")
+                        self.say(
+                            "Tut mir leid, es gab ein Problem, bitte versuche es erneut!"
+                        )
                         continue
             else:
                 self.say("Alles klar. Dann verschieben wir das auf später.")
-                print("[INFO] Telegram is desired, but will be entered later by the user.")
+                print(
+                    "[INFO] Telegram is desired, but will be entered later by the user."
+                )
         else:
             self.say("Alles klar. Telegram wird nicht eingerichtet.")
             print("[INFO] Telegram not wanted.")
 
     def set_phillips_tv(self):
-        self.say("Ich weiß leider noch nicht, wie ich die Nutzung eines Phillips-Fernsehers einrichten soll. Schau "
-                 "dafür einfach mal in die Program-Dokumentation oder frag einfach Jakob.")
+        self.say(
+            "Ich weiß leider noch nicht, wie ich die Nutzung eines Phillips-Fernsehers einrichten soll. Schau "
+            "dafür einfach mal in die Program-Dokumentation oder frag einfach Jakob."
+        )
         """
         response = self.ask_with_answer('Besitzt du einen Phillips-Fernseher und möchtest diesen über mich steuern?')
         if self.is_desired(response):
@@ -179,7 +217,7 @@ class FirstStart:
     def set_Network_Key(self):
         key = Random.get_random_bytes(32)
         key_encoded = base64.b64encode(key)
-        key_string = key_encoded.decode('utf-8')
+        key_string = key_encoded.decode("utf-8")
         self.config_data["Network_Key"] = key_string
         print("[INFO] Network Key fixed: ", key_string)
 
@@ -191,7 +229,7 @@ class InstallationAudio:
         with sr.Microphone(device_index=None) as source:
             self.speech_engine.adjust_for_ambient_noise(source)
         self.tts = Text_to_Speech()
-        self.tts.start('male')
+        self.tts.start("male")
         audio.init()
 
     def recognize_input(self):
@@ -216,7 +254,9 @@ class InstallationAudio:
 
     def play_bling_sound(self):
         TOP_DIR = os.path.dirname(os.path.abspath(__file__))
-        DETECT_DONG = os.path.join(TOP_DIR.rstrip('setup'), "resources/sounds/bling.wav")
+        DETECT_DONG = os.path.join(
+            TOP_DIR.rstrip("setup"), "resources/sounds/bling.wav"
+        )
 
         with open(DETECT_DONG, "rb") as wavfile:
             input_wav = wavfile.read()
@@ -226,10 +266,10 @@ class InstallationAudio:
 
 
 def install_packeges():
-    with open('../versions.json', 'r') as version_file:
+    with open("../versions.json", "r") as version_file:
         versions = json.load(version_file)
-    for version in versions.get('last versions'):
-        for command in version.get('shellcommands for update'):
-            subprocess.run(command.split(' '))
-    for command in versions.get('shellcommands for update'):
-        subprocess.run(command.split(' '))
+    for version in versions.get("last versions"):
+        for command in version.get("shellcommands for update"):
+            subprocess.run(command.split(" "))
+    for command in versions.get("shellcommands for update"):
+        subprocess.run(command.split(" "))
