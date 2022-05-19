@@ -14,7 +14,6 @@ from datetime import datetime
 from threading import Thread
 from typing import IO, Callable
 
-
 import pafy
 import pvporcupine
 import pyaudio
@@ -465,8 +464,8 @@ class AudioOutput:
                     mixer.Channel(1).play(track)
                 if (
                     not mixer.Channel(0).get_busy() is 1
-                    and mixer.Channel(1).get_volume != 1
-                    and mixer.Channel(2).get_volume != 1
+                    and mixer.Channel(1).get_volume is not 1
+                    and mixer.Channel(2).get_volume is not 1
                 ):
                     mixer.Channel(1).set_volume(1)
                     mixer.Channel(2).set_volume(1)
