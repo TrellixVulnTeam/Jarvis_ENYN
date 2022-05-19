@@ -2,23 +2,19 @@ from __future__ import annotations  # compatibility for < 3.10
 
 import json
 import logging
-import os
 import time
-import traceback
 from threading import Thread
-from typing import AnyStr
 
 import requests
 
-import src.speechassistant.webserver.wb_server as ws
 from src.speechassistant.Audio import AudioOutput, AudioInput
 from src.speechassistant.Services import ServiceWrapper
 from src.speechassistant.User import Users
+from src.speechassistant.database.database_connection import DataBase
 from src.speechassistant.resources.analyze import Sentence_Analyzer
+from src.speechassistant.resources.intent.Wrapper import IntentWrapper as AIWrapper
 from src.speechassistant.resources.intent.testHealper import Modules
 from src.speechassistant.resources.module_skills import Skills
-from src.speechassistant.resources.intent.Wrapper import IntentWrapper as AIWrapper
-from src.speechassistant.database.database_connection import DataBase
 
 
 class Core:

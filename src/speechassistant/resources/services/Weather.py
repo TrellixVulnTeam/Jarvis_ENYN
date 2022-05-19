@@ -1,12 +1,51 @@
 import logging
-import os
-from threading import Thread
-from datetime import datetime
-from datetime import timedelta
-import requests
 import time
+from datetime import datetime, timedelta
+from threading import Thread
+
+import requests
+from geopy import Location, Nominatim
 
 from src.speechassistant.core import Core
+
+geo_location = Nominatim(user_agent="my_app")
+
+""" Returns geological data of a city
+    Args:
+        city    (str): name of the city from which the data are required
+    Returns:
+        dict: Dictionary with the values of the city
+    """
+
+
+def get_data_of_city(city: str) -> dict:
+    location: Location = geo_location.geocode(city)
+    return __location_to_json(location.raw)
+
+
+""" Returns geological data of a city
+Args:
+    lat    (int): latutude of the city from which the data are required
+    lon    (int): longitude of the city from which the data are required
+Returns:
+    dict: Dictionary with the values of the city
+"""
+
+
+def get_data_of_lat_lon(self, lat: float, lon: float) -> dict:
+    location = self.geo_location.reverse(f"{lat}, {lon}")
+    return self.__location_to_json(location.raw)
+
+
+def __location_to_json(location: dict) -> dict:
+    display_name = location["display_name"].split(", ")
+    return {
+        "city": display_name[0],
+        "state": display_name[1],
+        "county": display_name[2],
+        "lat": location["lat"],
+        "lon": location["lon"],
+    }
 
 
 class Weather:
@@ -15,7 +54,7 @@ class Weather:
     @staticmethod
     def get_instance():
         if Weather.__instance is None:
-            Weather("default")
+            Weather()
         return Weather.__instance
 
     def __init__(self):
@@ -27,10 +66,9 @@ class Weather:
         self.__hourly_forecast = None
         self.__daily_forcast = None
         self.__sunrise_sunset = None
-        self.__skills = Skills()
-        self.city = ""
+        self.city = "Würzburg"
         self.__fill_data()
-        self.__geo_data = self.__skills.get_data_of_city(self.city)
+        self.__geo_data = get_data_of_city(self.city)
         self.__last_updated = datetime.now()
         self.old_weather_inf = []
         self.current_weather = None
@@ -41,7 +79,7 @@ class Weather:
 
     def __fill_data(self) -> None:
         core: Core = Core.get_instance()
-        self.__api_key = core.data["api_keys"]["open_weather_map"]
+        self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.data["api_keys"]["open_weather_map"]
         self.city = core.local_storage["actual_location"]
 
     def start(self) -> None:
@@ -61,10 +99,10 @@ class Weather:
             lat         (int)   : lat of searched city
             lon         (int)   : lon of searched city
             day_offset  (int)   : offset of day
-            
+
         Returns:
             set                 : sunrise and sunset as each datetime.datetime() objects
-        
+
         Exceptions:
             ValueError()        : raises if just one of lat and lon is given
     """
@@ -114,7 +152,7 @@ class Weather:
         if city_name is not None:
             return self.__get_current_weather(city_name)
         elif lat is not None and lon is not None:
-            city_name = self.__skills.get_data_of_lat_lon(lat, lon)["city"]
+            city_name = get_data_of_lat_lon(lat, lon)["city"]
             return self.__get_current_weather(city_name)
         else:
             raise ValueError("Got just one of lat and lon, but both are necessary!")
@@ -142,7 +180,7 @@ class Weather:
             return self.__daily_forcast[day_offset]
         else:
             if city_name is not None:
-                geo_data = self.__skills.get_data_of_city(self.city)
+                geo_data = get_data_of_city(self.city)
                 lat = geo_data["lat"]
                 lon = geo_data["lon"]
             url = (
@@ -214,7 +252,7 @@ class Weather:
             # self.get_offset_hours() does not have to be observed
             if offset > 47:
                 raise ValueError("Offset too big! Choose an offset between 0 and 47")
-            geo_data: dict = self.__skills.get_data_of_city(city)
+            geo_data: dict = get_data_of_city(city)
             url: str = (
                 f'https://api.openweathermap.org/data/2.5/onecall?lat={geo_data["lat"]}&lon={geo_data["lon"]}'
                 f"&units=metric&appid={self.__api_key}&lang=de "
@@ -224,7 +262,7 @@ class Weather:
             # since the data is retrieved anew, there is no "delay" of the data and
             # self.get_offset_hours() does not have to be observed
             url: str = f'https://api.openweathermap.org/data/2.5/onecall?lat={"lat"}&lon={"lon"}&units=metric&appid={self.__api_key}&lang=de'
-            city: str = self.__skills.get_data_of_lat_lon(lat, lon)["city"]
+            city: str = get_data_of_lat_lon(lat, lon)["city"]
             _forecast = requests.get(url).json()["hourly"][offset]
         else:
             raise ValueError()
@@ -247,6 +285,9 @@ class Weather:
     def get_daily_forecast_string(
         self, city: str = None, lat: float = None, lon: float = None, offset: int = 1
     ):
+        if offset > 7:
+            raise ValueError("Invalid offset input")
+
         temp_offset = self.get_offset_hours()
         offset += int(temp_offset / 24)
 
@@ -267,7 +308,7 @@ class Weather:
             # self.get_offset_ does not have to be observed
             if offset > 7:
                 raise ValueError("Offset too big! Choose an offset between 0 and 7")
-            geo_data: dict = self.__skills.get_data_of_city(city)
+            geo_data: dict = get_data_of_city(city)
             url = (
                 f'https://api.openweathermap.org/data/2.5/onecall?lat={geo_data["lat"]}&lon={geo_data["lon"]}&units'
                 f"=metric&appid={self.__api_key}&lang=de "
@@ -276,7 +317,7 @@ class Weather:
         elif lat is not None and lon is not None:
             # since the data is retrieved anew, there is no "delay" of the data and
             # self.get_offset_ does not have to be observed
-            city = self.__skills.get_data_of_lat_lon(lat, lon)["city"]
+            city = get_data_of_lat_lon(lat, lon)["city"]
             url = (
                 f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&units=metric&appid="
                 f"{self.__api_key}&lang=de "
@@ -299,8 +340,9 @@ class Weather:
 
     def get_weather_conditions(self) -> str:
         self.__update_all()
-        now = datetime.now()
-        output = ""
+        now: datetime = datetime.now()
+        output: str = ""
+
         if self.__minutely_forecast[0]["precipitation"] > 0:
             last_raining_index = 0
             for i in range(59):
@@ -313,31 +355,30 @@ class Weather:
                     f"Nimm am besten einen Regenschirm mit. Der Regen dauert wahrscheinlich noch länger als "
                     f"eine Stunde an. "
                 )
-        elif self.__minutely_forecast[0]["precipitation"] > 0:
-            first_raining_index = 0
+        elif self.__minutely_forecast[0]["precipitation"] == 0:
             for i in range(59):
                 if self.__minutely_forecast[0]["precipitation"] > 0:
-                    first_raining_index = i
+                    output = (
+                        f"Es wird in etwa {i} Minuten beginnen zu regnen. Nimm vielleicht einen "
+                        f"Regenschirm mit. "
+                    )
                     break
-            output = (
-                f"Es wird in etwa {first_raining_index} Minuten beginnen zu regnen. Nimm vielleicht einen "
-                f"Regenschirm mit. "
+
+        sunrise, sunset = self.get_sunrise_sunset()
+        if sunrise < now < sunset:
+            max_uvi = max(
+                [
+                    self.__hourly_forecast[now.hour + i]["uvi"]
+                    for i in range(24 - now.hour)
+                ]
             )
 
-        max_uvi = 0
-
-        for i in range(24 - now.hour):
-            max_uvi = max(self.__hourly_forecast[i]["uvi"], max_uvi)
-
-        if max_uvi >= 8:
-            output += (
-                " Creme dich unbedingt ein. Die Sonne scheint heute ziemlich stark."
-            )
-        elif max_uvi >= 6:
-            output += " Creme dich am besten ein. Die Sonne scheint heute stark."
-        elif max_uvi >= 4:
-            output += " Pass auf, die Sonne scheint heute mäßig stark. Villeicht solltest du dich eincremen."
-
+            if max_uvi >= 8:
+                output += f" Creme dich unbedingt ein. Die Sonne scheint heute ziemlich stark bei einem UV Index von bis zu {round(max_uvi)}."
+            elif max_uvi >= 6:
+                output += f" Creme dich am besten ein. Die Sonne scheint heute stark bei einem UV Index von bis zu {round(max_uvi)}."
+            elif max_uvi >= 4:
+                output += f" Pass auf, die Sonne scheint heute mäßig stark. Villeicht solltest du dich eincremen. Der UV Index beträgt maximal {round(max_uvi)}"
         return output
 
     """Returns the time since the last update of the data in minutes
@@ -429,9 +470,9 @@ class Weather:
             )
         elif weather_id in self.Statics.give_description_map.keys():
             weather_description = (
-                f"In {city} wird es "
+                f"In {city} gibt es "
                 f"{self.__get_time_string(days_offset=days_offset, hours_offset=hours_offset)} "
-                f"{self.Statics.give_description_map.get(weather_id)} {temp_inf} geben."
+                f"{self.Statics.give_description_map.get(weather_id)} {temp_inf}."
             )
         elif weather_id in self.Statics.will_description_map.keys():
             weather_description = (
@@ -468,29 +509,36 @@ class Weather:
         if minutes_offset is None:
             minutes_offset = 0
 
-        time_delta: timedelta = timedelta(
+        if days_offset == 0:
+            if hours_offset <= 1:
+                return "gleich"
+            elif hours_offset <= 3:
+                time_string: str = f"in {hours_offset} Stunden"
+                if minutes_offset > 5:
+                    return f"{time_string} und {minutes_offset}"
+
+        now: datetime = datetime.now()
+        target_time: datetime = now + timedelta(
             days=days_offset, hours=hours_offset, minutes=minutes_offset
         )
 
-        if is_days_offset_none or time_delta.days == 0:
+        if is_days_offset_none or target_time.day == now.day:
             time_string = "heute"
         else:
-            if time_delta.days == 1:
+            if (target_time.day - now.day) == 1:
                 time_string = "morgen"
-            elif time_delta.days == 2:
+            elif (target_time.day - now.day) == 2:
                 time_string = "übermorgen"
             else:
-                return f"in {time_delta.days} Tagen"
+                return f"in {target_time.day - now.day} Tagen"
 
         if not is_hours_offset_none:
 
-            time_delta_hours = time_delta.seconds / 3600
-
-            if time_delta_hours < 6:
+            if target_time.hour < 6:
                 time_string += " Nacht"
-            elif time_delta_hours < 12:
+            elif target_time.hour < 12:
                 time_string += " Früh"
-            elif time_delta_hours < 17:
+            elif target_time.hour < 17:
                 time_string += " Mittag"
             else:
                 time_string += " Abend"
@@ -642,19 +690,15 @@ class Weather:
 
 
 if __name__ == "__main__":
-    from src.speechassistant.resources.module_skills import Skills
-
-    w = Weather()
+    w: Weather = Weather.get_instance()
     th = Thread(target=w.run, args=())
     th.start()
     time.sleep(1)
+    print("----->" + w.get_weather_conditions())
     print(w.get_hourly_forecast_string(offset=0))
-    print(w.get_hourly_forecast_string(city="Coburg", offset=0))
-    print(w.get_hourly_forecast_string(offset=47))
-    print(w.get_daily_forecast_string(offset=0))
-    print(w.get_daily_forecast_string(city="Coburg", offset=0))
-    print(w.get_daily_forecast_string(offset=7))
+    print(w.get_hourly_forecast_string(offset=1))
+    print(w.get_hourly_forecast_string(offset=2))
 
     print(w.get_sunrise_sunset())
-    time.sleep(1)
-    print(w.get_sunrise_sunset(day_offset=2))
+    print(w.get_current_weather_string())
+    print(w.get_hourly_forecast_string())
