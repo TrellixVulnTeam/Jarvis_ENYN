@@ -3,13 +3,13 @@ from __future__ import annotations  # compatibility for < 3.10
 import json
 import logging
 
-from src.speechassistant.core import Core
-
 from src.speechassistant.resources.intent.AI import GenericAssistant
 
 
 class IntentWrapper:
     def __init__(self, path="/resources/intent") -> None:
+        from src.speechassistant.core import Core
+
         self.core = Core.get_instance()
         # with open(core.path + "/resources/intent/mappings.json", 'r') as mapping_file:
         with open(self.core.path + path + "/mappings.json", "r") as mapping_file:

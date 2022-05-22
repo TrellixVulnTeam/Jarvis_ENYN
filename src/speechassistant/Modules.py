@@ -7,7 +7,6 @@ import traceback
 from threading import Thread
 
 from src.speechassistant.ModuleWrapper import ModuleWrapper, ModuleWrapperContinuous
-from src.speechassistant.core import Core
 from src.speechassistant.resources.module_skills import Skills
 
 
@@ -25,6 +24,8 @@ class Modules:
             raise Exception("Singleton cannot be instantiated more than once!")
 
         logging.getLogger().setLevel(logging.INFO)
+        from src.speechassistant.core import Core
+
         self.core: Core = Core.get_instance()
         self.local_storage: dict = self.core.local_storage
         self.modules: list = []
