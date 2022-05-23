@@ -41,7 +41,7 @@ class IntentWrapper:
 
     def train_model(self) -> None:
         logging.info("[ACTION] Start training model")
-        self.ai.train_model(1000)
+        self.ai.train_model(5000)
         logging.info("[SUCCESS] Training done")
         self.ai.save_model()
         self.ai.load_model()
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             print(text)
 
     iw = IntentWrapper(path="\\resources\\intent")
-
+    iw.train_model()
     iw.test_model()
 
     while True:
