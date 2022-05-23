@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import json
 import logging
 import time
 from datetime import datetime, timedelta
@@ -5,8 +8,6 @@ from threading import Thread
 
 import requests
 from geopy import Location, Nominatim
-
-from src.speechassistant.core import Core
 
 geo_location = Nominatim(user_agent="my_app")
 
@@ -66,7 +67,7 @@ class Weather:
         self.__hourly_forecast = None
         self.__daily_forcast = None
         self.__sunrise_sunset = None
-        self.city = "Würzburg"
+        self.city = ""
         self.__fill_data()
         self.__geo_data = get_data_of_city(self.city)
         self.__last_updated = datetime.now()
@@ -78,8 +79,10 @@ class Weather:
         Weather.__instance = self
 
     def __fill_data(self) -> None:
+        from src.speechassistant.core import Core
+
         core: Core = Core.get_instance()
-        self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.data["api_keys"]["open_weather_map"]
+        self.__api_key = core.data["api_keys"]["open_weather_map"]
         self.city = core.local_storage["actual_location"]
 
     def start(self) -> None:
@@ -343,10 +346,12 @@ class Weather:
         now: datetime = datetime.now()
         output: str = ""
 
+        print(json.dumps(self.__hourly_forecast, indent=4))
+
         if self.__minutely_forecast[0]["precipitation"] > 0:
             last_raining_index = 0
-            for i in range(59):
-                if self.__minutely_forecast[i]["precipitation"] > 0:
+            for i, item in enumerate(self.__minutely_forecast):
+                if item["precipitation"] > 0:
                     last_raining_index = i
             if last_raining_index < 15:
                 output = f"Der Regen wird in etwa {last_raining_index} Minuten abgeklungen sein."
@@ -356,13 +361,32 @@ class Weather:
                     f"eine Stunde an. "
                 )
         elif self.__minutely_forecast[0]["precipitation"] == 0:
-            for i in range(59):
-                if self.__minutely_forecast[0]["precipitation"] > 0:
+            for i, item in enumerate(self.__minutely_forecast):
+                if item["precipitation"] > 0:
                     output = (
                         f"Es wird in etwa {i} Minuten beginnen zu regnen. Nimm vielleicht einen "
                         f"Regenschirm mit. "
                     )
                     break
+        else:
+            for i, item in enumerate(self.__hourly_forecast):
+                if i == 0:
+                    continue
+                elif i > 4:
+                    break
+
+                if 300 <= item["weather"]["id"] <= 231:
+                    output = (
+                        f"Es wird in etwa {i} Minuten beginnen zu nieseln. Nimm vielleicht einen "
+                        f"Regenschirm mit. "
+                    )
+                elif 500 <= item["weather"]["id"] <= 531:
+                    output = (
+                        f"Es wird in etwa {i} Minuten beginnen zu regnen. Nimm vielleicht einen "
+                        f"Regenschirm mit. "
+                    )
+                elif 600 <= item["weather"]["id"] <= 622:
+                    output = f"Es wird in etwa {i} Minuten beginnen zu Schneien."
 
         sunrise, sunset = self.get_sunrise_sunset()
         if sunrise < now < sunset:
@@ -379,6 +403,15 @@ class Weather:
                 output += f" Creme dich am besten ein. Die Sonne scheint heute stark bei einem UV Index von bis zu {round(max_uvi)}."
             elif max_uvi >= 4:
                 output += f" Pass auf, die Sonne scheint heute mäßig stark. Villeicht solltest du dich eincremen. Der UV Index beträgt maximal {round(max_uvi)}"
+
+            for i, item in enumerate(self.__hourly_forecast):
+                if 200 <= item["weather"]["id"] <= 232:
+                    if i == 0:
+                        output += ""
+                    elif i < 4:
+                        output += f"Pass auf, in etwa {['einer', 'zwei', 'drei'][i]} Stunden wird es Gewittern!"
+                    break
+
         return output
 
     """Returns the time since the last update of the data in minutes
@@ -391,7 +424,7 @@ class Weather:
     """
 
     def get_offset_minutes(self) -> int:
-        delta = datetime.now() - self.__last_updated
+        delta: timedelta = datetime.now() - self.__last_updated
         return round(delta.seconds / 60)
 
     """Returns the time since the last update of the data in hours
@@ -411,15 +444,15 @@ class Weather:
         return round(offset)
 
     """Updates the current weather
-            Args:
-                city        (str)   : name of city, from which the prediction is
-                lat         (int)   : lat of searched city
-                lon         (int)   : lon of searched city
-            Returns:
-                dict                : current weather data              
-            Exceptions:
-                ValueError()        : raises if just one of lat and lon is given
-        """
+        Args:
+            city        (str)   : name of city, from which the prediction is
+            lat         (int)   : lat of searched city
+            lon         (int)   : lon of searched city
+        Returns:
+            dict                : current weather data              
+        Exceptions:
+            ValueError()        : raises if just one of lat and lon is given
+    """
 
     def __get_current_weather(
         self, city: str = None, lat: int = None, lon: int = None
