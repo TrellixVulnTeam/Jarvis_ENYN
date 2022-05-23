@@ -44,11 +44,11 @@ class Modules:
     def load_modules(self) -> None:
         self.local_storage["modules"]: dict = {}
         time.sleep(1)
-        print("---------- MODULES...  ----------")
+        logging.info("---------- MODULES...  ----------")
         self.modules: list = self.get_modules("modules")
         if self.modules is []:
             print("[INFO] -- (None present)")
-        print("\n----- Continuous MODULES... -----")
+        logging.info("\n----- Continuous MODULES... -----")
         self.continuous_modules: list = self.get_modules(
             "modules/continuous", continuous=True
         )
@@ -80,10 +80,10 @@ class Modules:
                 continue
             else:
                 if continuous:
-                    print("[INFO] Continuous module {} loaded".format(name))
+                    logging.info("[INFO] Continuous module {} loaded".format(name))
                     modules.append(mod)
                 else:
-                    print("[INFO] Modul {} loaded".format(name))
+                    logging.info("[INFO] Modul {} loaded".format(name))
                     modules.append(mod)
         modules.sort(
             key=lambda module: module.PRIORITY if hasattr(module, "PRIORITY") else 0,
@@ -105,7 +105,7 @@ class Modules:
                 analysis: dict = self.core.analyzer.analyze(str(text))
             except Exception:
                 traceback.print_exc()
-                print("[ERROR] Sentence analysis failed!")
+                logging.warning("[ERROR] Sentence analysis failed!")
                 analysis: dict = {}
         if name is not None:
             # Module was called via start_module

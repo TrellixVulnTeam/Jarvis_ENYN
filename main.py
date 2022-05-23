@@ -11,5 +11,4 @@ if __name__ == "__main__":
     with open(relPath + "resources/alias/correct_output.json", "r") as correct_output:
         # don't log loading file, because it is a config too
         config_data["correct_output"]: dict = json.load(correct_output)
-    webThr: Thread = None
     core = Core.get_instance()
