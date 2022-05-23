@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 
@@ -11,3 +11,4 @@ class User:
     birthday: datetime
     messenger_id: int
     song_name: str
+    waiting_notifications: list[str] = field(default_factory=list)
