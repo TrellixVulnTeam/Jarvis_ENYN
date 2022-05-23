@@ -8,6 +8,7 @@ from sqlite3 import Connection, Cursor, OperationalError
 
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
 from src.speechassistant.exceptions.SQLException import *
+from src.speechassistant.models.user import User
 from src.speechassistant.resources.enums import OutputTypes
 from src.speechassistant.resources.module_skills import Skills
 
@@ -31,10 +32,10 @@ class DataBase:
 
         logging.basicConfig(level=logging.DEBUG)
         logging.info("[ACTION] Initialize DataBase...\n")
-        logging.info(os.path.dirname(os.path.realpath(__file__)).join("data_base"))
+        logging.info(os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"))
 
         self.db: Connection = sqlite3.connect(
-            os.path.dirname(os.path.realpath(__file__)).join("data_base"),
+            os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"),
             check_same_thread=False,
         )
         self.error_counter: int = 0
@@ -286,47 +287,44 @@ class DataBase:
             self.db: Connection = db
             logging.info("[INFO] UserInterface initialized.")
 
-        def get_user(self, user: str | int) -> dict:
+        def get_user_by_id(self, user_id: int) -> User:
             cursor: Cursor = self.db.cursor()
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
 
             statement: str = f"SELECT * from user WHERE uid=? LIMIT 1"
+            cursor.execute(statement, (user_id,))
 
-            cursor.execute(statement, (user,))
-
-            result_set: list[
-                tuple[int, str, str, str, str, int, int]
-            ] = cursor.fetchone()
+            user: User = self.__result_set_to_user(cursor.fetchone())
             cursor.close()
-            return self.__build_json(result_set)
+            return user
 
-        def get_user_by_messenger_id(self, messenger_id: int) -> dict:
+        def get_user_by_name(self, user_name: str) -> User:
+            user: int = self.__get_user_id(user_name)
+            return self.get_user_by_id(user)
+
+        def get_user_by_messenger_id(self, messenger_id: int) -> User:
             cursor: Cursor = self.db.cursor()
             statement: str = "SELECT * FROM user WHERE mid=? LIMIT 1"
             cursor.execute(statement, (messenger_id,))
-            result_set: list[tuple] = cursor.fetchone()
+            user: User = self.__result_set_to_user(cursor.fetchone())
             cursor.close()
-            return self.__build_json(result_set)
+            return user
 
-        def get_users(self) -> list:
+        def get_users(self) -> list[User]:
             cursor: Cursor = self.db.cursor()
             statement: str = "SELECT * from user"
             cursor.execute(statement)
-            result_set: list[
-                tuple[int, str, str, str, str, int, int]
-            ] = cursor.fetchall()
+            result_set: list = cursor.fetchall()
 
-            user_list: list = self.__build_json(result_set)
+            user_list: list[User] = [
+                self.__result_set_to_user(item) for item in result_set
+            ]
 
             for user in user_list:
                 notification_statement: str = (
                     f"SELECT text FROM notification WHERE uid=?"
                 )
-                cursor.execute(notification_statement, (user.get("uid"),))
-                notification_result_set: list[tuple] = cursor.fetchall()
-                for (text,) in notification_result_set:
-                    user["waiting_notifications"].append(text)
+                cursor.execute(notification_statement, (user.uid,))
+                user.waiting_notifications = [x[0] for x in cursor.fetchall()]
             cursor.close()
             return user_list
 
@@ -371,7 +369,6 @@ class DataBase:
             cursor.close()
             self.db.commit()
 
-        # The first line of attributes is for mapping purposes only, so that the user can be specified more easily
         def update_user(
             self,
             uid: int = None,
@@ -384,14 +381,16 @@ class DataBase:
             _birthday: dict = None,
             _messenger_id: int = 0,
             _song_name: str = "standard",
-        ):
+        ) -> User:
 
             cursor: Cursor = self.db.cursor()
+
+            result_set: tuple = ()
 
             if uid is not None:
                 statement: str = "SELECT * FROM user WHERE uid=? LIMIT 1"
                 cursor.execute(statement, (uid,))
-                result_set: tuple = cursor.fetchone()
+                result_set = cursor.fetchone()
                 if cursor.rowcount < 1:
                     cursor.close()
                     raise NoMatchingEntry(
@@ -401,7 +400,7 @@ class DataBase:
             elif alias is not None:
                 statement: str = "SELECT * FROM user WHERE alias=? LIMIT 1"
                 cursor.execute(statement, (alias,))
-                result_set: tuple = cursor.fetchone()
+                result_set = cursor.fetchone()
                 if cursor.rowcount < 1:
                     cursor.close()
                     raise NoMatchingEntry(
@@ -415,7 +414,7 @@ class DataBase:
                                     LIMIT 1"""
 
                 cursor.execute(statement, (first_name, last_name))
-                result_set: tuple = cursor.fetchone()
+                result_set = cursor.fetchone()
                 if cursor.rowcount < 1:
                     cursor.close()
                     raise NoMatchingEntry(
@@ -428,8 +427,6 @@ class DataBase:
                     "No suitable description of a user given. Either the uid, the alias or first "
                     "and last name is required!"
                 )
-
-            uid, alias, firstname, lastname, birthday, mid, sname = result_set
 
             if _new_alias is not None:
                 alias = _new_alias
@@ -504,6 +501,21 @@ class DataBase:
 
         def __create_table(self):
             pass
+
+        @staticmethod
+        def __result_set_to_user(result_set: tuple) -> User:
+            (
+                uid,
+                alias,
+                first_name,
+                last_name,
+                birthday,
+                messenger_id,
+                song_name,
+            ) = result_set
+            return User(
+                uid, alias, first_name, last_name, birthday, messenger_id, song_name
+            )
 
         def __build_json(self, result_set: list[tuple] | tuple) -> list[dict] | dict:
             if type(result_set) is list:
