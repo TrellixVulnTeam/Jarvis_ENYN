@@ -60,7 +60,7 @@ def get_item(core, skills):
         text = text.split(" ")
         founded = False
         i = 0
-        for i in range(len(text)):
+        for i, item in enumerate(text):
             if (
                 text[i - 1] == "setz"
                 or text[i - 1] == "setzte"
@@ -146,7 +146,7 @@ def get_item(core, skills):
             position += 1
     # ... und zählt alle Dopplungen zusammen
     duplicates_in_items = [
-        item[i] for i in range(len(item)) if not i == item.index(item[i])
+        value for i, value in enumerate(item) if not i == item.index(value)
     ]
     # anschließend werden Dopplungen, die durch die letzte Zeile entstehen könnten gelöscht
     if duplicates_in_items:

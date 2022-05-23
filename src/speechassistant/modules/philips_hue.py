@@ -161,8 +161,8 @@ class PhilipsWrapper:
 
     def inc_dec_brightness(self, lights, value):
         if type(lights[0]) is not type("") and type(lights[0]) is not type(1):
-            for i in range(len(lights)):
-                lights[i] = lights[i].id
+            for i, item in enumerate(lights):
+                item = item.id
         for light in lights:
             brightness = self.bridge.get_light(light, "bri") + value
             if brightness > 254:
@@ -284,9 +284,9 @@ class PhilipsWrapper:
                 "prozent", "%"
             )  # unnötig, da sowieso wegen der SpeechRecognition % aber sicher ist sicher
             text_split = text.split(" ")
-            for item in range(len(text_split)):
-                if "%" in text_split[item]:
-                    percent = text_split[item].replace("%", "")
+            for item in text_split:
+                if "%" in item:
+                    percent = item.replace("%", "")
                     percent = int(percent) / 100 * 254
                     return int(percent)
             return -1
@@ -323,8 +323,8 @@ class PhilipsWrapper:
                 [0.588, 0.386],
                 [0.4689, 0.4124],
             ]
-            for i in range(len(colors)):
-                if colors[i] in text:
+            for i, item in enumerate(colors):
+                if item in text:
                     # folgende 2 Zeilen werden nur dann verwendet, wenn man die Farben als hex-Code angibt
                     # color[0] = converter.hex_to_xy(farbe)[0]
                     # color[1] = converter.hex_to_xy(farbe)[1]

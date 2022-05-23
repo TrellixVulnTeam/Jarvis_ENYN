@@ -14,6 +14,8 @@
 # !!!ACHTUNG!!! Bei den Audio-Dateien muss es sich um wav-Dateien handeln
 import json
 
+# toDo: Cleaning up...
+
 ALPHABET = [
     "a",
     "b",
@@ -116,7 +118,7 @@ def handle(text, core, skills):
                     and len(item["Antwortmoeglichkeiten"]) <= 26
                 ):  # ich hoffe einfahc mal, dass letzteres zutrifft :)
                     moeglichkeiten = item["Antwortmoeglichkeiten"]
-                    for i in range(len(item["Antwortmoeglichkeiten"])):
+                    for i, item in enumerate(item["Antwortmoeglichkeiten"]):
                         text = ALPHABET[i] + ": " + moeglichkeiten[i]
                         core.say(text)
             else:

@@ -1,17 +1,18 @@
+import io
+import json
+import logging
 import os
 import pkgutil
 import random
 import time
 import traceback
+import urllib
 from datetime import datetime
 from threading import Thread
-import io
-import json
-import logging
-import urllib
-from src.speechassistant.resources.analyze import Sentence_Analyzer as Analyzer
 from urllib.request import Request, urlopen
+
 from Wrapper import IntentWrapper
+from src.speechassistant.resources.analyze import Sentence_Analyzer as Analyzer
 
 logging.disable(logging.INFO)
 
@@ -490,8 +491,8 @@ class skills:
     @staticmethod
     def get_word_index(text, word):
         text = text.split(" ")
-        for i in range(len(text)):
-            if text[i] == word:
+        for i, item in enumerate(text):
+            if item == word:
                 return i
         return -1
 

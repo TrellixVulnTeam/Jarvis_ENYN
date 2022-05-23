@@ -180,14 +180,14 @@ def ligaResult(rangRaw, liga, verein, hasTriedLastYear=False):
             return "So viele Vereine spielen nicht in dieser Liga."
     elif verein is not None:
         hadExc = False
-        for t in range(len(js)):
+        for t, item in enumerate(js):
             try:
-                if js[t]["TeamName"].lower() in verein.lower() or (
-                    "ShortName" in js[t]
-                    and js[t]["ShortName"] is not None
-                    and js[t]["ShortName"].lower() in verein.lower()
+                if item["TeamName"].lower() in verein.lower() or (
+                    "ShortName" in item
+                    and item["ShortName"] is not None
+                    and item["ShortName"].lower() in verein.lower()
                 ):
-                    team = js[t]
+                    team = item
                     teamRang = t + 1
             except (IndexError, KeyError):
                 hadExc = True

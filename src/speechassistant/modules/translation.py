@@ -17,8 +17,8 @@ def get_text_beetween(start_word, text, end_word="", output="array"):
     ausgabe = []
     index = -1
     text = text.split(" ")
-    for i in range(len(text)):
-        if text[i] is start_word:
+    for i, item in enumerate(text):
+        if item is start_word:
             index = i + 1
     if index is not -1:
         if end_word is "":
