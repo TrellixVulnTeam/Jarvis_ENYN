@@ -2,19 +2,22 @@ from datetime import datetime
 
 from src.speechassistant.core import ModuleWrapperContinuous
 
-INTERVALL = 2
+INTERVALL = 60
 
 
 def run(core: ModuleWrapperContinuous, skills):
-    now = datetime.now()
-
     routine_interface = core.data_base.routine_interface
 
-    result_set = routine_interface.get_routines()
+    current_routines: list[dict] = routine_interface.get_current_routines()
+    for routine in current_routines:
+        core.start_module(name="start_routine", text=routine)
 
-    for routine in core.local_storage["routines"]:
+    """
+    result_set = routine_interface.get_routines()
+    for routine in result_set:
         if is_day_correct(now, routine, skills) and is_time_correct(now, routine, core):
             core.start_module(name="start_routine", text=routine)
+    """
 
 
 def is_day_correct(now, inf, skills):

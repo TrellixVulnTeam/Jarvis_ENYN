@@ -11,6 +11,7 @@ from urllib.request import Request, urlopen
 
 from src.speechassistant.Audio import AudioOutput, AudioInput
 from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.models.user import User
 from src.speechassistant.resources.analyze import Sentence_Analyzer
 from src.speechassistant.resources.module_skills import Skills
 
@@ -42,7 +43,7 @@ class ModuleWrapper:
         self.local_storage: dict = self.core.local_storage
         self.system_name: str = self.core.system_name
         self.path: str = self.core.path
-        self.user: dict = user
+        self.user: User = user
 
     def say(self, text: str | list, output: str = "auto") -> None:
         if type(text) is list:

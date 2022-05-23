@@ -1,13 +1,14 @@
+from src.speechassistant.models.user import User
 from src.speechassistant.resources.services import PhilipsWrapper
 
 
 def handle(text, core, skills):
-    ton = text.get("Ton")
-    user = text.get("User")
-    path = core.path + "/modules/resources/alarm_sounds/" + ton
+    ton: str = text.get("Ton")
+    user: User = text.get("User")
+    path: str = core.path + "/modules/resources/alarm_sounds/" + ton
     try:
         if core.local_storage["module_storage"]["philips_hue"]["Bridge-Ip"] != "":
-            pw = PhilipsWrapper(core)
+            pw: PhilipsWrapper = PhilipsWrapper(core)
             pw.wrapper("mach das Licht weiß")
     except RuntimeError:
         pass
@@ -15,15 +16,13 @@ def handle(text, core, skills):
         core.play(path=path, next=True)
     except FileNotFoundError:
         core.say("Alarm! Alarm! Alarm! Aufstehen! Klingeling!")
-    if user.get("fist_name") == "Unknown":
+    if user.first_name == "Unknown":
         core.say(
             "Guten Morgen! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag!"
         )
     else:
         core.say(
-            "Guten Morgen {}! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag".format(
-                user.get("first_name")
-            )
+            f"Guten Morgen {user.first_name}! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag"
         )
 
     for routine in core.local_storage["alarm_routines"]:
