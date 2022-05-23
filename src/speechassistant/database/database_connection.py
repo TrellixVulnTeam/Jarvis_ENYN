@@ -3,11 +3,12 @@ from __future__ import annotations  # compatibility for < 3.10
 import io
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, time
 from sqlite3 import Connection, Cursor, OperationalError
 
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
 from src.speechassistant.exceptions.SQLException import *
+from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 from src.speechassistant.models.user import User
 from src.speechassistant.resources.enums import OutputTypes
 from src.speechassistant.resources.module_skills import Skills
@@ -92,9 +93,7 @@ class DataBase:
             "aid INTEGER PRIMARY KEY, "
             "sname VARCHAR(30), "
             "uid INTEGER, "
-            "hour INTEGER, "
-            "minute INTEGER, "
-            "total_seconds UNSIGNED BIG INT, "
+            "time Time, "
             "text VARCHAR(255), "
             "active INTEGER, "
             "initiated INTEGER, "
@@ -288,45 +287,41 @@ class DataBase:
             logging.info("[INFO] UserInterface initialized.")
 
         def get_user_by_id(self, user_id: int) -> User:
-            cursor: Cursor = self.db.cursor()
+            with self.db.cursor() as cursor:
+                statement: str = f"SELECT * from user WHERE uid=? LIMIT 1"
+                cursor.execute(statement, (user_id,))
 
-            statement: str = f"SELECT * from user WHERE uid=? LIMIT 1"
-            cursor.execute(statement, (user_id,))
-
-            user: User = self.__result_set_to_user(cursor.fetchone())
-            cursor.close()
-            return user
+                user: User = self.__tuple_to_user(cursor.fetchone())
+                return user
 
         def get_user_by_name(self, user_name: str) -> User:
             user: int = self.__get_user_id(user_name)
             return self.get_user_by_id(user)
 
         def get_user_by_messenger_id(self, messenger_id: int) -> User:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM user WHERE mid=? LIMIT 1"
-            cursor.execute(statement, (messenger_id,))
-            user: User = self.__result_set_to_user(cursor.fetchone())
-            cursor.close()
-            return user
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM user WHERE mid=? LIMIT 1"
+                cursor.execute(statement, (messenger_id,))
+                user: User = self.__tuple_to_user(cursor.fetchone())
+                return user
 
         def get_users(self) -> list[User]:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * from user"
-            cursor.execute(statement)
-            result_set: list = cursor.fetchall()
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * from user"
+                cursor.execute(statement)
+                result_set: list = cursor.fetchall()
 
-            user_list: list[User] = [
-                self.__result_set_to_user(item) for item in result_set
-            ]
+                user_list: list[User] = [
+                    self.__tuple_to_user(item) for item in result_set
+                ]
 
-            for user in user_list:
-                notification_statement: str = (
-                    f"SELECT text FROM notification WHERE uid=?"
-                )
-                cursor.execute(notification_statement, (user.uid,))
-                user.waiting_notifications = [x[0] for x in cursor.fetchall()]
-            cursor.close()
-            return user_list
+                for user in user_list:
+                    notification_statement: str = (
+                        f"SELECT text FROM notification WHERE uid=?"
+                    )
+                    cursor.execute(notification_statement, (user.uid,))
+                    user.waiting_notifications = [x[0] for x in cursor.fetchall()]
+                return user_list
 
         def add_user(
             self,
@@ -337,37 +332,34 @@ class DataBase:
             messenger_id: int = 0,
             song_id: int = 1,
         ) -> int:
-            cursor: Cursor = self.db.cursor()
-            statement: str = (
-                f"INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) "
-                f"VALUES (?, ?, ?, ?, ?, ?)"
-            )
-            cursor.execute(
-                statement,
-                (
-                    alias,
-                    firstname,
-                    lastname,
-                    self.__birthday_to_string(birthday),
-                    messenger_id,
-                    song_id,
-                ),
-            )
-            uid: int = cursor.lastrowid
-            cursor.close()
-            self.db.commit()
-            return uid
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    f"INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) "
+                    f"VALUES (?, ?, ?, ?, ?, ?)"
+                )
+                cursor.execute(
+                    statement,
+                    (
+                        alias,
+                        firstname,
+                        lastname,
+                        self.__birthday_to_string(birthday),
+                        messenger_id,
+                        song_id,
+                    ),
+                )
+                uid: int = cursor.lastrowid
+                self.db.commit()
+                return uid
 
         def add_user_notification(self, user: int | str, notification: str) -> None:
-            cursor: Cursor = self.db.cursor()
+            with self.db.cursor() as cursor:
+                if type(user) is str:
+                    user: int = self.__get_user_id(user)
 
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
-
-            statement: str = f"INSERT INTO notification (uid, text) VALUES (?, ?)"
-            cursor.execute(statement, (user, notification))
-            cursor.close()
-            self.db.commit()
+                statement: str = f"INSERT INTO notification (uid, text) VALUES (?, ?)"
+                cursor.execute(statement, (user, notification))
+                self.db.commit()
 
         def update_user(
             self,
@@ -383,127 +375,149 @@ class DataBase:
             _song_name: str = "standard",
         ) -> User:
 
-            cursor: Cursor = self.db.cursor()
+            with self.db.cursor() as cursor:
+                user: User
 
-            result_set: tuple = ()
-
-            if uid is not None:
-                statement: str = "SELECT * FROM user WHERE uid=? LIMIT 1"
-                cursor.execute(statement, (uid,))
-                result_set = cursor.fetchone()
-                if cursor.rowcount < 1:
-                    cursor.close()
-                    raise NoMatchingEntry(
-                        f"No matching user with the user-id {uid} was found in the database."
+                if uid is not None:
+                    user = self.get_user_by_id(uid)
+                elif alias is not None:
+                    user = self.get_user_by_alias(alias)
+                elif first_name is not None and last_name is not None:
+                    user = self.get_user_by_first_and_last_name(first_name, last_name)
+                else:
+                    raise ValueError(
+                        "No suitable description of a user given. Either the uid, the alias or first "
+                        "and last name is required!"
                     )
 
-            elif alias is not None:
-                statement: str = "SELECT * FROM user WHERE alias=? LIMIT 1"
-                cursor.execute(statement, (alias,))
-                result_set = cursor.fetchone()
-                if cursor.rowcount < 1:
-                    cursor.close()
-                    raise NoMatchingEntry(
-                        f'No matching user with the alias "{alias}" was found in the database.'
-                    )
-
-            elif first_name is not None and last_name is not None:
-                statement: str = """SELECT * FROM user
-                                    WHERE firstname=?
-                                    AND lastname=?
-                                    LIMIT 1"""
-
-                cursor.execute(statement, (first_name, last_name))
-                result_set = cursor.fetchone()
-                if cursor.rowcount < 1:
-                    cursor.close()
-                    raise NoMatchingEntry(
-                        f'No matching user with the name "{last_name, first_name}" was found '
-                        f"in the database."
-                    )
-            else:
-                cursor.close()
-                raise ValueError(
-                    "No suitable description of a user given. Either the uid, the alias or first "
-                    "and last name is required!"
+                user = self.__update_user_by_data(
+                    user,
+                    _new_alias,
+                    _new_first_name,
+                    _new_last_name,
+                    _birthday,
+                    _messenger_id,
+                    _song_name,
                 )
 
+                self.__update_user_in_db(user)
+                return user
+
+        def __update_user_in_db(self, user: User):
+            with self.db.cursor() as cursor:
+                statement: str = """UPDATE user 
+                                    SET alias=?, firstname=?, lastname=?, 
+                                    birthday=?, mid=?, sname=? 
+                                    WHERE uid=?"""
+                cursor.execute(
+                    statement,
+                    (
+                        user.alias,
+                        user.first_name,
+                        user.last_name,
+                        user.birthday,
+                        user.messenger_id,
+                        user.song_name,
+                        user.uid,
+                    ),
+                )
+                self.db.commit()
+
+        def __update_user_by_data(
+            self,
+            user: User,
+            _new_alias: str,
+            _new_first_name: str,
+            _new_last_name: str,
+            _birthday: datetime,
+            _messenger_id: int,
+            _song_name: str,
+        ) -> User:
             if _new_alias is not None:
-                alias = _new_alias
+                user.alias = _new_alias
             if _new_first_name is not None:
-                firstname = _new_first_name
+                user.first_name = _new_first_name
             if _new_last_name is not None:
-                lastname = _new_last_name
+                user.last_name = _new_last_name
             if _birthday is not None:
-                birthday = self.__birthday_to_string(_birthday)
-            mid = _messenger_id
+                user.birthday = self.__birthday_to_string(_birthday)
+            if _messenger_id is not None:
+                user.messenger_id = _messenger_id
+            if _song_name is not None:
+                user.song_name = _song_name
+            return user
 
-            statement: str = """UPDATE user 
-                                SET alias=?, firstname=?, lastname=?, 
-                                birthday=?, mid=?, sname=? 
-                                WHERE uid=?"""
-            cursor.execute(
-                statement,
-                (
-                    alias,
-                    firstname,
-                    lastname,
-                    self.__birthday_to_string(birthday),
-                    mid,
-                    sname,
-                    uid,
-                ),
-            )
-            cursor.close()
-            self.db.commit()
+        def get_user_by_alias(self, alias: str) -> User:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM user WHERE alias=? LIMIT 1"
+                cursor.execute(statement, (alias,))
+                user: User = self.__tuple_to_user(cursor.fetchone())
+                return user
 
-        def delete_user_notification(self, user: int | str, text: str) -> None:
-            cursor: Cursor = self.db.cursor()
+        def get_user_by_first_and_last_name(
+            self, first_name: str, last_name: str
+        ) -> User:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    "SELECT * FROM user WHERE firstname=? AND lastname=? LIMIT 1"
+                )
+                cursor.execute(statement, (first_name, last_name))
+                user: User = self.__tuple_to_user(cursor.fetchone())
+                return user
 
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
+        def delete_user_notification_by_id(self, user: int, text: str) -> None:
+            with self.db.cursor() as cursor:
+                statement: str = "DELETE FROM notification WHERE uid=? AND text=?"
+                cursor.execute(statement, (user, text))
+                self.db.commit()
 
-            statement: str = "DELETE FROM notification WHERE uid=? AND text=?"
-            cursor.execute(statement, (user, text))
-            cursor.close()
-            self.db.commit()
+        def delete_user_notification_by_alias(self, alias: str, text: str) -> None:
+            user_id: int = self.__get_user_id_by_alias(alias)
+            self.delete_user_notification_by_id(user_id, text)
 
-        def delete_user(self, user: int | str) -> None:
-            cursor: Cursor = self.db.cursor()
+        def delete_user_by_id(self, user_id: int) -> None:
+            with self.db.cursor() as cursor:
+                statement: str = "DELETE FROM user WHERE uid=?"
+                cursor.execute(statement, (user_id,))
+                self.db.commit()
 
-            if type(user) is str:
-                user: int = self.__get_user_id(user)
-
-            statement: str = "DELETE FROM user WHERE uid=?"
-
-            cursor.execute(statement, (user,))
-            cursor.close()
-            self.db.commit()
+        def delete_user_by_alias(self, alias: str) -> None:
+            user_id: int = self.__get_user_id_by_alias(alias)
+            self.delete_user_by_id(user_id)
 
         @staticmethod
-        def __birthday_to_string(birthday: dict) -> str:
-            return (
-                str(birthday.get("year"))
-                + str(birthday.get("month")).rjust(2, "0")
-                + str(birthday.get("day")).rjust(2, "0")
-            )
+        def __birthday_to_string(birthday: datetime) -> str:
+            return birthday.isoformat()
 
-        def __get_user_id(self, alias: str) -> int:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT uid FROM user WHERE alias=? LIMIT 1"
-            cursor.execute(statement, (alias,))
-            uid: int = cursor.fetchone()
-            cursor.close()
-            if uid:
-                return uid
-            else:
-                raise UserNotFountException()
+        def __get_user_id_by_alias(self, alias: str) -> int:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT uid FROM user WHERE alias=? LIMIT 1"
+                cursor.execute(statement, (alias,))
+                uid: int = cursor.fetchone()
+                if uid:
+                    return uid
+                else:
+                    raise UserNotFountException()
+
+        def __get_user_id_by_first_and_last_name(
+            self, first_name: str, last_name: str
+        ) -> int:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    "SELECT uid FROM user WHERE firstname=? AND lastname=? LIMIT 1"
+                )
+                cursor.execute(statement, (first_name, last_name))
+                uid: int = cursor.fetchone()
+                if uid:
+                    return uid
+                else:
+                    raise UserNotFountException()
 
         def __create_table(self):
             pass
 
         @staticmethod
-        def __result_set_to_user(result_set: tuple) -> User:
+        def __tuple_to_user(result_set: tuple) -> User:
             (
                 uid,
                 alias,
@@ -551,71 +565,72 @@ class DataBase:
             self.skills = Skills()
             logging.info("[INFO] AlarmInterface initialized.")
 
-        def get_alarm(self, aid: int, as_tuple: bool = False) -> tuple | dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid WHERE a.aid=? LIMIT 1"
-            cursor.execute(statement, (aid,))
-            result_set: tuple = cursor.fetchone()
-            cursor.close()
-            return self.__build_json([result_set], as_tuple)[0]
+        def get_alarm(self, aid: int, as_tuple: bool = False) -> Alarm:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid WHERE a.aid=? LIMIT 1"
+                cursor.execute(statement, (aid,))
+                result_set: tuple = cursor.fetchone()
+                return self.__tuple_to_alarm(result_set)
 
         def get_alarms(
-            self, active: bool = False, unsorted: bool = False, as_tuple: bool = False
-        ) -> list[dict] | list[tuple] | tuple[list, list]:
-            cursor: Cursor = self.db.cursor()
-            init_result_set: list = []
-            if unsorted:
+            self, active: bool = False, unfiltered: bool = False, as_tuple: bool = False
+        ) -> list[Alarm]:
+            with self.db.cursor() as cursor:
+                init_result_set: list = []
+                if unfiltered:
+                    return self.__get_alarms_unfiltered(active)
                 if active:
-                    statement: str = "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid"
+                    now: datetime = datetime.now()
+                    weekday: str = self.skills.statics.numb_to_day[str(now.weekday())]
+                    now_seconds = now.hour * 3600 + now.minute * 60 + now.second
+                    active_alarms_statement: str = (
+                        f"SELECT * FROM alarm as a "
+                        f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
+                        f"WHERE ar.{weekday}=1 "
+                        f"AND a.hour >= {now.hour} "
+                        f"AND a.minute >= {now.minute} "
+                        f"AND a.active=1 "
+                        f"AND a.last_executed != {now.day}.{now.month}.{now.year}"
+                    )
+                    init_alarms_statement: str = (
+                        f"SELECT * FROM alarm as a "
+                        f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
+                        f"WHERE ar.{weekday}=1 "
+                        f"AND a.total_seconds <= {now_seconds + 1800}"
+                    )
+                    cursor.execute(init_alarms_statement)
+                    init_result_set: list[Alarm] = [
+                        self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
+                    ]
                 else:
-                    statement: str = """SELECT * FROM alarm as a 
-                                        JOIN alarmrepeat as ar ON a.aid=ar.aid 
-                                        WHERE a.active=True"""
+                    active_alarms_statement: str = (
+                        "SELECT * FROM alarm as a "
+                        "JOIN alarmrepeat as ar ON a.aid = ar.aid"
+                    )
+                cursor.execute(active_alarms_statement)
+                active_result_set: list[tuple] = cursor.fetchall()
+                active_returning_list: list[dict] = self.__build_json(
+                    active_result_set, as_tuple
+                )
+                init_returning_list: list[dict] = self.__build_json(
+                    init_result_set, as_tuple
+                )
+                return active_returning_list, init_returning_list
+
+        def __get_alarms_unfiltered(self, active) -> list[Alarm]:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid"
+                )
+                if active:
+                    statement = f"{statement} WHERE a.active=True"
                 cursor.execute(statement)
                 result_set: list[tuple] = cursor.fetchall()
-                cursor.close()
-                return self.__build_json(result_set, as_tuple)
-
-            if active:
-                now: datetime = datetime.now()
-                weekday: str = self.skills.statics.numb_to_day[str(now.weekday())]
-                now_seconds = now.hour * 3600 + now.minute * 60 + now.second
-                active_alarms_statement: str = (
-                    f"SELECT * FROM alarm as a "
-                    f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
-                    f"WHERE ar.{weekday}=1 "
-                    f"AND a.hour >= {now.hour} "
-                    f"AND a.minute >= {now.minute} "
-                    f"AND a.active=1 "
-                    f"AND a.last_executed != {now.day}.{now.month}.{now.year}"
-                )
-                init_alarms_statement: str = (
-                    f"SELECT * FROM alarm as a "
-                    f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
-                    f"WHERE ar.{weekday}=1 "
-                    f"AND a.total_seconds <= {now_seconds + 1800}"
-                )
-                cursor.execute(init_alarms_statement)
-                init_result_set: list[tuple] = cursor.fetchall()
-            else:
-                active_alarms_statement: str = (
-                    "SELECT * FROM alarm as a "
-                    "JOIN alarmrepeat as ar ON a.aid = ar.aid"
-                )
-            cursor.execute(active_alarms_statement)
-            active_result_set: list[tuple] = cursor.fetchall()
-            active_returning_list: list[dict] = self.__build_json(
-                active_result_set, as_tuple
-            )
-            init_returning_list: list[dict] = self.__build_json(
-                init_result_set, as_tuple
-            )
-            cursor.close()
-            return active_returning_list, init_returning_list
+                return [self.__tuple_to_alarm(alarm) for alarm in result_set]
 
         def add_alarm(
             self,
-            time: dict,
+            alarm_time: dict,
             text: str,
             user: int | str,
             repeating: dict,
@@ -638,9 +653,9 @@ class DataBase:
                 (
                     song,
                     user,
-                    time["hour"],
-                    time["minute"],
-                    time["total_seconds"],
+                    alarm_time["hour"],
+                    alarm_time["minute"],
+                    alarm_time["total_seconds"],
                     text,
                     int(active),
                     int(initiated),
@@ -845,11 +860,7 @@ class DataBase:
                     initiated,
                     last_executed,
                 ) in result_set:
-                    time = {
-                        "hour": hour,
-                        "minute": minute,
-                        "total_seconds": total_seconds,
-                    }
+                    alarm_time = time(hour, minute)
                     result_list.append(
                         (aid, time, sname, uid, text, active, initiated, last_executed)
                     )
@@ -918,6 +929,42 @@ class DataBase:
                 return uid
             else:
                 raise UserNotFountException()
+
+        @staticmethod
+        def __tuple_to_alarm(alarm: tuple) -> Alarm:
+            (
+                alarm_id,
+                song_name,
+                user_id,
+                alarm_time,
+                text,
+                active,
+                initiated,
+                last_executed,
+                _,
+                monday,
+                tuesday,
+                wednesday,
+                thursday,
+                friday,
+                saturday,
+                sunday,
+                regular,
+            ) = alarm
+            repeating: AlarmRepeating = AlarmRepeating(
+                monday, tuesday, wednesday, thursday, friday, saturday, sunday, regular
+            )
+            return Alarm(
+                alarm_id,
+                repeating,
+                song_name,
+                time.fromisoformat(alarm_time),
+                text,
+                active,
+                initiated,
+                last_executed,
+                user_id,
+            )
 
         def __create_table(self):
             pass
