@@ -1,16 +1,15 @@
 from __future__ import annotations
 
+import io
 import json
 import logging
+import random
 import urllib
 from random import random
-import random
 from typing import AnyStr, Any
-import io
 from urllib.request import Request, urlopen
 
 from src.speechassistant.Audio import AudioOutput, AudioInput
-from src.speechassistant.core import Core
 from src.speechassistant.database.database_connection import DataBase
 from src.speechassistant.resources.analyze import Sentence_Analyzer
 from src.speechassistant.resources.module_skills import Skills
@@ -22,6 +21,8 @@ class ModuleWrapper:
         self.analysis: dict = analysis
         # toDo: down below
         # self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
+
+        from src.speechassistant.core import Core
 
         self.core: Core = Core.get_instance()
 

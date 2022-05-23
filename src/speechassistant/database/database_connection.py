@@ -1,33 +1,14 @@
 from __future__ import annotations  # compatibility for < 3.10
 
 import io
-import json
-import logging
-import pathlib
-from datetime import datetime
-from typing import Callable, TypeAlias  # , TypeAlias
 import os
 import sqlite3
+from datetime import datetime
 from sqlite3 import Connection, Cursor, OperationalError
 
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
-from src.speechassistant.resources.enums import OutputTypes
 from src.speechassistant.exceptions.SQLException import *
-
-shopping_item: TypeAlias = dict[[str, int], [str, str], [str, str], [str, float]]
-timer_item: TypeAlias = dict[[str, int], [str, str], [str, str], [str, int]]
-user_item: TypeAlias = dict[
-    [str, int],
-    [str, str],
-    [str, str],
-    [str, str],
-    [str, dict[str, int], [str, int], [str, int]],
-    [str, int],
-    [str, int],
-    [str, list[str]],
-]
-routine_item: TypeAlias = dict[[str, str], [str, dict], [str, dict], [str, dict]]
-
+from src.speechassistant.resources.enums import OutputTypes
 from src.speechassistant.resources.module_skills import Skills
 
 
@@ -50,9 +31,10 @@ class DataBase:
 
         logging.basicConfig(level=logging.DEBUG)
         logging.info("[ACTION] Initialize DataBase...\n")
-        logging.info(os.path.dirname(os.path.realpath(__file__)) + "\data_base")
+        logging.info(os.path.dirname(os.path.realpath(__file__)).join("data_base"))
+
         self.db: Connection = sqlite3.connect(
-            os.path.dirname(os.path.realpath(__file__)) + "\data_base",
+            os.path.dirname(os.path.realpath(__file__)).join("data_base"),
             check_same_thread=False,
         )
         self.error_counter: int = 0
@@ -304,7 +286,7 @@ class DataBase:
             self.db: Connection = db
             logging.info("[INFO] UserInterface initialized.")
 
-        def get_user(self, user: str | int) -> user_item:
+        def get_user(self, user: str | int) -> dict:
             cursor: Cursor = self.db.cursor()
             if type(user) is str:
                 user: int = self.__get_user_id(user)
@@ -319,7 +301,7 @@ class DataBase:
             cursor.close()
             return self.__build_json(result_set)
 
-        def get_user_by_messenger_id(self, messenger_id: int) -> user_item:
+        def get_user_by_messenger_id(self, messenger_id: int) -> dict:
             cursor: Cursor = self.db.cursor()
             statement: str = "SELECT * FROM user WHERE mid=? LIMIT 1"
             cursor.execute(statement, (messenger_id,))
@@ -327,7 +309,7 @@ class DataBase:
             cursor.close()
             return self.__build_json(result_set)
 
-        def get_users(self) -> list[user_item]:
+        def get_users(self) -> list:
             cursor: Cursor = self.db.cursor()
             statement: str = "SELECT * from user"
             cursor.execute(statement)
@@ -335,7 +317,7 @@ class DataBase:
                 tuple[int, str, str, str, str, int, int]
             ] = cursor.fetchall()
 
-            user_list: list[user_item] = self.__build_json(result_set)
+            user_list: list = self.__build_json(result_set)
 
             for user in user_list:
                 notification_statement: str = (
@@ -1103,9 +1085,7 @@ class DataBase:
             self.user_interface = user_interface
             logging.info("[INFO] TimerInterface initialized.")
 
-        def get_all_timer(
-            self, output_type: OutputTypes
-        ) -> list[timer_item] | list[tuple]:
+        def get_all_timer(self, output_type: OutputTypes) -> list | list[tuple]:
             cursor: Cursor = self.db.cursor()
             statement: str = f"SELECT * FROM timer"
             cursor.execute(statement)
@@ -1134,7 +1114,7 @@ class DataBase:
             cursor.close()
             return result_list
 
-        def get_timer(self, timer_id: int) -> timer_item:
+        def get_timer(self, timer_id: int) -> dict:
             cursor: Cursor = self.db.cursor()
             statement: str = f"SELECT * FROM timer WHERE id=? LIMIT 1"
             cursor.execute(statement, (timer_id,))
@@ -1353,7 +1333,7 @@ class DataBase:
             self.db: Connection = db
             logging.info("[INFO] ShoppingListInterface initialized.")
 
-        def get_list(self) -> list[shopping_item]:
+        def get_list(self) -> list:
             cursor: Cursor = self.db.cursor()
             statement: str = "SELECT * FROM shoppinglist"
             cursor.execute(statement)
@@ -1429,8 +1409,8 @@ class DataBase:
         def __build_json(
             self,
             result_set: list[tuple[int, str, str, float]] | tuple[int, str, str, float],
-        ) -> list[shopping_item] | shopping_item:
-            result_list: list[shopping_item] = []
+        ) -> list:
+            result_list: list = []
             if type(result_set) is list:
                 for data_set in result_set:
                     result_list.append(self.__get_data_set(data_set))
@@ -1450,7 +1430,7 @@ class DataBase:
             self.db: Connection = db
             logging.info("[INFO] RoutineInterface initialized.")
 
-        def get_routine(self, name: str) -> routine_item:
+        def get_routine(self, name: str) -> dict:
             cursor: Cursor = self.db.cursor()
             statement: str = "SELECT * FROM routine WHERE name=? LIMIT 1"
             try:
@@ -1488,9 +1468,7 @@ class DataBase:
                 on_command_set,
             )
 
-        def get_routines(
-            self, on_command: str = None, on_time: dict = None
-        ) -> list[routine_item]:
+        def get_routines(self, on_command: str = None, on_time: dict = None) -> list:
             cursor: Cursor = self.db.cursor()
             routine_list: list[dict] = []
             if on_command is not None:
@@ -2060,7 +2038,7 @@ class DataBase:
             dates: list[tuple],
             activation: list[tuple],
             on_commands: list[tuple],
-        ) -> routine_item:
+        ) -> dict:
             """
             rout: ('Morgenroutine', 'Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
             command_set: [(1, 'Morgenroutine', 'phillips_hue')],

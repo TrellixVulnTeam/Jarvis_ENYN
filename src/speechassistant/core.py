@@ -3,17 +3,18 @@ from __future__ import annotations  # compatibility for < 3.10
 import json
 import logging
 import time
+from pathlib import Path
 from threading import Thread
 
 import requests
 
 from src.speechassistant.Audio import AudioOutput, AudioInput
+from src.speechassistant.Modules import Modules
 from src.speechassistant.Services import ServiceWrapper
 from src.speechassistant.User import Users
 from src.speechassistant.database.database_connection import DataBase
 from src.speechassistant.resources.analyze import Sentence_Analyzer
 from src.speechassistant.resources.intent.Wrapper import IntentWrapper as AIWrapper
-from src.speechassistant.resources.intent.testHealper import Modules
 from src.speechassistant.resources.module_skills import Skills
 
 
@@ -29,6 +30,7 @@ class Core:
     def __init__(self) -> None:
         if Core.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
+        self.relPath = str(Path(__file__).parent) + "/"
         self.local_storage: dict = {}
         self.config_data: dict = {}
         self.__load_config_data()
@@ -67,11 +69,11 @@ class Core:
         Core.__instance = self
 
     def __fill_data(self) -> None:
-        with open(relPath + "/data/api_keys.dat") as api_file:
+        with open(self.relPath + "/data/api_keys.dat") as api_file:
             self.data["api_keys"] = json.load(api_file)
 
     def __load_config_data(self):
-        with open(relPath + "config.json", "r") as config_file:
+        with open(self.relPath + "config.json", "r") as config_file:
             logging.info("[INFO] loading configs...")
             self.config_data = json.load(config_file)
             self.local_storage = self.config_data["Local_storage"]
