@@ -35,7 +35,7 @@ class Core:
         self.config_data: dict = {}
         self.__load_config_data()
         self.use_ai = self.config_data["ai"]
-        self.path: str = self.config_data["Local_storage"]["CORE_PATH"]
+        self.path: str = str(Path(__file__).parent) + "/"
         self.data: dict = self.config_data
         self.__fill_data()  # since the path is needed, __fill_data() is called only here
         self.modules: Modules = None
