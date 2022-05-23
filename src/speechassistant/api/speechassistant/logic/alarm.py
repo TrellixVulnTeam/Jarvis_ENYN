@@ -35,7 +35,7 @@ def read_alarm(data: int | None) -> Response:
         logging.info(alarm)
         return Response(json.dumps(alarm), mimetype="application/json")
     else:
-        alarms: list[dict] = database.alarm_interface.get_alarms(unsorted=True)
+        alarms: list[dict] = database.alarm_interface.get_alarms(unfiltered=True)
         if not alarms:
             return Response([], mimetype="application/json")
         for alarm in alarms:

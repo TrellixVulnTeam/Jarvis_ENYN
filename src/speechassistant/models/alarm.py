@@ -1,18 +1,9 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, time
 
 
 @dataclass
-class Time:
-    hour: int
-    minute: int
-
-    def __after_init__(self):
-        self.total_seconds = self.hour * 3600 + self.minute * 60
-
-
-@dataclass
-class Repeating:
+class AlarmRepeating:
     monday: bool
     tuesday: bool
     wednesday: bool
@@ -26,8 +17,9 @@ class Repeating:
 @dataclass
 class Alarm:
     aid: int
+    repeating: AlarmRepeating
     song_name: str
-    time: Time
+    alarm_time: time
     text: str
     active: bool
     initiated: bool
