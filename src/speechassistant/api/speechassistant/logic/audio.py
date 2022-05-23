@@ -6,11 +6,11 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from src.speechassistant.api.settings import ALLOWED_AUDIO_EXTENSIONS
-from src.speechassistant.resources.exceptions.CriticalExceptions import (
+from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.exceptions.CriticalExceptions import (
     UnsolvableException,
 )
-from src.speechassistant.resources.exceptions.SQLException import FileNameAlreadyExists
-from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.exceptions.SQLException import FileNameAlreadyExists
 
 folder: str = "C:\\Users\\Jakob\\PycharmProjects\\Jarvis"
 database: DataBase = DataBase.get_instance()
