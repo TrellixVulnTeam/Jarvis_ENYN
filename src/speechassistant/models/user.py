@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 
 @dataclass
 class User:
-    uid: int
+    uid: Optional[int]
     alias: str
     first_name: str
     last_name: str
