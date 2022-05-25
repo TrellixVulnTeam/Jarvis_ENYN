@@ -1,16 +1,29 @@
 from __future__ import annotations  # compatibility for < 3.10
 
+import base64
 import io
 import os
 import sqlite3
 from datetime import datetime, time
-from sqlite3 import Connection, Cursor, OperationalError
+from sqlite3 import Connection, Cursor
 
 from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
 from src.speechassistant.exceptions.SQLException import *
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
+from src.speechassistant.models.audio_file import AudioFile
+from src.speechassistant.models.reminder import Reminder
+from src.speechassistant.models.routine import (
+    Routine,
+    SpecificDate,
+    RoutineDays,
+    RoutineCommand,
+    RoutineRetakes,
+    RoutineTimes,
+    RoutineClockTime,
+)
+from src.speechassistant.models.shopping_list import ShoppingListItem
+from src.speechassistant.models.timer import Timer
 from src.speechassistant.models.user import User
-from src.speechassistant.resources.enums import OutputTypes
 from src.speechassistant.resources.module_skills import Skills
 
 
@@ -36,7 +49,8 @@ class DataBase:
         logging.info(os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"))
 
         self.db: Connection = sqlite3.connect(
-            os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"),
+            "C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\db.sqlite",
+            # os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"),
             check_same_thread=False,
         )
         self.error_counter: int = 0
@@ -73,7 +87,7 @@ class DataBase:
         self.__create_table(
             "CREATE TABLE IF NOT EXISTS audio ("
             "name VARCHAR(30) PRIMARY KEY UNIQUE,"
-            "path VARCHAR(50) UNIQUE)"
+            "data BLOB)"
         )
 
         self.__create_table(
@@ -294,14 +308,28 @@ class DataBase:
                 user: User = self.__tuple_to_user(cursor.fetchone())
                 return user
 
-        def get_user_by_name(self, user_name: str) -> User:
-            user: int = self.__get_user_id(user_name)
-            return self.get_user_by_id(user)
-
         def get_user_by_messenger_id(self, messenger_id: int) -> User:
             with self.db.cursor() as cursor:
                 statement: str = "SELECT * FROM user WHERE mid=? LIMIT 1"
                 cursor.execute(statement, (messenger_id,))
+                user: User = self.__tuple_to_user(cursor.fetchone())
+                return user
+
+        def get_user_by_alias(self, alias: str) -> User:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM user WHERE alias=? LIMIT 1"
+                cursor.execute(statement, (alias,))
+                user: User = self.__tuple_to_user(cursor.fetchone())
+                return user
+
+        def get_user_by_first_and_last_name(
+            self, first_name: str, last_name: str
+        ) -> User:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    "SELECT * FROM user WHERE firstname=? AND lastname=? LIMIT 1"
+                )
+                cursor.execute(statement, (first_name, last_name))
                 user: User = self.__tuple_to_user(cursor.fetchone())
                 return user
 
@@ -323,15 +351,7 @@ class DataBase:
                     user.waiting_notifications = [x[0] for x in cursor.fetchall()]
                 return user_list
 
-        def add_user(
-            self,
-            alias: str,
-            firstname: str,
-            lastname: str,
-            birthday: dict,
-            messenger_id: int = 0,
-            song_id: int = 1,
-        ) -> int:
+        def add_user(self, user: User) -> User:
             with self.db.cursor() as cursor:
                 statement: str = (
                     f"INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) "
@@ -340,70 +360,33 @@ class DataBase:
                 cursor.execute(
                     statement,
                     (
-                        alias,
-                        firstname,
-                        lastname,
-                        self.__birthday_to_string(birthday),
-                        messenger_id,
-                        song_id,
+                        user.alias,
+                        user.first_name,
+                        user.last_name,
+                        user.birthday.isoformat(),
+                        user.messenger_id,
+                        user.song_name,
                     ),
                 )
-                uid: int = cursor.lastrowid
+                user.uid = cursor.lastrowid
                 self.db.commit()
-                return uid
-
-        def add_user_notification(self, user: int | str, notification: str) -> None:
-            with self.db.cursor() as cursor:
-                if type(user) is str:
-                    user: int = self.__get_user_id(user)
-
-                statement: str = f"INSERT INTO notification (uid, text) VALUES (?, ?)"
-                cursor.execute(statement, (user, notification))
-                self.db.commit()
-
-        def update_user(
-            self,
-            uid: int = None,
-            alias: str = None,
-            first_name: str = None,
-            last_name: str = None,
-            _new_alias: str = None,
-            _new_first_name: str = None,
-            _new_last_name: str = None,
-            _birthday: dict = None,
-            _messenger_id: int = 0,
-            _song_name: str = "standard",
-        ) -> User:
-
-            with self.db.cursor() as cursor:
-                user: User
-
-                if uid is not None:
-                    user = self.get_user_by_id(uid)
-                elif alias is not None:
-                    user = self.get_user_by_alias(alias)
-                elif first_name is not None and last_name is not None:
-                    user = self.get_user_by_first_and_last_name(first_name, last_name)
-                else:
-                    raise ValueError(
-                        "No suitable description of a user given. Either the uid, the alias or first "
-                        "and last name is required!"
-                    )
-
-                user = self.__update_user_by_data(
-                    user,
-                    _new_alias,
-                    _new_first_name,
-                    _new_last_name,
-                    _birthday,
-                    _messenger_id,
-                    _song_name,
-                )
-
-                self.__update_user_in_db(user)
                 return user
 
-        def __update_user_in_db(self, user: User):
+        def add_user_notification_by_user_id(
+            self, user_id: int, notification: str
+        ) -> None:
+            with self.db.cursor() as cursor:
+                statement: str = f"INSERT INTO notification (uid, text) VALUES (?, ?)"
+                cursor.execute(statement, (user_id, notification))
+                self.db.commit()
+
+        def add_use_notification_by_user_alias(
+            self, user_alias: str, notification: str
+        ) -> None:
+            user_id: int = self.__get_user_id_by_alias(user_alias)
+            self.add_user_notification_by_user_id(user_id, notification)
+
+        def update_user(self, user: User) -> User:
             with self.db.cursor() as cursor:
                 statement: str = """UPDATE user 
                                     SET alias=?, firstname=?, lastname=?, 
@@ -422,47 +405,6 @@ class DataBase:
                     ),
                 )
                 self.db.commit()
-
-        def __update_user_by_data(
-            self,
-            user: User,
-            _new_alias: str,
-            _new_first_name: str,
-            _new_last_name: str,
-            _birthday: datetime,
-            _messenger_id: int,
-            _song_name: str,
-        ) -> User:
-            if _new_alias is not None:
-                user.alias = _new_alias
-            if _new_first_name is not None:
-                user.first_name = _new_first_name
-            if _new_last_name is not None:
-                user.last_name = _new_last_name
-            if _birthday is not None:
-                user.birthday = self.__birthday_to_string(_birthday)
-            if _messenger_id is not None:
-                user.messenger_id = _messenger_id
-            if _song_name is not None:
-                user.song_name = _song_name
-            return user
-
-        def get_user_by_alias(self, alias: str) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM user WHERE alias=? LIMIT 1"
-                cursor.execute(statement, (alias,))
-                user: User = self.__tuple_to_user(cursor.fetchone())
-                return user
-
-        def get_user_by_first_and_last_name(
-            self, first_name: str, last_name: str
-        ) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    "SELECT * FROM user WHERE firstname=? AND lastname=? LIMIT 1"
-                )
-                cursor.execute(statement, (first_name, last_name))
-                user: User = self.__tuple_to_user(cursor.fetchone())
                 return user
 
         def delete_user_notification_by_id(self, user: int, text: str) -> None:
@@ -531,93 +473,71 @@ class DataBase:
                 uid, alias, first_name, last_name, birthday, messenger_id, song_name
             )
 
-        def __build_json(self, result_set: list[tuple] | tuple) -> list[dict] | dict:
-            if type(result_set) is list:
-                result_list: list[dict] = []
-
-                for dataset in result_set:
-                    result_list.append(self.__tuple_to_dict(dataset))
-                return result_list
-            else:
-                return self.__tuple_to_dict(result_set)
-
-        @staticmethod
-        def __tuple_to_dict(dataset: tuple) -> dict:
-            uid, alias, firstname, lastname, birthday, mid, sname = dataset
-            return {
-                "uid": uid,
-                "name": alias,
-                "first_name": firstname,
-                "last_name": lastname,
-                "date_of_birth": {
-                    "year": birthday[0:4],
-                    "month": birthday[4:6],
-                    "day": birthday[6:8],
-                },
-                "messenger_id": mid,
-                "alarm_sound": sname,
-                "waiting_notifications": [],
-            }
-
     class _AlarmInterface:
-        def __init__(self, db: Connection) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection) -> None:
+            self.db: Connection = _db
             self.skills = Skills()
             logging.info("[INFO] AlarmInterface initialized.")
 
-        def get_alarm(self, aid: int, as_tuple: bool = False) -> Alarm:
+        def get_alarm_by_id(self, aid: int) -> Alarm:
             with self.db.cursor() as cursor:
                 statement: str = "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid WHERE a.aid=? LIMIT 1"
                 cursor.execute(statement, (aid,))
-                result_set: tuple = cursor.fetchone()
-                return self.__tuple_to_alarm(result_set)
+                return self.__tuple_to_alarm(cursor.fetchone())
 
-        def get_alarms(
-            self, active: bool = False, unfiltered: bool = False, as_tuple: bool = False
-        ) -> list[Alarm]:
+        def get_active_and_init_alarms(self) -> tuple[list[Alarm], list[Alarm]]:
+            now: datetime = datetime.now()
+            weekday: str = self.skills.statics.numb_to_day[str(now.weekday())]
+            now_seconds = now.hour * 3600 + now.minute * 60 + now.second
+            active_alarms = self.get_active_and_passed_alarms(now, weekday)
+            init_alarms = self.get_initiated_alarms(now_seconds, weekday)
+
+            return active_alarms, init_alarms
+
+        def get_active_and_passed_alarms(self, now, weekday) -> list[Alarm]:
             with self.db.cursor() as cursor:
-                init_result_set: list = []
-                if unfiltered:
-                    return self.__get_alarms_unfiltered(active)
-                if active:
-                    now: datetime = datetime.now()
-                    weekday: str = self.skills.statics.numb_to_day[str(now.weekday())]
-                    now_seconds = now.hour * 3600 + now.minute * 60 + now.second
-                    active_alarms_statement: str = (
-                        f"SELECT * FROM alarm as a "
-                        f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
-                        f"WHERE ar.{weekday}=1 "
-                        f"AND a.hour >= {now.hour} "
-                        f"AND a.minute >= {now.minute} "
-                        f"AND a.active=1 "
-                        f"AND a.last_executed != {now.day}.{now.month}.{now.year}"
-                    )
-                    init_alarms_statement: str = (
-                        f"SELECT * FROM alarm as a "
-                        f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
-                        f"WHERE ar.{weekday}=1 "
-                        f"AND a.total_seconds <= {now_seconds + 1800}"
-                    )
-                    cursor.execute(init_alarms_statement)
-                    init_result_set: list[Alarm] = [
-                        self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
-                    ]
-                else:
-                    active_alarms_statement: str = (
-                        "SELECT * FROM alarm as a "
-                        "JOIN alarmrepeat as ar ON a.aid = ar.aid"
-                    )
-                cursor.execute(active_alarms_statement)
-                active_result_set: list[tuple] = cursor.fetchall()
-                active_returning_list: list[dict] = self.__build_json(
-                    active_result_set, as_tuple
+                active_alarms_statement: str = (
+                    f"SELECT * FROM alarm as a "
+                    f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
+                    f"WHERE ar.{weekday}=1 "
+                    f"AND a.hour >= ? "
+                    f"AND a.minute >= ? "
+                    f"AND a.active = 1 "
+                    f"AND a.last_executed != ?"
                 )
-                init_returning_list: list[dict] = self.__build_json(
-                    init_result_set, as_tuple
+                cursor.execute(
+                    active_alarms_statement,
+                    (now.hour, now.minute, f"{now.day}.{now.month}.{now.year}"),
                 )
-                return active_returning_list, init_returning_list
+                active_alarms: list[Alarm] = [
+                    self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
+                ]
+                return active_alarms
 
-        def __get_alarms_unfiltered(self, active) -> list[Alarm]:
+        def get_initiated_alarms(self, now_seconds, weekday) -> list[Alarm]:
+            with self.db.cursor() as cursor:
+                init_alarms_statement: str = (
+                    f"SELECT * FROM alarm as a "
+                    f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
+                    f"WHERE ar.{weekday} = 1 "
+                    f"AND a.total_seconds <= {now_seconds + 1800}"
+                )
+                cursor.execute(init_alarms_statement)
+                init_alarms: list[Alarm] = [
+                    self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
+                ]
+                return init_alarms
+
+        def get_all_alarms(self) -> list[Alarm]:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    "SELECT * FROM alarm as a "
+                    "JOIN alarmrepeat as ar ON a.aid = ar.aid"
+                )
+                cursor.execute(statement)
+                return [self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()]
+
+        def get_alarms_unfiltered(self, active: bool) -> list[Alarm]:
             with self.db.cursor() as cursor:
                 statement: str = (
                     "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid"
@@ -625,310 +545,126 @@ class DataBase:
                 if active:
                     statement = f"{statement} WHERE a.active=True"
                 cursor.execute(statement)
-                result_set: list[tuple] = cursor.fetchall()
-                return [self.__tuple_to_alarm(alarm) for alarm in result_set]
+                return [self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()]
 
-        def add_alarm(
-            self,
-            alarm_time: dict,
-            text: str,
-            user: int | str,
-            repeating: dict,
-            active: bool = True,
-            initiated: bool = False,
-            song: str = "standard",
-        ) -> dict:
-            if song is None:
-                song = "standard"
-            cursor: Cursor = self.db.cursor()
-            if type(user) is str:
-                user = self.__get_user_id(user)
-
-            statement: str = """INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, 
-                                initiated, last_executed) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, "")"""
-
-            cursor.execute(
-                statement,
-                (
-                    song,
-                    user,
-                    alarm_time["hour"],
-                    alarm_time["minute"],
-                    alarm_time["total_seconds"],
-                    text,
-                    int(active),
-                    int(initiated),
-                ),
+        def add_alarm(self, alarm: Alarm) -> Alarm:
+            alarm_id = self.__add_alarm_into_db(
+                alarm.active,
+                alarm.alarm_time.isoformat(),
+                alarm.initiated,
+                alarm.song_name,
+                alarm.text,
+                alarm.user_id,
             )
-            alarm_id: int = cursor.lastrowid
-
-            statement: str = (
-                f"INSERT INTO alarmrepeat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            )
-            values: list = [alarm_id]
-            for item in repeating.keys():
-                values.append(str(int(repeating.get(item))))
-            cursor.execute(statement, tuple(values))
-            aid: int = cursor.lastrowid
-            cursor.close()
+            self.__add_alarm_repeating_into_db(alarm_id, alarm.repeating)
             self.db.commit()
-            return self.get_alarm(alarm_id)
+            alarm.aid = alarm_id
+
+            return alarm
+
+        def __add_alarm_repeating_into_db(
+            self, alarm_id: int, repeating: AlarmRepeating
+        ) -> None:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    f"INSERT INTO alarmrepeat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                )
+                cursor.execute(
+                    statement,
+                    (
+                        alarm_id,
+                        repeating.monday,
+                        repeating.tuesday,
+                        repeating.wednesday,
+                        repeating.thursday,
+                        repeating.friday,
+                        repeating.saturday,
+                        repeating.sunday,
+                        repeating.regular,
+                    ),
+                )
+
+        def __add_alarm_into_db(
+            self, active, alarm_time, initiated, song, text, user
+        ) -> int:
+            with self.db.cursor() as cursor:
+                statement: str = """INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, 
+                                    initiated, last_executed) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, "")"""
+                cursor.execute(
+                    statement,
+                    (
+                        song,
+                        user,
+                        alarm_time["hour"],
+                        alarm_time["minute"],
+                        alarm_time["total_seconds"],
+                        text,
+                        int(active),
+                        int(initiated),
+                    ),
+                )
+                return cursor.lastrowid
 
         def delete_alarm(self, aid: int) -> int:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "DELETE FROM alarm WHERE aid=?"
-            cursor.execute(statement, (aid,))
-            anz_removed_alarm: int = cursor.rowcount
-            statement = "DELETE FROM alarmrepeat WHERE aid=?"
-            cursor.execute(statement, (aid,))
-            anz_removed_repeat: int = cursor.rowcount
+            with self.db.cursor() as cursor:
+                statement: str = "DELETE FROM alarm WHERE aid=?"
+                cursor.execute(statement, (aid,))
+                anz_removed_alarm: int = cursor.rowcount
+                statement = "DELETE FROM alarmrepeat WHERE aid=?"
+                cursor.execute(statement, (aid,))
+                anz_removed_repeat: int = cursor.rowcount
 
-            if anz_removed_alarm != anz_removed_repeat and anz_removed_alarm < 1:
-                cursor.close()
-                # toDo: maybe use another SQLException
-                raise UnsolvableException("Removed more alarm repeating´s than alarms!")
-            cursor.close()
-            self.db.commit()
-            return anz_removed_alarm
-
-        def update_alarm(
-            self,
-            aid: int,
-            _time: dict = None,
-            _text: str = None,
-            _user: int | str = None,
-            _active: bool = None,
-            _initiated: bool = None,
-            _regular: bool = None,
-            _sound: str = None,
-            _last_executed: str = None,
-        ) -> None:
-            cursor: Cursor = self.db.cursor()
-            # If there is no item with the name, the user should be told about it and not just not update anything
-            statement: str = "SELECT * FROM alarm WHERE aid=? LIMIT 1"
-            cursor.execute(statement, (aid,))
-            result_set: tuple = cursor.fetchone()
-            if result_set is None:
-                cursor.close()
-                raise NoMatchingEntry(
-                    f"No matching element with the alarm-id {aid} was found in the database."
-                )
-
-            (
-                aid,
-                sname,
-                uid,
-                hour,
-                minute,
-                total_seconds,
-                text,
-                active,
-                initiated,
-                last_executed,
-            ) = result_set
-
-            if _time is not None:
-                hour = _time["hour"]
-                minute = _time["minute"]
-            if _text is not None:
-                text = _text
-            if _user is not None:
-                if type(_user) is str:
-                    statement: str = "SELECT uid FROM user WHERE name=? LIMIT 1"
-                    cursor.execute(statement, (_user,))
-                    uid: int = cursor.fetchone()
-                    if cursor.rowcount < 1:
-                        cursor.close()
-                        raise NoMatchingEntry(f'No user found with name "{_user}.')
-                else:
-                    uid = _user
-            if _active is not None:
-                active = int(_active is True)
-            if _initiated is not None:
-                initiated = int(_initiated is True)
-            if _sound is not None:
-                sname = _sound
-            if _last_executed is not None:
-                if len(_last_executed) > 10:
-                    cursor.close()
-                    raise ValueError(
-                        "Given last_executed was too long! Max length for last_executed is 10 chars."
+                if anz_removed_alarm != anz_removed_repeat:
+                    self.db.rollback()
+                    raise UnsolvableException(
+                        "Removed more alarm repeating´s than alarms!"
                     )
-                last_executed = _last_executed
+                self.db.commit()
+                return anz_removed_alarm
 
-            statement: str = (
-                f"UPDATE alarm SET sname=?, uid=?, hour=?, minute=?, total_seconds=?, text=?, active=?, "
-                f"initiated=?, last_executed=? WHERE aid=?"
-            )
-            cursor.execute(
-                statement,
-                (
-                    sname,
-                    uid,
-                    hour,
-                    minute,
-                    total_seconds,
-                    text,
-                    active,
-                    initiated,
-                    last_executed,
-                    aid,
-                ),
-            )
-            cursor.close()
-            self.db.commit()
-
-        def update_repeating(
-            self,
-            aid: int,
-            _monday: bool = None,
-            _tuesday: bool = None,
-            _wednesday: bool = None,
-            _thursday: bool = None,
-            _friday: bool = None,
-            _saturday: bool = None,
-            _sunday: bool = None,
-        ):
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM alarmrepeat WHERE aid=?"
-            cursor.execute(statement, (aid,))
-            if cursor.rowcount == 0:
-                cursor.close()
-                raise NoMatchingEntry(
-                    f"No matching element with the id {aid} was found in the database."
+        def update_alarm(self, alarm: Alarm):
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    f"UPDATE alarm SET sname=?, uid=?, time=?, text=?, active=?, "
+                    f"initiated=?, last_executed=? WHERE aid=?"
                 )
-            result_set: tuple = cursor.fetchone()
-
-            (
-                aid,
-                monday,
-                tuesday,
-                wednesday,
-                thursday,
-                friday,
-                saturday,
-                sunday,
-                repeat,
-            ) = result_set
-
-            if _monday is not None:
-                monday = int(_monday is True)
-            if _tuesday is not None:
-                tuesday = int(_tuesday is True)
-            if _wednesday is not None:
-                wednesday = int(_wednesday is True)
-            if _thursday is not None:
-                thursday = int(_thursday is True)
-            if _friday is not None:
-                friday = int(_friday is True)
-            if _saturday is not None:
-                saturday = int(_saturday is True)
-            if _sunday is not None:
-                sunday = int(_sunday is True)
-
-            statement: str = (
-                f"UPDATE alarmrepeat "
-                f"SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, sunday=? "
-                f"WHERE aid=?"
-            )
-            cursor.execute(
-                statement,
-                (monday, tuesday, wednesday, thursday, friday, saturday, sunday, aid),
-            )
-            cursor.close()
-            self.db.commit()
-
-        def __build_json(
-            self, result_set: list[tuple], as_tuple: bool = False
-        ) -> list[dict] | list[tuple]:
-            # toDo: add alarmrepeat
-
-            cursor: Cursor = self.db.cursor()
-
-            if as_tuple:
-                result_list: list[tuple] = []
-                for (
-                    aid,
-                    sname,
-                    uid,
-                    hour,
-                    minute,
-                    total_seconds,
-                    text,
-                    active,
-                    initiated,
-                    last_executed,
-                ) in result_set:
-                    alarm_time = time(hour, minute)
-                    result_list.append(
-                        (aid, time, sname, uid, text, active, initiated, last_executed)
-                    )
-                return result_list
-
-            result_list: list[dict] = []
-            if not result_set:
-                return []
-            for (
-                aid,
-                sname,
-                uid,
-                hour,
-                minute,
-                total_seconds,
-                text,
-                active,
-                initiated,
-                last_executed,
-                _,
-                monday,
-                tuesday,
-                wednesday,
-                thursday,
-                friday,
-                saturday,
-                sunday,
-                regular,
-            ) in result_set:
-                statement: str = "SELECT path FROM audio WHERE name=?"
-                cursor.execute(statement, (sname,))
-                sound_path: str = cursor.fetchone()
-                result_list.append(
-                    {
-                        "id": aid,
-                        "time": {
-                            "hour": hour,
-                            "minute": minute,
-                            "total_seconds": total_seconds,
-                        },
-                        "sound": sound_path,
-                        "user": uid,
-                        "text": text,
-                        "active": (active == 1),
-                        "initiated": (initiated == 1),
-                        "last_executed": last_executed,
-                        "monday": monday,
-                        "tuesday": tuesday,
-                        "wednesday": wednesday,
-                        "thursday": thursday,
-                        "friday": friday,
-                        "saturday": saturday,
-                        "sunday": sunday,
-                        "regular": regular,
-                    }
+                cursor.execute(
+                    statement,
+                    (
+                        alarm.song_name,
+                        alarm.user_id,
+                        alarm.alarm_time,
+                        alarm.text,
+                        alarm.active,
+                        alarm.initiated,
+                        alarm.last_executed,
+                        alarm.aid,
+                    ),
                 )
-            cursor.close()
-            return result_list
+                alarm_repeat: AlarmRepeating = alarm.repeating
+                statement: str = (
+                    f"UPDATE alarmrepeat "
+                    f"SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, sunday=? "
+                    f"WHERE aid=?"
+                )
+                cursor.execute(
+                    statement,
+                    (
+                        alarm_repeat.monday,
+                        alarm_repeat.tuesday,
+                        alarm_repeat.wednesday,
+                        alarm_repeat.thursday,
+                        alarm_repeat.friday,
+                        alarm_repeat.saturday,
+                        alarm_repeat.sunday,
+                        alarm_repeat.regular,
+                        alarm.aid,
+                    ),
+                )
 
-        def __get_user_id(self, alias: str) -> int:
-            cursor = self.db.cursor()
-            cursor.execute("SELECT uid FROM user WHERE alias=?", (alias,))
-            uid: int = cursor.fetchone()
-            cursor.close()
-            if uid is not None:
-                return uid
-            else:
-                raise UserNotFountException()
+            self.db.commit()
+            return alarm
 
         @staticmethod
         def __tuple_to_alarm(alarm: tuple) -> Alarm:
@@ -970,126 +706,30 @@ class DataBase:
             pass
 
     class _AudioInterface:
-        def __init__(self, db: Connection) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection) -> None:
+            self.db: Connection = _db
             self.audio_path: str = "C:\\Users\\Jakob\\PycharmProjects\\Jarvis"
             logging.info("[INFO] AudioInterface initialized.")
 
-        def add_audio(
-            self,
-            name: str,
-            path: str = None,
-            audio_file: io.BytesIO = None,
-            file_stored: bool = False,
-        ) -> int:
-            # IMPORTANT: file_stored allows the developer to add a file to the database which is still in the file
-            # folder of the system. There will be problems, if the name is not correct or the file is not in the
-            # path. Be carefully while using this attribute !!!
-            cursor: Cursor = self.db.cursor()
-            if path is not None:
-                statement: str = "SELECT name FROM audio WHERE path=?"
-                cursor.execute(statement, (path,))
-                if cursor.rowcount > 0:
-                    cursor.close()
-                    raise FileNameAlreadyExists()
-            if name is not None:
-                statement: str = "SELECT name FROM audio WHERE name=?"
-                cursor.execute(statement, (audio_file,))
-                if cursor.rowcount > 0:
-                    cursor.close()
-                    raise FileNameAlreadyExists()
+        def add_audio(self, name: str, audio_file: io.BytesIO = None) -> str:
+            with self.db.cursor() as cursor:
+                statement: str = "INSERT INTO audio (name, path) VALUES (?, ?)"
+                encoded_data = base64.b64decode(audio_file.read())
+                cursor.execute(statement, (name, encoded_data))
+                self.db.commit()
+                return name
 
-            if not file_stored:
-                if path is not None and audio_file is not None:
-                    cursor.close()
-                    raise ValueError(
-                        "Got too many arguments! Decide between the path and the audio file."
-                    )
-                elif path is None and audio_file is None:
-                    cursor.close()
-                    raise ValueError("Neither path nor audio file given!")
-                else:
-                    if path is not None:
-                        path = self.__justify_file_path(name, path)
-                    elif audio_file is not None:
-                        self.__save_audio_file(name, audio_file)
-                        path = self.audio_path + f"{name}.wav"
-            statement: str = "INSERT INTO audio (name, path) VALUES (?, ?)"
-            cursor.execute(statement, (name, path))
-            cursor.close()
-            self.db.commit()
+        def update_audio_file(self, old_name: str, audio_file: AudioFile) -> None:
+            with self.db.cursor() as cursor:
+                statement: str = "UPDATE audio SET name=?, data=? WHERE name=?"
+                cursor.execute(statement, (audio_file.name, audio_file.data, old_name))
+                self.db.commit()
 
-        def update_audio(
-            self,
-            _audio_name: str,
-            _new_audio_name: str = None,
-            _path: str = None,
-            _audio_file: io.BytesIO = None,
-        ) -> str:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM audio WHERE name=?"
-            cursor.execute(statement, (_audio_name,))
-            result_set: tuple = cursor.fetchone()
-            if cursor.rowcount < 1:
-                cursor.close()
-                raise NoMatchingEntry(
-                    f'No matching element with the audio name "{_audio_name}" was found '
-                    f"in the database."
-                )
-
-            name, path = result_set
-
-            if _new_audio_name is not None:
-                name = _new_audio_name
-                os.rename(
-                    os.path.join(self.audio_path, _audio_name),
-                    os.path.join(self.audio_path, name),
-                )
-            if _path is not None and _audio_file is not None:
-                cursor.close()
-                raise ValueError(
-                    "Got too many arguments! Decide between the path and the audio file."
-                )
-            elif _path is not None:
-                # old_path is needed after the SQL query
-                old_path: str = _path
-                path = self.__justify_file_path(_audio_name, _path)
-            elif _audio_file is not None:
-                statement: str = "SELECT path FROM audio WHERE name=?"
-                cursor.execute(statement, (_audio_name,))
-                file_path: str = cursor.fetchone()
-                os.remove(file_path)
-                self.__save_audio_file(_audio_name, _audio_file)
-                path = self.audio_path + _audio_name
-
-            statement: str = """UPDATE audio 
-                                SET name=?, path=? 
-                                WHERE name=?"""
-            cursor.execute(statement, (name, path, _audio_name))
-
-            # delete file only after database access has worked
-            if _path is not None:
-                # delete file, if no other entry in the database uses it
-                statement: str = "SELECT name FROM audio WHERE path=?"
-                cursor.execute(statement, (old_path,))
-                if cursor.rowcount == 0:
-                    os.remove(old_path)
-                    logging.info(f"[ACTION] Audio file deleted ({old_path})")
-            cursor.close()
-            self.db.commit()
-            return name
-
-        def get_audio_file(self, audio: str, as_tuple: bool = False) -> tuple | dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM audio WHERE name=?"
-            cursor.execute(statement, (audio,))
-            result_set: tuple = cursor.fetchone()
-            cursor.close()
-            if as_tuple:
-                return result_set
-            else:
-                name, path = result_set
-                return {"name": name, "path": path}
+        def get_audio_file_by_name(self, audio_name: str) -> AudioFile:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM audio WHERE name=?"
+                cursor.execute(statement, (audio_name,))
+                return self.__tuple_to_audio_file(cursor.fetchone())
 
         def get_file_names(self) -> list[str]:
             cursor: Cursor = self.db.cursor()
@@ -1101,431 +741,246 @@ class DataBase:
             return [x[0] for x in result_set]
 
         def delete_audio(self, audio_name: str) -> int:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT path FROM audio WHERE name=?"
-            cursor.execute(statement, (audio_name,))
-            file_path: str = cursor.fetchone()
-            statement = "DELETE FROM audio WHERE name=?"
-            cursor.execute(statement, (audio_name,))
-            anz_removed: int = cursor.rowcount
-            cursor.close()
-            if type(anz_removed) is list:
-                raise UnsolvableException(
-                    "DataBase returned wrong type while deleting an entry!"
-                )
-            self.db.commit()
-            # delete file only after database access has worked
-            os.remove(file_path)
-            logging.info(f'[ACTION] Deleted audiofile "{file_path}".')
-            return anz_removed
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT path FROM audio WHERE name=?"
+                cursor.execute(statement, (audio_name,))
+                statement = "DELETE FROM audio WHERE name=?"
+                cursor.execute(statement, (audio_name,))
+                return cursor.rowcount
 
-        def __justify_file_path(self, name: str, path: str) -> str:
-            if not os.path.isfile(path):
-                if not os.path.isfile(self.audio_path + path):
-                    raise ValueError(
-                        f'File "{path}" is neither in the folder of audio files, nor a valid path to an audio file!'
-                    )
-                else:
-                    # move the file into the audio folder of the speech assistant
-                    os.replace(path, self.audio_path + name + ".wav")
-                    path = self.audio_path + name + ".wav"
-                    logging.info(f'[ACTION] Moved audiofile "{path}" into the path.')
-                    return path
-
-        def __save_audio_file(self, name: str, audio_file: io.BytesIO) -> None:
-            # write audio into a new file in the audio folder
-            with open(self.audio_path + f"{name}.wav", "wb") as file:
-                file.write(audio_file.getbuffer())
-            logging.info(f'[ACTION] Created audiofile "{self.audio_path + name}.wav".')
+        @staticmethod
+        def __tuple_to_audio_file(result_set: tuple) -> AudioFile:
+            name, data = result_set
+            return AudioFile(name, data)
 
     class _TimerInterface:
-        def __init__(self, db: Connection, user_interface) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection, user_interface) -> None:
+            self.db: Connection = _db
             self.user_interface = user_interface
             logging.info("[INFO] TimerInterface initialized.")
 
-        def get_all_timer(self, output_type: OutputTypes) -> list | list[tuple]:
-            cursor: Cursor = self.db.cursor()
-            statement: str = f"SELECT * FROM timer"
-            cursor.execute(statement)
-            result_set: list = cursor.fetchall()
-            cursor.close()
+        def get_all_timer(self) -> list[Timer]:
+            with self.db.cursor() as cursor:
+                statement: str = f"SELECT * FROM timer"
+                cursor.execute(statement)
+                result_set: list = cursor.fetchall()
+                return [self.__tuple_to_timer(timer) for timer in result_set]
 
-            if output_type == OutputTypes.DICT:
-                result_list: list[dict] = []
-                for timer in result_set:
-                    result_list.append(self.__build_json(timer))
-                return result_list
-            elif output_type == OutputTypes.TUPLE:
-                for timer in result_set:
-                    timer[2] = self.__build_datetime_object(timer[2])
-                return result_set
-
-        def get_timer_of_user(self, user: str | int) -> list[dict]:
+        def get_timer_of_user_by_user_id(self, user: int) -> list[Timer]:
             cursor: Cursor = self.db.cursor()
-            result_list: list[dict] = []
-            if type(user) is str:
-                user = self.user_interface.__get_user_id(user)
             statement: str = "SELECT * FROM timer WHERE uid=?"
             cursor.execute(statement, (user,))
-            for timer in cursor.fetchall():
-                result_list.append(self.__build_json(timer))
-            cursor.close()
-            return result_list
+            return [self.__tuple_to_timer(alarm) for alarm in cursor.fetchall()]
 
-        def get_timer(self, timer_id: int) -> dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = f"SELECT * FROM timer WHERE id=? LIMIT 1"
-            cursor.execute(statement, (timer_id,))
-            result_set: tuple[int, str, str, str, int] = cursor.fetchone()
-            cursor.close()
-            return self.__build_json(result_set)
+        def get_timer_of_user_by_user_alias(self, user_alias: str) -> list[Timer]:
+            user_id: int = self.user_interface.__get_user_id(user_alias)
+            return self.get_timer_of_user_by_user_id(user_id)
 
-        def add_timer(
-            self, time: datetime, duration: str, text: str, user_id: int
-        ) -> int:
-            if len(text) > 255:
-                raise ValueError("Given text is too long!")
-            if len(duration) > 50:
-                duration = self.__shorten_duration_string(duration)
-            cursor: Cursor = self.db.cursor()
-            statement: str = (
-                f"INSERT INTO timer (duration, time, text, uid) " f"VALUES(?, ?, ?, ?)"
-            )
-            cursor.execute(
-                statement, (duration, {self.__build_time_string(time)}, text, user_id)
-            )
-            result_set: int = cursor.rowcount
-            statement = "SELECT id FROM timer LIMIT 1"
-            cursor.execute(statement)
-            cursor.close()
-            self.db.commit()
-            # id from inserted timer - id from the first timer in the current database +1
-            return result_set - cursor.rowcount + 1
+        def get_timer_by_id(self, timer_id: int) -> Timer:
+            with self.db.cursor() as cursor:
+                statement: str = f"SELECT * FROM timer WHERE id=? LIMIT 1"
+                cursor.execute(statement, (timer_id,))
+                return self.__tuple_to_timer(cursor.fetchone())
 
-        def update_timer(
-            self,
-            timer_id: int,
-            _duration: str = None,
-            _time: datetime = None,
-            _text: str = None,
-            _user: int | str = None,
-        ) -> None:
-            cursor: Cursor = self.db.cursor()
-
-            statement: str = "SELECT * FROM timer WHERE id=?"
-            cursor.execute(statement, (timer_id,))
-            result_set: tuple = cursor.fetchone()
-            if cursor.rowcount < 1:
-                cursor.close()
-                raise NoMatchingEntry(
-                    f"No matching element with the timer-id {timer_id} was found in the database."
+        def add_timer(self, timer: Timer) -> int:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    f"INSERT INTO timer (duration, time, text, uid) "
+                    f"VALUES(?, ?, ?, ?)"
                 )
+                cursor.execute(
+                    statement,
+                    (timer.duration, timer.start_time, timer.text, timer.user.uid),
+                )
+                result_set: int = cursor.rowcount
+                statement = "SELECT id FROM timer LIMIT 1"
+                cursor.execute(statement)
+                self.db.commit()
+                # id from inserted timer - id from the first timer in the current database +1
+                return result_set - cursor.rowcount + 1
 
-            tid, duration, time, text, uid = result_set
-
-            if _duration is not None:
-                if len(_duration) > 50:
-                    duration = self.__shorten_duration_string(_duration)
-                else:
-                    duration = _duration
-            if _time is not None:
-                time = self.__build_time_string(_time)
-            if _text is not None:
-                if len(_text) > 255:
-                    cursor.close()
-                    raise ValueError("Given text is too long!")
-                text = _text
-            if _user is not None:
-                if type(_user) is str:
-                    statement: str = "SELECT uid FROM user WHERE name=?"
-                    cursor.execute(statement, (_user,))
-                    uid: int = cursor.fetchone()
-                    if cursor.rowcount < 1:
-                        cursor.close()
-                        raise NoMatchingEntry(f"No user with name {_user} found!")
-                else:
-                    # SELECT is needed to ensure consistency of the data. Do not enter a uid that does not exist!
-                    statement: str = "SELECT uid FROM user WHERE uid=?"
-                    cursor.execute(statement, (_user,))
-                    uid = cursor.fetchone()
-                    if cursor.rowcount < 1:
-                        cursor.close()
-                        raise NoMatchingEntry(f"No user with id {_user} found!")
-
-            statement: str = """UPDATE timer 
-                                SET duration=?, time=?, text=?, uid=? 
-                                WHERE id=?"""
-            cursor.execute(statement, (duration, time, text, uid, tid))
-            cursor.close()
-            self.db.commit()
+        def update_timer(self, timer: Timer) -> Timer:
+            with self.db.cursor() as cursor:
+                statement: str = """UPDATE timer 
+                                    SET duration=?, time=?, text=?, uid=? 
+                                    WHERE id=?"""
+                cursor.execute(
+                    statement,
+                    (
+                        timer.duration,
+                        timer.start_time,
+                        timer.text,
+                        timer.user.uid,
+                        timer.tid,
+                    ),
+                )
+                self.db.commit()
+                return timer
 
         def delete_timer(self, timer_id: int) -> None:
-            curser: Cursor = self.db.cursor()
-            statement: str = "DELETE FROM timer WHERE id=?"
-            curser.execute(statement, (timer_id,))
-            curser.close()
+            with self.db.cursor() as cursor:
+                statement: str = "DELETE FROM timer WHERE id=?"
+                cursor.execute(statement, (timer_id,))
 
-        def delete_passed_timer(self) -> None:
-            curser: Cursor = self.db.cursor()
-            statement: str = "DELETE FROM timer WHERE time < ?"
-            curser.execute(statement, (self.__build_time_string(datetime.now()),))
-            curser.close()
-
-        @staticmethod
-        def __shorten_duration_string(duration: str) -> str:
-            # try to short the duration string, else store with unknown duration
-            duration_arr: list[str] = duration.split(" ")
-            if len(duration_arr[0]) + len(duration_arr[1]) > 40:
-                return "Unbekannte Länge"
-            else:
-                return "mehr als " + duration_arr[0] + duration_arr[1]
-
-        def __build_json(self, timer: tuple[int, str, str, str, int]) -> dict:
-            return {
-                "id": timer[0],
-                "duration": timer[1],
-                "time": self.__build_datetime_object(timer[2]),
-                "text": timer[3],
-                "uid": timer[4],
-            }
+        def delete_passed_timer(self) -> int:
+            with self.db.cursor() as cursor:
+                statement: str = "DELETE FROM timer WHERE time < ?"
+                now: datetime = datetime.now()
+                cursor.execute(
+                    statement, time(now.hour, now.minute, now.second).isoformat()
+                )
+                return cursor.rowcount
 
         @staticmethod
-        def __build_datetime_object(time_string: str) -> datetime:
-            return datetime(
-                int(time_string[0:4]),
-                int(time_string[4:6]),
-                int(time_string[6:8]),
-                int(time_string[8:10]),
-                int(time_string[10:12]),
-                int(time_string[12:]),
-                0,
-            )
-
-        @staticmethod
-        def __build_time_string(time: datetime) -> str:
-            return str(time.date()).replace("-", "") + str(time.time())[0:8].replace(
-                ":", ""
-            )
+        def __tuple_to_timer(result_set: tuple) -> Timer:
+            timer_id, duration, start_time, text, user = result_set
+            return Timer(timer_id, duration, start_time, text, user)
 
         def __create_table(self):
             pass
 
     class _ReminderInterface:
-        def __init__(self, db: Connection, user_interface) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection, user_interface) -> None:
+            self.db: Connection = _db
             self.user_interface = (
-                user_interface  # connection is necessary for __get_user_id()
+                user_interface  # connection is necessary for get_user_by_id()
             )
             logging.info("[INFO] ReminderInterface initialized.")
 
-        def get_reminder(self, passed: bool = False):
-            cursor: Cursor = self.db.cursor()
-
-            if passed:
+        def get_passed_reminder(self) -> list[Reminder]:
+            with self.db.cursor() as cursor:
                 now: datetime = datetime.now()
                 date_string: str = now.strftime("%Y.%d.%m:%H:%M:%S")
-                statement: str = "SELECT * FROM reminder " "WHERE time<?"
+                statement: str = "SELECT * FROM reminder as r JOIN user as u ON r.id = u.id WHERE time<?"
                 cursor.execute(statement, (date_string,))
-            else:
+                return [
+                    self.__tuple_to_reminder(reminder) for reminder in cursor.fetchall()
+                ]
+
+        def get_all_reminder(self) -> list[Reminder]:
+            with self.db.cursor() as cursor:
                 statement: str = "SELECT * FROM reminder"
                 cursor.execute(statement)
-            result_set: list[tuple[int, str, str, int]] = cursor.fetchall()
-            cursor.close()
-            return self.__build_json(result_set)
+                return [
+                    self.__tuple_to_reminder(reminder) for reminder in cursor.fetchall()
+                ]
 
-        def add_reminder(
-            self, text: str, time: str | None, user: int | str = None
-        ) -> int:
-            if len(text) > 255:
-                raise ValueError("Given text is too long!")
+        def add_reminder(self, reminder: Reminder) -> int:
+            with self.db.cursor() as cursor:
+                statement: str = (
+                    f"INSERT INTO reminder (time, text, uid) VALUES (?, ?, ?)"
+                )
+                cursor.execute(
+                    statement, (reminder.time, reminder.text, reminder.user.uid)
+                )
+                rid: int = cursor.lastrowid
+                self.db.commit()
+                return rid
 
-            if len(time) != 19:
-                raise ValueError("Given time doesn't match!")
+        def delete_reminder_by_id(self, _id: int) -> int:
+            statement: str = "DELETE FROM reminder WHERE id=?"
+            return self.__delete_reminder_by_statement(statement, (_id,))
 
-            if user is None:
-                user = -1
-            elif type(user) is str:
-                user = self.user_interface.__get_user_id(user)
+        def delete_reminder_by_time(self, _time: str) -> int:
+            statement: str = "DELTE FROM reminder WHERE time=?"
+            return self.__delete_reminder_by_statement(statement, (_time,))
 
-            if time is None:
-                time = ""
+        def __delete_reminder_by_statement(self, statement: str, values: tuple) -> int:
+            with self.db.cursor() as cursor:
+                cursor.execute(statement, values)
+                counter: int = cursor.rowcount
+                self.db.commit()
+                return counter
 
-            cursor: Cursor = self.db.cursor()
-
-            statement: str = (
-                f"INSERT INTO reminder (time, text, uid) " f"VALUES (?, ?, ?)"
-            )
-            cursor.execute(statement, (time, text, user))
-            rid: int = cursor.lastrowid
-            cursor.close()
-            self.db.commit()
-            return rid
-
-        def delete_reminder(self, _id: int = None, time: str = None) -> int:
-            cursor: Cursor = self.db.cursor()
-            if _id is not None:
-                statement: str = "DELETE FROM reminder WHERE id=?"
-                cursor.execute(statement, (_id,))
-            else:
-                statement: str = "DELTE FROM reminder WHERE time=?"
-                cursor.execute(statement, (time,))
-            counter: int = cursor.rowcount
-            cursor.close()
-            self.db.commit()
-            return counter
-
-        @staticmethod
-        def __build_json(result_set: list[tuple[int, str, str, int]]) -> list[dict]:
-            result_list: list[dict] = []
-
-            for _id, time, text, uid in result_set:
-                result_list.append({"id": _id, "time": time, "text": text, "uid": uid})
-
-            return result_list
+        def __tuple_to_reminder(self, result_set: tuple) -> Reminder:
+            (reminder_id, reminder_time, text, user_id) = result_set
+            user: User = self.user_interface.get_user_by_id(user_id)
+            return Reminder(reminder_id, reminder_time, text, user)
 
         def __create_table(self):
             pass
 
     class _ShoppingListInterface:
-        def __init__(self, db: Connection) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection) -> None:
+            self.db: Connection = _db
             logging.info("[INFO] ShoppingListInterface initialized.")
 
-        def get_list(self) -> list:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM shoppinglist"
-            cursor.execute(statement)
-            result_set: list[tuple[int, str, str, float]] = cursor.fetchall()
-            cursor.close()
-            return self.__build_json(result_set)
+        def get_list(self) -> list[ShoppingListItem]:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM shoppinglist"
+                cursor.execute(statement)
+                return self.__tuple_to_shopping_list(cursor.fetchall())
 
-        def get_item(self, name: str) -> dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM shoppinglist WHERE name=?"
-            cursor.execute(statement, (name,))
-            result_set: tuple = cursor.fetchone()
-            cursor.close()
-            return self.__build_json(result_set)
+        def get_item(self, name: str) -> ShoppingListItem:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM shoppinglist WHERE name=?"
+                cursor.execute(statement, (name,))
+                return self.__tuple_to_shopping_list_item(cursor.fetchone())
 
-        def add_item(self, name: str, measure: str, quantity: float) -> None:
-            cursor: Cursor = self.db.cursor()
-            statement: str = (
-                f'INSERT INTO shoppinglist ("name", "measure", "quantity") '
-                f"VALUES (?, ?, ?)"
-            )
-            cursor.execute(statement, (name, measure, quantity))
-            cursor.close()
-            self.db.commit()
+        def add_item(self, item: ShoppingListItem) -> int:
+            with self.db.cursor() as cursor:
+                statement: str = f"INSERT INTO shoppinglist (name, measure, quantity) VALUES (?, ?, ?)"
+                cursor.execute(statement, (item.name, item.measure, item.quantity))
+                self.db.commit()
+                return cursor.lastrowid
 
-        def update_item(self, name: str, quantity: float) -> None:
-            cursor: Cursor = self.db.cursor()
-            # If there is no item with the name, the user should be told about it and not just not update anything
-            statement: str = "SELECT 1 FROM shoppinglist WHERE name=? LIMIT 1"
-            cursor.execute(statement, (name,))
+        def update_item(self, item: ShoppingListItem) -> ShoppingListItem:
+            with self.db.cursor() as cursor:
+                statement: str = """UPDATE shoppinglist 
+                                    SET name=?, measure=?, quantity=?  
+                                    WHERE name=?"""
+                cursor.execute(statement, (item.name, item.measure, item.quantity))
+                self.db.commit()
+                return item
 
-            anz_results: int = cursor.rowcount
-            if anz_results == 0:
-                cursor.close()
-                raise NoMatchingEntry(
-                    f"No matching element with the name {name} was found in the database."
-                )
+        def remove_item_by_id(self, item_id: int) -> None:
+            statement: str = "DELETE FROM shoppinglist WHERE id=?"
+            self.__remove_item_by_statement(statement, (item_id,))
 
-            statement: str = """UPDATE shoppinglist 
-                                SET quantity=? 
-                                WHERE name=?"""
-            cursor.execute(statement, (quantity, name))
-            cursor.close()
-            self.db.commit()
-
-        def remove_item(self, name: str) -> None:
-            cursor: Cursor = self.db.cursor()
+        def remove_item_by_name(self, name: str) -> None:
             statement: str = "DELETE FROM shoppinglist WHERE name=?"
-            cursor.execute(statement, (name,))
-            cursor.close()
-            self.db.commit()
+            self.__remove_item_by_statement(statement, (name,))
+
+        def __remove_item_by_statement(self, statement: str, values: tuple) -> None:
+            with self.db.cursor() as cursor:
+                cursor.execute(statement, values)
+                self.db.commit()
 
         def clear_list(self) -> None:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "DELETE FROM shoppinglist"
-            cursor.execute(statement)
-            cursor.close()
-            self.db.commit()
+            with self.db.cursor() as cursor:
+                statement: str = "DELETE FROM shoppinglist"
+                cursor.execute(statement)
+                self.db.commit()
 
-        def is_item_in_list(self, name) -> bool:
-            cursor: Cursor = self.db.cursor()
-            statement: str = f"SELECT 1 FROM shoppinglist WHERE name=? LIMIT 1"
-            cursor.execute(statement, (name,))
-            cursor.close()
-            if cursor.rowcount == 1:
-                return True
-            else:
-                return False
+        def is_item_in_list(self, name: str) -> bool:
+            with self.db.cursor() as cursor:
+                statement: str = f"SELECT 1 FROM shoppinglist WHERE name=? LIMIT 1"
+                cursor.execute(statement, (name,))
+                return cursor.rowcount == 1
 
         def __create_table(self):
             pass
 
-        def __build_json(
-            self,
-            result_set: list[tuple[int, str, str, float]] | tuple[int, str, str, float],
-        ) -> list:
-            result_list: list = []
-            if type(result_set) is list:
-                for data_set in result_set:
-                    result_list.append(self.__get_data_set(data_set))
-                return result_list
-            else:
-                return self.__get_data_set(result_set)
+        def __tuple_to_shopping_list(
+            self, result_set: list[tuple]
+        ) -> list[ShoppingListItem]:
+            return [self.__tuple_to_shopping_list_item(item) for item in result_set]
 
         @staticmethod
-        def __get_data_set(data_set: tuple[int, str, str, float]):
-            sid, name, measure, quantity = data_set
-            if quantity.is_integer():
-                quantity = int(quantity)
-            return {"id": sid, "name": name, "measure": measure, "quantity": quantity}
+        def __tuple_to_shopping_list_item(item: tuple) -> ShoppingListItem:
+            name, measure, quantity = item
+            return ShoppingListItem(name=name, measure=measure, quantity=quantity)
 
     class _RoutineInterface:
-        def __init__(self, db: Connection) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection) -> None:
+            self.db: Connection = _db
             logging.info("[INFO] RoutineInterface initialized.")
 
-        def get_routine(self, name: str) -> dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM routine WHERE name=? LIMIT 1"
-            try:
-                cursor.execute(statement, (name,))
-            except OperationalError:
-                raise NoMatchingEntry(f'Routine with name "{name}" not found!')
-            if cursor.rowcount < 1:
-                raise NoMatchingEntry(f'Routine with name "{name}" not found!')
-            routine_set: tuple = cursor.fetchone()
-            statement: str = "SELECT * FROM routinecommands WHERE rname=?"
-            cursor.execute(statement, (name,))
-            command_set: list[tuple] = cursor.fetchall()
-            text_set: list[tuple] = []
-            statement: str = "SELECT * FROM commandtext WHERE cid=?"
-            for command in command_set:
-                cursor.execute(statement, (command[0],))
-                for item in cursor.fetchall():
-                    text_set.append(item)
-            statement: str = "SELECT * FROM routinedates WHERE rname=?"
-            cursor.execute(statement, (name,))
-            date_set: list[tuple] = cursor.fetchall()
-            statement = "SELECT * FROM routineactivationtime WHERE rname=?"
-            cursor.execute(statement, (name,))
-            activation_set: list[tuple] = cursor.fetchall()
-            statement = "SELECT command FROM oncommand WHERE rname=?"
-            cursor.execute(statement, (name,))
-            on_command_set: list[tuple] = cursor.fetchall()
-            cursor.close()
-            return self.__build_json(
-                routine_set,
-                command_set,
-                text_set,
-                date_set,
-                activation_set,
-                on_command_set,
-            )
+        def get_routine(self, name: str) -> Routine:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM routine WHERE name=? LIMIT 1"
+                cursor.execute(statement)
+                return self.__tuple_to_routine(cursor.fetchone())
 
         def get_routines(self, on_command: str = None, on_time: dict = None) -> list:
             cursor: Cursor = self.db.cursor()
@@ -2183,6 +1638,89 @@ class DataBase:
         def __create_table(self):
             pass
 
+        def __tuple_to_routine(
+            self,
+            routine: tuple,
+        ) -> Routine:
+            with self.db.cursor() as cursor:
+                (
+                    name,
+                    description,
+                    daily,
+                    monday,
+                    tuesday,
+                    wednesday,
+                    thursday,
+                    friday,
+                    saturday,
+                    sunday,
+                    after_alarm,
+                    after_sunrise,
+                    after_sunset,
+                    after_call,
+                ) = routine
+
+                routine_dates_statement: str = (
+                    "SELECT * FROM routinedates WHERE rname=?"
+                )
+                cursor.execute(routine_dates_statement, (name,))
+
+                routine_dates: list[SpecificDate] = [
+                    SpecificDate(sid, day, month)
+                    for sid, _, day, month in cursor.fetchall()
+                ]
+
+                on_command_statement: str = "SELECT * FROM oncommand WHERE rname=?"
+                cursor.execute(on_command_statement, (name,))
+
+                on_commands: list[str] = [command for command, in cursor.fetchall()]
+
+                routine_days: RoutineDays = RoutineDays(
+                    monday,
+                    tuesday,
+                    wednesday,
+                    thursday,
+                    friday,
+                    saturday,
+                    sunday,
+                    routine_dates,
+                )
+
+                routine_activation_times_statement: str = (
+                    "SELECT * FROM routineactivationtime WHERE rname=?"
+                )
+                cursor.execute(routine_activation_times_statement, (name,))
+
+                clock_times: list[RoutineClockTime] = [
+                    RoutineClockTime(rctid, time(hour, minute))
+                    for rctid, _, hour, minute in cursor.fetchall()
+                ]
+
+                routine_times: RoutineTimes = RoutineTimes(
+                    clock_times, after_alarm, after_sunrise, after_sunset, after_call
+                )
+
+                retakes: RoutineRetakes = RoutineRetakes(routine_days, routine_times)
+
+                actions: list[RoutineCommand] = self.__get_routine_commands(name)
+
+                return Routine(name, description, on_commands, retakes, actions)
+
+        def __get_routine_commands(self, routine_name: str) -> list[RoutineCommand]:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM routinecommands WHERE rname=?"
+                cursor.execute(statement, (routine_name,))
+                return [
+                    RoutineCommand(rcid, module_name, self.__get_texts_of_command(rcid))
+                    for rcid, _, module_name in cursor.fetchall()
+                ]
+
+        def __get_texts_of_command(self, routine_id: int) -> list[str]:
+            with self.db.cursor() as cursor:
+                statement: str = "SELECT * FROM commandtext WHERE cid=?"
+                cursor.execute(statement, (routine_id,))
+                return [text for _, text in cursor.fetchall()]
+
     class _QuizInterface:
         def __init__(self, db: Connection) -> None:
             self.db: Connection = db
@@ -2330,9 +1868,48 @@ class DataBase:
 
 
 if __name__ == "__main__":
-    db = DataBase(
-        "C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\", None
-    )
+    db = DataBase()
     print(db.routine_interface.get_routines())
-    # db.alarm_interface.add_alarm({"hour": 10, "minute": 0, "total_seconds":5234324}, "Hallo Welt", -1, {"monday": True, "tuesday": True, "wednesday": True, "thursday": True, "friday": True, "saturday": False, "sunday": False, "regular": True})
+    db.routine_interface.add_routine(
+        {
+            "name": "Morgenroutine",
+            "descriptions": "Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an",
+            "on_commands": [],
+            "retakes": {
+                "days": {
+                    "daily": True,
+                    "monday": False,
+                    "tuesday": False,
+                    "wednesday": False,
+                    "thursday": False,
+                    "friday": False,
+                    "saturday": False,
+                    "sunday": False,
+                    "date_of_day": [{"id": 1, "day": 5, "month": 12}],
+                },
+                "activation": {
+                    "clock_time": [
+                        {"id": 2, "hour": 10, "minute": 30},
+                        {"id": 1, "hour": 12, "minute": 0},
+                    ],
+                    "after_alarm": False,
+                    "after_sunrise": False,
+                    "after_sunset": True,
+                    "after_call": False,
+                },
+            },
+            "actions": {
+                "commands": [
+                    {
+                        "id": 1,
+                        "module_name": "phillips_hue",
+                        "text": [
+                            "Mach das Bett gr\u00fcn",
+                            "Mach den Schreibtisch blau",
+                        ],
+                    }
+                ]
+            },
+        }
+    )
     # print(db.alarm_interface.get_alarms())
