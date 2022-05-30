@@ -1,10 +1,9 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
 class Birthday:
     first_name: str
     last_name: str
-    day: int
-    month: int
-    year: int
+    date: datetime
