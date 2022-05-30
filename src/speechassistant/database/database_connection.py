@@ -11,6 +11,7 @@ from src.speechassistant.exceptions.CriticalExceptions import UnsolvableExceptio
 from src.speechassistant.exceptions.SQLException import *
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 from src.speechassistant.models.audio_file import AudioFile
+from src.speechassistant.models.birthday import Birthday
 from src.speechassistant.models.reminder import Reminder
 from src.speechassistant.models.routine import (
     Routine,
@@ -18,18 +19,17 @@ from src.speechassistant.models.routine import (
     RoutineDays,
     RoutineCommand,
     RoutineRetakes,
-    RoutineTimes,
+    RoutineTime,
     RoutineClockTime,
+    CallingCommand,
 )
 from src.speechassistant.models.shopping_list import ShoppingListItem
 from src.speechassistant.models.timer import Timer
 from src.speechassistant.models.user import User
 from src.speechassistant.resources.module_skills import Skills
 
-
-# toDo: as_tuple -> output_type: OutputTypes
-# toDo: close cursor before raise
-
+# toDo: __tuple_to raise value error when nothing fount (type-error)
+# toDo: bugfix in returning boolean values of db
 
 class DataBase:
     __instance = None
@@ -161,7 +161,6 @@ class DataBase:
             "CREATE TABLE IF NOT EXISTS routine ("
             "name VARCHAR(50) PRIMARY KEY, "
             "description VARCHAR(255), "
-            "daily INTEGER, "
             "monday INTEGER, "
             "tuesday INTEGER, "
             "wednesday INTEGER, "
@@ -188,19 +187,17 @@ class DataBase:
             "CREATE TABLE IF NOT EXISTS routineactivationtime ("
             "ratid INTEGER PRIMARY KEY, "
             "rname VARCHAR(50), "
-            "hour INTEGER, "
-            "minute INTEGER, "
+            "time TIME, "
             "FOREIGN KEY(rname) REFERENCES routine(rname), "
-            "UNIQUE (rname, hour, minute))"
+            "UNIQUE (rname, time))"
         )
 
         self.__create_table(
             "CREATE TABLE IF NOT EXISTS routinedates ("
             "rdid INTEGER PRIMARY KEY, "
             "rname VARCHAR(50), "
-            "day INTEGER, "
-            "month INTEGER, "
-            "UNIQUE (rname, day, month), "
+            "date DATE, "
+            "UNIQUE (rname, date), "
             "FOREIGN KEY(rname) REFERENCES routine(rname))"
         )
 
@@ -256,9 +253,7 @@ class DataBase:
             "CREATE TABLE IF NOT EXISTS birthdays ("
             "firstname VARCHAR(15), "
             "lastname VARCHAR(30), "
-            "day INTEGER, "
-            "month INTEGER, "
-            "year INTEGER, "
+            "date DATE, "
             "PRIMARY KEY(firstname, lastname), "
             "UNIQUE (firstname, lastname))"
         )
@@ -296,89 +291,92 @@ class DataBase:
         self.db.close()
 
     class _UserInterface:
-        def __init__(self, db: Connection) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection) -> None:
+            self.db: Connection = _db
             logging.info("[INFO] UserInterface initialized.")
 
         def get_user_by_id(self, user_id: int) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = f"SELECT * from user WHERE uid=? LIMIT 1"
-                cursor.execute(statement, (user_id,))
+            cursor: Cursor = self.db.cursor()
+            statement: str = f"SELECT * from user WHERE uid=? LIMIT 1"
+            cursor.execute(statement, (user_id,))
 
-                user: User = self.__tuple_to_user(cursor.fetchone())
-                return user
+            user: User = self.__tuple_to_user(cursor.fetchone())
+            cursor.close()
+            return user
 
         def get_user_by_messenger_id(self, messenger_id: int) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM user WHERE mid=? LIMIT 1"
-                cursor.execute(statement, (messenger_id,))
-                user: User = self.__tuple_to_user(cursor.fetchone())
-                return user
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM user WHERE mid=? LIMIT 1"
+            cursor.execute(statement, (messenger_id,))
+            user: User = self.__tuple_to_user(cursor.fetchone())
+            cursor.close()
+            return user
 
         def get_user_by_alias(self, alias: str) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM user WHERE alias=? LIMIT 1"
-                cursor.execute(statement, (alias,))
-                user: User = self.__tuple_to_user(cursor.fetchone())
-                return user
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM user WHERE alias=? LIMIT 1"
+            cursor.execute(statement, (alias,))
+            user: User = self.__tuple_to_user(cursor.fetchone())
+            cursor.close()
+            return user
 
         def get_user_by_first_and_last_name(
             self, first_name: str, last_name: str
         ) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    "SELECT * FROM user WHERE firstname=? AND lastname=? LIMIT 1"
-                )
-                cursor.execute(statement, (first_name, last_name))
-                user: User = self.__tuple_to_user(cursor.fetchone())
-                return user
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                "SELECT * FROM user WHERE firstname=? AND lastname=? LIMIT 1"
+            )
+            cursor.execute(statement, (first_name, last_name))
+            user: User = self.__tuple_to_user(cursor.fetchone())
+            cursor.close()
+            return user
 
         def get_users(self) -> list[User]:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * from user"
-                cursor.execute(statement)
-                result_set: list = cursor.fetchall()
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * from user"
+            cursor.execute(statement)
+            result_set: list = cursor.fetchall()
 
-                user_list: list[User] = [
-                    self.__tuple_to_user(item) for item in result_set
-                ]
+            user_list: list[User] = [self.__tuple_to_user(item) for item in result_set]
 
-                for user in user_list:
-                    notification_statement: str = (
-                        f"SELECT text FROM notification WHERE uid=?"
-                    )
-                    cursor.execute(notification_statement, (user.uid,))
-                    user.waiting_notifications = [x[0] for x in cursor.fetchall()]
-                return user_list
+            for user in user_list:
+                notification_statement: str = (
+                    f"SELECT text FROM notification WHERE uid=?"
+                )
+                cursor.execute(notification_statement, (user.uid,))
+                user.waiting_notifications = [x[0] for x in cursor.fetchall()]
+            cursor.close()
+            return user_list
 
         def add_user(self, user: User) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    f"INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) "
-                    f"VALUES (?, ?, ?, ?, ?, ?)"
-                )
-                cursor.execute(
-                    statement,
-                    (
-                        user.alias,
-                        user.first_name,
-                        user.last_name,
-                        user.birthday.isoformat(),
-                        user.messenger_id,
-                        user.song_name,
-                    ),
-                )
-                user.uid = cursor.lastrowid
-                self.db.commit()
-                return user
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                f"INSERT INTO user (alias, firstname, lastname, birthday, mid, sname) "
+                f"VALUES (?, ?, ?, ?, ?, ?)"
+            )
+            cursor.execute(
+                statement,
+                (
+                    user.alias,
+                    user.first_name,
+                    user.last_name,
+                    user.birthday.isoformat(),
+                    user.messenger_id,
+                    user.song_name,
+                ),
+            )
+            user.uid = cursor.lastrowid
+            cursor.close()
+            return user
 
         def add_user_notification_by_user_id(
             self, user_id: int, notification: str
         ) -> None:
-            with self.db.cursor() as cursor:
-                statement: str = f"INSERT INTO notification (uid, text) VALUES (?, ?)"
-                cursor.execute(statement, (user_id, notification))
-                self.db.commit()
+            cursor: Cursor = self.db.cursor()
+            statement: str = f"INSERT INTO notification (uid, text) VALUES (?, ?)"
+            cursor.execute(statement, (user_id, notification))
+            cursor.close()
 
         def add_use_notification_by_user_alias(
             self, user_alias: str, notification: str
@@ -387,41 +385,41 @@ class DataBase:
             self.add_user_notification_by_user_id(user_id, notification)
 
         def update_user(self, user: User) -> User:
-            with self.db.cursor() as cursor:
-                statement: str = """UPDATE user 
-                                    SET alias=?, firstname=?, lastname=?, 
-                                    birthday=?, mid=?, sname=? 
-                                    WHERE uid=?"""
-                cursor.execute(
-                    statement,
-                    (
-                        user.alias,
-                        user.first_name,
-                        user.last_name,
-                        user.birthday,
-                        user.messenger_id,
-                        user.song_name,
-                        user.uid,
-                    ),
-                )
-                self.db.commit()
-                return user
+            cursor: Cursor = self.db.cursor()
+            statement: str = """UPDATE user 
+                                SET alias=?, firstname=?, lastname=?, 
+                                birthday=?, mid=?, sname=? 
+                                WHERE uid=?"""
+            cursor.execute(
+                statement,
+                (
+                    user.alias,
+                    user.first_name,
+                    user.last_name,
+                    user.birthday,
+                    user.messenger_id,
+                    user.song_name,
+                    user.uid,
+                ),
+            )
+            cursor.close()
+            return user
 
         def delete_user_notification_by_id(self, user: int, text: str) -> None:
-            with self.db.cursor() as cursor:
-                statement: str = "DELETE FROM notification WHERE uid=? AND text=?"
-                cursor.execute(statement, (user, text))
-                self.db.commit()
+            cursor: Cursor = self.db.cursor()
+            statement: str = "DELETE FROM notification WHERE uid=? AND text=?"
+            cursor.execute(statement, (user, text))
+            cursor.close()
 
         def delete_user_notification_by_alias(self, alias: str, text: str) -> None:
             user_id: int = self.__get_user_id_by_alias(alias)
             self.delete_user_notification_by_id(user_id, text)
 
         def delete_user_by_id(self, user_id: int) -> None:
-            with self.db.cursor() as cursor:
-                statement: str = "DELETE FROM user WHERE uid=?"
-                cursor.execute(statement, (user_id,))
-                self.db.commit()
+            cursor: Cursor = self.db.cursor()
+            statement: str = "DELETE FROM user WHERE uid=?"
+            cursor.execute(statement, (user_id,))
+            cursor.close()
 
         def delete_user_by_alias(self, alias: str) -> None:
             user_id: int = self.__get_user_id_by_alias(alias)
@@ -432,28 +430,30 @@ class DataBase:
             return birthday.isoformat()
 
         def __get_user_id_by_alias(self, alias: str) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT uid FROM user WHERE alias=? LIMIT 1"
-                cursor.execute(statement, (alias,))
-                uid: int = cursor.fetchone()
-                if uid:
-                    return uid
-                else:
-                    raise UserNotFountException()
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT uid FROM user WHERE alias=? LIMIT 1"
+            cursor.execute(statement, (alias,))
+            uid: int = cursor.fetchone()
+            cursor.close()
+            if uid:
+                return uid
+            else:
+                raise UserNotFountException()
 
         def __get_user_id_by_first_and_last_name(
             self, first_name: str, last_name: str
         ) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    "SELECT uid FROM user WHERE firstname=? AND lastname=? LIMIT 1"
-                )
-                cursor.execute(statement, (first_name, last_name))
-                uid: int = cursor.fetchone()
-                if uid:
-                    return uid
-                else:
-                    raise UserNotFountException()
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                "SELECT uid FROM user WHERE firstname=? AND lastname=? LIMIT 1"
+            )
+            cursor.execute(statement, (first_name, last_name))
+            uid: int = cursor.fetchone()
+            cursor.close()
+            if uid:
+                return uid
+            else:
+                raise UserNotFountException()
 
         def __create_table(self):
             pass
@@ -480,10 +480,12 @@ class DataBase:
             logging.info("[INFO] AlarmInterface initialized.")
 
         def get_alarm_by_id(self, aid: int) -> Alarm:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid WHERE a.aid=? LIMIT 1"
-                cursor.execute(statement, (aid,))
-                return self.__tuple_to_alarm(cursor.fetchone())
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid WHERE a.aid=? LIMIT 1"
+            cursor.execute(statement, (aid,))
+            alarm: Alarm = self.__tuple_to_alarm(cursor.fetchone())
+            cursor.close()
+            return alarm
 
         def get_active_and_init_alarms(self) -> tuple[list[Alarm], list[Alarm]]:
             now: datetime = datetime.now()
@@ -495,57 +497,66 @@ class DataBase:
             return active_alarms, init_alarms
 
         def get_active_and_passed_alarms(self, now, weekday) -> list[Alarm]:
-            with self.db.cursor() as cursor:
-                active_alarms_statement: str = (
-                    f"SELECT * FROM alarm as a "
-                    f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
-                    f"WHERE ar.{weekday}=1 "
-                    f"AND a.hour >= ? "
-                    f"AND a.minute >= ? "
-                    f"AND a.active = 1 "
-                    f"AND a.last_executed != ?"
-                )
-                cursor.execute(
-                    active_alarms_statement,
-                    (now.hour, now.minute, f"{now.day}.{now.month}.{now.year}"),
-                )
-                active_alarms: list[Alarm] = [
-                    self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
-                ]
-                return active_alarms
+            cursor: Cursor = self.db.cursor()
+            active_alarms_statement: str = (
+                f"SELECT * FROM alarm as a "
+                f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
+                f"WHERE ar.{weekday}=1 "
+                f"AND a.hour >= ? "
+                f"AND a.minute >= ? "
+                f"AND a.active = 1 "
+                f"AND a.last_executed != ?"
+            )
+            cursor.execute(
+                active_alarms_statement,
+                (now.hour, now.minute, f"{now.day}.{now.month}.{now.year}"),
+            )
+            active_alarms: list[Alarm] = [
+                self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
+            ]
+            cursor.close()
+            return active_alarms
 
         def get_initiated_alarms(self, now_seconds, weekday) -> list[Alarm]:
-            with self.db.cursor() as cursor:
-                init_alarms_statement: str = (
-                    f"SELECT * FROM alarm as a "
-                    f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
-                    f"WHERE ar.{weekday} = 1 "
-                    f"AND a.total_seconds <= {now_seconds + 1800}"
-                )
-                cursor.execute(init_alarms_statement)
-                init_alarms: list[Alarm] = [
-                    self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
-                ]
-                return init_alarms
+            cursor: Cursor = self.db.cursor()
+            init_alarms_statement: str = (
+                f"SELECT * FROM alarm as a "
+                f"JOIN alarmrepeat as ar ON a.aid = ar.aid "
+                f"WHERE ar.{weekday} = 1 "
+                f"AND a.total_seconds <= {now_seconds + 1800}"
+            )
+            cursor.execute(init_alarms_statement)
+            init_alarms: list[Alarm] = [
+                self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
+            ]
+            cursor.close()
+            return init_alarms
 
         def get_all_alarms(self) -> list[Alarm]:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    "SELECT * FROM alarm as a "
-                    "JOIN alarmrepeat as ar ON a.aid = ar.aid"
-                )
-                cursor.execute(statement)
-                return [self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()]
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                "SELECT * FROM alarm as a " "JOIN alarmrepeat as ar ON a.aid = ar.aid"
+            )
+            cursor.execute(statement)
+            alarms: list[Alarm] = [
+                self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
+            ]
+            cursor.close()
+            return alarms
 
         def get_alarms_unfiltered(self, active: bool) -> list[Alarm]:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid"
-                )
-                if active:
-                    statement = f"{statement} WHERE a.active=True"
-                cursor.execute(statement)
-                return [self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()]
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid=ar.aid"
+            )
+            if active:
+                statement = f"{statement} WHERE a.active=True"
+            cursor.execute(statement)
+            alarms: list[Alarm] = [
+                self.__tuple_to_alarm(alarm) for alarm in cursor.fetchall()
+            ]
+            cursor.close()
+            return alarms
 
         def add_alarm(self, alarm: Alarm) -> Alarm:
             alarm_id = self.__add_alarm_into_db(
@@ -557,113 +568,111 @@ class DataBase:
                 alarm.user_id,
             )
             self.__add_alarm_repeating_into_db(alarm_id, alarm.repeating)
-            self.db.commit()
             alarm.aid = alarm_id
-
             return alarm
 
         def __add_alarm_repeating_into_db(
             self, alarm_id: int, repeating: AlarmRepeating
         ) -> None:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    f"INSERT INTO alarmrepeat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                )
-                cursor.execute(
-                    statement,
-                    (
-                        alarm_id,
-                        repeating.monday,
-                        repeating.tuesday,
-                        repeating.wednesday,
-                        repeating.thursday,
-                        repeating.friday,
-                        repeating.saturday,
-                        repeating.sunday,
-                        repeating.regular,
-                    ),
-                )
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                f"INSERT INTO alarmrepeat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            )
+            cursor.execute(
+                statement,
+                (
+                    alarm_id,
+                    repeating.monday,
+                    repeating.tuesday,
+                    repeating.wednesday,
+                    repeating.thursday,
+                    repeating.friday,
+                    repeating.saturday,
+                    repeating.sunday,
+                    repeating.regular,
+                ),
+            )
+            cursor.close()
 
         def __add_alarm_into_db(
             self, active, alarm_time, initiated, song, text, user
         ) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = """INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, 
-                                    initiated, last_executed) 
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, "")"""
-                cursor.execute(
-                    statement,
-                    (
-                        song,
-                        user,
-                        alarm_time["hour"],
-                        alarm_time["minute"],
-                        alarm_time["total_seconds"],
-                        text,
-                        int(active),
-                        int(initiated),
-                    ),
-                )
-                return cursor.lastrowid
+            cursor: Cursor = self.db.cursor()
+            statement: str = """INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, 
+                                initiated, last_executed) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, "")"""
+            cursor.execute(
+                statement,
+                (
+                    song,
+                    user,
+                    alarm_time["hour"],
+                    alarm_time["minute"],
+                    alarm_time["total_seconds"],
+                    text,
+                    int(active),
+                    int(initiated),
+                ),
+            )
+            alarm_id: int = cursor.lastrowid
+            cursor.close()
+            return alarm_id
 
         def delete_alarm(self, aid: int) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = "DELETE FROM alarm WHERE aid=?"
-                cursor.execute(statement, (aid,))
-                anz_removed_alarm: int = cursor.rowcount
-                statement = "DELETE FROM alarmrepeat WHERE aid=?"
-                cursor.execute(statement, (aid,))
-                anz_removed_repeat: int = cursor.rowcount
+            cursor: Cursor = self.db.cursor()
+            statement: str = "DELETE FROM alarm WHERE aid=?"
+            cursor.execute(statement, (aid,))
+            anz_removed_alarm: int = cursor.rowcount
+            statement = "DELETE FROM alarmrepeat WHERE aid=?"
+            cursor.execute(statement, (aid,))
+            anz_removed_repeat: int = cursor.rowcount
 
-                if anz_removed_alarm != anz_removed_repeat:
-                    self.db.rollback()
-                    raise UnsolvableException(
-                        "Removed more alarm repeating´s than alarms!"
-                    )
-                self.db.commit()
-                return anz_removed_alarm
+            if anz_removed_alarm != anz_removed_repeat:
+                self.db.rollback()
+                raise UnsolvableException("Removed more alarm repeating´s than alarms!")
+            cursor.close()
+            return anz_removed_alarm
 
         def update_alarm(self, alarm: Alarm):
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    f"UPDATE alarm SET sname=?, uid=?, time=?, text=?, active=?, "
-                    f"initiated=?, last_executed=? WHERE aid=?"
-                )
-                cursor.execute(
-                    statement,
-                    (
-                        alarm.song_name,
-                        alarm.user_id,
-                        alarm.alarm_time,
-                        alarm.text,
-                        alarm.active,
-                        alarm.initiated,
-                        alarm.last_executed,
-                        alarm.aid,
-                    ),
-                )
-                alarm_repeat: AlarmRepeating = alarm.repeating
-                statement: str = (
-                    f"UPDATE alarmrepeat "
-                    f"SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, sunday=? "
-                    f"WHERE aid=?"
-                )
-                cursor.execute(
-                    statement,
-                    (
-                        alarm_repeat.monday,
-                        alarm_repeat.tuesday,
-                        alarm_repeat.wednesday,
-                        alarm_repeat.thursday,
-                        alarm_repeat.friday,
-                        alarm_repeat.saturday,
-                        alarm_repeat.sunday,
-                        alarm_repeat.regular,
-                        alarm.aid,
-                    ),
-                )
-
-            self.db.commit()
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                f"UPDATE alarm SET sname=?, uid=?, time=?, text=?, active=?, "
+                f"initiated=?, last_executed=? WHERE aid=?"
+            )
+            cursor.execute(
+                statement,
+                (
+                    alarm.song_name,
+                    alarm.user_id,
+                    alarm.alarm_time,
+                    alarm.text,
+                    alarm.active,
+                    alarm.initiated,
+                    alarm.last_executed,
+                    alarm.aid,
+                ),
+            )
+            alarm_repeat: AlarmRepeating = alarm.repeating
+            statement: str = (
+                f"UPDATE alarmrepeat "
+                f"SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, sunday=? "
+                f"WHERE aid=?"
+            )
+            cursor.execute(
+                statement,
+                (
+                    alarm_repeat.monday,
+                    alarm_repeat.tuesday,
+                    alarm_repeat.wednesday,
+                    alarm_repeat.thursday,
+                    alarm_repeat.friday,
+                    alarm_repeat.saturday,
+                    alarm_repeat.sunday,
+                    alarm_repeat.regular,
+                    alarm.aid,
+                ),
+            )
+            cursor.close()
             return alarm
 
         @staticmethod
@@ -712,24 +721,26 @@ class DataBase:
             logging.info("[INFO] AudioInterface initialized.")
 
         def add_audio(self, name: str, audio_file: io.BytesIO = None) -> str:
-            with self.db.cursor() as cursor:
-                statement: str = "INSERT INTO audio (name, path) VALUES (?, ?)"
-                encoded_data = base64.b64decode(audio_file.read())
-                cursor.execute(statement, (name, encoded_data))
-                self.db.commit()
-                return name
+            cursor: Cursor = self.db.cursor()
+            statement: str = "INSERT INTO audio (name, path) VALUES (?, ?)"
+            encoded_data = base64.b64decode(audio_file.read())
+            cursor.execute(statement, (name, encoded_data))
+            cursor.close()
+            return name
 
         def update_audio_file(self, old_name: str, audio_file: AudioFile) -> None:
-            with self.db.cursor() as cursor:
-                statement: str = "UPDATE audio SET name=?, data=? WHERE name=?"
-                cursor.execute(statement, (audio_file.name, audio_file.data, old_name))
-                self.db.commit()
+            cursor: Cursor = self.db.cursor()
+            statement: str = "UPDATE audio SET name=?, data=? WHERE name=?"
+            cursor.execute(statement, (audio_file.name, audio_file.data, old_name))
+            cursor.close()
 
         def get_audio_file_by_name(self, audio_name: str) -> AudioFile:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM audio WHERE name=?"
-                cursor.execute(statement, (audio_name,))
-                return self.__tuple_to_audio_file(cursor.fetchone())
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM audio WHERE name=?"
+            cursor.execute(statement, (audio_name,))
+            audio_file: AudioFile = self.__tuple_to_audio_file(cursor.fetchone())
+            cursor.close()
+            return audio_file
 
         def get_file_names(self) -> list[str]:
             cursor: Cursor = self.db.cursor()
@@ -741,12 +752,14 @@ class DataBase:
             return [x[0] for x in result_set]
 
         def delete_audio(self, audio_name: str) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT path FROM audio WHERE name=?"
-                cursor.execute(statement, (audio_name,))
-                statement = "DELETE FROM audio WHERE name=?"
-                cursor.execute(statement, (audio_name,))
-                return cursor.rowcount
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT path FROM audio WHERE name=?"
+            cursor.execute(statement, (audio_name,))
+            statement = "DELETE FROM audio WHERE name=?"
+            cursor.execute(statement, (audio_name,))
+            counter: int = cursor.rowcount
+            cursor.close()
+            return counter
 
         @staticmethod
         def __tuple_to_audio_file(result_set: tuple) -> AudioFile:
@@ -760,76 +773,86 @@ class DataBase:
             logging.info("[INFO] TimerInterface initialized.")
 
         def get_all_timer(self) -> list[Timer]:
-            with self.db.cursor() as cursor:
-                statement: str = f"SELECT * FROM timer"
-                cursor.execute(statement)
-                result_set: list = cursor.fetchall()
-                return [self.__tuple_to_timer(timer) for timer in result_set]
+            cursor: Cursor = self.db.cursor()
+            statement: str = f"SELECT * FROM timer"
+            cursor.execute(statement)
+            result_set: list = cursor.fetchall()
+            cursor.close()
+            return [self.__tuple_to_timer(timer) for timer in result_set]
 
         def get_timer_of_user_by_user_id(self, user: int) -> list[Timer]:
             cursor: Cursor = self.db.cursor()
             statement: str = "SELECT * FROM timer WHERE uid=?"
             cursor.execute(statement, (user,))
-            return [self.__tuple_to_timer(alarm) for alarm in cursor.fetchall()]
+            timer: list[Timer] = [
+                self.__tuple_to_timer(alarm) for alarm in cursor.fetchall()
+            ]
+            cursor.close()
+            return timer
 
         def get_timer_of_user_by_user_alias(self, user_alias: str) -> list[Timer]:
             user_id: int = self.user_interface.__get_user_id(user_alias)
             return self.get_timer_of_user_by_user_id(user_id)
 
         def get_timer_by_id(self, timer_id: int) -> Timer:
-            with self.db.cursor() as cursor:
-                statement: str = f"SELECT * FROM timer WHERE id=? LIMIT 1"
-                cursor.execute(statement, (timer_id,))
-                return self.__tuple_to_timer(cursor.fetchone())
+            cursor: Cursor = self.db.cursor()
+            statement: str = f"SELECT * FROM timer WHERE id=? LIMIT 1"
+            cursor.execute(statement, (timer_id,))
+            timer: Timer = self.__tuple_to_timer(cursor.fetchone())
+            cursor.close()
+            return timer
 
         def add_timer(self, timer: Timer) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    f"INSERT INTO timer (duration, time, text, uid) "
-                    f"VALUES(?, ?, ?, ?)"
-                )
-                cursor.execute(
-                    statement,
-                    (timer.duration, timer.start_time, timer.text, timer.user.uid),
-                )
-                result_set: int = cursor.rowcount
-                statement = "SELECT id FROM timer LIMIT 1"
-                cursor.execute(statement)
-                self.db.commit()
-                # id from inserted timer - id from the first timer in the current database +1
-                return result_set - cursor.rowcount + 1
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                f"INSERT INTO timer (duration, time, text, uid) " f"VALUES(?, ?, ?, ?)"
+            )
+            cursor.execute(
+                statement,
+                (timer.duration, timer.start_time, timer.text, timer.user.uid),
+            )
+            result_set: int = cursor.rowcount
+            statement = "SELECT id FROM timer LIMIT 1"
+            cursor.execute(statement)
+            # id from inserted timer - id from the first timer in the current database +1
+            position: int = result_set - cursor.rowcount + 1
+            cursor.close()
+            return position
 
         def update_timer(self, timer: Timer) -> Timer:
-            with self.db.cursor() as cursor:
-                statement: str = """UPDATE timer 
-                                    SET duration=?, time=?, text=?, uid=? 
-                                    WHERE id=?"""
-                cursor.execute(
-                    statement,
-                    (
-                        timer.duration,
-                        timer.start_time,
-                        timer.text,
-                        timer.user.uid,
-                        timer.tid,
-                    ),
-                )
-                self.db.commit()
-                return timer
+            cursor: Cursor = self.db.cursor()
+            statement: str = """UPDATE timer 
+                                SET duration=?, time=?, text=?, uid=? 
+                                WHERE id=?"""
+            cursor.execute(
+                statement,
+                (
+                    timer.duration,
+                    timer.start_time,
+                    timer.text,
+                    timer.user.uid,
+                    timer.tid,
+                ),
+            )
+            cursor.close()
+            return timer
 
         def delete_timer(self, timer_id: int) -> None:
-            with self.db.cursor() as cursor:
-                statement: str = "DELETE FROM timer WHERE id=?"
-                cursor.execute(statement, (timer_id,))
+            cursor: Cursor = self.db.cursor()
+            statement: str = "DELETE FROM timer WHERE id=?"
+            cursor.execute(statement, (timer_id,))
+            cursor.close()
 
         def delete_passed_timer(self) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = "DELETE FROM timer WHERE time < ?"
-                now: datetime = datetime.now()
-                cursor.execute(
-                    statement, time(now.hour, now.minute, now.second).isoformat()
-                )
-                return cursor.rowcount
+            cursor: Cursor = self.db.cursor()
+            statement: str = "DELETE FROM timer WHERE time < ?"
+            now: datetime = datetime.now()
+            cursor.execute(
+                statement, time(now.hour, now.minute, now.second).isoformat()
+            )
+            counter: int = cursor.rowcount
+            cursor.close()
+            return counter
 
         @staticmethod
         def __tuple_to_timer(result_set: tuple) -> Timer:
@@ -848,34 +871,36 @@ class DataBase:
             logging.info("[INFO] ReminderInterface initialized.")
 
         def get_passed_reminder(self) -> list[Reminder]:
-            with self.db.cursor() as cursor:
-                now: datetime = datetime.now()
-                date_string: str = now.strftime("%Y.%d.%m:%H:%M:%S")
-                statement: str = "SELECT * FROM reminder as r JOIN user as u ON r.id = u.id WHERE time<?"
-                cursor.execute(statement, (date_string,))
-                return [
-                    self.__tuple_to_reminder(reminder) for reminder in cursor.fetchall()
-                ]
+            cursor: Cursor = self.db.cursor()
+            now: datetime = datetime.now()
+            date_string: str = now.strftime("%Y.%d.%m:%H:%M:%S")
+            statement: str = (
+                "SELECT * FROM reminder as r JOIN user as u ON r.id = u.id WHERE time<?"
+            )
+            cursor.execute(statement, (date_string,))
+            reminder: list[Reminder] = [
+                self.__tuple_to_reminder(r) for r in cursor.fetchall()
+            ]
+            cursor.close()
+            return reminder
 
         def get_all_reminder(self) -> list[Reminder]:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM reminder"
-                cursor.execute(statement)
-                return [
-                    self.__tuple_to_reminder(reminder) for reminder in cursor.fetchall()
-                ]
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM reminder"
+            cursor.execute(statement)
+            reminder: list[Reminder] = [
+                self.__tuple_to_reminder(r) for r in cursor.fetchall()
+            ]
+            cursor.close()
+            return reminder
 
         def add_reminder(self, reminder: Reminder) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = (
-                    f"INSERT INTO reminder (time, text, uid) VALUES (?, ?, ?)"
-                )
-                cursor.execute(
-                    statement, (reminder.time, reminder.text, reminder.user.uid)
-                )
-                rid: int = cursor.lastrowid
-                self.db.commit()
-                return rid
+            cursor: Cursor = self.db.cursor()
+            statement: str = f"INSERT INTO reminder (time, text, uid) VALUES (?, ?, ?)"
+            cursor.execute(statement, (reminder.time, reminder.text, reminder.user.uid))
+            rid: int = cursor.lastrowid
+            cursor.close()
+            return rid
 
         def delete_reminder_by_id(self, _id: int) -> int:
             statement: str = "DELETE FROM reminder WHERE id=?"
@@ -886,11 +911,11 @@ class DataBase:
             return self.__delete_reminder_by_statement(statement, (_time,))
 
         def __delete_reminder_by_statement(self, statement: str, values: tuple) -> int:
-            with self.db.cursor() as cursor:
-                cursor.execute(statement, values)
-                counter: int = cursor.rowcount
-                self.db.commit()
-                return counter
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(statement, values)
+            counter: int = cursor.rowcount
+            cursor.close()
+            return counter
 
         def __tuple_to_reminder(self, result_set: tuple) -> Reminder:
             (reminder_id, reminder_time, text, user_id) = result_set
@@ -906,32 +931,44 @@ class DataBase:
             logging.info("[INFO] ShoppingListInterface initialized.")
 
         def get_list(self) -> list[ShoppingListItem]:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM shoppinglist"
-                cursor.execute(statement)
-                return self.__tuple_to_shopping_list(cursor.fetchall())
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM shoppinglist"
+            cursor.execute(statement)
+            item_list: list[ShoppingListItem] = self.__tuple_to_shopping_list(
+                cursor.fetchall()
+            )
+            cursor.close()
+            return item_list
 
         def get_item(self, name: str) -> ShoppingListItem:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM shoppinglist WHERE name=?"
-                cursor.execute(statement, (name,))
-                return self.__tuple_to_shopping_list_item(cursor.fetchone())
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM shoppinglist WHERE name=?"
+            cursor.execute(statement, (name,))
+            shopping_item: ShoppingListItem = self.__tuple_to_shopping_list_item(
+                cursor.fetchone()
+            )
+            cursor.close()
+            return shopping_item
 
         def add_item(self, item: ShoppingListItem) -> int:
-            with self.db.cursor() as cursor:
-                statement: str = f"INSERT INTO shoppinglist (name, measure, quantity) VALUES (?, ?, ?)"
-                cursor.execute(statement, (item.name, item.measure, item.quantity))
-                self.db.commit()
-                return cursor.lastrowid
+            cursor: Cursor = self.db.cursor()
+            statement: str = (
+                f"INSERT INTO shoppinglist (name, measure, quantity) VALUES (?, ?, ?)"
+            )
+            cursor.execute(statement, (item.name, item.measure, item.quantity))
+            self.db.commit()
+            item_id: int = cursor.lastrowid
+            cursor.close()
+            return item_id
 
         def update_item(self, item: ShoppingListItem) -> ShoppingListItem:
-            with self.db.cursor() as cursor:
-                statement: str = """UPDATE shoppinglist 
-                                    SET name=?, measure=?, quantity=?  
-                                    WHERE name=?"""
-                cursor.execute(statement, (item.name, item.measure, item.quantity))
-                self.db.commit()
-                return item
+            cursor: Cursor = self.db.cursor()
+            statement: str = """UPDATE shoppinglist 
+                                SET name=?, measure=?, quantity=?  
+                                WHERE name=?"""
+            cursor.execute(statement, (item.name, item.measure, item.quantity))
+            cursor.close()
+            return item
 
         def remove_item_by_id(self, item_id: int) -> None:
             statement: str = "DELETE FROM shoppinglist WHERE id=?"
@@ -942,21 +979,23 @@ class DataBase:
             self.__remove_item_by_statement(statement, (name,))
 
         def __remove_item_by_statement(self, statement: str, values: tuple) -> None:
-            with self.db.cursor() as cursor:
-                cursor.execute(statement, values)
-                self.db.commit()
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(statement, values)
+            cursor.close()
 
         def clear_list(self) -> None:
-            with self.db.cursor() as cursor:
-                statement: str = "DELETE FROM shoppinglist"
-                cursor.execute(statement)
-                self.db.commit()
+            cursor: Cursor = self.db.cursor()
+            statement: str = "DELETE FROM shoppinglist"
+            cursor.execute(statement)
+            cursor.close()
 
         def is_item_in_list(self, name: str) -> bool:
-            with self.db.cursor() as cursor:
-                statement: str = f"SELECT 1 FROM shoppinglist WHERE name=? LIMIT 1"
-                cursor.execute(statement, (name,))
-                return cursor.rowcount == 1
+            cursor: Cursor = self.db.cursor()
+            statement: str = f"SELECT 1 FROM shoppinglist WHERE name=? LIMIT 1"
+            cursor.execute(statement, (name,))
+            anz_items = cursor.rowcount
+            cursor.close()
+            return anz_items > 0
 
         def __create_table(self):
             pass
@@ -969,7 +1008,9 @@ class DataBase:
         @staticmethod
         def __tuple_to_shopping_list_item(item: tuple) -> ShoppingListItem:
             name, measure, quantity = item
-            return ShoppingListItem(name=name, measure=measure, quantity=quantity)
+            return ShoppingListItem(
+                id=None, name=name, measure=measure, quantity=quantity
+            )
 
     class _RoutineInterface:
         def __init__(self, _db: Connection) -> None:
@@ -977,318 +1018,42 @@ class DataBase:
             logging.info("[INFO] RoutineInterface initialized.")
 
         def get_routine(self, name: str) -> Routine:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM routine WHERE name=? LIMIT 1"
-                cursor.execute(statement)
-                return self.__tuple_to_routine(cursor.fetchone())
-
-        def get_routines(self, on_command: str = None, on_time: dict = None) -> list:
             cursor: Cursor = self.db.cursor()
-            routine_list: list[dict] = []
-            if on_command is not None:
-                statement: str = """SELECT * FROM routine 
-                                    JOIN oncommand ON routine.name=oncommand.rname 
-                                    WHERE instr(?, oncommand.command) > 0"""
-
-                cursor.execute(statement, (on_command,))
-                routine_set: list[tuple] = cursor.fetchall()
-            elif on_time is not None:
-                statement: str = """SELECT * FROM routine"""
-                cursor.execute(statement)
-                routine_set: list[tuple] = cursor.fetchall()
-            else:
-                statement: str = """SELECT * FROM routine"""
-                cursor.execute(statement)
-                routine_set: list[tuple] = cursor.fetchall()
-
-            for rout in routine_set:
-                statement: str = "SELECT * FROM routinecommands WHERE rname=?"
-                cursor.execute(statement, (rout[0],))
-                command_set: list[tuple] = cursor.fetchall()
-                text_set: list[tuple] = []
-                for command in command_set:
-                    statement = "SELECT * FROM commandtext WHERE cid=?"
-                    cursor.execute(statement, (command[0],))
-                    for item in cursor.fetchall():
-                        text_set.append(item)
-
-                statement = "SELECT * FROM routinedates WHERE rname=?"
-                cursor.execute(statement, (rout[0],))
-                data_set: list[tuple] = cursor.fetchall()
-
-                statement = "SELECT * FROM routineactivationtime WHERE rname=?"
-                cursor.execute(statement, (rout[0],))
-                activation_set: list[tuple] = cursor.fetchall()
-
-                statement = "SELECT command FROM oncommand WHERE rname=?"
-                cursor.execute(statement, (rout[0],))
-                on_command_set: list[tuple] = cursor.fetchall()
-
-                # print(f'rout: {rout}, command_set: {command_set}, text_set: {text_set}, date_set: {data_set}, activation_set: {activation_set}, on_command_set: {on_command_set}')
-                routine_list.append(
-                    self.__build_json(
-                        rout,
-                        command_set,
-                        text_set,
-                        data_set,
-                        activation_set,
-                        on_command_set,
-                    )
-                )
-
-            cursor.close()
-            return routine_list
-
-        def get_routine_command(self, rcid: int) -> dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM routinecommand WHERE rcid=? LIMIT 1"
-            cursor.execute(statement, (rcid,))
-            rcid, rname, modulename = cursor.fetchone()
-            statement = "SELECT * FROM commandtext WHERE rcid=?"
-            commands: list[tuple] = cursor.fetchall()
-            cursor.execute(statement, (rcid,))
-            cursor.close()
-            return {
-                "id": rcid,
-                "rname": rname,
-                "modulename": modulename,
-                "text": [text for _, text in commands],
-            }
-
-        def get_routine_dates(self, rdid: int) -> dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM routinedates WHERE rdid=? LIMIT 1"
-            cursor.execute(statement, (rdid,))
-            rdid, rname, day, month = cursor.fetchone()
-            cursor.close()
-            return {"id": rdid, "rname": rname, "day": day, "month": month}
-
-        def get_on_command(self, ocid: int) -> dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM oncommand WHERE ocid=?"
-            cursor.execute(statement, (ocid,))
-            ocid, rname, command = cursor.fetchone()
-            cursor.close()
-            return {"id": ocid, "rname": rname, "command": command}
-
-        def get_routine_activation_time(self, ratid: int) -> dict:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM routineactivationtime WHERE ratid=?"
-            cursor.execute(statement, (ratid,))
-            ratid, rname, command = cursor.fetchone()
-            cursor.close()
-            return {"id": ratid, "rname": rname, "command": command}
-
-        def add_routine(self, routine: dict) -> None:
-            days: dict = routine["retakes"]["days"]
-            if (
-                days["monday"]
-                and days["tuesday"]
-                and days["wednesday"]
-                and days["friday"]
-                and days["saturday"]
-                and days["sunday"]
-            ):
-                routine["retakes"]["days"]["daily"] = True
-            else:
-                routine["retakes"]["days"]["daily"] = False
-            cursor: Cursor = self.db.cursor()
-            statement: str = """INSERT INTO routine (name, description, daily, monday, tuesday, wednesday, thursday, 
-                                friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
-            values: list = [routine.get("name"), routine.get("description")]
-            for key in [
-                "daily",
-                "monday",
-                "tuesday",
-                "wednesday",
-                "thursday",
-                "friday",
-                "saturday",
-                "sunday",
-            ]:
-                values.append(str(int(routine["retakes"]["days"][key] is True)))
-            for key in ["after_alarm", "after_sunrise", "after_sunset", "after_call"]:
-                values.append(str(int(routine["retakes"]["activation"][key] is True)))
-            cursor.execute(statement, tuple(values))
-
-            statement = "SELECT last_insert_rowid()"
-            cursor.execute(statement)
-
-            self.__add_commands(routine["actions"]["commands"], routine.get("name"))
-
-            statement = "INSERT INTO routinedates (rname, day, month) VALUES (?, ?, ?)"
-            for item in routine["retakes"]["days"]["date_of_day"]:
-                cursor.execute(
-                    statement, (routine["name"], item.get("day"), item.get("month"))
-                )
-
-            statement = "INSERT INTO routineactivationtime (rname, hour, minute) VALUES (?, ?, ?)"
-            for item in routine["retakes"]["activation"]["clock_time"]:
-                cursor.execute(
-                    statement, (routine["name"], item["hour"], item["minute"])
-                )
-
-            statement = "INSERT INTO oncommand (rname, command) VALUES(?, ?)"
-            for item in routine["on_commands"]:
-                cursor.execute(statement, (routine["name"], item))
-
-            cursor.close()
-            self.db.commit()
-
-        def add_routine_by_values(
-            self,
-            name,
-            description,
-            daily,
-            monday,
-            tuesday,
-            wednesday,
-            thursday,
-            friday,
-            saturday,
-            sunday,
-            afteralarm,
-            aftersunrise,
-            aftersunset,
-            aftercall,
-        ):
-            cursor: Cursor = self.db.cursor()
-            statement: str = """INSERT INTO routine (name, description, daily, monday, tuesday, wednesday, thursday, 
-                                            friday, saturday, sunday, afteralarm, aftersunrise, aftersunset, aftercall) 
-                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) """
-            cursor.execute(
-                statement,
-                (
-                    name,
-                    description,
-                    daily,
-                    monday,
-                    tuesday,
-                    wednesday,
-                    thursday,
-                    friday,
-                    saturday,
-                    sunday,
-                    afteralarm,
-                    aftersunrise,
-                    aftersunset,
-                    aftercall,
-                ),
-            )
-            cursor.close()
-            self.db.commit()
-
-        def create_routine_commands(
-            self, rname: str, modulename: str, text: list[str]
-        ) -> int:
-            cursor: Cursor = self.db.cursor()
-            statement: str = (
-                "INSERT INTO routinecommands (rname, modulename) VALUES (?, ?)"
-            )
-            cursor.execute(statement, (rname, modulename))
-            rcid: int = cursor.lastrowid
-
-            if text is not None:
-                statement = "INSERT INTO commandtext VALUES (?, ?)"
-                cursor.executemany(statement, text)
-
-            cursor.close()
-            self.db.commit()
-            return rcid
-
-        def create_on_command(self, rname: str, command: str) -> int:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "INSERT INTO oncommand (rname, command) VALUES (?, ?)"
-            cursor.execute(statement, (rname, command))
-            ocid: int = cursor.lastrowid
-            cursor.close()
-            self.db.commit()
-            return ocid
-
-        def create_routine_dates(self, rname: str, day: int, month: int):
-            cursor: Cursor = self.db.cursor()
-            statement: str = (
-                "INSERT INTO routinedates (rname, day, month) VALUES (?, ?, ?)"
-            )
-            cursor.execute(statement, (rname, day, month))
-            rdid: int = cursor.lastrowid
-            cursor.close()
-            self.db.commit()
-            return rdid
-
-        def create_routine_activation_time(
-            self, rname: str, hour: int, minute: int
-        ) -> int:
-            cursor: Cursor = self.db.cursor()
-            statement: str = "INSERT INTO routineactivationtime (rname, hour, minute) VALUES (?, ?, ?)"
-            cursor.execute(statement, (rname, hour, minute))
-            ratid: int = cursor.lastrowid
-            cursor.close()
-            self.db.commit()
-            return ratid
-
-        def update_routine(
-            self,
-            old_name: str,
-            new_routine_dict: dict = None,
-            _name: str = None,
-            _description: str = None,
-            _daily: bool = None,
-            _monday: bool = None,
-            _tuesday: bool = None,
-            _wednesday: bool = None,
-            _thursday: bool = None,
-            _friday: bool = None,
-            _saturday: bool = None,
-            _sunday: bool = None,
-            _after_alarm: bool = None,
-            _after_sunrise: bool = None,
-            _after_sunset: bool = None,
-            _after_call: bool = None,
-            _dates: list = None,
-            _clock_time: list = None,
-            _commands: list = None,
-        ):
-            cursor: Cursor = self.db.cursor()
-
-            if new_routine_dict is not None:
-                _name = new_routine_dict["name"]
-                _description = new_routine_dict["description"]
-
-                _retakes: dict = new_routine_dict["retakes"]["days"]
-                _daily = _retakes["daily"]
-                _monday = _retakes["monday"]
-                _tuesday = _retakes["tuesday"]
-                _wednesday = _retakes["wednesday"]
-                _thursday = _retakes["thursday"]
-                _friday = _retakes["friday"]
-                _saturday = _retakes["saturday"]
-                _sunday = _retakes["sunday"]
-
-                _activation: dict = new_routine_dict["retakes"]["activation"]
-                _after_alarm = _activation["after_alarm"]
-                _after_sunrise = _activation["after_sunrise"]
-                _after_sunset = _activation["after_sunset"]
-                _after_call = _activation["after_call"]
-
-                _dates = _retakes["date_of_day"]
-                _clock_time = _activation["clock_time"]
-                _commands = new_routine_dict["actions"]["commands"]
-
             statement: str = "SELECT * FROM routine WHERE name=? LIMIT 1"
-            cursor.execute(statement, (old_name,))
-            result_set: tuple = cursor.fetchone()
-            if cursor.rowcount < 1:
-                cursor.close()
-                raise NoMatchingEntry(
-                    f"No matching routine with the name {old_name} was found in the database."
-                )
+            cursor.execute(statement, (name,))
+            found_routine: Routine = self.__tuple_to_routine(cursor.fetchone())
+            cursor.close()
+            return found_routine
 
+        def get_routines(
+            self, on_command: str = None, on_time: time = None
+        ) -> list[Routine]:
+            cursor: Cursor = self.db.cursor()
+            if on_command:
+                statement: str = """SELECT * FROM routine 
+                                JOIN oncommand ON routine.name=oncommand.rname 
+                                WHERE instr(?, oncommand.command) > 0"""
+                cursor.execute(statement, (on_command,))
+            elif on_time:
+                # toDo
+                statement: str = """SELECT * FROM routine"""
+                cursor.execute(statement)
+            else:
+                statement: str = "SELECT * FROM routine"
+                cursor.execute(statement)
+
+            routines: list[tuple] = cursor.fetchall()
+            return [self.__tuple_to_routine(r) for r in routines]
+
+        def add_routine(self, new_routine: Routine) -> Routine:
             (
                 name,
                 description,
-                daily,
+                calling_commands,
+                retakes,
+                actions,
+            ) = new_routine.as_tuple()
+            (
                 monday,
                 tuesday,
                 wednesday,
@@ -1296,62 +1061,24 @@ class DataBase:
                 friday,
                 saturday,
                 sunday,
+                specific_dates,
+            ) = retakes.days.as_tuple()
+            (
+                times,
                 after_alarm,
                 after_sunrise,
                 after_sunset,
                 after_call,
-            ) = result_set
-
-            if _name is not None:
-                if len(_name) > 50:
-                    cursor.close()
-                    raise ValueError("Given name is too long!")
-                name = _name
-                # toDo: update names of other tables
-
-            if _description is not None:
-                if len(_description) > 255:
-                    cursor.close()
-                    raise ValueError("Given text is too long!")
-                description = _description
-            # maybe (y is True) is y
-            if _daily is not None:
-                daily = int(_daily is True)
-            if _monday is not None:
-                monday = int(_monday is True)
-            if _tuesday is not None:
-                tuesday = int(_tuesday is True)
-            if _wednesday is not None:
-                wednesday = int(_wednesday is True)
-            if _thursday is not None:
-                thursday = int(_thursday is True)
-            if _friday is not None:
-                friday = int(_friday is True)
-            if _saturday is not None:
-                saturday = int(_saturday is True)
-            if _sunday is not None:
-                sunday = int(_sunday is True)
-            if _after_alarm is not None:
-                after_alarm = int(_after_alarm is True)
-            if _after_sunrise is not None:
-                after_sunrise = int(_after_sunrise is True)
-            if _after_sunset is not None:
-                after_sunset = int(_after_sunset is True)
-            if _after_call is not None:
-                after_call = int(_after_call is True)
-
+            ) = retakes.times.as_tuple()
+            cursor: Cursor = self.db.cursor()
             statement: str = (
-                f"UPDATE routine "
-                f"SET name=?, description=?, daily=?, monday=?, tuesday=?, wednesday=?, thursday=?, "
-                f"friday=?, saturday=?, sunday=?, afteralarm=?, aftersunrise=?, aftersunset=?, aftercall=? "
-                f"WHERE name=?"
+                "INSERT INTO routine VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             )
             cursor.execute(
                 statement,
                 (
                     name,
                     description,
-                    daily,
                     monday,
                     tuesday,
                     wednesday,
@@ -1363,125 +1090,249 @@ class DataBase:
                     after_sunrise,
                     after_sunset,
                     after_call,
-                    old_name,
                 ),
             )
-
-            if _dates is not None:
-                statement: str = "UPDATE routinedates SET day=?, month=? WHERE rdid=?"
-                values: list[tuple] = [
-                    (item["day"], item["month"], item["id"]) for item in _dates
-                ]
-                cursor.executemany(statement, values)
-
-            if _clock_time is not None:
-                statement: str = (
-                    "UPDATE routineactivationtime SET hour=?, minute=? WHERE ratid=?"
-                )
-                values: list[tuple] = [
-                    (item["hour"], item["minute"], item["id"]) for item in _clock_time
-                ]
-                cursor.executemany(statement, values)
-
-            if _commands is not None:
-                statement: str = "UPDATE routinecommands SET modulename=? WHERE rcid=?"
-                values: list[tuple] = [
-                    (item["module_name"], (item["id"])) for item in _commands
-                ]
-                cursor.executemany(statement, values)
-
-                statement: str = "UPDATE commandtext SET text=? WHERE rcid=?"
-                values: list[tuple] = [(item["text"], item["id"]) for item in _commands]
-                cursor.executemany(statement, values)
             cursor.close()
-            self.db.commit()
-
-        def update_date_of_day(self, rdid: int, day: int, month: int):
-            cursor: Cursor = self.db.cursor()
-            statement: str = "UPDATE routinedates SET day=?, month=? WHERE rdid=?"
-            cursor.execute(statement, (day, month, rdid))
-            cursor.close()
-            self.db.commit()
-
-        def update_activation_time(self, ratid: int, hour: int, minute: int):
-            cursor: Cursor = self.db.cursor()
-            statement: str = (
-                "UPDATE routineactivationtime SET hour=?, minute=? WHERE ratid=?"
+            self.add_calling_commands(name, routine.calling_commands)
+            routine.actions = self.add_actions(name, routine.actions)
+            routine.retakes.times.clock_times = self.add_clock_times(
+                name, routine.retakes.times.clock_times
             )
-            cursor.execute(statement, (hour, minute, ratid))
-            cursor.close()
-            self.db.commit()
+            routine.retakes.days.specific_dates = self.add_specific_dates(
+                name, routine.retakes.days.specific_dates
+            )
 
-        def update_routine_commands(self, rcid: int, modulename: str, text: list[str]):
+            return routine
+
+        def add_calling_commands(
+            self, routine_name: str, calling_commands: list[CallingCommand]
+        ) -> list[CallingCommand]:
+            for index, command in enumerate(calling_commands):
+                calling_commands[index] = self.add_calling_command(
+                    routine_name, command
+                )
+            return calling_commands
+
+        def add_calling_command(
+            self, routine_name: str, calling_command: CallingCommand
+        ) -> CallingCommand:
+            statement: str = "INSERT INTO oncommand (rname, command) VALUES (?, ?)"
             cursor: Cursor = self.db.cursor()
-            statement: str = "UPDATE routinecommands SET modulename=? WHERE rcid=?"
-            cursor.execute(statement, (modulename, rcid))
+            cursor.execute(statement, (routine_name, calling_command.command))
+            calling_command.ocid = cursor.lastrowid
             cursor.close()
-            self.db.commit()
+            return calling_command
 
-        def update_command_text(self, rcid: int, module_name: str, text: list[str]):
+        def add_actions(
+            self, routine_name: str, actions: list[RoutineCommand]
+        ) -> list[RoutineCommand]:
             cursor: Cursor = self.db.cursor()
-            statement: str = "DELETE FROM commandtext WHERE rcid=?"
-            cursor.execute(statement, (rcid,))
-            statement = "INSERT INTO commandtext VALUES (?, ?)"
-            values: list[tuple] = [(rcid, item) for item in text]
-            cursor.executemany(statement, values)
+            command_statement: str = (
+                "INSERT INTO routinecommands (rname, modulename) VALUES (?, ?)"
+            )
+            text_statement: str = "INSERT INTO commandtext VALUES (?, ?)"
+            for index, action in enumerate(actions):
+                cursor.execute(command_statement, (routine_name, action.module_name))
+                command_id: int = cursor.lastrowid
+                actions[index].cid = command_id
+                for text in action.with_text:
+                    cursor.execute(text_statement, (command_id, text))
             cursor.close()
-            self.db.commit()
+            return actions
 
-        def update_on_command(self, ocid: int, command: str) -> None:
+        def add_times(
+            self, routine_name: str, clock_times: list[RoutineClockTime]
+        ) -> None:
+            pass
+
+        def add_clock_times(
+            self, routine_name: str, clock_times: list[RoutineClockTime]
+        ) -> list[RoutineClockTime]:
+            for index, clock_time in enumerate(clock_times):
+                clock_times[index] = self.add_clock_time(routine_name, clock_time)
+            return clock_times
+
+        def add_clock_time(
+            self, routine_name: str, clock_time: RoutineClockTime
+        ) -> RoutineClockTime:
+            statement: str = (
+                "INSERT INTO routineactivationtime (rname, time) VALUES (?, ?)"
+            )
             cursor: Cursor = self.db.cursor()
-            statement: str = "UPDATE FROM oncommand SET command=? WHERE ocid=?"
-            cursor.execute(statement, (command, ocid))
+            cursor.execute(statement, (routine_name, clock_time.clock_time.isoformat()))
+            clock_time.ratid = cursor.lastrowid
             cursor.close()
-            self.db.commit()
+            return clock_time
 
-        def update_on_commands(self, rname: str, commands: list[str]):
+        def add_specific_dates(
+            self, routine_name: str, dates: list[SpecificDate]
+        ) -> list[SpecificDate]:
+            for index, date in dates:
+                dates[index] = self.add_specific_date(routine_name, date)
+            return dates
+
+        def add_specific_date(
+            self, routine_name: str, specific_date: SpecificDate
+        ) -> SpecificDate:
+            statement: str = "INSERT INTO routinedates (rname, time) VALUES (?, ?)"
             cursor: Cursor = self.db.cursor()
-            try:
-                statement: str = "DELETE FROM oncommand WHERE rname=?"
-                cursor.execute(statement, (rname,))
-                statement = "INSERT INTO oncommand (rname, command) VALUES (?, ?)"
-                values: list[tuple] = [(rname, item) for item in commands]
-                cursor.executemany(statement, values)
-            except Exception as e:
-                # there could be an SQLException because len(command) has to be < 255
-                cursor.close()
-                raise e
-
+            cursor.executemany(statement, (routine_name, specific_date.date))
+            specific_date.sid = cursor.lastrowid
             cursor.close()
-            self.db.commit()
+            return specific_date
 
-        def update_attribute(self, routine_name: str, values: list[tuple[str, any]]):
+        def add_time(self, routine_name: str, clock_time: RoutineClockTime) -> None:
+            pass
+
+        def rename_routine(self, old_name: str, new_name: str) -> None:
+            statement: str = f"UPDATE routine SET name=? WHERE name=?"
             cursor: Cursor = self.db.cursor()
-
-            for item in values:
-                attribute, value = item
-                # change after_alarm to afteralarm, ...
-                attribute.replace("_", "")
-                if attribute == "name":
-                    self.update_routine(routine_name, _name=value)
-                if attribute in [
-                    "description",
-                    "daily",
-                    "monday",
-                    "tuesday",
-                    "wednesday",
-                    "thursday",
-                    "friday",
-                    "saturday",
-                    "sunday",
-                    "afteralarm",
-                    "aftersunrise",
-                    "aftersunset",
-                    "aftercall",
-                ]:
-                    statement: str = "UPDATE routine SET " + "?=?"
-                    cursor.execute(statement, (attribute, value))
-                elif attribute == "commands":
-                    self.update_routine(routine_name, _commands=value)
+            cursor.execute(statement, (new_name, old_name))
             cursor.close()
-            self.db.commit()
+
+        def update_routine(self, old_name: str, updated_routine: Routine):
+            statement: str = f"UPDATE routine SET name=?, description=? WHERE name=?"
+            name, description, calling_commands, retakes, actions = updated_routine
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(statement, (name, description, old_name))
+            cursor.close()
+            updated_routine.calling_commands = self.update_calling_commands(
+                updated_routine.calling_commands
+            )
+            self.update_retakes(updated_routine.name, updated_routine.retakes)
+            self.update_actions(updated_routine.actions)
+
+        def update_calling_commands(
+            self, calling_commands: list[CallingCommand]
+        ) -> list[CallingCommand]:
+            for index, command in enumerate(calling_commands):
+                calling_commands[index] = self.update_calling_command(command)
+            return calling_commands
+
+        def update_calling_command(
+            self, calling_command: CallingCommand
+        ) -> CallingCommand:
+            ocid, routine_name, command = calling_command
+            cursor: Cursor = self.db.cursor()
+            if ocid:
+                update_statement: str = (
+                    "UPDATE oncommand SET rname=?, command=? WHERE ocid=?"
+                )
+                cursor.execute(update_statement, (routine_name, command, ocid))
+            else:
+                create_statement = (
+                    "INSERT INTO oncommand (rname, command) VALUES (?, ?)"
+                )
+                cursor.execute(create_statement, (routine_name, command))
+                calling_command.ocid = cursor.lastrowid
+            cursor.close()
+            return calling_command
+
+        def update_actions(self, actions: list[RoutineCommand]) -> None:
+            for command in actions:
+                self.update_action_texts(command)
+
+        def update_action_texts(self, routine_command: RoutineCommand) -> None:
+            del_statement: str = "DELETE FROM commandtext WHERE rcid=?"
+            create_statement = "INSERT INTO commandtext VALUES (?, ?)"
+
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(del_statement)
+            cursor.executemany(
+                create_statement,
+                [
+                    (routine_command.module_name, text)
+                    for text in routine_command.with_text
+                ],
+            )
+            cursor.close()
+
+        def update_retakes(self, routine_name: str, retakes: RoutineRetakes) -> None:
+            self.update_days(routine_name, retakes.days)
+            self.update_time(routine_name, retakes.times)
+
+        def update_days(self, routine_name: str, days: RoutineDays) -> None:
+            (
+                monday,
+                tuesday,
+                wednesday,
+                thursday,
+                friday,
+                saturday,
+                sunday,
+                specific_dates,
+            ) = days.as_tuple()
+            statement: str = (
+                "UPDATE routine SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, "
+                "sunday=? WHERE rname=?"
+            )
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(
+                statement,
+                (
+                    monday,
+                    tuesday,
+                    wednesday,
+                    thursday,
+                    friday,
+                    saturday,
+                    sunday,
+                    routine_name,
+                ),
+            )
+            cursor.close()
+
+            self.update_specific_dates(specific_dates)
+
+        def update_time(self, routine_name: str, routine_time: RoutineTime):
+            (
+                times,
+                after_alarm,
+                after_sunrise,
+                after_sunset,
+                after_call,
+            ) = routine_time.as_tuple()
+            self.update_clock_times(times)
+            statement: str = "UPDATE routine SET afteralarm=?, aftersunrise=?, aftersunser=?, aftercall=? WHERE rname=?"
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(
+                statement,
+                (
+                    after_alarm,
+                    after_sunrise,
+                    after_sunset,
+                    after_call,
+                    routine_name,
+                ),
+            )
+            cursor.close()
+
+        def update_specific_dates(self, specific_dates: list[SpecificDate]) -> None:
+            #
+            statement: str = "UPDATE routinedates SET time=?"
+            cursor: Cursor = self.db.cursor()
+            cursor.executemany(
+                statement, [(sd.date.isoformat(),) for sd in specific_dates]
+            )
+            cursor.close()
+
+        def update_clock_times(self, clock_times: list[RoutineClockTime]) -> None:
+            statement: str = (
+                "UPDATE routineactivationtime SET ratid=?, time=? WHERE ratid=?"
+            )
+            cursor: Cursor = self.db.cursor()
+            cursor.executemany(statement, clock_times)
+            cursor.close()
+
+        def update_clock_time(self, clock_time: RoutineClockTime) -> None:
+            statement: str = (
+                "UPDATE routineactivationtime SET ratid=?, time=? WHERE ratid=?"
+            )
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(
+                statement, (clock_time.ratid, clock_time.clock_time.isoformat())
+            )
+            cursor.close()
 
         def delete_routine(self, routine_name: str) -> int:
             cursor: Cursor = self.db.cursor()
@@ -1494,38 +1345,32 @@ class DataBase:
             cursor.execute("DELETE FROM routine WHERE rname=?", (routine_name,))
             counter: int = cursor.rowcount
             cursor.close()
-            self.db.commit()
             return counter
 
-        def delete_routine_command(self, rcid: int):
+        def delete_routine_command(self, routine_command_id: int):
             cursor: Cursor = self.db.cursor()
             statement: str = "DELETE FROM commandtext WHERE rcid=?"
-            cursor.execute(statement, (rcid,))
+            cursor.execute(statement, (routine_command_id,))
             statement: str = "DELETE FROM routinecommands WHERE rcid=?"
-            cursor.execute(statement, (rcid,))
+            cursor.execute(statement, (routine_command_id,))
             cursor.close()
-            self.db.commit()
 
-        def delete_on_command(self, ocid: int):
-            cursor: Cursor = self.db.cursor()
+        def delete_on_command(self, on_command_id: int):
             statement: str = "DELETE FROM oncommand WHERE ocid=?"
-            cursor.execute(statement, (ocid,))
-            cursor.close()
-            self.db.commit()
-
-        def delete_routine_dates(self, rdid: int):
             cursor: Cursor = self.db.cursor()
-            statement: str = "DELETE FROM routinedates WHERE rdid=?"
-            cursor.execute(statement, (rdid,))
+            cursor.execute(statement, (on_command_id,))
             cursor.close()
-            self.db.commit()
 
-        def delete_routine_activation_time(self, ratid: int):
-            cursor: Cursor = self.db.cursor()
+        def delete_routine_dates(self, routine_date_id: int):
+            with self.db.cursor() as cursor:
+                statement: str = "DELETE FROM routinedates WHERE rdid=?"
+                cursor.execute(statement, (routine_date_id,))
+
+        def delete_routine_activation_time(self, routine_activation_time_id: int):
             statement: str = "DELETE FROM routineactivationtime WHERE ratid=?"
-            cursor.execute(statement, (ratid,))
+            cursor: Cursor = self.db.cursor()
+            cursor.execute(statement, (routine_activation_time_id,))
             cursor.close()
-            self.db.commit()
 
         def __add_commands(self, commands: list[dict], name: str):
             cursor: Cursor = self.db.cursor()
@@ -1544,32 +1389,17 @@ class DataBase:
                     )
             cursor.close()
 
-        @staticmethod
-        def __build_json(
-            routine: tuple,
-            commands: list[tuple],
-            commandtext: list[tuple],
-            dates: list[tuple],
-            activation: list[tuple],
-            on_commands: list[tuple],
-        ) -> dict:
-            """
-            rout: ('Morgenroutine', 'Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
-            command_set: [(1, 'Morgenroutine', 'phillips_hue')],
-            text_set: [(1, 'Mach das Bett grün'), (1, 'Mach den Schreibtisch blau')],
-            date_set: [(1, 'Morgenroutine', 5, 12)],
-            activation_set: [(2, 'Morgenroutine', 10, 30), (1, 'Morgenroutine', 12, 0)],
-            on_command_set: []
+        def __create_table(self):
+            pass
 
-            """
-            if routine == ():
-                return {}
-
-            print(routine)
+        def __tuple_to_routine(
+            self,
+            routine_tuple: tuple,
+        ) -> Routine:
+            cursor: Cursor = self.db.cursor()
             (
                 name,
                 description,
-                daily,
                 monday,
                 tuesday,
                 wednesday,
@@ -1577,153 +1407,87 @@ class DataBase:
                 friday,
                 saturday,
                 sunday,
-                afteralarm,
-                aftersunrise,
-                aftersunset,
-                aftercall,
-            ) = routine
-            result_dict = {
-                "name": name,
-                "descriptions": description,
-                "on_commands": [],
-                "retakes": {
-                    "days": {
-                        "daily": (daily == 1),
-                        "monday": (monday == 1),
-                        "tuesday": (tuesday == 1),
-                        "wednesday": (wednesday == 1),
-                        "thursday": (thursday == 1),
-                        "friday": (friday == 1),
-                        "saturday": (saturday == 1),
-                        "sunday": (sunday == 1),
-                        "date_of_day": [],
-                    },
-                    "activation": {
-                        "clock_time": [],
-                        "after_alarm": (afteralarm == 1),
-                        "after_sunrise": (aftersunrise == 1),
-                        "after_sunset": (aftersunset == 1),
-                        "after_call": (aftercall == 1),
-                    },
-                },
-                "actions": {"commands": []},
-            }
+                after_alarm,
+                after_sunrise,
+                after_sunset,
+                after_call,
+            ) = routine_tuple
 
-            for rdid, rid, day, month in dates:
-                result_dict["retakes"]["days"]["date_of_day"].append(
-                    {"id": rdid, "day": day, "month": month}
+            routine_dates_statement: str = "SELECT * FROM routinedates WHERE rname=?"
+            cursor.execute(routine_dates_statement, (name,))
+
+            routine_dates: list[SpecificDate] = [
+                SpecificDate(datetime.fromisoformat(date), sid)
+                for sid, _, date in cursor.fetchall()
+            ]
+
+            on_command_statement: str = "SELECT * FROM oncommand WHERE rname=?"
+            cursor.execute(on_command_statement, (name,))
+
+            on_commands: list[CallingCommand] = [
+                CallingCommand(on_command_id, routine_name, command)
+                for on_command_id, routine_name, command, in cursor.fetchall()
+            ]
+
+            routine_days: RoutineDays = RoutineDays(
+                monday,
+                tuesday,
+                wednesday,
+                thursday,
+                friday,
+                saturday,
+                sunday,
+                routine_dates,
+            )
+
+            routine_activation_times_statement: str = (
+                "SELECT * FROM routineactivationtime WHERE rname=?"
+            )
+            cursor.execute(routine_activation_times_statement, (name,))
+
+            clock_times: list[RoutineClockTime] = [
+                RoutineClockTime(
+                    time.fromisoformat(routine_time), routine_clock_time_id
                 )
+                for routine_clock_time_id, _, routine_time in cursor.fetchall()
+            ]
+            cursor.close()
+            routine_times: RoutineTime = RoutineTime(
+                clock_times, after_alarm, after_sunrise, after_sunset, after_call
+            )
 
-            for ratid, rid, _hour, _min in activation:
-                result_dict["retakes"]["activation"]["clock_time"].append(
-                    {"id": ratid, "hour": _hour, "min": _min}
-                )
+            retakes: RoutineRetakes = RoutineRetakes(routine_days, routine_times)
 
-            for _id, rid, module_name in commands:
-                text_list: list = []
+            actions: list[RoutineCommand] = self.__get_routine_commands(name)
 
-                for cid, text in commandtext:
-                    if cid == _id:
-                        text_list.append(text)
-
-                result_dict["actions"]["commands"].append(
-                    {"id": _id, "module_name": module_name, "text": text_list}
-                )
-
-            for (command,) in on_commands:
-                result_dict["on_commands"].append(command)
-
-            return result_dict
-
-        def __create_table(self):
-            pass
-
-        def __tuple_to_routine(
-            self,
-            routine: tuple,
-        ) -> Routine:
-            with self.db.cursor() as cursor:
-                (
-                    name,
-                    description,
-                    daily,
-                    monday,
-                    tuesday,
-                    wednesday,
-                    thursday,
-                    friday,
-                    saturday,
-                    sunday,
-                    after_alarm,
-                    after_sunrise,
-                    after_sunset,
-                    after_call,
-                ) = routine
-
-                routine_dates_statement: str = (
-                    "SELECT * FROM routinedates WHERE rname=?"
-                )
-                cursor.execute(routine_dates_statement, (name,))
-
-                routine_dates: list[SpecificDate] = [
-                    SpecificDate(sid, day, month)
-                    for sid, _, day, month in cursor.fetchall()
-                ]
-
-                on_command_statement: str = "SELECT * FROM oncommand WHERE rname=?"
-                cursor.execute(on_command_statement, (name,))
-
-                on_commands: list[str] = [command for command, in cursor.fetchall()]
-
-                routine_days: RoutineDays = RoutineDays(
-                    monday,
-                    tuesday,
-                    wednesday,
-                    thursday,
-                    friday,
-                    saturday,
-                    sunday,
-                    routine_dates,
-                )
-
-                routine_activation_times_statement: str = (
-                    "SELECT * FROM routineactivationtime WHERE rname=?"
-                )
-                cursor.execute(routine_activation_times_statement, (name,))
-
-                clock_times: list[RoutineClockTime] = [
-                    RoutineClockTime(rctid, time(hour, minute))
-                    for rctid, _, hour, minute in cursor.fetchall()
-                ]
-
-                routine_times: RoutineTimes = RoutineTimes(
-                    clock_times, after_alarm, after_sunrise, after_sunset, after_call
-                )
-
-                retakes: RoutineRetakes = RoutineRetakes(routine_days, routine_times)
-
-                actions: list[RoutineCommand] = self.__get_routine_commands(name)
-
-                return Routine(name, description, on_commands, retakes, actions)
+            return Routine(name, description, on_commands, retakes, actions)
 
         def __get_routine_commands(self, routine_name: str) -> list[RoutineCommand]:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM routinecommands WHERE rname=?"
-                cursor.execute(statement, (routine_name,))
-                return [
-                    RoutineCommand(rcid, module_name, self.__get_texts_of_command(rcid))
-                    for rcid, _, module_name in cursor.fetchall()
-                ]
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM routinecommands WHERE rname=?"
+            cursor.execute(statement, (routine_name,))
+            commands: list[RoutineCommand] = [
+                RoutineCommand(
+                    module_name,
+                    self.__get_texts_of_command(routine_command_id),
+                    routine_command_id,
+                )
+                for routine_command_id, _, module_name in cursor.fetchall()
+            ]
+            cursor.close()
+            return commands
 
         def __get_texts_of_command(self, routine_id: int) -> list[str]:
-            with self.db.cursor() as cursor:
-                statement: str = "SELECT * FROM commandtext WHERE cid=?"
-                cursor.execute(statement, (routine_id,))
-                return [text for _, text in cursor.fetchall()]
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM commandtext WHERE cid=?"
+            cursor.execute(statement, (routine_id,))
+            text_list: list[str] = [text for _, text in cursor.fetchall()]
+            cursor.close()
+            return text_list
 
     class _QuizInterface:
-        def __init__(self, db: Connection) -> None:
-            self.db: Connection = db
+        def __init__(self, _db: Connection) -> None:
+            self.db: Connection = _db
             logging.info("[INFO] QuizInterface initialized.")
 
         def add_question(
@@ -1752,82 +1516,56 @@ class DataBase:
         def __init__(self, db: Connection) -> None:
             self.db: Connection = db
 
-        def add_birthday(
-            self, first_name: str, last_name: str, day: int, month: int, year: int
-        ) -> None:
+        def add_birthday(self, birthday: Birthday) -> None:
             cursor: Cursor = self.db.cursor()
             cursor.execute(
                 "INSERT INTO birthdays VALUES (?, ?, ?, ?, ?)",
-                (first_name, last_name, day, month, year),
+                (
+                    birthday.first_name,
+                    birthday.last_name,
+                    birthday.date.isoformat(),
+                ),
             )
             cursor.close()
-            self.db.commit()
 
-        def get_birthday(self, first_name: str, last_name: str) -> dict:
+        def get_birthday(self, first_name: str, last_name: str) -> Birthday:
             cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM birthdays WHERE firstname=? AND lastname=?"
+            statement: str = (
+                "SELECT * FROM birthdays WHERE firstname=? AND lastname=? LIMIT 1"
+            )
             cursor.execute(statement, (first_name, last_name))
-            result_set: tuple = cursor.fetchone()
+            birthday: Birthday = self.__tuple_to_birthday(cursor.fetchone())
             cursor.close()
-            return self.__build_json(result_set)
+            return birthday
 
-        def get_all_birthdays(self) -> list[dict]:
+        def get_all_birthdays(self) -> list[Birthday]:
             cursor: Cursor = self.db.cursor()
-            result_list: list[dict] = []
-
             cursor.execute(f"SELECT * FROM birthdays")
-            result_set: list[tuple] = cursor.fetchall()
+            birthdays: list[Birthday] = [
+                self.__tuple_to_birthday(birthday) for birthday in cursor.fetchall()
+            ]
             cursor.close()
-            for item in result_set:
-                result_list.append(self.__build_json(item))
-
-            return result_list
+            return birthdays
 
         def update_birthday(
-            self,
-            _old_first_name: str,
-            _old_last_name: str,
-            _new_first_name: str = None,
-            _new_last_name: str = None,
-            _day: int = None,
-            _month: int = None,
-            _year: int = None,
-        ) -> None:
+            self, old_first_name: str, old_last_name: str, birthday: Birthday
+        ) -> Birthday:
 
+            statement: str = "UPDATE birthdays SET firstname=?, lastname=?, date=? WHERE firstname=? AND lastname=?"
             cursor: Cursor = self.db.cursor()
-            statement: str = "SELECT * FROM birthdays WHERE firstname=? AND lastname=?"
-            cursor.execute(statement, (_old_first_name, _old_last_name))
-            first_name, last_name, day, month, year = cursor.fetchone()
-
-            if _new_first_name is not None:
-                first_name = _new_first_name
-            if _new_last_name is not None:
-                last_name = _new_last_name
-            if _day is not None:
-                day = day
-            if _month is not None:
-                month = _month
-            if _year is not None:
-                year = _year
-
-            statement: str = """UPDATE birthdays 
-                                SET firstname=?, lastname=?, day=?, month=?, year=? 
-                                WHERE firstname=? 
-                                AND lastname=?"""
+            first_name, last_name, date = birthday
             cursor.execute(
                 statement,
                 (
                     first_name,
                     last_name,
-                    day,
-                    month,
-                    year,
-                    _old_first_name,
-                    _old_last_name,
+                    date.isoformat(),
+                    old_first_name,
+                    old_last_name,
                 ),
             )
             cursor.close()
-            self.db.commit()
+            return birthday
 
         def delete_birthday(self, first_name: str, last_name: str) -> None:
             cursor: Cursor = self.db.cursor()
@@ -1836,80 +1574,29 @@ class DataBase:
                 (first_name, last_name),
             )
             cursor.close()
-            self.db.commit()
 
         @staticmethod
-        def __build_json(result_set: tuple) -> dict:
-            return {
-                "first_name": result_set[0],
-                "last_name": result_set[1],
-                "day": result_set[2],
-                "month": result_set[3],
-                "year": result_set[4],
-            }
-
-    """def __execute(self, command: str, values: tuple = ()) -> list | int:
-        # cursor: Cursor = self.db.cursor()
-        cursor: Cursor = self.db.cursor()
-        try:
-            result_set: list = cursor.execute(command, values).fetchall()
-            if 'insert into' in command.lower():
-                return cursor.lastrowid
-            elif 'delete' in command.lower():
-                return cursor.rowcount
-            return result_set
-        except Exception as e:
-            self.error_counter += 1
-            logging.warning(f"[ERROR] Could not execute SQL command: {command}:\n {e}")
-            self.db.rollback()
-            raise SQLException(f"Couldn't execute SQL Statement: {command} with Values {str(values)}\n{e}")
-        finally:
-            cursor.close()"""
+        def __tuple_to_birthday(result_set: tuple) -> Birthday:
+            first_name, last_name, date = result_set
+            return Birthday(first_name, last_name, datetime.fromisoformat(date))
 
 
 if __name__ == "__main__":
     db = DataBase()
-    print(db.routine_interface.get_routines())
-    db.routine_interface.add_routine(
-        {
-            "name": "Morgenroutine",
-            "descriptions": "Routine, wenn Sonne Untergeht. Z.B. geht dann das Licht an",
-            "on_commands": [],
-            "retakes": {
-                "days": {
-                    "daily": True,
-                    "monday": False,
-                    "tuesday": False,
-                    "wednesday": False,
-                    "thursday": False,
-                    "friday": False,
-                    "saturday": False,
-                    "sunday": False,
-                    "date_of_day": [{"id": 1, "day": 5, "month": 12}],
-                },
-                "activation": {
-                    "clock_time": [
-                        {"id": 2, "hour": 10, "minute": 30},
-                        {"id": 1, "hour": 12, "minute": 0},
-                    ],
-                    "after_alarm": False,
-                    "after_sunrise": False,
-                    "after_sunset": True,
-                    "after_call": False,
-                },
-            },
-            "actions": {
-                "commands": [
-                    {
-                        "id": 1,
-                        "module_name": "phillips_hue",
-                        "text": [
-                            "Mach das Bett gr\u00fcn",
-                            "Mach den Schreibtisch blau",
-                        ],
-                    }
-                ]
-            },
-        }
+    routine: Routine = Routine("Test Routine", "Checken, ob alles klappt")
+
+    routine.add_calling_command("Ich bin wach")
+    routine.add_routine_command(
+        RoutineCommand(module_name="phue", with_text=["blau", "grün"])
     )
-    # print(db.alarm_interface.get_alarms())
+    print(db.routine_interface.add_routine(routine))
+
+    print(db.routine_interface.get_routine("Test Routine"))
+    print(db.routine_interface.get_routines())
+    routine.description = "lel"
+    routine.retakes.days.monday = True
+    routine.retakes.days.friday = True
+    routine.retakes.days.sunday = True
+    routine.retakes.times.after_alarm = True
+
+    print(db.routine_interface.update_routine("Ich bin wach", routine))
