@@ -14,3 +14,6 @@ class AudioFile:
 
     def get_data(self) -> base64:
         return base64.b64decode(self.data)
+
+    def to_json(self) -> dict:
+        return {"name": self.name, "data": self.data}

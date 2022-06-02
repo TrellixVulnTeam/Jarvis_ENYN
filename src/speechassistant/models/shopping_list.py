@@ -10,3 +10,11 @@ class ShoppingListItem:
     name: str
     measure: Measures
     quantity: float
+
+    def to_json(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "measure": self.measure,
+            "quantity": self.quantity,
+        }

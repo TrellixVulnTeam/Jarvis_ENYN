@@ -13,3 +13,15 @@ class User:
     messenger_id: int
     song_name: str
     waiting_notifications: list[str] = field(default_factory=list)
+
+    def to_json(self) -> dict:
+        return {
+            "id": self.uid,
+            "alias": self.alias,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "birthday": self.birthday.isoformat(),
+            "messengerId": self.messenger_id,
+            "songName": self.song_name,
+            "waitingNotifications": self.waiting_notifications,
+        }

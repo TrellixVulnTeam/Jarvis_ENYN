@@ -11,3 +11,11 @@ class Reminder:
     time: datetime
     text: str
     user: User
+
+    def to_json(self) -> dict:
+        return {
+            "reminderId": self.rid,
+            "time": self.time.isoformat(),
+            "text": self.text,
+            "user": self.user.to_json(),
+        }

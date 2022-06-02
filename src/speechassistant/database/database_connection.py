@@ -28,14 +28,16 @@ from src.speechassistant.models.timer import Timer
 from src.speechassistant.models.user import User
 from src.speechassistant.resources.module_skills import Skills
 
+
 # toDo: __tuple_to raise value error when nothing fount (type-error)
 # toDo: bugfix in returning boolean values of db
+
 
 class DataBase:
     __instance = None
 
     @staticmethod
-    def get_instance():
+    def get_instance() -> DataBase:
         if DataBase.__instance is None:
             DataBase()
         return DataBase.__instance
@@ -561,7 +563,7 @@ class DataBase:
         def add_alarm(self, alarm: Alarm) -> Alarm:
             alarm_id = self.__add_alarm_into_db(
                 alarm.active,
-                alarm.alarm_time.isoformat(),
+                alarm.get_alarm_time().isoformat(),
                 alarm.initiated,
                 alarm.song_name,
                 alarm.text,
@@ -1550,7 +1552,6 @@ class DataBase:
         def update_birthday(
             self, old_first_name: str, old_last_name: str, birthday: Birthday
         ) -> Birthday:
-
             statement: str = "UPDATE birthdays SET firstname=?, lastname=?, date=? WHERE firstname=? AND lastname=?"
             cursor: Cursor = self.db.cursor()
             first_name, last_name, date = birthday

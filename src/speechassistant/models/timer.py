@@ -12,3 +12,12 @@ class Timer:
     start_time: time
     text: str
     user: User
+
+    def to_json(self) -> dict:
+        return {
+            "id": self.tid,
+            "duration": self.duration.total_seconds(),
+            "startTime": self.start_time.isoformat(),
+            "text": self.text,
+            "user": self.user.to_json(),
+        }

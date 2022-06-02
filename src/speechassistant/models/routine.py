@@ -10,6 +10,9 @@ class SpecificDate:
     def as_tuple(self) -> tuple[int, datetime]:
         return self.sid, self.date
 
+    def to_json(self) -> dict:
+        return {"id": self.sid, "date": self.date.isoformat()}
+
 
 @dataclass
 class RoutineDays:
@@ -47,6 +50,18 @@ class RoutineDays:
             self.specific_dates,
         )
 
+    def to_json(self) -> dict:
+        return {
+            "monday": self.monday,
+            "tuesday": self.tuesday,
+            "wednesday": self.wednesday,
+            "thursday": self.thursday,
+            "friday": self.friday,
+            "saturday": self.saturday,
+            "sunday": self.sunday,
+            "specific_dates": [date.to_json() for date in self.specific_dates],
+        }
+
 
 @dataclass
 class RoutineClockTime:
@@ -55,6 +70,12 @@ class RoutineClockTime:
 
     def as_tuple(self) -> tuple[int, time]:
         return self.ratid, self.clock_time
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.ratid,
+            "clockTime": self.clock_time.isoformat(),
+        }
 
 
 @dataclass
@@ -74,6 +95,15 @@ class RoutineTime:
             self.after_call,
         )
 
+    def to_json(self) -> dict:
+        return {
+            "clockTimes": [routine_time.to_json() for routine_time in self.clock_times],
+            "afterAlarm": self.after_alarm,
+            "afterSunrise": self.after_sunrise,
+            "afterSunset": self.after_sunset,
+            "afterCall": self.after_call,
+        }
+
 
 @dataclass
 class RoutineRetakes:
@@ -82,6 +112,9 @@ class RoutineRetakes:
 
     def as_tuple(self) -> tuple[RoutineDays, RoutineTime]:
         return self.days, self.times
+
+    def to_json(self) -> dict:
+        return {"days": self.days.to_json(), "times": self.times.to_json()}
 
 
 @dataclass
@@ -93,6 +126,13 @@ class RoutineCommand:
     def as_tuple(self) -> tuple[int, str, list[str]]:
         return self.cid, self.module_name, self.with_text
 
+    def to_json(self) -> dict:
+        return {
+            "id": self.cid,
+            "moduleName": self.module_name,
+            "withText": self.with_text,
+        }
+
 
 @dataclass
 class CallingCommand:
@@ -102,6 +142,13 @@ class CallingCommand:
 
     def as_tuple(self) -> tuple[int, str, str]:
         return self.ocid, self.routine_name, self.command
+
+    def to_json(self) -> dict:
+        return {
+            "id": self.ocid,
+            "routineName": self.routine_name,
+            "command": self.command,
+        }
 
 
 @dataclass
@@ -138,3 +185,11 @@ class Routine:
             self.retakes,
             self.actions,
         )
+
+    def to_json(self) -> dict:
+        return {
+            "name": self.name,
+            "description": self.description,
+            "callingCommands": self.calling_commands,
+            "retakes": self.retakes,
+        }
