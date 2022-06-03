@@ -1,16 +1,17 @@
 from flask import request
 from flask_restx import Resource
+from src.speechassistant.api_old.myapi import api
+from src.speechassistant.api_old.speechassistant.logic.routine import *
+from src.speechassistant.api_old.speechassistant.parser import routine_parser as parser
 
-from src.speechassistant.api.myapi import api
-from src.speechassistant.api.speechassistant.logic.routine import *
-from src.speechassistant.api.speechassistant.parser import routine_parser as parser
+from src.speechassistant.models.routine import Routine
 
 namespace = api.namespace("routines")
 
 
 @namespace.route("/")
 class RoutineConnection(Resource):
-    # @api.marshal_with(routine)
+    @api.marshal_with(Routine)
     def get(self) -> Response:
         data: dict = parser.parse_args(request)
         if "name" not in data.keys():

@@ -2,28 +2,30 @@ from __future__ import annotations
 
 import json
 import logging
-import traceback
 
+from fastapi import status
+from fastapi.responses import JSONResponse
 from flask import Response
-from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
+
 from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
+from src.speechassistant.models.alarm import Alarm
 
 database: DataBase = DataBase.get_instance()
 
 
-def create_alarm(data: dict) -> Response:
+def create_alarm(data: dict) -> JSONResponse:
     if "user" not in data.keys():
         data["user"] = -1
     if "sound" not in data.keys() or data["sound"] is None:
         data["sound"] = "standard.wav"
-    result_set: dict = database.alarm_interface.add_alarm(
+    result_set: Alarm = database.alarm_interface.add_alarm(
         data["time"], data["text"], data["user"], data["repeating"], song=data["sound"]
     )
     result_set["sound"] = "standard"
-    print(result_set)
-    return Response(
-        mimetype="application/json",
-        status=201,
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content=result_set,
         headers={"location": f'/alarms/{result_set["id"]}'},
     )
 

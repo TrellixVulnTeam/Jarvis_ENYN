@@ -1,0 +1,16 @@
+{
+  "repeating": {
+    "monday": true,
+    "tuesday": false,
+    "wednesday": false,
+    "thursday": true,
+    "friday": false,
+    "saturday": false,
+    "sunday": false,
+    "regular": false
+  },
+  "song_name": "aufstehen",
+  "text": "aufstehen",
+  "active": true,
+  "initiated": false
+}

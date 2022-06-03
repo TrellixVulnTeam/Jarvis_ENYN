@@ -1,5 +1,5 @@
 from flask_restx import fields
-from src.speechassistant.api.myapi import api
+from src.speechassistant.api_old.myapi import api
 
 service = api.model(
     "Service",

@@ -1,8 +1,6 @@
 from flask import Response
-
-from src.speechassistant.api.myapi import api
 from flask_restx import Resource
-
+from src.speechassistant.api_old.myapi import api
 
 namespace = api.namespace("phue", desciption="Handle Philips-HUE devices")
 

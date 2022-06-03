@@ -1,7 +1,6 @@
-from flask import request, Response
 from flask_restx import Resource
 
-from src.speechassistant.api.myapi import api
+from src.speechassistant.api_old.myapi import api
 
 namespace = api.namespace("setup", description="Endpoint for settings and etc.")
 

@@ -2,10 +2,10 @@ import json
 import os
 
 from flask import Response, request
+from src.speechassistant.api_old.settings import ALLOWED_AUDIO_EXTENSIONS
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from src.speechassistant.api.settings import ALLOWED_AUDIO_EXTENSIONS
 from src.speechassistant.database.database_connection import DataBase
 from src.speechassistant.exceptions.CriticalExceptions import (
     UnsolvableException,

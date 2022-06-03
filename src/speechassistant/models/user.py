@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
@@ -12,7 +12,10 @@ class User:
     birthday: datetime
     messenger_id: int
     song_name: str
-    waiting_notifications: list[str] = field(default_factory=list)
+    waiting_notifications: list[str]
+
+    def __post_init__(self):
+        pass
 
     def to_json(self) -> dict:
         return {
