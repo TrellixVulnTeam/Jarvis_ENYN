@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, fields, field
+from pydantic.dataclasses import dataclass, Field
 from datetime import datetime, time
-from typing import Optional
 
-from dataclasses_json import dataclass_json, LetterCase, config
-from pydantic import BaseModel
+from src.speechassistant.api.utils.converter import (
+    CamelModelConfig,
+    CamelModel,
+    to_camel,
+)
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class AlarmRepeating(BaseModel):
+class AlarmRepeating(CamelModel):
     monday: bool
     tuesday: bool
     wednesday: bool
@@ -46,30 +46,16 @@ class AlarmRepeating(BaseModel):
     #     )
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Alarm(BaseModel):
+class Alarm(CamelModel):
+    text: str
+    alarm_time: time
     repeating: AlarmRepeating
     song_name: str
-    text: str
-    active: bool
-    initiated: bool
-    alarm_time: time = field(
-        metadata=config(
-            encoder=datetime.isoformat,
-            decoder=datetime.fromisoformat,
-            mm_field=fields.DateTime(format="iso"),
-        )
-    )
-    __last_executed: Optional[str] = None
-    user_id: int = -1
-    aid: Optional[int] = None
-
-    def get_last_executed(self) -> datetime:
-        return datetime.fromisoformat(self.__last_executed)
-
-    def set_last_executed(self, last_executed: datetime) -> None:
-        self.__last_executed = last_executed.isoformat()
+    active: bool = True
+    initiated: bool = False
+    user_id: int = None
+    alarm_id: int = None
+    last_executed: datetime | None = None
 
     # def to_json(self) -> dict:
     #     return {

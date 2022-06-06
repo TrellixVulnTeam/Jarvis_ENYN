@@ -2,6 +2,9 @@ import uvicorn
 from fastapi import FastAPI, Request
 
 from src.speechassistant.api.services.alarmService import alarm_service
+from src.speechassistant.api.services.audioFileService import audio_file_service
+from src.speechassistant.api.services.moduleService import module_service
+from src.speechassistant.api.services.reminderService import reminder_service
 
 app = FastAPI()
 
@@ -18,6 +21,9 @@ def test():
 
 def start() -> None:
     app.mount("/alarms", alarm_service)
+    app.mount("/reminder", reminder_service)
+    app.mount("/modules", module_service)
+    app.mount("/audioFiles", audio_file_service)
 
 
 if __name__ == "__main__":

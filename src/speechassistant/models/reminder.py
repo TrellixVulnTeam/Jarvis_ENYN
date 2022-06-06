@@ -1,21 +1,19 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from src.speechassistant.models.user import User
+from src.speechassistant.api.utils.converter import CamelModel
 
 
-@dataclass
-class Reminder:
-    rid: Optional[int]
+class Reminder(CamelModel):
     time: datetime
     text: str
-    user: User
+    user_id: int
+    reminder_id: int = None
 
-    def to_json(self) -> dict:
+    """def to_json(self) -> dict:
         return {
             "reminderId": self.rid,
             "time": self.time.isoformat(),
             "text": self.text,
             "user": self.user.to_json(),
-        }
+        }"""

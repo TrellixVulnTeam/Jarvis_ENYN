@@ -34,18 +34,7 @@ from src.speechassistant.resources.module_skills import Skills
 
 
 class DataBase:
-    __instance = None
-
-    @staticmethod
-    def get_instance() -> DataBase:
-        if DataBase.__instance is None:
-            DataBase()
-        return DataBase.__instance
-
     def __init__(self) -> None:
-        if DataBase.__instance is not None:
-            raise Exception("Singleton cannot be instantiated more than once!")
-
         logging.basicConfig(level=logging.DEBUG)
         logging.info("[ACTION] Initialize DataBase...\n")
         logging.info(os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"))
@@ -109,11 +98,11 @@ class DataBase:
             "aid INTEGER PRIMARY KEY, "
             "sname VARCHAR(30), "
             "uid INTEGER, "
-            "time Time, "
+            "time TIME, "
             "text VARCHAR(255), "
             "active INTEGER, "
             "initiated INTEGER, "
-            "last_executed VARCHAR(10), "
+            "last_executed DATE, "
             "FOREIGN KEY(sname) REFERENCES audio(name), "
             "FOREIGN KEY(uid) REFERENCES user(uid))"
         )
@@ -153,7 +142,7 @@ class DataBase:
         self.__create_table(
             "CREATE TABLE IF NOT EXISTS reminder ("
             "id INTEGER PRIMARY KEY,"
-            "time VARCHAR(19),"
+            "time DATE,"
             "text VARCHAR(255),"
             "uid INTEGER,"
             "FOREIGN KEY(uid) REFERENCES user(uid))"
@@ -563,14 +552,13 @@ class DataBase:
         def add_alarm(self, alarm: Alarm) -> Alarm:
             alarm_id = self.__add_alarm_into_db(
                 alarm.active,
-                alarm.get_alarm_time().isoformat(),
-                alarm.initiated,
+                alarm.alarm_time,
                 alarm.song_name,
                 alarm.text,
                 alarm.user_id,
             )
             self.__add_alarm_repeating_into_db(alarm_id, alarm.repeating)
-            alarm.aid = alarm_id
+            alarm.alarm_id = alarm_id
             return alarm
 
         def __add_alarm_repeating_into_db(
@@ -597,24 +585,15 @@ class DataBase:
             cursor.close()
 
         def __add_alarm_into_db(
-            self, active, alarm_time, initiated, song, text, user
+            self, active: bool, alarm_time: time, song: str, text: str, user_id: int
         ) -> int:
             cursor: Cursor = self.db.cursor()
-            statement: str = """INSERT INTO alarm (sname, uid, hour, minute, total_seconds, text, active, 
+            statement: str = """INSERT INTO alarm (sname, uid, time, text, active, 
                                 initiated, last_executed) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, "")"""
+                                VALUES (?, ?, ?, ?, ?, ?, "")"""
             cursor.execute(
                 statement,
-                (
-                    song,
-                    user,
-                    alarm_time["hour"],
-                    alarm_time["minute"],
-                    alarm_time["total_seconds"],
-                    text,
-                    int(active),
-                    int(initiated),
-                ),
+                (song, user_id, alarm_time.isoformat(), active, text, int(active)),
             )
             alarm_id: int = cursor.lastrowid
             cursor.close()
@@ -641,23 +620,25 @@ class DataBase:
                 f"UPDATE alarm SET sname=?, uid=?, time=?, text=?, active=?, "
                 f"initiated=?, last_executed=? WHERE aid=?"
             )
+            print(alarm.last_executed)
+            print(type(alarm.last_executed))
             cursor.execute(
                 statement,
                 (
                     alarm.song_name,
                     alarm.user_id,
-                    alarm.alarm_time,
+                    alarm.alarm_time.isoformat(),
                     alarm.text,
                     alarm.active,
                     alarm.initiated,
                     alarm.last_executed,
-                    alarm.aid,
+                    alarm.alarm_id,
                 ),
             )
             alarm_repeat: AlarmRepeating = alarm.repeating
             statement: str = (
                 f"UPDATE alarmrepeat "
-                f"SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, sunday=? "
+                f"SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, sunday=?, regular=? "
                 f"WHERE aid=?"
             )
             cursor.execute(
@@ -671,7 +652,7 @@ class DataBase:
                     alarm_repeat.saturday,
                     alarm_repeat.sunday,
                     alarm_repeat.regular,
-                    alarm.aid,
+                    alarm.alarm_id,
                 ),
             )
             cursor.close()
@@ -679,6 +660,8 @@ class DataBase:
 
         @staticmethod
         def __tuple_to_alarm(alarm: tuple) -> Alarm:
+            if not alarm:
+                raise NoMatchingEntry()
             (
                 alarm_id,
                 song_name,
@@ -699,18 +682,27 @@ class DataBase:
                 regular,
             ) = alarm
             repeating: AlarmRepeating = AlarmRepeating(
-                monday, tuesday, wednesday, thursday, friday, saturday, sunday, regular
+                monday=(monday == 1),
+                tuesday=(tuesday == 1),
+                wednesday=(wednesday == 1),
+                thursday=(thursday == 1),
+                friday=(friday == 1),
+                saturday=(saturday == 1),
+                sunday=(sunday == 1),
+                regular=(regular == 1),
             )
             return Alarm(
-                alarm_id,
-                repeating,
-                song_name,
-                time.fromisoformat(alarm_time),
-                text,
-                active,
-                initiated,
-                last_executed,
-                user_id,
+                alarm_id=alarm_id,
+                repeating=repeating,
+                song_name=song_name,
+                alarm_time=time.fromisoformat(alarm_time),
+                text=text,
+                active=(active == 1),
+                initiated=(initiated == 1),
+                last_executed=datetime.fromisoformat(last_executed)
+                if last_executed
+                else None,
+                user_id=user_id,
             )
 
         def __create_table(self):
@@ -743,6 +735,16 @@ class DataBase:
             audio_file: AudioFile = self.__tuple_to_audio_file(cursor.fetchone())
             cursor.close()
             return audio_file
+
+        def get_all_audio_files(self) -> list[AudioFile]:
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELCT * FROM audio"
+            cursor.execute(statement)
+            audio_files: list[AudioFile] = [
+                self.__tuple_to_audio_file(result) for result in cursor.fetchall()
+            ]
+            cursor.close()
+            return audio_files
 
         def get_file_names(self) -> list[str]:
             cursor: Cursor = self.db.cursor()
@@ -896,13 +898,22 @@ class DataBase:
             cursor.close()
             return reminder
 
-        def add_reminder(self, reminder: Reminder) -> int:
+        def get_reminder_by_id(self, reminder_id: int) -> Reminder:
+            cursor: Cursor = self.db.cursor()
+            statement: str = "SELECT * FROM reminder WHERE id=?"
+            cursor.execute(statement, (reminder_id,))
+            reminder: Reminder = self.__tuple_to_reminder(cursor.fetchone())
+            cursor.close()
+            return reminder
+
+        def add_reminder(self, reminder: Reminder) -> Reminder:
             cursor: Cursor = self.db.cursor()
             statement: str = f"INSERT INTO reminder (time, text, uid) VALUES (?, ?, ?)"
-            cursor.execute(statement, (reminder.time, reminder.text, reminder.user.uid))
+            cursor.execute(statement, (reminder.time, reminder.text, reminder.user_id))
             rid: int = cursor.lastrowid
             cursor.close()
-            return rid
+            reminder.reminder_id = rid
+            return reminder
 
         def delete_reminder_by_id(self, _id: int) -> int:
             statement: str = "DELETE FROM reminder WHERE id=?"
@@ -919,10 +930,14 @@ class DataBase:
             cursor.close()
             return counter
 
-        def __tuple_to_reminder(self, result_set: tuple) -> Reminder:
+        @staticmethod
+        def __tuple_to_reminder(result_set: tuple) -> Reminder:
+            if not result_set:
+                raise NoMatchingEntry()
             (reminder_id, reminder_time, text, user_id) = result_set
-            user: User = self.user_interface.get_user_by_id(user_id)
-            return Reminder(reminder_id, reminder_time, text, user)
+            return Reminder(
+                time=reminder_time, text=text, user_id=user_id, reminder_id=reminder_id
+            )
 
         def __create_table(self):
             pass

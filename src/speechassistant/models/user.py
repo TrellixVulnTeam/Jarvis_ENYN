@@ -5,7 +5,6 @@ from typing import Optional
 
 @dataclass
 class User:
-    uid: Optional[int]
     alias: str
     first_name: str
     last_name: str
@@ -13,6 +12,7 @@ class User:
     messenger_id: int
     song_name: str
     waiting_notifications: list[str]
+    uid: Optional[int] = None
 
     def __post_init__(self):
         pass
