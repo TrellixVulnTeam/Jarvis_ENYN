@@ -30,8 +30,6 @@ async def read_reminder_by_id(reminder_id: int):
     return ReminderLogic.read_reminder_by_id(reminder_id)
 
 
-@reminder_service.delete(
-    "/{reminder_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
-)
+@reminder_service.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reminder_by_id(reminder_id: int):
     ReminderLogic.delete_reminder(reminder_id)

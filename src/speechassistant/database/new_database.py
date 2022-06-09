@@ -2,28 +2,18 @@ import logging
 import os
 
 import sqlalchemy
-from sqlalchemy.engine import Connection, Engine
+from sqlalchemy import databases
+
+from src.speechassistant.database.DataBasePersistency import DBPersistency
 
 
 class DataBase:
-    __instance = None
-
-    @staticmethod
-    def get_instance():
-        if DataBase.__instance is None:
-            DataBase()
-        return DataBase.__instance
-
     def __int__(self) -> None:
-        if DataBase.__instance is not None:
-            raise Exception("Singleton cannot be instantiated more than once!")
-
         logging.info("[ACTION] Initialize DataBase...\n")
-        logging.info(
-            "sqlite://" + os.path.dirname(os.path.realpath(__file__)).join("db.sqlite")
-        )
+        database = databases.Database(DBPersistency.DATABASE_URL)
+        metadata = sqlalchemy.MetaData()
 
-        self.engine: Engine = sqlalchemy.create_engine(
-            "sqlite://" + os.path.dirname(os.path.realpath(__file__)).join("db.sqlite")
+        engine = sqlalchemy.create_engine(
+            DBPersistency.DATABASE_URL, connect_args={"check_same_thread": False}
         )
-        self.db: Connection = self.engine.connect()
+        metadata.create_all(engine)

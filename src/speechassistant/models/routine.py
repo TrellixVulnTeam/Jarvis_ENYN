@@ -1,29 +1,33 @@
-from dataclasses import dataclass, field
 from datetime import time, datetime
+from typing import Optional
+
+from pydantic import validator, Field
+
+from src.speechassistant.api.utils.converter import CamelModel
 
 
-@dataclass
-class SpecificDate:
+class SpecificDate(CamelModel):
     date: datetime
-    sid: int = field(default=None)
+    sid: Optional[int] = None
+
+    @validator("sid")
+    def validate_specific_date_id(cls, v):
+        assert v is not None, "ID may not be None!"
+        return v
 
     def as_tuple(self) -> tuple[int, datetime]:
         return self.sid, self.date
 
-    def to_json(self) -> dict:
-        return {"id": self.sid, "date": self.date.isoformat()}
 
-
-@dataclass
-class RoutineDays:
-    monday: bool = field(default=False)
-    tuesday: bool = field(default=False)
-    wednesday: bool = field(default=False)
-    thursday: bool = field(default=False)
-    friday: bool = field(default=False)
-    saturday: bool = field(default=False)
-    sunday: bool = field(default=False)
-    specific_dates: list[SpecificDate] = field(default_factory=lambda: [])
+class RoutineDays(CamelModel):
+    monday: bool = Field(default=False)
+    tuesday: bool = Field(default=False)
+    wednesday: bool = Field(default=False)
+    thursday: bool = Field(default=False)
+    friday: bool = Field(default=False)
+    saturday: bool = Field(default=False)
+    sunday: bool = Field(default=False)
+    specific_dates: list[SpecificDate] = Field(default_factory=lambda: [])
 
     def __post_init__(self):
         self.daily = (
@@ -50,41 +54,21 @@ class RoutineDays:
             self.specific_dates,
         )
 
-    def to_json(self) -> dict:
-        return {
-            "monday": self.monday,
-            "tuesday": self.tuesday,
-            "wednesday": self.wednesday,
-            "thursday": self.thursday,
-            "friday": self.friday,
-            "saturday": self.saturday,
-            "sunday": self.sunday,
-            "specific_dates": [date.to_json() for date in self.specific_dates],
-        }
 
-
-@dataclass
-class RoutineClockTime:
+class RoutineClockTime(CamelModel):
     clock_time: time
-    ratid: int = field(default=None)
+    ratid: int = Field(default=None)
 
     def as_tuple(self) -> tuple[int, time]:
         return self.ratid, self.clock_time
 
-    def to_dict(self) -> dict:
-        return {
-            "id": self.ratid,
-            "clockTime": self.clock_time.isoformat(),
-        }
 
-
-@dataclass
-class RoutineTime:
-    clock_times: list[RoutineClockTime] = field(default_factory=lambda: [])
-    after_alarm: bool = field(default=False)
-    after_sunrise: bool = field(default=False)
-    after_sunset: bool = field(default=False)
-    after_call: bool = field(default=False)
+class RoutineTime(CamelModel):
+    clock_times: list[RoutineClockTime] = Field(default_factory=lambda: [])
+    after_alarm: bool = Field(default=False)
+    after_sunrise: bool = Field(default=False)
+    after_sunset: bool = Field(default=False)
+    after_call: bool = Field(default=False)
 
     def as_tuple(self) -> tuple[list[RoutineClockTime], bool, bool, bool, bool]:
         return (
@@ -95,69 +79,39 @@ class RoutineTime:
             self.after_call,
         )
 
-    def to_json(self) -> dict:
-        return {
-            "clockTimes": [routine_time.to_json() for routine_time in self.clock_times],
-            "afterAlarm": self.after_alarm,
-            "afterSunrise": self.after_sunrise,
-            "afterSunset": self.after_sunset,
-            "afterCall": self.after_call,
-        }
 
-
-@dataclass
-class RoutineRetakes:
-    days: RoutineDays = field(default_factory=lambda: RoutineDays())
-    times: RoutineTime = field(default_factory=lambda: RoutineTime())
+class RoutineRetakes(CamelModel):
+    days: RoutineDays = Field(default_factory=lambda: RoutineDays())
+    times: RoutineTime = Field(default_factory=lambda: RoutineTime())
 
     def as_tuple(self) -> tuple[RoutineDays, RoutineTime]:
         return self.days, self.times
 
-    def to_json(self) -> dict:
-        return {"days": self.days.to_json(), "times": self.times.to_json()}
 
-
-@dataclass
-class RoutineCommand:
+class RoutineCommand(CamelModel):
     module_name: str
     with_text: list[str]
-    cid: int = field(default=None)
+    cid: int = Field(default=None)
 
     def as_tuple(self) -> tuple[int, str, list[str]]:
         return self.cid, self.module_name, self.with_text
 
-    def to_json(self) -> dict:
-        return {
-            "id": self.cid,
-            "moduleName": self.module_name,
-            "withText": self.with_text,
-        }
 
-
-@dataclass
-class CallingCommand:
+class CallingCommand(CamelModel):
     routine_name: str
     command: str
-    ocid: int = field(default=None)
+    ocid: int = Field(default=None)
 
     def as_tuple(self) -> tuple[int, str, str]:
         return self.ocid, self.routine_name, self.command
 
-    def to_json(self) -> dict:
-        return {
-            "id": self.ocid,
-            "routineName": self.routine_name,
-            "command": self.command,
-        }
 
-
-@dataclass
-class Routine:
+class Routine(CamelModel):
     name: str
     description: str
-    calling_commands: list[CallingCommand] = field(default_factory=lambda: [])
-    retakes: RoutineRetakes = field(default_factory=lambda: RoutineRetakes())
-    actions: list[RoutineCommand] = field(default_factory=lambda: [])
+    calling_commands: list[CallingCommand] = Field(default_factory=lambda: [])
+    retakes: RoutineRetakes = Field(default_factory=lambda: RoutineRetakes())
+    actions: list[RoutineCommand] = Field(default_factory=lambda: [])
 
     def add_calling_command(self, command: str):
         self.calling_commands.append(
@@ -185,11 +139,3 @@ class Routine:
             self.retakes,
             self.actions,
         )
-
-    def to_json(self) -> dict:
-        return {
-            "name": self.name,
-            "description": self.description,
-            "callingCommands": self.calling_commands,
-            "retakes": self.retakes,
-        }

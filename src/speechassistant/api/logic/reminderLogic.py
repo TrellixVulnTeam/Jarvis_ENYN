@@ -28,7 +28,7 @@ class ReminderLogic:
         except (OperationalError, NoMatchingEntry):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"There is no Reminder with the ID {reminder_id} in the database!",
+                detail=f"There is no reminder with the ID {reminder_id} in the database!",
             )
 
     @staticmethod

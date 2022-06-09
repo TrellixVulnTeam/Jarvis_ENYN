@@ -27,7 +27,7 @@ def read_user(data: int | None) -> Response:
 
 
 def update_user(data: dict) -> Response:
-    database.user_interface.update_user(
+    updated_user: User = database.user_interface.update_user(
         data["uid"],
         _new_alias=data["alias"],
         _new_first_name=data["firstname"],
@@ -36,7 +36,7 @@ def update_user(data: dict) -> Response:
         _song_name=data["song"],
         _messenger_id=data["messenger_id"],
     )
-    return Response(status=204)
+    return Response(updated_user, status=204)
 
 
 def delete_user(uid: int) -> Response:

@@ -738,7 +738,7 @@ class DataBase:
 
         def get_all_audio_files(self) -> list[AudioFile]:
             cursor: Cursor = self.db.cursor()
-            statement: str = "SELCT * FROM audio"
+            statement: str = "SELECT * FROM audio"
             cursor.execute(statement)
             audio_files: list[AudioFile] = [
                 self.__tuple_to_audio_file(result) for result in cursor.fetchall()
@@ -1070,6 +1070,7 @@ class DataBase:
                 retakes,
                 actions,
             ) = new_routine.as_tuple()
+
             (
                 monday,
                 tuesday,
@@ -1080,6 +1081,7 @@ class DataBase:
                 sunday,
                 specific_dates,
             ) = retakes.days.as_tuple()
+
             (
                 times,
                 after_alarm,
@@ -1110,16 +1112,16 @@ class DataBase:
                 ),
             )
             cursor.close()
-            self.add_calling_commands(name, routine.calling_commands)
-            routine.actions = self.add_actions(name, routine.actions)
-            routine.retakes.times.clock_times = self.add_clock_times(
-                name, routine.retakes.times.clock_times
+            self.add_calling_commands(name, new_routine.calling_commands)
+            new_routine.actions = self.add_actions(name, new_routine.actions)
+            new_routine.retakes.times.clock_times = self.add_clock_times(
+                name, new_routine.retakes.times.clock_times
             )
-            routine.retakes.days.specific_dates = self.add_specific_dates(
-                name, routine.retakes.days.specific_dates
+            new_routine.retakes.days.specific_dates = self.add_specific_dates(
+                name, new_routine.retakes.days.specific_dates
             )
 
-            return routine
+            return new_routine
 
         def add_calling_commands(
             self, routine_name: str, calling_commands: list[CallingCommand]
@@ -1207,9 +1209,15 @@ class DataBase:
             cursor.execute(statement, (new_name, old_name))
             cursor.close()
 
-        def update_routine(self, old_name: str, updated_routine: Routine):
+        def update_routine(self, old_name: str, updated_routine: Routine) -> Routine:
             statement: str = f"UPDATE routine SET name=?, description=? WHERE name=?"
-            name, description, calling_commands, retakes, actions = updated_routine
+            (
+                name,
+                description,
+                calling_commands,
+                retakes,
+                actions,
+            ) = updated_routine.as_tuple()
             cursor: Cursor = self.db.cursor()
             cursor.execute(statement, (name, description, old_name))
             cursor.close()
@@ -1218,6 +1226,7 @@ class DataBase:
             )
             self.update_retakes(updated_routine.name, updated_routine.retakes)
             self.update_actions(updated_routine.actions)
+            return updated_routine
 
         def update_calling_commands(
             self, calling_commands: list[CallingCommand]
@@ -1250,11 +1259,11 @@ class DataBase:
                 self.update_action_texts(command)
 
         def update_action_texts(self, routine_command: RoutineCommand) -> None:
-            del_statement: str = "DELETE FROM commandtext WHERE rcid=?"
+            del_statement: str = "DELETE FROM commandtext WHERE cid=?"
             create_statement = "INSERT INTO commandtext VALUES (?, ?)"
 
             cursor: Cursor = self.db.cursor()
-            cursor.execute(del_statement)
+            cursor.execute(del_statement, (routine_command.cid,))
             cursor.executemany(
                 create_statement,
                 [
@@ -1281,7 +1290,7 @@ class DataBase:
             ) = days.as_tuple()
             statement: str = (
                 "UPDATE routine SET monday=?, tuesday=?, wednesday=?, thursday=?, friday=?, saturday=?, "
-                "sunday=? WHERE rname=?"
+                "sunday=? WHERE name=?"
             )
             cursor: Cursor = self.db.cursor()
             cursor.execute(
@@ -1299,7 +1308,7 @@ class DataBase:
             )
             cursor.close()
 
-            self.update_specific_dates(specific_dates)
+            self.update_specific_dates(routine_name, specific_dates)
 
         def update_time(self, routine_name: str, routine_time: RoutineTime):
             (
@@ -1310,7 +1319,7 @@ class DataBase:
                 after_call,
             ) = routine_time.as_tuple()
             self.update_clock_times(times)
-            statement: str = "UPDATE routine SET afteralarm=?, aftersunrise=?, aftersunser=?, aftercall=? WHERE rname=?"
+            statement: str = "UPDATE routine SET afteralarm=?, aftersunrise=?, aftersunset=?, aftercall=? WHERE name=?"
             cursor: Cursor = self.db.cursor()
             cursor.execute(
                 statement,
@@ -1324,12 +1333,21 @@ class DataBase:
             )
             cursor.close()
 
-        def update_specific_dates(self, specific_dates: list[SpecificDate]) -> None:
-            #
-            statement: str = "UPDATE routinedates SET time=?"
+        def update_specific_dates(
+            self, routine_name: str, specific_dates: list[SpecificDate]
+        ) -> None:
+            statement: str = "UPDATE routinedates SET rdid=?, rname=?, date=?"
             cursor: Cursor = self.db.cursor()
             cursor.executemany(
-                statement, [(sd.date.isoformat(),) for sd in specific_dates]
+                statement,
+                [
+                    (
+                        routine_name,
+                        sd.sid,
+                        sd.date.isoformat(),
+                    )
+                    for sd in specific_dates
+                ],
             )
             cursor.close()
 
@@ -1413,6 +1431,9 @@ class DataBase:
             self,
             routine_tuple: tuple,
         ) -> Routine:
+            # toDo: get actions of routine
+            if not routine_tuple:
+                raise NoMatchingEntry()
             cursor: Cursor = self.db.cursor()
             (
                 name,
@@ -1434,7 +1455,7 @@ class DataBase:
             cursor.execute(routine_dates_statement, (name,))
 
             routine_dates: list[SpecificDate] = [
-                SpecificDate(datetime.fromisoformat(date), sid)
+                SpecificDate(date=datetime.fromisoformat(date), sid=sid)
                 for sid, _, date in cursor.fetchall()
             ]
 
@@ -1442,19 +1463,21 @@ class DataBase:
             cursor.execute(on_command_statement, (name,))
 
             on_commands: list[CallingCommand] = [
-                CallingCommand(on_command_id, routine_name, command)
+                CallingCommand(
+                    ocid=on_command_id, routine_name=routine_name, command=command
+                )
                 for on_command_id, routine_name, command, in cursor.fetchall()
             ]
 
             routine_days: RoutineDays = RoutineDays(
-                monday,
-                tuesday,
-                wednesday,
-                thursday,
-                friday,
-                saturday,
-                sunday,
-                routine_dates,
+                monday=monday,
+                tuesday=tuesday,
+                wednesday=wednesday,
+                thursday=thursday,
+                friday=friday,
+                saturday=saturday,
+                sunday=sunday,
+                routine_dates=routine_dates,
             )
 
             routine_activation_times_statement: str = (
@@ -1464,20 +1487,33 @@ class DataBase:
 
             clock_times: list[RoutineClockTime] = [
                 RoutineClockTime(
-                    time.fromisoformat(routine_time), routine_clock_time_id
+                    clock_time=time.fromisoformat(routine_time),
+                    ratid=routine_clock_time_id,
                 )
                 for routine_clock_time_id, _, routine_time in cursor.fetchall()
             ]
             cursor.close()
             routine_times: RoutineTime = RoutineTime(
-                clock_times, after_alarm, after_sunrise, after_sunset, after_call
+                clock_times=clock_times,
+                after_alarm=after_alarm,
+                after_sunrise=after_sunrise,
+                after_sunset=after_sunset,
+                after_call=after_call,
             )
 
-            retakes: RoutineRetakes = RoutineRetakes(routine_days, routine_times)
+            retakes: RoutineRetakes = RoutineRetakes(
+                days=routine_days, times=routine_times
+            )
 
             actions: list[RoutineCommand] = self.__get_routine_commands(name)
 
-            return Routine(name, description, on_commands, retakes, actions)
+            return Routine(
+                name=name,
+                description=description,
+                calling_commands=on_commands,
+                retakes=retakes,
+                actions=actions,
+            )
 
         def __get_routine_commands(self, routine_name: str) -> list[RoutineCommand]:
             cursor: Cursor = self.db.cursor()
@@ -1485,9 +1521,9 @@ class DataBase:
             cursor.execute(statement, (routine_name,))
             commands: list[RoutineCommand] = [
                 RoutineCommand(
-                    module_name,
-                    self.__get_texts_of_command(routine_command_id),
-                    routine_command_id,
+                    module_name=module_name,
+                    with_text=self.__get_texts_of_command(routine_command_id),
+                    cid=routine_command_id,
                 )
                 for routine_command_id, _, module_name in cursor.fetchall()
             ]
@@ -1599,7 +1635,9 @@ class DataBase:
 
 if __name__ == "__main__":
     db = DataBase()
-    routine: Routine = Routine("Test Routine", "Checken, ob alles klappt")
+    routine: Routine = Routine(
+        name="Test Routine", description="Checken, ob alles klappt"
+    )
 
     routine.add_calling_command("Ich bin wach")
     routine.add_routine_command(

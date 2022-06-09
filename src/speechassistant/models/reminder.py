@@ -1,14 +1,17 @@
 from datetime import datetime
-from typing import Optional
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, DateTime, String, Integer
 
 from src.speechassistant.api.utils.converter import CamelModel
+
+Base = declarative_base()
 
 
 class Reminder(CamelModel):
     time: datetime
     text: str
     user_id: int
-    reminder_id: int = None
+    reminder_id: int
 
     """def to_json(self) -> dict:
         return {
