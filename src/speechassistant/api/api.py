@@ -1,11 +1,8 @@
 import uvicorn
 from fastapi import FastAPI, Request
+from fastapi.routing import APIRoute, APIRouter
 
-from src.speechassistant.api.services.alarmService import alarm_service
-from src.speechassistant.api.services.audioFileService import audio_file_service
-from src.speechassistant.api.services.moduleService import module_service
-from src.speechassistant.api.services.reminderService import reminder_service
-from src.speechassistant.api.services.routineService import routine_service
+from src.speechassistant.api.routers import alarm, audioFile, module, reminder, routine
 
 app = FastAPI()
 
@@ -21,11 +18,18 @@ def test():
 
 
 def start() -> None:
-    app.mount("/alarms", alarm_service)
-    app.mount("/reminder", reminder_service)
-    app.mount("/modules", module_service)
-    app.mount("/audioFiles", audio_file_service)
-    app.mount("/routines", routine_service)
+    api: FastAPI = FastAPI()
+
+    v1: FastAPI = FastAPI()
+    v1.include_router(alarm.router, prefix="/alarms", tags=["Wecker"], dependencies=[])
+    v1.include_router(reminder.router, prefix="/reminder", tags=["reminder"], dependencies=[])
+    v1.include_router(module.router, prefix="/modules", tags=["modules"], dependencies=[])
+    v1.include_router(audioFile.router, prefix="/audioFiles", tags=["audioFiles"], dependencies=[])
+    v1.include_router(routine.router, prefix="/routines", tags=["routines"], dependencies=[])
+
+    api.mount(app=v1, path="/v1", name="v1")
+
+    app.mount(app=api, path="/api", name="api")
 
 
 if __name__ == "__main__":

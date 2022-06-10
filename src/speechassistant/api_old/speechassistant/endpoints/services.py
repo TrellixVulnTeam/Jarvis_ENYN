@@ -2,7 +2,7 @@ from flask import Response
 from flask_restx import Resource
 from src.speechassistant.api_old.myapi import api
 
-namespace = api.namespace("service", desciption="Get information of services")
+namespace = api.namespace("service", desciption="Get information of routers")
 
 
 @namespace.route("/")

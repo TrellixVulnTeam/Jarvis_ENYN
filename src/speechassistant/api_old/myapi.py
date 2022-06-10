@@ -4,7 +4,7 @@ import logging
 api: Api = Api(
     version="0.1",
     title="Speech-assistant API",
-    description="This API is used to access to modules and services of the Speech-assistant",
+    description="This API is used to access to modules and routers of the Speech-assistant",
 )
 
 

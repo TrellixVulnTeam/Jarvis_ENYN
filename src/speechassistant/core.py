@@ -244,7 +244,7 @@ def start() -> None:
 # modules.start_continuous()
 # audio_input.start(config_data['wakeword_sentensivity'], core.hotword_detected)
 # audio_output.start()
-# core.services.weather.start()
+# core.routers.weather.start()
 # time.sleep(0.75)
 
 # start_telegram(core)

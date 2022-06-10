@@ -1,19 +1,19 @@
-from fastapi import FastAPI, status
+from fastapi import APIRouter, status
 
 from src.speechassistant.api.logic.reminderLogic import ReminderLogic
 from src.speechassistant.models.reminder import Reminder
 
-reminder_service: FastAPI = FastAPI()
+router: APIRouter = APIRouter()
 
 
-@reminder_service.post(
+@router.post(
     "/", response_model=Reminder, status_code=status.HTTP_201_CREATED
 )
 async def create_reminder(reminder: Reminder):
     return ReminderLogic.create_reminder(reminder)
 
 
-@reminder_service.get(
+@router.get(
     "/", response_model=list[Reminder], status_code=status.HTTP_200_OK
 )
 async def read_all_reminder(passed: bool = False):
@@ -23,13 +23,13 @@ async def read_all_reminder(passed: bool = False):
         return ReminderLogic.read_all_reminder()
 
 
-@reminder_service.get(
+@router.get(
     "/{reminder_id}", response_model=Reminder, status_code=status.HTTP_200_OK
 )
 async def read_reminder_by_id(reminder_id: int):
     return ReminderLogic.read_reminder_by_id(reminder_id)
 
 
-@reminder_service.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reminder_by_id(reminder_id: int):
     ReminderLogic.delete_reminder(reminder_id)

@@ -12,7 +12,7 @@ from threading import Thread
 class InstallWrapper:
     """
     The install wrapper class initiates a thread and enables a few helper functions
-    to install components described in the services.json file
+    to install components described in the routers.json file
     """
 
     def __init__(self):
@@ -125,10 +125,10 @@ class InstallWrapper:
     def readConfig(self):
         """
         the readConfig is used as a basic wrapper function to read and import the
-        services.json-config-file. Additionally it returns the class-internal
-        packagesRaw-Variable where the contents of the services.json files are stored
+        routers.json-config-file. Additionally it returns the class-internal
+        packagesRaw-Variable where the contents of the routers.json files are stored
         """
-        config = str(Path(__file__).parent) + "/services.json"
+        config = str(Path(__file__).parent) + "/routers.json"
         self.packagesRaw = json.load(open(config, encoding="utf-8"))
 
         return self.packagesRaw

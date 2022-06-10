@@ -1,14 +1,14 @@
-from fastapi import FastAPI, status, HTTPException
+from fastapi import APIRouter, status, HTTPException
 
 from src.speechassistant.api.logic.alarmLogic import AlarmLogic
 from src.speechassistant.models.alarm import Alarm
 
-alarm_service: FastAPI = FastAPI()
+router: APIRouter = APIRouter()
 
 APPLICATION_JSON = "application/json"
 
 
-@alarm_service.post(
+@router.post(
     "/",
     response_model=Alarm,
     status_code=status.HTTP_201_CREATED,
@@ -17,17 +17,17 @@ async def create_alarm(alarm: Alarm):
     return AlarmLogic.create_alarm(alarm)
 
 
-@alarm_service.get("/", response_model=list[Alarm], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=list[Alarm], status_code=status.HTTP_200_OK)
 async def read_all_alarms():
     return AlarmLogic.read_all_alarms()
 
 
-@alarm_service.get("/{alarm_id}", response_model=Alarm, status_code=status.HTTP_200_OK)
+@router.get("/{alarm_id}", response_model=Alarm, status_code=status.HTTP_200_OK)
 async def read_alarm_by_id(alarm_id: int):
     return AlarmLogic.read_alarm_by_id(alarm_id)
 
 
-@alarm_service.put("/{alarm_id}", response_model=Alarm, status_code=status.HTTP_200_OK)
+@router.put("/{alarm_id}", response_model=Alarm, status_code=status.HTTP_200_OK)
 async def update_alarm(alarm_id: int, alarm: Alarm):
     if alarm_id != alarm.alarm_id:
         raise HTTPException(
@@ -37,7 +37,7 @@ async def update_alarm(alarm_id: int, alarm: Alarm):
     return AlarmLogic.update_alarm(alarm)
 
 
-@alarm_service.delete(
+@router.delete(
     "/{alarm_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_alarm(alarm_id: int):
