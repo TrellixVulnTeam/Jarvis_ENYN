@@ -15,7 +15,7 @@ def handle(text, core, skills):
     try:
         core.play(path=path, next=True)
     except FileNotFoundError:
-        core.say("Alarm! Alarm! Alarm! Aufstehen! Klingeling!")
+        core.say("AlarmSchema! AlarmSchema! AlarmSchema! Aufstehen! Klingeling!")
     if user.first_name == "Unknown":
         core.say(
             "Guten Morgen! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag!"

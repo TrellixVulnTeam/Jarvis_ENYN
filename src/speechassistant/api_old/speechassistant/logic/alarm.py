@@ -91,7 +91,7 @@ def delete_alarm(aid: int) -> Response:
         if anz < 1:
             return Response(f"No matching alarm for ID {aid}!", status=404)
         else:
-            return Response("Alarm deleted successfully!", status=202)
+            return Response("AlarmSchema deleted successfully!", status=202)
     except UnsolvableException:
         # toDo
         return Response("Internal Error has occurred!", 500)

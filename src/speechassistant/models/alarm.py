@@ -33,8 +33,8 @@ class AlarmRepeating(CamelModel):
     #     }
     #
     # @staticmethod
-    # def from_json(json_data: dict) -> AlarmRepeating:
-    #     return AlarmRepeating(
+    # def from_json(json_data: dict) -> AlarmRepeatingSchema:
+    #     return AlarmRepeatingSchema(
     #         json_data.get("monday"),
     #         json_data.get("tuesday"),
     #         json_data.get("wednesday"),
@@ -71,9 +71,9 @@ class Alarm(CamelModel):
     #     }
     #
     # @staticmethod
-    # def from_json(json_data: dict) -> Alarm:
-    #     return Alarm(
-    #         AlarmRepeating.from_json(json_data.get("repeating")),
+    # def from_json(json_data: dict) -> AlarmSchema:
+    #     return AlarmSchema(
+    #         AlarmRepeatingSchema.from_json(json_data.get("repeating")),
     #         json_data.get("songName"),
     #         json_data.get("alarmTime"),
     #         json_data.get("text"),

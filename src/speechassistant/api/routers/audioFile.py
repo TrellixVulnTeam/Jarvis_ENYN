@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, Response
+from fastapi.responses import StreamingResponse
 
 from src.speechassistant.api.logic.audioFileLogic import AudioFileLogic
 from src.speechassistant.models.audio_file import AudioFile
@@ -26,8 +27,11 @@ async def get_all_audio_files():
     "/{audio_file_name}", response_model=AudioFile, status_code=status.HTTP_200_OK
 )
 async def get_audio_file_by_name(audio_file_name: str):
-    audio_file: AudioFile = AudioFileLogic.get_audio_file_by_name(audio_file_name)
-    return Response(audio_file, status_code=status.HTTP_200_OK)
+    return StreamingResponse(
+        AudioFileLogic.get_audio_file_by_name(audio_file_name),
+        status_code=status.HTTP_200_OK,
+        media_type="audio/wav"
+    )
 
 
 @router.put(

@@ -21,7 +21,7 @@ audio_file = api.model(
 )
 
 alarm_file = api.model(
-    "Alarm",
+    "AlarmSchema",
     {
         "id": fields.Integer(description="ID of the alarm"),
         "time": fields.String,

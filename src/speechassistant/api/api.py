@@ -1,10 +1,22 @@
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi.routing import APIRoute, APIRouter
+from fastapi.responses import RedirectResponse
 
 from src.speechassistant.api.routers import alarm, audioFile, module, reminder, routine
 
-app = FastAPI()
+description: str = """
+
+"""
+
+app = FastAPI(
+    title="Jarvis API",
+    description=description,
+    version="0.0.1",
+    contact={
+        "name": "Jakob Priesner",
+        "email": "jakob.priesner@outlook.de"
+    }
+)
 
 
 @app.get("/app")
@@ -13,8 +25,8 @@ def read_main(request: Request):
 
 
 @app.get("/")
-def test():
-    return {"Success": "nice"}
+def redirect_to_latest_docs(request: Request):
+    return RedirectResponse(request.scope.get("root_path") + "api/latest/docs")
 
 
 def start() -> None:
@@ -28,6 +40,7 @@ def start() -> None:
     v1.include_router(routine.router, prefix="/routines", tags=["routines"], dependencies=[])
 
     api.mount(app=v1, path="/v1", name="v1")
+    api.mount(app=v1, path="/latest", name="lastest")
 
     app.mount(app=api, path="/api", name="api")
 

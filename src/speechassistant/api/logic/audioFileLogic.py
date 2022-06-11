@@ -1,6 +1,8 @@
 from src.speechassistant.database.database_connection import DataBase
 from src.speechassistant.models.audio_file import AudioFile
 
+from fastapi.responses import StreamingResponse
+
 audio_file_interface: any = DataBase().audio_interface
 
 
@@ -16,8 +18,9 @@ class AudioFileLogic:
         return audio_file_interface.get_all_audio_files()
 
     @staticmethod
-    def get_audio_file_by_name(name: str) -> AudioFile:
-        return audio_file_interface.get_audio_file_by_name(name)
+    def get_audio_file_by_name(name: str) -> StreamingResponse:
+        with open(audio_file_interface.get_audio_file_by_name(name)) as audio_file:
+            yield from audio_file
 
     @staticmethod
     def update_audio_file_by_name(name: str, audio_file: AudioFile) -> AudioFile:
