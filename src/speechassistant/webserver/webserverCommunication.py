@@ -4,7 +4,7 @@ import sys
 from threading import Thread
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-import main
+from src.speechassistant import main
 
 
 class mThr:
