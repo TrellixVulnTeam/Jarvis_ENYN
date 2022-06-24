@@ -7,9 +7,9 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 from flask import Response
 
-from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
-from src.speechassistant.models.alarm import Alarm
+from database.database_connection import DataBase
+from exceptions.CriticalExceptions import UnsolvableException
+from models.alarm import Alarm
 
 database: DataBase = DataBase.get_instance()
 

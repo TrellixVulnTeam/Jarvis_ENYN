@@ -1,12 +1,12 @@
 from flask import Response
 from flask_restx import Resource
-from src.speechassistant.api_old.myapi import api
-from src.speechassistant.api_old.speechassistant.logic.modules import (
+from api_old.myapi import api
+from api_old.speechassistant.logic.modules import (
     read_module,
     read_modules,
     read_module_names,
 )
-from src.speechassistant.api_old.speechassistant.parser import (
+from api_old.speechassistant.parser import (
     audio_file_parser as audio_file,
 )
 

@@ -1,5 +1,5 @@
 from flask import Response
-from src.speechassistant.resources.services.light_systems.Phue import PhilipsWrapper
+from resources.services.light_systems.Phue import PhilipsWrapper
 
 
 service = PhilipsWrapper()

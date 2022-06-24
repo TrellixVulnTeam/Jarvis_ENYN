@@ -1,18 +1,18 @@
 import logging
 
 from flask import Flask, Blueprint
-from src.speechassistant.api_old import settings
-from src.speechassistant.api_old.myapi import api
-from src.speechassistant.api_old.speechassistant.endpoints.alarm import (
+from api_old import settings
+from api_old.myapi import api
+from api_old.speechassistant.endpoints.alarm import (
     namespace as alarm_namespace,
 )
-from src.speechassistant.api_old.speechassistant.endpoints.audio_files import (
+from api_old.speechassistant.endpoints.audio_files import (
     namespace as audio_namespace,
 )
-from src.speechassistant.api_old.speechassistant.endpoints.modules import (
+from api_old.speechassistant.endpoints.modules import (
     namespace as modules_namespace,
 )
-from src.speechassistant.api_old.speechassistant.endpoints.routine import (
+from api_old.speechassistant.endpoints.routine import (
     namespace as routine_namespace,
 )
 

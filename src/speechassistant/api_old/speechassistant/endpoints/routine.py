@@ -1,10 +1,10 @@
 from flask import request
 from flask_restx import Resource
-from src.speechassistant.api_old.myapi import api
-from src.speechassistant.api_old.speechassistant.logic.routine import *
-from src.speechassistant.api_old.speechassistant.parser import routine_parser as parser
+from api_old.myapi import api
+from api_old.speechassistant.logic.routine import *
+from api_old.speechassistant.parser import routine_parser as parser
 
-from src.speechassistant.models.routine import Routine
+from models.routine import Routine
 
 namespace = api.namespace("routines")
 

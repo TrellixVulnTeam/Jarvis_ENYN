@@ -1,19 +1,19 @@
 from flask import request, Response
 from flask_restx import Resource
 from flask_restx.reqparse import ParseResult
-from src.speechassistant.api_old.myapi import api
-from src.speechassistant.api_old.speechassistant.logic.audio import (
+from api_old.myapi import api
+from api_old.speechassistant.logic.audio import (
     read_audio,
     read_audio_names,
     create_audio_file,
     update_audio_file,
     delete_audio_file,
 )
-from src.speechassistant.api_old.speechassistant.parser import (
+from api_old.speechassistant.parser import (
     audio_file_parser as audio_file,
 )
 
-from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
+from exceptions.CriticalExceptions import UnsolvableException
 
 namespace = api.namespace(
     "audio", desciption="Handles audiofiles of the speech-assistant"
