@@ -1,5 +1,5 @@
-from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.models.audio_file import AudioFile
+from database.database_connection import DataBase
+from models.audio_file import AudioFile
 
 from fastapi.responses import StreamingResponse
 

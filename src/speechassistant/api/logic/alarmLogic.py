@@ -2,9 +2,9 @@ from sqlite3 import OperationalError
 
 from fastapi import HTTPException, status
 
-from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.exceptions.SQLException import NoMatchingEntry
-from src.speechassistant.models.alarm import Alarm
+from database.database_connection import DataBase
+from exceptions.SQLException import NoMatchingEntry
+from models.alarm import Alarm
 
 alarm_interface: any = DataBase().alarm_interface
 

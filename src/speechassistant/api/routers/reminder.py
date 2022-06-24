@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 
-from src.speechassistant.api.logic.reminderLogic import ReminderLogic
-from src.speechassistant.models.reminder import Reminder
+from api.logic.reminderLogic import ReminderLogic
+from models.reminder import Reminder
 
 router: APIRouter = APIRouter()
 

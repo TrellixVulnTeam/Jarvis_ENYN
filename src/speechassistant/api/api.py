@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 
-from src.speechassistant.api.routers import alarm, audioFile, module, reminder, routine
+from api.routers import alarm, audioFile, module, reminder, routine
 
 description: str = """
 

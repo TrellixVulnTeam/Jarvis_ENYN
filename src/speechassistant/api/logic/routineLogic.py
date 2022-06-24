@@ -3,9 +3,9 @@ from sqlite3 import OperationalError
 
 from fastapi import HTTPException, status
 
-from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.exceptions.SQLException import NoMatchingEntry
-from src.speechassistant.models.routine import Routine
+from database.database_connection import DataBase
+from exceptions.SQLException import NoMatchingEntry
+from models.routine import Routine
 
 routine_interface = DataBase().routine_interface
 

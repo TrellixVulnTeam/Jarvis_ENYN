@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 
-from src.speechassistant.api.logic.alarmLogic import AlarmLogic
-from src.speechassistant.models.alarm import Alarm
+from api.logic.alarmLogic import AlarmLogic
+from models.alarm import Alarm
 
 router: APIRouter = APIRouter()
 

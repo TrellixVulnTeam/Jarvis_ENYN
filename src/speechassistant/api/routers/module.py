@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 
-from src.speechassistant.api.logic.moduleLogic import ModuleLogic
-from src.speechassistant.models.module import Module
+from api.logic.moduleLogic import ModuleLogic
+from models.module import Module
 
 router: APIRouter = APIRouter()
 

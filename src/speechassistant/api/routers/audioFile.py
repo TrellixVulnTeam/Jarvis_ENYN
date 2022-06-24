@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, Response
 from fastapi.responses import StreamingResponse
 
-from src.speechassistant.api.logic.audioFileLogic import AudioFileLogic
-from src.speechassistant.models.audio_file import AudioFile
+from api.logic.audioFileLogic import AudioFileLogic
+from models.audio_file import AudioFile
 
 router: APIRouter = APIRouter()
 

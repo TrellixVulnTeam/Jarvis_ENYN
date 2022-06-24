@@ -2,7 +2,7 @@ import os
 import pkgutil
 from pathlib import Path
 
-from src.speechassistant.models.module import Module
+from models.module import Module
 
 
 class ModuleLogic:
