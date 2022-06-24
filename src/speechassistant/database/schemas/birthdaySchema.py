@@ -4,7 +4,7 @@ from sqlalchemy.orm import declarative_base, relationship
 Base = declarative_base()
 
 
-class Birthday(Base):
+class BirthdaySchema(Base):
     __tablename__ = "birthday"
 
     first_name = Column(String, primary_key=True)

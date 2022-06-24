@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, LargeBinary
 from sqlalchemy.orm import declarative_base, relationship
 
-from src.speechassistant.models.audio_file import AudioFile
+from models.audio_file import AudioFile
 
 Base = declarative_base()
 

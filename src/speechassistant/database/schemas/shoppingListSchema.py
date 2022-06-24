@@ -7,7 +7,7 @@ Base = declarative_base()
 class ShoppingList(Base):
     __tablename__ = "shopping_list"
 
-    id = Column(Integer, primary_key=True, sqlite_autoincrement=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String)
     measure = Column(String)
     quantity = Column(Float)

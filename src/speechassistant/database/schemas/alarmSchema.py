@@ -9,7 +9,8 @@ Base = declarative_base()
 
 class AlarmRepeatingSchema(Base):
     __tablename__ = "alarm_repeating"
-
+    id = Column(Integer, primary_key=True)
+    alarm_id = Column(Integer, foreign_key="AlarmSchema.id")
     monday = Column(Boolean)
     tuesday = Column(Boolean)
     wednesday = Column(Boolean)
@@ -26,14 +27,14 @@ class AlarmRepeatingSchema(Base):
 class AlarmSchema(Base):
     __tablename__ = "alarm"
 
-    id = Column(Integer, primary_key=True, sqlite_autoincrement=True)
+    id = Column(Integer, primary_key=True)
     text = Column(String)
     alarm_time = Column(Time)
     repeating = relationship("AlarmRepeatingSchema")
-    song_name = Column(String),
+    song_name = Column(String)
     active = Column(Boolean)
     initiated = Column(Boolean)
-    user_id = Column(Integer, ForeignKey(User.uid))
+    user_id = Column(Integer, ForeignKey(User.id))
     last_executed = Column(DateTime)
 
 

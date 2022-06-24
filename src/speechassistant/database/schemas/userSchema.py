@@ -6,14 +6,13 @@ Base = declarative_base()
 
 class WaitingNotifications(Base):
     __tablename__ = "waiting_notifications"
-
-    text = Column(String)
+    text = Column(String, primary_key=True)
 
 
 class User(Base):
     __tablename__ = "user"
 
-    id = Column(Integer, primary_key=True, sqlite_autoincrement=True)
+    id = Column(Integer, primary_key=True)
     alias = Column(String)
     first_name = Column(String)
     last_name = Column(String)
