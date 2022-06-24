@@ -1,9 +1,7 @@
 import json
 from pathlib import Path
 
-from src.speechassistant.core import Core
-
-# toDo: update Imports
+from core import Core
 
 if __name__ == "__main__":
     relPath: str = str(Path(__file__).parent) + "/src/speechassistant/"

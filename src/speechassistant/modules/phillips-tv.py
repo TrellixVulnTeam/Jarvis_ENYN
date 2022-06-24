@@ -4,7 +4,7 @@ import string
 
 import requests
 
-from src.speechassistant.resources.services.philips_tv.philips_tv import Pylips
+from resources.services.philips_tv.philips_tv import Pylips
 
 user = ""
 password = ""

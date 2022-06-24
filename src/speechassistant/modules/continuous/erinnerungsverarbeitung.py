@@ -1,6 +1,6 @@
 import datetime
 
-from src.speechassistant.core import ModuleWrapperContinuous
+from core import ModuleWrapperContinuous
 
 INTERVALL = 10
 

@@ -1,7 +1,7 @@
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
 from phue import Bridge
 
-from src.speechassistant.resources.module_skills import Skills
+from resources.module_skills import Skills
 
 colors = [
     "blau",

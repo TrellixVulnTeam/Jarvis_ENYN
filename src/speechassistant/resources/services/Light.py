@@ -13,7 +13,7 @@ class LightController:
     def __init__(self):
         if LightController.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
-        from src.speechassistant.core import Core
+        from core import Core
 
         self.core: Core = Core.get_instance()
         self.systems = []

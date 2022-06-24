@@ -1,4 +1,4 @@
-from src.speechassistant.modules.resources.akinator.akinator import Akinator
+from modules.resources.akinator.akinator import Akinator
 
 PRIORITY = 3
 

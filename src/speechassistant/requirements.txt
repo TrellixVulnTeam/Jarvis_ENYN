@@ -19,3 +19,4 @@ selenium~=4.1.1
 geopy~=2.2.0
 fritzconnection~=1.9.1
 setuptools==62.6.0
+Cython==0.26

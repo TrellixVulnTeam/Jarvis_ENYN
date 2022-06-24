@@ -6,8 +6,9 @@ import time
 import traceback
 from threading import Thread
 
-from src.speechassistant.ModuleWrapper import ModuleWrapper, ModuleWrapperContinuous
-from src.speechassistant.resources.module_skills import Skills
+from ModuleWrapper import ModuleWrapper, ModuleWrapperContinuous
+from resources.module_skills import Skills
+from src.speechassistant.models.user import User
 
 
 class Modules:
@@ -24,7 +25,7 @@ class Modules:
             raise Exception("Singleton cannot be instantiated more than once!")
 
         logging.getLogger().setLevel(logging.INFO)
-        from src.speechassistant.core import Core
+        from core import Core
 
         self.core: Core = Core.get_instance()
         self.local_storage: dict = self.core.local_storage
@@ -129,7 +130,7 @@ class Modules:
                 try:
                     if module.isValid(str(text).lower()):
                         self.core.active_modules[str(text)] = self.module_wrapper(
-                            self.core, text, analysis, messenger, user
+                            text, analysis, messenger, user
                         )
                         mt: Thread = Thread(
                             target=self.run_threaded_module,
@@ -158,12 +159,11 @@ class Modules:
 
     def start_module(
         self,
-        user: dict = None,
+        user: User = None,
         text: str = None,
         name: str = None,
         messenger: bool = False,
     ) -> bool:
-        # self.query_threaded(name, text, direct, messenger=messenger)
         mod_skill: Skills = self.core.skills
         analysis: dict = {}
         if text is None:
@@ -187,7 +187,7 @@ class Modules:
                     self.core.active_modules[
                         str(text)
                     ]: ModuleWrapper = self.module_wrapper(
-                        self.core, text, analysis, messenger, user
+                        text, analysis, messenger, user
                     )
                     mt: Thread = Thread(
                         target=self.run_threaded_module, args=(text, module, mod_skill)
@@ -198,7 +198,7 @@ class Modules:
         else:
             try:
                 analysis: dict = self.core.analyzer.analyze(str(text))
-            except:
+            except Exception:
                 traceback.print_exc()
                 print("[ERROR] Sentence analysis failed!")
                 analysis: dict = {}
@@ -208,7 +208,7 @@ class Modules:
                         self.core.active_modules[
                             str(text)
                         ]: ModuleWrapper = self.module_wrapper(
-                            self.core, text, analysis, messenger, user
+                            text, analysis, messenger, user
                         )
                         mt: Thread = Thread(
                             target=self.run_threaded_module,

@@ -8,14 +8,15 @@ from threading import Thread
 
 import requests
 
-from src.speechassistant.Audio import AudioOutput, AudioInput
-from src.speechassistant.Modules import Modules
-from src.speechassistant.Services import ServiceWrapper
-from src.speechassistant.User import Users
-from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.resources.analyze import Sentence_Analyzer
-from src.speechassistant.resources.intent.Wrapper import IntentWrapper as AIWrapper
-from src.speechassistant.resources.module_skills import Skills
+from Audio import AudioOutput, AudioInput
+from Modules import Modules
+from Services import ServiceWrapper
+from Users import Users
+from database.database_connection import DataBase
+from resources.analyze import Sentence_Analyzer
+from resources.intent.Wrapper import IntentWrapper as AIWrapper
+from resources.module_skills import Skills
+from models.user import User
 
 
 class Core:
@@ -41,13 +42,12 @@ class Core:
         self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.skills: Skills = Skills()
-        self.data_base = DataBase.get_instance()
-        # self.data_base.user_interface.add_user('Jakob', 'Jakob', 'Priesner', {'day': 5, 'month': 9, 'year': 2002})
+        self.data_base = DataBase()
         self.services: ServiceWrapper = ServiceWrapper(
             self, self.data, self.config_data
         )
         self.messenger = None
-        self.messenger_queued_users: list = []  # These users are waiting for a response
+        self.messenger_queued_users: list = []
         self.messenger_queue_output: dict = {}
 
         self.users: Users = Users()
@@ -82,47 +82,21 @@ class Core:
         # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.
         while True:
             for msg in self.messenger.messages.copy():
-                # Load the user name from the corresponding table
                 try:
-                    user: dict = self.users.get_user_by_name(
+                    user: User = self.users.get_user_by_name(
                         msg["from"]["first_name"].lower()
                     )
                 except KeyError:
-                    # Messages from strangers will not be tolerated. They are nevertheless stored.
-                    self.data_base.messenger_interface.add_rejected_message(msg)
-                    try:
-                        logging.warning(
-                            "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
-                                msg["from"]["first_name"]
-                            )
-                        )
-                    except KeyError:
-                        logging.warning(
-                            "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
-                                msg["from"]["id"]
-                            )
-                        )
-                    self.messenger.say(
-                        "Entschuldigung, aber ich darf leider zur Zeit nicht mit Fremden reden.",
-                        msg["from"]["id"],
-                        msg["text"],
-                    )
-                    self.messenger.messages.remove(msg)
+                    self.__reject_message(msg)
                     continue
 
-                # no pictures available if msg['type'] == "photo": self.messenger.say('Leider kann ich noch nichts
-                # mit Bildern anfangen.', self.users.get_user_by_name(user)) Message is definitely a (possibly
-                # inserted) "new request" ("Jarvis,...").
                 if msg["text"].lower().startswith("Jarvis"):
                     self.modules.start_module(
                         text=msg["text"], user=user, messenger=True
                     )
-                # Message is not a request at all, but a response (or a module expects such a response)
                 elif msg["from"]["first_name"].lower() in self.messenger_queued_users:
                     self.messenger_queue_output[msg["from"]["first_name"].lower()] = msg
-                # Message is a normal request
                 else:
-                    # self.modules.start_module(text=msg['text'], user=user, messenger=True)
                     th: Thread = Thread(
                         target=self.modules.start_module,
                         args=(
@@ -138,6 +112,30 @@ class Core:
                 self.users.get_user_by_name(user)['messenger_id']) """
                 self.messenger.messages.remove(msg)
             time.sleep(0.5)
+
+    def __reject_message(self, msg):
+        self.data_base.messenger_interface.add_rejected_message(msg)
+        self.__log_message_from_unknown_user(msg)
+        self.messenger.say(
+            "Entschuldigung, aber ich darf leider zur Zeit nicht mit Fremden reden.",
+            msg["from"]["id"],
+            msg["text"],
+        )
+        self.messenger.messages.remove(msg)
+
+    def __log_message_from_unknown_user(self, msg):
+        try:
+            logging.warning(
+                "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
+                    msg["from"]["first_name"]
+                )
+            )
+        except KeyError:
+            logging.warning(
+                "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
+                    msg["from"]["id"]
+                )
+            )
 
     def messenger_listen(self, user: str):
         # Tell the Telegram thread that you are waiting for a reply,

@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import datetime
 import logging
 
-from src.speechassistant.core import ModuleWrapper
-from src.speechassistant.resources.module_skills import Skills
-from src.speechassistant.resources.enums import OutputTypes
+from core import ModuleWrapper
+from resources.module_skills import Skills
+from resources.enums import OutputTypes
 
 PRIORITY = 2  # Conflicts with module "wie_lange_noch"
 

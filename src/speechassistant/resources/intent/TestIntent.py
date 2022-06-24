@@ -12,7 +12,7 @@ from threading import Thread
 from urllib.request import Request, urlopen
 
 from Wrapper import IntentWrapper
-from src.speechassistant.resources.analyze import Sentence_Analyzer as Analyzer
+from resources.analyze import Sentence_Analyzer as Analyzer
 
 logging.disable(logging.INFO)
 

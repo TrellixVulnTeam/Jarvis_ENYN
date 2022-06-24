@@ -79,7 +79,7 @@ class Weather:
         Weather.__instance = self
 
     def __fill_data(self) -> None:
-        # from src.speechassistant.core import Core
+        # from core import Core
         # core: Core = Core.get_instance()
         self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.data["api_keys"]["open_weather_map"]
         self.city = "Würzburg"  # core.local_storage["actual_location"]

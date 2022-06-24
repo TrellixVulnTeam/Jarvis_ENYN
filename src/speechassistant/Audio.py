@@ -21,7 +21,7 @@ import speech_recognition as sr
 import vlc
 from pygame import mixer as mixer
 
-from src.speechassistant.resources.tts import TTS
+from resources.tts import TTS
 
 
 class AudioInput(metaclass=ABCMeta):
@@ -400,6 +400,15 @@ class AudioOutput:
 
         self.stopped: bool = True
 
+
+        # toDo: optimize PATH
+        TOP_DIR: str = os.path.dirname(os.path.abspath(__file__))
+        DETECT_DONG: str = os.path.join(TOP_DIR, "resources/sounds/bling.wav")
+
+        with open(DETECT_DONG, "rb") as wavfile:
+            input_wav: bytes = wavfile.read()
+        self.bling_file: io.BytesIO = io.BytesIO(input_wav)
+
         AudioOutput.__instance = self
         logging.info("[SUCCESS] Audio Output initialized!")
 
@@ -414,6 +423,7 @@ class AudioOutput:
         return self
 
     def run(self) -> None:
+        # toDo: cleancode
         while not self.stopped:
             try:
                 if self.listen:
@@ -479,7 +489,6 @@ class AudioOutput:
         if text == "" or text is None:
             text: str = "Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr."
         self.notification.append(text)
-        # block while not done
         if wait_until_done:
             while text in self.notification:
                 time.sleep(0.2)
@@ -511,13 +520,7 @@ class AudioOutput:
             self.notification.insert(0, buff)
 
     def play_bling_sound(self) -> None:
-        TOP_DIR: str = os.path.dirname(os.path.abspath(__file__))
-        DETECT_DONG: str = os.path.join(TOP_DIR, "resources/sounds/bling.wav")
-
-        with open(DETECT_DONG, "rb") as wavfile:
-            input_wav: bytes = wavfile.read()
-        data: io.BytesIO = io.BytesIO(input_wav)
-        self.play_notification(data, as_next=True)
+        self.play_notification(self.bling_file, as_next=True)
 
     @staticmethod
     def pause(channel: int) -> None:

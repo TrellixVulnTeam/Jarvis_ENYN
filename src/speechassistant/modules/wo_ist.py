@@ -1,5 +1,5 @@
-from src.speechassistant.ModuleWrapper import ModuleWrapper
-from src.speechassistant.resources.module_skills import Skills
+from ModuleWrapper import ModuleWrapper
+from resources.module_skills import Skills
 
 PRIORITY = 1
 

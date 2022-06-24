@@ -1,5 +1,5 @@
-from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.models.user import User
+from database.database_connection import DataBase
+from models.user import User
 
 
 class Users:

@@ -1,6 +1,6 @@
 import time
 
-from src.speechassistant.resources.services.light_systems.Phue import PhilipsWrapper
+from resources.services.light_systems.Phue import PhilipsWrapper
 from threading import Thread
 
 

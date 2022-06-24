@@ -1,5 +1,5 @@
-from src.speechassistant.models.user import User
-from src.speechassistant.resources.services import PhilipsWrapper
+from models.user import User
+from resources.services import PhilipsWrapper
 
 
 def handle(text, core, skills):

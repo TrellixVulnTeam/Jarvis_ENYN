@@ -1,4 +1,4 @@
-from src.speechassistant.resources.services import Weather, LightController
+from resources.services import Weather, LightController
 
 
 class ServiceWrapper:

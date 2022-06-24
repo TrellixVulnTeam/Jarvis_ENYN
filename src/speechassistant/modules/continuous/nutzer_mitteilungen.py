@@ -1,6 +1,6 @@
 import datetime
 
-from src.speechassistant.core import ModuleWrapper
+from core import ModuleWrapper
 
 INTERVALL = 2
 

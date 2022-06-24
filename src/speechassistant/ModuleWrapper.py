@@ -9,21 +9,21 @@ from random import random
 from typing import AnyStr, Any
 from urllib.request import Request, urlopen
 
-from src.speechassistant.Audio import AudioOutput, AudioInput
-from src.speechassistant.database.database_connection import DataBase
-from src.speechassistant.models.user import User
-from src.speechassistant.resources.analyze import Sentence_Analyzer
-from src.speechassistant.resources.module_skills import Skills
+from Audio import AudioOutput, AudioInput
+from database.database_connection import DataBase
+from models.user import User
+from resources.analyze import Sentence_Analyzer
+from resources.module_skills import Skills
 
 
 class ModuleWrapper:
-    def __init__(self, text: str, analysis: dict, messenger: bool, user: dict) -> None:
+    def __init__(self, text: str, analysis: dict, messenger: bool, user: User) -> None:
         self.text: str = text
         self.analysis: dict = analysis
         # toDo: down below
         # self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
 
-        from src.speechassistant.core import Core
+        from core import Core
 
         self.core: Core = Core.get_instance()
 
@@ -60,11 +60,11 @@ class ModuleWrapper:
 
     def messenger_say(self, text: str) -> None:
         try:
-            self.messenger.say(text, self.user["telegram_id"])
+            self.messenger.say(text, self.user.messenger_id)
         except KeyError:
             logging.warning(
                 '[WARNING] Sending message "{}" to messenger failed, because there is no Telegram-ID for this user '
-                "({}) ".format(text, self.user["name"])
+                "({}) ".format(text, self.user.alias)
             )
         except AttributeError:
             logging.info(

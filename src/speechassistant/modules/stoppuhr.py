@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.speechassistant.resources.module_skills import Skills
+from resources.module_skills import Skills
 
 
 def isValid(text):
