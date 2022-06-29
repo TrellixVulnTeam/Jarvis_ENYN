@@ -1,11 +1,12 @@
 from sqlalchemy import Column, Integer, String, Float
-from sqlalchemy.orm import declarative_base, relationship
 
-Base = declarative_base()
+from src.speechassistant.database.DataBasePersistency import DBPersistency
+
+Base = DBPersistency.Base
 
 
 class ShoppingList(Base):
-    __tablename__ = "shopping_list"
+    __tablename__ = "shoppinglist"
 
     id = Column(Integer, primary_key=True)
     name = Column(String)

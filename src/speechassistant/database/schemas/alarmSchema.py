@@ -1,16 +1,17 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Time, DateTime
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import relationship
 
-from src.speechassistant.database.schemas.userSchema import User
+from src.speechassistant.database.DataBasePersistency import DBPersistency
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 
-Base = declarative_base()
+Base = DBPersistency.Base
 
 
 class AlarmRepeatingSchema(Base):
-    __tablename__ = "alarm_repeating"
+    __tablename__ = "alarm_repeatings"
+
     id = Column(Integer, primary_key=True)
-    alarm_id = Column(Integer, foreign_key="AlarmSchema.id")
+    alarm_id = Column(Integer, ForeignKey("alarms.id"))
     monday = Column(Boolean)
     tuesday = Column(Boolean)
     wednesday = Column(Boolean)
@@ -25,7 +26,7 @@ class AlarmRepeatingSchema(Base):
 
 
 class AlarmSchema(Base):
-    __tablename__ = "alarm"
+    __tablename__ = "alarms"
 
     id = Column(Integer, primary_key=True)
     text = Column(String)
@@ -34,7 +35,7 @@ class AlarmSchema(Base):
     song_name = Column(String)
     active = Column(Boolean)
     initiated = Column(Boolean)
-    user_id = Column(Integer, ForeignKey(User.id))
+    user_id = Column(Integer, ForeignKey("users.id"))
     last_executed = Column(DateTime)
 
 
@@ -47,7 +48,7 @@ def alarm_to_schema(alarm: Alarm) -> AlarmSchema:
         friday=alarm.repeating.friday,
         saturday=alarm.repeating.saturday,
         sunday=alarm.repeating.sunday,
-        regular=alarm.repeating.regular
+        regular=alarm.repeating.regular,
     )
 
     return AlarmSchema(
@@ -59,7 +60,7 @@ def alarm_to_schema(alarm: Alarm) -> AlarmSchema:
         active=alarm.active,
         initiated=alarm.initiated,
         user_id=alarm.user_id,
-        last_executed=alarm.last_executed
+        last_executed=alarm.last_executed,
     )
 
 
@@ -72,7 +73,7 @@ def schema_to_alarm(alarm_schema: AlarmSchema) -> Alarm:
         friday=alarm_schema.repeating.friday,
         saturday=alarm_schema.repeating.saturday,
         sunday=alarm_schema.repeating.sunday,
-        regular=alarm_schema.repeating.regular
+        regular=alarm_schema.repeating.regular,
     )
 
     return Alarm(
@@ -84,5 +85,5 @@ def schema_to_alarm(alarm_schema: AlarmSchema) -> Alarm:
         active=alarm_schema.active,
         initiated=alarm_schema.initiated,
         user_id=alarm_schema.user_id,
-        last_executed=alarm_schema.last_executed
+        last_executed=alarm_schema.last_executed,
     )

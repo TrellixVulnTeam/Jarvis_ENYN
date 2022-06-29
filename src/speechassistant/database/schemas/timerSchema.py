@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, Time
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import relationship
 
-from database.schemas.userSchema import User
+from src.speechassistant.database.DataBasePersistency import DBPersistency
+from src.speechassistant.database.schemas.userSchema import User
 
-Base = declarative_base()
+Base = DBPersistency.Base
 
 
 class Timer(Base):

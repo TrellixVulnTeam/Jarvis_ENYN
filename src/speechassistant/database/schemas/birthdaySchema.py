@@ -1,11 +1,12 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Time, DateTime
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, String, DateTime
 
-Base = declarative_base()
+from src.speechassistant.database.DataBasePersistency import DBPersistency
+
+Base = DBPersistency.Base
 
 
 class BirthdaySchema(Base):
-    __tablename__ = "birthday"
+    __tablename__ = "birthdays"
 
     first_name = Column(String, primary_key=True)
     last_name = Column(String, primary_key=True)

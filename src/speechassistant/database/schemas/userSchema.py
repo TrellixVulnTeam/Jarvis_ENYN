@@ -1,16 +1,19 @@
-from sqlalchemy import Column, Integer, String, Time, DateTime
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from src.speechassistant.database.DataBasePersistency import DBPersistency
+
+Base = DBPersistency.Base
 
 
 class WaitingNotifications(Base):
     __tablename__ = "waiting_notifications"
     text = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
 
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     alias = Column(String)
@@ -19,4 +22,4 @@ class User(Base):
     birthday = Column(DateTime)
     messenger_id = Column(Integer)
     song_name = Column(String)
-    waiting_notifications = relationship(WaitingNotifications)
+    waiting_notifications = relationship("WaitingNotifications")
