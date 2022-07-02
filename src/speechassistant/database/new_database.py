@@ -1,19 +1,18 @@
 from datetime import time
 
-from sqlalchemy import create_engine
-from sqlalchemy.future import Engine, select
-from sqlalchemy.orm import Session, sessionmaker
-
-from src.speechassistant.database.DataBasePersistency import DBPersistency
+from database.DataBasePersistency import DBPersistency
 
 # toDo: add cascade in schemas where it has to
-from src.speechassistant.database.schemas.alarmSchema import (
+from database.schemas.alarmSchema import (
     AlarmSchema,
     alarm_to_schema,
     schema_to_alarm,
 )
-from src.speechassistant.models.alarm import Alarm, AlarmRepeating
-from src.speechassistant.models.audio_file import AudioFile
+from models.alarm import Alarm, AlarmRepeating
+from models.audio_file import AudioFile
+from sqlalchemy import create_engine
+from sqlalchemy.future import Engine, select
+from sqlalchemy.orm import Session, sessionmaker
 
 # class DataBase:
 #    def __int__(self) -> None:

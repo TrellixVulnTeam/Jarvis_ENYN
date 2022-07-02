@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, time
 
-from src.speechassistant.api.utils.converter import CamelModel
+from api.utils.converter import CamelModel
 
 
 class AlarmRepeating(CamelModel):

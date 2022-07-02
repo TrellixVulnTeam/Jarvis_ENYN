@@ -1,8 +1,7 @@
+from database.schemas.userSchema import User
+from models.alarm import Alarm, AlarmRepeating
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Time, DateTime
 from sqlalchemy.orm import declarative_base, relationship
-
-from src.speechassistant.database.schemas.userSchema import User
-from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 
 Base = declarative_base()
 
@@ -47,7 +46,7 @@ def alarm_to_schema(alarm: Alarm) -> AlarmSchema:
         friday=alarm.repeating.friday,
         saturday=alarm.repeating.saturday,
         sunday=alarm.repeating.sunday,
-        regular=alarm.repeating.regular
+        regular=alarm.repeating.regular,
     )
 
     return AlarmSchema(
@@ -59,7 +58,7 @@ def alarm_to_schema(alarm: Alarm) -> AlarmSchema:
         active=alarm.active,
         initiated=alarm.initiated,
         user_id=alarm.user_id,
-        last_executed=alarm.last_executed
+        last_executed=alarm.last_executed,
     )
 
 
@@ -72,7 +71,7 @@ def schema_to_alarm(alarm_schema: AlarmSchema) -> Alarm:
         friday=alarm_schema.repeating.friday,
         saturday=alarm_schema.repeating.saturday,
         sunday=alarm_schema.repeating.sunday,
-        regular=alarm_schema.repeating.regular
+        regular=alarm_schema.repeating.regular,
     )
 
     return Alarm(
@@ -84,5 +83,5 @@ def schema_to_alarm(alarm_schema: AlarmSchema) -> Alarm:
         active=alarm_schema.active,
         initiated=alarm_schema.initiated,
         user_id=alarm_schema.user_id,
-        last_executed=alarm_schema.last_executed
+        last_executed=alarm_schema.last_executed,
     )
