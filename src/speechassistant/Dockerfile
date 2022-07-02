@@ -1,22 +1,22 @@
-FROM ubuntu:22.04
+FROM ubuntu:latest
+
+RUN apt-get update -y \
+    && apt-get install -y python3 \
+    && apt-get install -y python3-pip \
+    && apt-get install -y libatlas-base-dev \
+    && apt-get install -y portaudio19-dev \
+    && apt-get install -y sox \
+    && apt-get install -y flac \
+    && apt-get install -y chromium-chromedriver \
+    && apt-get install -y sqlite3 \
+    && apt-get install -y vlc \
+    && apt-get install -y xvfb
 
 WORKDIR /home/jarvis
+
 COPY requirements.txt requirements.txt
 COPY . /home/jarvis
 
+RUN pip install -r requirements.txt
 
-RUN apt-get update -y
-RUN apt-get install -y python3
-RUN apt-get install -y python3-pip
-RUN apt-get install -y libatlas-base-dev
-RUN apt-get install -y portaudio19-dev
-RUN apt-get install -y sox
-RUN apt-get install -y flac
-RUN apt-get install -y chromium-chromedriver
-RUN apt-get install -y sqlite3
-
-CMD [ "pip3", "install", "-r", "requirements.txt" ]
-
-ENTRYPOINT [ "python3" ]
-
-CMD [ "main.py" ]
+CMD [ "python3", "main.py" ]

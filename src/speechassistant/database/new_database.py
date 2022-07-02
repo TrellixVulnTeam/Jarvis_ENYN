@@ -1,28 +1,41 @@
-import logging
 from datetime import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from src.speechassistant.database.DataBasePersistency import DBPersistency
 
 # toDo: add cascade in schemas where it has to
-from src.speechassistant.database.schemas.alarmSchema import AlarmSchema, alarm_to_schema, schema_to_alarm
+from src.speechassistant.database.schemas.alarmSchema import (
+    AlarmSchema,
+    alarm_to_schema,
+    schema_to_alarm,
+)
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 from src.speechassistant.models.audio_file import AudioFile
 
-
-#class DataBase:
+# class DataBase:
 #    def __int__(self) -> None:
-  #      self.engine: Engine = create_engine(
-    #        DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
-     #   )
+#      self.engine: Engine = create_engine(
+#        DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+#   )
+
+
+engine = create_engine(
+    DBPersistency.DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = DBPersistency.Base
+
 
 class _AlarmInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_alarm(self, new_alarm: Alarm) -> Alarm:
@@ -54,10 +67,14 @@ class _AlarmInterface:
     def delete_alarm_by_id(self, alarm_id: int) -> None:
         pass
 
+
 class _AudioFileInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_audio_file(self) -> AudioFile:
@@ -72,7 +89,9 @@ class _AudioFileInterface:
     def get_all_audio_files(self) -> list[AudioFile]:
         pass
 
-    def update_audio_file_by_id(self, audio_file_id: int, audio_file: AudioFile) -> AudioFile:
+    def update_audio_file_by_id(
+        self, audio_file_id: int, audio_file: AudioFile
+    ) -> AudioFile:
         pass
 
     def delete_audio_file_by_id(self, audio_file_id: int) -> None:
@@ -81,10 +100,14 @@ class _AudioFileInterface:
     def delete_audio_file_by_name(self, audio_file_name: str) -> None:
         pass
 
+
 class _BirthdayInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_birthday(self) -> AudioFile:
@@ -99,7 +122,9 @@ class _BirthdayInterface:
     def get_all_birthdays(self) -> list[AudioFile]:
         pass
 
-    def update_birthday_by_id(self, audio_file_id: int, audio_file: AudioFile) -> AudioFile:
+    def update_birthday_by_id(
+        self, audio_file_id: int, audio_file: AudioFile
+    ) -> AudioFile:
         pass
 
     def delete_birthday_by_id(self, audio_file_id: int) -> None:
@@ -108,10 +133,14 @@ class _BirthdayInterface:
     def delete_birthday_by_first_and_last_name(self, audio_file_name: str) -> None:
         pass
 
+
 class _ReminderInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_reminder(self) -> AudioFile:
@@ -123,16 +152,22 @@ class _ReminderInterface:
     def get_all_reminder(self) -> list[AudioFile]:
         pass
 
-    def update_reminder_by_id(self, audio_file_id: int, audio_file: AudioFile) -> AudioFile:
+    def update_reminder_by_id(
+        self, audio_file_id: int, audio_file: AudioFile
+    ) -> AudioFile:
         pass
 
     def delete_reminder_by_id(self, audio_file_id: int) -> None:
         pass
 
+
 class _RoutineInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_routine(self) -> AudioFile:
@@ -147,16 +182,22 @@ class _RoutineInterface:
     def get_all_routine(self) -> list[AudioFile]:
         pass
 
-    def update_routine_by_id(self, audio_file_id: int, audio_file: AudioFile) -> AudioFile:
+    def update_routine_by_id(
+        self, audio_file_id: int, audio_file: AudioFile
+    ) -> AudioFile:
         pass
 
     def delete_routine_by_id(self, audio_file_id: int) -> None:
         pass
 
+
 class _ShoppingListInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_shopping_list(self) -> AudioFile:
@@ -168,7 +209,9 @@ class _ShoppingListInterface:
     def get_shopping_list_by_name(self, audio_file_name: str) -> AudioFile:
         pass
 
-    def update_shopping_list_by_id(self, audio_file_id: int, audio_file: AudioFile) -> AudioFile:
+    def update_shopping_list_by_id(
+        self, audio_file_id: int, audio_file: AudioFile
+    ) -> AudioFile:
         pass
 
     def delete_shopping_list_by_id(self, audio_file_id: int) -> None:
@@ -177,10 +220,14 @@ class _ShoppingListInterface:
     def delete_shopping_list_by_name(self, audio_file_name: str) -> None:
         pass
 
+
 class _TimerInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_timer(self) -> AudioFile:
@@ -192,16 +239,22 @@ class _TimerInterface:
     def get_all_timer(self) -> list[AudioFile]:
         pass
 
-    def update_timer_by_id(self, audio_file_id: int, audio_file: AudioFile) -> AudioFile:
+    def update_timer_by_id(
+        self, audio_file_id: int, audio_file: AudioFile
+    ) -> AudioFile:
         pass
 
     def delete_timer_by_id(self, audio_file_id: int) -> None:
         pass
 
+
 class _UserInterface:
     def __int__(self) -> None:
         self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
+            DBPersistency.DATABASE_URL,
+            echo=True,
+            future=True,
+            connect_args={"check_same_thread": False},
         )
 
     def create_user(self) -> AudioFile:
@@ -230,19 +283,19 @@ if __name__ == "__main__":
     interface = _AlarmInterface()
 
     alarm: Alarm = Alarm(
-        text = "Guten Morgen",
-        alarm_time = time(12, 12, 12),
-        repeating = AlarmRepeating(
-            monday = False,
-            tuesday = False,
-            wednesday = False,
-            thursday = True,
-            friday = False,
-            saturday = False,
-            sunday = False,
-            regular = False
+        text="Guten Morgen",
+        alarm_time=time(12, 12, 12),
+        repeating=AlarmRepeating(
+            monday=False,
+            tuesday=False,
+            wednesday=False,
+            thursday=True,
+            friday=False,
+            saturday=False,
+            sunday=False,
+            regular=False,
         ),
-        song_name = "standard"
+        song_name="standard",
     )
 
     print(interface.create_alarm(alarm))

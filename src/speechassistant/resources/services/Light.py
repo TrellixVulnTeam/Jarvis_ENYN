@@ -5,17 +5,15 @@ class LightController:
     __instance = None
 
     @staticmethod
-    def get_instance():
+    def get_instance(_core):
         if LightController.__instance is None:
-            LightController()
+            LightController(_core)
         return LightController.__instance
 
-    def __init__(self):
+    def __init__(self, _core):
         if LightController.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
-        from core import Core
-
-        self.core: Core = Core.get_instance()
+        self.core = _core
         self.systems = []
         self.lights = []
 
