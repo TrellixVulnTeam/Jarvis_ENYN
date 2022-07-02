@@ -3,15 +3,14 @@ from __future__ import annotations
 import json
 import logging
 
+from database.database_connection import DataBase
+from exceptions.CriticalExceptions import UnsolvableException
 from fastapi import status
 from fastapi.responses import JSONResponse
 from flask import Response
-
-from database.database_connection import DataBase
-from exceptions.CriticalExceptions import UnsolvableException
 from models.alarm import Alarm
 
-database: DataBase = DataBase.get_instance()
+database: DataBase = DataBase()
 
 
 def create_alarm(data: dict) -> JSONResponse:

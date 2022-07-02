@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import json
 
-from flask import Response
-
 from database.database_connection import DataBase
 from exceptions.SQLException import NoMatchingEntry
+from flask import Response
 
-database: DataBase = DataBase.get_instance()
+database: DataBase = DataBase()
 
 
 def create_routine(data: dict) -> Response:

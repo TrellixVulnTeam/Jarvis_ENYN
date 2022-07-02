@@ -36,7 +36,7 @@ class ModuleWrapper:
         self.messenger = self.core.messenger
 
         self.skills: Skills = Skills()
-        self.data_base = DataBase.get_instance()
+        self.data_base = DataBase()
 
         self.Analyzer: Sentence_Analyzer = self.core.analyzer
 
