@@ -7,13 +7,13 @@ import sqlite3
 from datetime import datetime, time
 from sqlite3 import Connection, Cursor
 
-from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
-from src.speechassistant.exceptions.SQLException import *
-from src.speechassistant.models.alarm import Alarm, AlarmRepeating
-from src.speechassistant.models.audio_file import AudioFile
-from src.speechassistant.models.birthday import Birthday
-from src.speechassistant.models.reminder import Reminder
-from src.speechassistant.models.routine import (
+from exceptions.CriticalExceptions import UnsolvableException
+from exceptions.SQLException import *
+from models.alarm import Alarm, AlarmRepeating
+from models.audio_file import AudioFile
+from models.birthday import Birthday
+from models.reminder import Reminder
+from models.routine import (
     Routine,
     SpecificDate,
     RoutineDays,
@@ -23,10 +23,10 @@ from src.speechassistant.models.routine import (
     RoutineClockTime,
     CallingCommand,
 )
-from src.speechassistant.models.shopping_list import ShoppingListItem
-from src.speechassistant.models.timer import Timer
-from src.speechassistant.models.user import User
-from src.speechassistant.resources.module_skills import Skills
+from models.shopping_list import ShoppingListItem
+from models.timer import Timer
+from models.user import User
+from resources.module_skills import Skills
 
 
 # toDo: __tuple_to raise value error when nothing fount (type-error)
@@ -59,8 +59,6 @@ class DataBase:
         self.__audio_path: str = ""
 
         self.create_tables()
-
-        DataBase.__instance = self
 
         logging.info("[INFO] DataBase successfully initialized.")
 

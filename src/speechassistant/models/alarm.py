@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime, time
 
-from sqlalchemy import Integer, Column
-
 from src.speechassistant.api.utils.converter import CamelModel
 
 
