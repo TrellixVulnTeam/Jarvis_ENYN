@@ -2,7 +2,6 @@ pvporcupine~=2.1.2
 pyaudio~=0.2.11
 SpeechRecognition~=3.8.1
 PyVirtualDisplay~=3.0
-selenium~=4.3.0
 phue~=1.1
 pywhatkit~=5.3
 pafy~=0.5.5
