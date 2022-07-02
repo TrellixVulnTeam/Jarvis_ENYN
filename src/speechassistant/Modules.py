@@ -7,8 +7,8 @@ import traceback
 from threading import Thread
 
 from ModuleWrapper import ModuleWrapper, ModuleWrapperContinuous
+from models.user import User
 from resources.module_skills import Skills
-from src.speechassistant.models.user import User
 
 
 class Modules:

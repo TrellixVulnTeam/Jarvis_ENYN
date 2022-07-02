@@ -1,5 +1,3 @@
-from datetime import time
-
 from humps import camel
 from pydantic import BaseModel
 

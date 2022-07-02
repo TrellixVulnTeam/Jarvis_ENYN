@@ -13,10 +13,10 @@ from Modules import Modules
 from Services import ServiceWrapper
 from Users import Users
 from database.database_connection import DataBase
+from models.user import User
 from resources.analyze import Sentence_Analyzer
 from resources.intent.Wrapper import IntentWrapper as AIWrapper
 from resources.module_skills import Skills
-from models.user import User
 
 
 class Core:
@@ -168,7 +168,7 @@ class Core:
         pass
 
     def hotword_detected(self, text: str) -> None:
-        user: dict = self.users.get_user_by_name(self.local_storage["user"])
+        user: User = self.users.get_user_by_name(self.local_storage["user"])
 
         matching_routines: list[dict] = self.data_base.routine_interface.get_routines(
             on_command=text
