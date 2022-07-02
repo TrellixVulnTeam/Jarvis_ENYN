@@ -200,12 +200,12 @@ class MusicPlayer:
     __instance = None
 
     @staticmethod
-    def get_instance():
+    def get_instance(_audio_output: AudioOutput):
         if MusicPlayer.__instance is None:
-            MusicPlayer()
+            MusicPlayer(_audio_output)
         return MusicPlayer.__instance
 
-    def __init__(self) -> None:
+    def __init__(self, _audio_output: AudioOutput) -> None:
         if MusicPlayer.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
 
@@ -213,7 +213,7 @@ class MusicPlayer:
         self.playlist: list = []
         self.instance: vlc.Instance = vlc.Instance()
         self.player = self.instance.media_player_new()
-        self.audio_output: AudioOutput = AudioOutput.get_instance()
+        self.audio_output: AudioOutput = _audio_output
         self.player_alive: bool = True
         self.is_playing: bool = False
         self.stopped: bool = False
@@ -393,13 +393,12 @@ class AudioOutput:
         # mixer0: notification, mixer1: music
         self.mixer: list = []
 
-        self.music_player: MusicPlayer = MusicPlayer(self)
+        self.music_player: MusicPlayer = MusicPlayer.get_instance(self)
         mixer.pre_init(44100, -16, 1, 512)
         self.tts: TTS = TTS()
         self.tts.start(voice)
 
         self.stopped: bool = True
-
 
         # toDo: optimize PATH
         TOP_DIR: str = os.path.dirname(os.path.abspath(__file__))
