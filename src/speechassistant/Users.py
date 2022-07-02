@@ -4,7 +4,7 @@ from models.user import User
 
 class Users:
     def __init__(self) -> None:
-        self.user_interface = DataBase.get_instance().user_interface
+        self.user_interface = DataBase().user_interface
 
     def get_user_list(self) -> list[User]:
         return self.user_interface.get_users()

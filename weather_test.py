@@ -16,7 +16,7 @@ geo_location = Nominatim(user_agent="my_app")
         city    (str): name of the city from which the data are required
     Returns:
         dict: Dictionary with the values of the city
-    """
+"""
 
 
 def get_data_of_city(city: str) -> dict:
@@ -25,11 +25,11 @@ def get_data_of_city(city: str) -> dict:
 
 
 """ Returns geological data of a city
-Args:
-    lat    (int): latutude of the city from which the data are required
-    lon    (int): longitude of the city from which the data are required
-Returns:
-    dict: Dictionary with the values of the city
+    Args:
+        lat    (int): latutude of the city from which the data are required
+        lon    (int): longitude of the city from which the data are required
+    Returns:
+        dict: Dictionary with the values of the city
 """
 
 
