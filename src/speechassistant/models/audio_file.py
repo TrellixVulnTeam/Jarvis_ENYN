@@ -1,6 +1,6 @@
 import base64
 
-from src.speechassistant.api.utils.converter import CamelModel
+from api.utils.converter import CamelModel
 
 
 class AudioFile(CamelModel):

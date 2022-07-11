@@ -1,8 +1,7 @@
 pvporcupine~=2.1.2
+pydantic==1.9.1
 pyaudio~=0.2.11
 SpeechRecognition~=3.8.1
-PyVirtualDisplay~=3.0
-selenium~=4.3.0
 phue~=1.1
 pywhatkit~=5.3
 pafy~=0.5.5
@@ -17,14 +16,12 @@ pytube==12.1.0
 gevent~=21.12.0
 python-vlc~=3.0.16120
 pyperclip==1.8.2
-pygame~=2.1.2
 geopy~=2.2.0
 nltk~=3.7
 qrcode==7.3.1
 speedtest-cli==2.1.3
 pydub==0.25.1
 matplotlib~=3.5.1
-tensorflow==2.9.1
 pyperclip3==0.4.1
 fastapi~=0.78.0
 fritzconnection~=1.9.1

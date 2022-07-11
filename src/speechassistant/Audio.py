@@ -19,7 +19,8 @@ import pvporcupine
 import pyaudio
 import speech_recognition as sr
 import vlc
-from pygame import mixer as mixer
+
+# from pygame import mixer as mixer
 
 from resources.tts import TTS
 

@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM debian:latest
 
 RUN apt-get update -y \
     && apt-get install -y python3 \
@@ -7,7 +7,6 @@ RUN apt-get update -y \
     && apt-get install -y portaudio19-dev \
     && apt-get install -y sox \
     && apt-get install -y flac \
-    && apt-get install -y chromium-chromedriver \
     && apt-get install -y sqlite3 \
     && apt-get install -y vlc \
     && apt-get install -y xvfb
