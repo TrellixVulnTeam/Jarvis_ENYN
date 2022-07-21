@@ -1,21 +1,17 @@
 from fastapi import APIRouter, status
 
-from api.logic.reminderLogic import ReminderLogic
-from models.reminder import Reminder
+from src.speechassistant.api.logic.reminderLogic import ReminderLogic
+from src.speechassistant.models.reminder import Reminder
 
 router: APIRouter = APIRouter()
 
 
-@router.post(
-    "/", response_model=Reminder, status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=Reminder, status_code=status.HTTP_201_CREATED)
 async def create_reminder(reminder: Reminder):
     return ReminderLogic.create_reminder(reminder)
 
 
-@router.get(
-    "/", response_model=list[Reminder], status_code=status.HTTP_200_OK
-)
+@router.get("/", response_model=list[Reminder], status_code=status.HTTP_200_OK)
 async def read_all_reminder(passed: bool = False):
     if passed:
         return ReminderLogic.read_passed_reminder()
@@ -23,9 +19,7 @@ async def read_all_reminder(passed: bool = False):
         return ReminderLogic.read_all_reminder()
 
 
-@router.get(
-    "/{reminder_id}", response_model=Reminder, status_code=status.HTTP_200_OK
-)
+@router.get("/{reminder_id}", response_model=Reminder, status_code=status.HTTP_200_OK)
 async def read_reminder_by_id(reminder_id: int):
     return ReminderLogic.read_reminder_by_id(reminder_id)
 

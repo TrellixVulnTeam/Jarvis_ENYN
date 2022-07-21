@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from api.utils.converter import CamelModel
 from sqlalchemy.orm import declarative_base
+
+from src.speechassistant.api.utils.converter import CamelModel
 
 Base = declarative_base()
 

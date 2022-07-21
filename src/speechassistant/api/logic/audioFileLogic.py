@@ -1,7 +1,12 @@
-from database.database_connection import DataBase
-from models.audio_file import AudioFile
+from __future__ import annotations
 
-from fastapi.responses import StreamingResponse
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.speechassistant.models.audio_file import AudioFile
+    from fastapi.responses import StreamingResponse
+
+from src.speechassistant.database.database_connection import DataBase
 
 audio_file_interface: any = DataBase().audio_interface
 

@@ -12,12 +12,14 @@ from src.speechassistant.models.routine import (
 Base = declarative_base()
 
 
-class SpecificDateSchema(Base):
-    __tablename__ = "specificdates"
+class RoutineSchema(Base):
+    __tablename__ = "routines"
 
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
-    routine_days_id = Column(Integer, ForeignKey("routinedays.routine_day_id"))
+    name = Column(String, primary_key=True)
+    description = Column(String)
+    calling_commands = relationship("CallingCommandSchema")
+    retakes = relationship("RoutineRetakesSchema")
+    actions = relationship("RoutineCommandSchema")
 
 
 class RoutineDaysSchema(Base):
@@ -35,12 +37,12 @@ class RoutineDaysSchema(Base):
     routine_retake_id = Column(Integer, ForeignKey("routineclocktime.id"))
 
 
-class RoutineClockTimeSchema(Base):
-    __tablename__ = "routineclocktime"
+class SpecificDateSchema(Base):
+    __tablename__ = "specificdates"
 
     id = Column(Integer, primary_key=True)
-    clock_time = Column(Time)
-    clock_time_id = Column(Integer, ForeignKey("routinetime.id"))
+    date = Column(DateTime)
+    routine_days_id = Column(Integer, ForeignKey(RoutineDaysSchema.routine_day_id))
 
 
 class RoutineTimeSchema(Base):
@@ -55,20 +57,21 @@ class RoutineTimeSchema(Base):
     routine_retake_id = Column(Integer, ForeignKey("routineretakes.id"))
 
 
+class RoutineClockTimeSchema(Base):
+    __tablename__ = "routineclocktime"
+
+    id = Column(Integer, primary_key=True)
+    clock_time = Column(Time)
+    clock_time_id = Column(Integer, ForeignKey(RoutineTimeSchema.id))
+
+
 class RoutineRetakesSchema(Base):
     __tablename__ = "routineretakes"
 
     id = Column(Integer, primary_key=True)
     days = relationship("RoutineDaysSchema")
     times = relationship("RoutineTimeSchema")
-    routine_name = Column(Integer, ForeignKey("routines.name"))
-
-
-class RoutineCommandTextSchema(Base):
-    __tablename__ = "routine_command_text"
-
-    text = Column(String, primary_key=True)
-    routine_command_id = Column(Integer, ForeignKey("routinecommand.id"))
+    routine_name = Column(Integer, ForeignKey(RoutineSchema.name))
 
 
 class RoutineCommandSchema(Base):
@@ -80,22 +83,19 @@ class RoutineCommandSchema(Base):
     routine_name = Column(Integer, ForeignKey("routines.name"))
 
 
+class RoutineCommandTextSchema(Base):
+    __tablename__ = "routine_command_text"
+
+    text = Column(String, primary_key=True)
+    routine_command_id = Column(Integer, ForeignKey(RoutineCommandSchema.id))
+
+
 class CallingCommandSchema(Base):
     __tablename__ = "callingcommands"
 
     id = Column(Integer, primary_key=True)
-    routine_name = Column(Integer, ForeignKey("routines.name"))
+    routine_name = Column(Integer, ForeignKey(RoutineSchema.name))
     command = Column(String)
-
-
-class RoutineSchema(Base):
-    __tablename__ = "routines"
-
-    name = Column(String, primary_key=True)
-    description = Column(String)
-    calling_commands = relationship("CallingCommandSchema")
-    retakes = relationship("RoutineRetakesSchema")
-    actions = relationship("RoutineCommandSchema")
 
 
 def __schema_to_calling_command(schema: CallingCommandSchema) -> CallingCommand:

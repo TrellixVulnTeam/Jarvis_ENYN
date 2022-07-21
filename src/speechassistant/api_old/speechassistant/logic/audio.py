@@ -1,15 +1,16 @@
 import json
 import os
 
-from api_old.settings import ALLOWED_AUDIO_EXTENSIONS
-from database.database_connection import DataBase
-from exceptions.CriticalExceptions import (
-    UnsolvableException,
-)
-from exceptions.SQLException import FileNameAlreadyExists
 from flask import Response, request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
+
+from src.speechassistant.api_old.settings import ALLOWED_AUDIO_EXTENSIONS
+from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.exceptions.CriticalExceptions import (
+    UnsolvableException,
+)
+from src.speechassistant.exceptions.SQLException import FileNameAlreadyExists
 
 folder: str = "C:\\Users\\Jakob\\PycharmProjects\\Jarvis"
 database: DataBase = DataBase()

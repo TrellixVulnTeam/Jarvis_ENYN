@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import json
 
-from database.database_connection import DataBase
-from exceptions.SQLException import NoMatchingEntry
 from flask import Response
+
+from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.exceptions.SQLException import NoMatchingEntry
 
 database: DataBase = DataBase()
 

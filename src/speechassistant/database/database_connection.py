@@ -6,27 +6,31 @@ import os
 import sqlite3
 from datetime import datetime, time
 from sqlite3 import Connection, Cursor
+from typing import TYPE_CHECKING
 
-from exceptions.CriticalExceptions import UnsolvableException
-from exceptions.SQLException import *
-from models.alarm import Alarm, AlarmRepeating
-from models.audio_file import AudioFile
-from models.birthday import Birthday
-from models.reminder import Reminder
-from models.routine import (
-    Routine,
-    SpecificDate,
-    RoutineDays,
-    RoutineCommand,
-    RoutineRetakes,
-    RoutineTime,
-    RoutineClockTime,
-    CallingCommand,
-)
-from models.shopping_list import ShoppingListItem
-from models.timer import Timer
-from models.user import User
-from resources.module_skills import Skills
+from src.speechassistant.exceptions.CriticalExceptions import UnsolvableException
+from src.speechassistant.exceptions.SQLException import *
+from src.speechassistant.resources.module_skills import Skills
+
+if TYPE_CHECKING:
+    from src.speechassistant.models.shopping_list import ShoppingListItem
+    from src.speechassistant.models.timer import Timer
+    from src.speechassistant.models.user import User
+
+    from src.speechassistant.models.alarm import Alarm, AlarmRepeating
+    from src.speechassistant.models.audio_file import AudioFile
+    from src.speechassistant.models.birthday import Birthday
+    from src.speechassistant.models.reminder import Reminder
+    from src.speechassistant.models.routine import (
+        Routine,
+        SpecificDate,
+        RoutineDays,
+        RoutineCommand,
+        RoutineRetakes,
+        RoutineTime,
+        RoutineClockTime,
+        CallingCommand,
+    )
 
 
 # toDo: __tuple_to raise value error when nothing fount (type-error)
@@ -310,7 +314,7 @@ class DataBase:
             return user
 
         def get_user_by_first_and_last_name(
-            self, first_name: str, last_name: str
+                self, first_name: str, last_name: str
         ) -> User:
             cursor: Cursor = self.db.cursor()
             statement: str = (
@@ -360,7 +364,7 @@ class DataBase:
             return user
 
         def add_user_notification_by_user_id(
-            self, user_id: int, notification: str
+                self, user_id: int, notification: str
         ) -> None:
             cursor: Cursor = self.db.cursor()
             statement: str = f"INSERT INTO notification (uid, text) VALUES (?, ?)"
@@ -368,7 +372,7 @@ class DataBase:
             cursor.close()
 
         def add_use_notification_by_user_alias(
-            self, user_alias: str, notification: str
+                self, user_alias: str, notification: str
         ) -> None:
             user_id: int = self.__get_user_id_by_alias(user_alias)
             self.add_user_notification_by_user_id(user_id, notification)
@@ -430,7 +434,7 @@ class DataBase:
                 raise UserNotFountException()
 
         def __get_user_id_by_first_and_last_name(
-            self, first_name: str, last_name: str
+                self, first_name: str, last_name: str
         ) -> int:
             cursor: Cursor = self.db.cursor()
             statement: str = (
@@ -524,7 +528,7 @@ class DataBase:
         def get_all_alarms(self) -> list[Alarm]:
             cursor: Cursor = self.db.cursor()
             statement: str = (
-                "SELECT * FROM alarm as a " "JOIN alarmrepeat as ar ON a.aid = ar.aid"
+                "SELECT * FROM alarm as a JOIN alarmrepeat as ar ON a.aid = ar.aid"
             )
             cursor.execute(statement)
             alarms: list[Alarm] = [
@@ -560,7 +564,7 @@ class DataBase:
             return alarm
 
         def __add_alarm_repeating_into_db(
-            self, alarm_id: int, repeating: AlarmRepeating
+                self, alarm_id: int, repeating: AlarmRepeating
         ) -> None:
             cursor: Cursor = self.db.cursor()
             statement: str = (
@@ -583,7 +587,7 @@ class DataBase:
             cursor.close()
 
         def __add_alarm_into_db(
-            self, active: bool, alarm_time: time, song: str, text: str, user_id: int
+                self, active: bool, alarm_time: time, song: str, text: str, user_id: int
         ) -> int:
             cursor: Cursor = self.db.cursor()
             statement: str = """INSERT INTO alarm (sname, uid, time, text, active, 
@@ -618,8 +622,6 @@ class DataBase:
                 f"UPDATE alarm SET sname=?, uid=?, time=?, text=?, active=?, "
                 f"initiated=?, last_executed=? WHERE aid=?"
             )
-            print(alarm.last_executed)
-            print(type(alarm.last_executed))
             cursor.execute(
                 statement,
                 (
@@ -658,6 +660,8 @@ class DataBase:
 
         @staticmethod
         def __tuple_to_alarm(alarm: tuple) -> Alarm:
+            from src.speechassistant.models.alarm import Alarm, AlarmRepeating
+
             if not alarm:
                 raise NoMatchingEntry()
             (
@@ -1016,7 +1020,7 @@ class DataBase:
             pass
 
         def __tuple_to_shopping_list(
-            self, result_set: list[tuple]
+                self, result_set: list[tuple]
         ) -> list[ShoppingListItem]:
             return [self.__tuple_to_shopping_list_item(item) for item in result_set]
 
@@ -1041,7 +1045,7 @@ class DataBase:
             return found_routine
 
         def get_routines(
-            self, on_command: str = None, on_time: time = None
+                self, on_command: str = None, on_time: time = None
         ) -> list[Routine]:
             cursor: Cursor = self.db.cursor()
             if on_command:
@@ -1122,7 +1126,7 @@ class DataBase:
             return new_routine
 
         def add_calling_commands(
-            self, routine_name: str, calling_commands: list[CallingCommand]
+                self, routine_name: str, calling_commands: list[CallingCommand]
         ) -> list[CallingCommand]:
             for index, command in enumerate(calling_commands):
                 calling_commands[index] = self.add_calling_command(
@@ -1131,7 +1135,7 @@ class DataBase:
             return calling_commands
 
         def add_calling_command(
-            self, routine_name: str, calling_command: CallingCommand
+                self, routine_name: str, calling_command: CallingCommand
         ) -> CallingCommand:
             statement: str = "INSERT INTO oncommand (rname, command) VALUES (?, ?)"
             cursor: Cursor = self.db.cursor()
@@ -1141,7 +1145,7 @@ class DataBase:
             return calling_command
 
         def add_actions(
-            self, routine_name: str, actions: list[RoutineCommand]
+                self, routine_name: str, actions: list[RoutineCommand]
         ) -> list[RoutineCommand]:
             cursor: Cursor = self.db.cursor()
             command_statement: str = (
@@ -1158,19 +1162,19 @@ class DataBase:
             return actions
 
         def add_times(
-            self, routine_name: str, clock_times: list[RoutineClockTime]
+                self, routine_name: str, clock_times: list[RoutineClockTime]
         ) -> None:
             pass
 
         def add_clock_times(
-            self, routine_name: str, clock_times: list[RoutineClockTime]
+                self, routine_name: str, clock_times: list[RoutineClockTime]
         ) -> list[RoutineClockTime]:
             for index, clock_time in enumerate(clock_times):
                 clock_times[index] = self.add_clock_time(routine_name, clock_time)
             return clock_times
 
         def add_clock_time(
-            self, routine_name: str, clock_time: RoutineClockTime
+                self, routine_name: str, clock_time: RoutineClockTime
         ) -> RoutineClockTime:
             statement: str = (
                 "INSERT INTO routineactivationtime (rname, time) VALUES (?, ?)"
@@ -1182,14 +1186,14 @@ class DataBase:
             return clock_time
 
         def add_specific_dates(
-            self, routine_name: str, dates: list[SpecificDate]
+                self, routine_name: str, dates: list[SpecificDate]
         ) -> list[SpecificDate]:
             for index, date in dates:
                 dates[index] = self.add_specific_date(routine_name, date)
             return dates
 
         def add_specific_date(
-            self, routine_name: str, specific_date: SpecificDate
+                self, routine_name: str, specific_date: SpecificDate
         ) -> SpecificDate:
             statement: str = "INSERT INTO routinedates (rname, time) VALUES (?, ?)"
             cursor: Cursor = self.db.cursor()
@@ -1227,14 +1231,14 @@ class DataBase:
             return updated_routine
 
         def update_calling_commands(
-            self, calling_commands: list[CallingCommand]
+                self, calling_commands: list[CallingCommand]
         ) -> list[CallingCommand]:
             for index, command in enumerate(calling_commands):
                 calling_commands[index] = self.update_calling_command(command)
             return calling_commands
 
         def update_calling_command(
-            self, calling_command: CallingCommand
+                self, calling_command: CallingCommand
         ) -> CallingCommand:
             ocid, routine_name, command = calling_command
             cursor: Cursor = self.db.cursor()
@@ -1332,7 +1336,7 @@ class DataBase:
             cursor.close()
 
         def update_specific_dates(
-            self, routine_name: str, specific_dates: list[SpecificDate]
+                self, routine_name: str, specific_dates: list[SpecificDate]
         ) -> None:
             statement: str = "UPDATE routinedates SET rdid=?, rname=?, date=?"
             cursor: Cursor = self.db.cursor()
@@ -1426,8 +1430,8 @@ class DataBase:
             pass
 
         def __tuple_to_routine(
-            self,
-            routine_tuple: tuple,
+                self,
+                routine_tuple: tuple,
         ) -> Routine:
             # toDo: get actions of routine
             if not routine_tuple:
@@ -1542,7 +1546,7 @@ class DataBase:
             logging.info("[INFO] QuizInterface initialized.")
 
         def add_question(
-            self, theme: str, question: str, audio: str | io.BytesIO, answer: str
+                self, theme: str, question: str, audio: str | io.BytesIO, answer: str
         ):
             pass
 
@@ -1599,7 +1603,7 @@ class DataBase:
             return birthdays
 
         def update_birthday(
-            self, old_first_name: str, old_last_name: str, birthday: Birthday
+                self, old_first_name: str, old_last_name: str, birthday: Birthday
         ) -> Birthday:
             statement: str = "UPDATE birthdays SET firstname=?, lastname=?, date=? WHERE firstname=? AND lastname=?"
             cursor: Cursor = self.db.cursor()

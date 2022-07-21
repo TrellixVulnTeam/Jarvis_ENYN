@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 
-from api.logic.routineLogic import RoutineLogic
-from models.routine import Routine
+from src.speechassistant.api.logic.routineLogic import RoutineLogic
+from src.speechassistant.models.routine import Routine
 
 router: APIRouter = APIRouter()
 
@@ -16,16 +16,12 @@ async def read_all_routines():
     return RoutineLogic.read_all_routines()
 
 
-@router.get(
-    "/{routine_name}", response_model=Routine, status_code=status.HTTP_200_OK
-)
+@router.get("/{routine_name}", response_model=Routine, status_code=status.HTTP_200_OK)
 async def read_routine_by_name(routine_name: str):
     return RoutineLogic.read_routine_by_name(routine_name)
 
 
-@router.put(
-    "/{routine_name}", response_model=Routine, status_code=status.HTTP_200_OK
-)
+@router.put("/{routine_name}", response_model=Routine, status_code=status.HTTP_200_OK)
 async def update_routine_by_name(routine_name: str, routine: Routine):
     return RoutineLogic.update_routine_by_name(routine_name, routine)
 

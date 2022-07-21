@@ -1,9 +1,10 @@
 from sqlite3 import OperationalError
+
 from fastapi import status, HTTPException
 
-from exceptions.SQLException import NoMatchingEntry
-from models.reminder import Reminder
-from database.database_connection import DataBase
+from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.exceptions.SQLException import NoMatchingEntry
+from src.speechassistant.models.reminder import Reminder
 
 reminder_interface = DataBase().reminder_interface
 

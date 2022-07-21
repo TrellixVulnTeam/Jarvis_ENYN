@@ -43,9 +43,7 @@ class Core:
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.skills: Skills = Skills()
         self.data_base = DataBase()
-        self.services: ServiceWrapper = ServiceWrapper(
-            self, self.data, self.config_data
-        )
+        self.services: ServiceWrapper = ServiceWrapper(self, self.data)
         self.messenger = None
         self.messenger_queued_users: list = []
         self.messenger_queue_output: dict = {}

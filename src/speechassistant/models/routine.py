@@ -1,8 +1,9 @@
 from datetime import time, datetime
 from typing import Optional
 
-from api.utils.converter import CamelModel
 from pydantic import validator, Field
+
+from src.speechassistant.api.utils.converter import CamelModel
 
 
 class SpecificDate(CamelModel):
