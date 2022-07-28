@@ -1,6 +1,4 @@
-from pydantic import BaseModel
-
-from api.utils.converter import CamelModel
+from src.speechassistant.api.utils.converter import CamelModel
 
 
 class Module(CamelModel):
