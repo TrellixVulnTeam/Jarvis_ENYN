@@ -1,21 +1,45 @@
-import pyttsx3
+from pathlib import Path
+
+import parselmouth
+import soundcard as sc
+import soundfile as sf
+from gtts import gTTS
+from pydub import AudioSegment
 
 
 class TTS:
-    def __init__(self):
-        self.engine = pyttsx3.init()
+    def __init__(self) -> None:
+        self.language = "de"
+        self.framerate = 16000
+        self.channels = 2
 
-    def start(self, gender):
-        pass
+    def say(self, text):
+        filename: Path = Path(__file__).parent
+        tts = gTTS(text=text, lang=self.language, slow=False)
+        tts.save(filename.joinpath("temp.mp3").absolute())
 
-    def run(self):
-        pass
+        print(filename)
 
-    def say(self, text: str):
-        self.engine.say(text)
+        sound = AudioSegment.from_mp3(filename.joinpath("temp.mp3").absolute())
+        sound.export("temp.wav", format="wav")
 
-        self.engine.runAndWait()
+        audio_file: parselmouth.Parselmouth = parselmouth.Parselmouth(
+            filename.joinpath("temp.wav").absolute()
+        )
 
+        # librosa_file, sample_rate = librosa.load("temp.wav", mono=True)
+        # librosa_file = librosa.effects.time_stretch(librosa_file, rate=1.5)
+        # librosa_file = librosa.effects.pitch_shift(librosa_file, sample_rate, -6)
+        sf.write("temp.wav", audio_file, samplerate=48000)
+
+        default_speaker = sc.default_speaker()
+        samples, samplerate = sf.read(filename.joinpath("temp.wav").absolute())
+        default_speaker.play(samples, samplerate=samplerate)
+
+
+if __name__ == "__main__":
+    while True:
+        TTS().say(input())
 
 # import logging
 # import time
