@@ -1,9 +1,9 @@
 from sqlalchemy import Column, String, LargeBinary
+from sqlalchemy.ext.declarative import declarative_base
 
-from src.speechassistant.database.DataBasePersistency import DBPersistency
 from src.speechassistant.models.audio_file import AudioFile
 
-Base = DBPersistency.Base
+Base = declarative_base()
 
 
 class AudioFileSchema(Base):

@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy.ext.declarative import declarative_base
 
-from src.speechassistant.database.DataBasePersistency import DBPersistency
-
-Base = DBPersistency.Base
+Base = declarative_base()
 
 
 class ShoppingList(Base):

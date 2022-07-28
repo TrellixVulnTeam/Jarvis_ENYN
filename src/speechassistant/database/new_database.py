@@ -7,13 +7,18 @@ from sqlalchemy.orm import Session, sessionmaker
 from src.speechassistant.database.DataBasePersistency import DBPersistency
 
 # toDo: add cascade in schemas where it has to
+from src.speechassistant.database.connections.AbstractDataBaseConnection import (
+    AbstractDataBaseConnection,
+)
 from src.speechassistant.database.schemas.alarmSchema import (
     AlarmSchema,
     alarm_to_schema,
     schema_to_alarm,
 )
+from src.speechassistant.database.tables.alarmTables import create_alarm_tables
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 from src.speechassistant.models.audio_file import AudioFile
+
 
 # class DataBase:
 #    def __int__(self) -> None:
@@ -22,21 +27,20 @@ from src.speechassistant.models.audio_file import AudioFile
 #   )
 
 
-engine = create_engine(
-    DBPersistency.DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = DBPersistency.Base
-
-
-class _AlarmInterface:
-    def __int__(self) -> None:
-        self.engine: Engine = create_engine(
+class _AlarmInterface(AbstractDataBaseConnection):
+    def __init__(self):
+        self.engine = create_engine(
             DBPersistency.DATABASE_URL,
             echo=True,
-            future=True,
             connect_args={"check_same_thread": False},
         )
+
+        create_alarm_tables(self.engine)
+
+        self.SessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, bind=self.engine
+        )
+        self.Base = DBPersistency.Base
 
     def create_alarm(self, new_alarm: Alarm) -> Alarm:
         alarm_schema: AlarmSchema = alarm_to_schema(new_alarm)

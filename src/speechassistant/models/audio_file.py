@@ -1,9 +1,15 @@
 import base64
 
-from api.utils.converter import CamelModel
+from pydantic import BaseModel
 
 
-class AudioFile(CamelModel):
+def to_camel(string: str) -> str:
+    from humps import camel
+
+    return camel.case(string)
+
+
+class AudioFile(BaseModel):
     name: str
     data: bytes
 
@@ -12,6 +18,10 @@ class AudioFile(CamelModel):
         self.data = base64.b64decode(data)
 
     class Config:
+        alias_generator = to_camel
+        allow_population_by_field_name = (True,)
+        validate_assignment = (True,)
+        orm_mode = True
         json_encoders = {bytes: lambda b: base64.b64encode(b.read())}
 
     def to_json(self) -> dict:

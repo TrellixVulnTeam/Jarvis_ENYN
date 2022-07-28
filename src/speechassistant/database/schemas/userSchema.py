@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.speechassistant.database.DataBasePersistency import DBPersistency
-
-Base = DBPersistency.Base
+Base = declarative_base()
 
 
 class WaitingNotifications(Base):
@@ -12,7 +11,7 @@ class WaitingNotifications(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
 
 
-class User(Base):
+class UserSchema(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)

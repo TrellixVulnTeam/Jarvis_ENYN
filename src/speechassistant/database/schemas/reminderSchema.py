@@ -1,9 +1,9 @@
+from database.schemas.userSchema import UserSchema
+from models.reminder import Reminder
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
 
-from src.speechassistant.database.DataBasePersistency import DBPersistency
-from src.speechassistant.models.reminder import Reminder
-
-Base = DBPersistency.Base
+Base = declarative_base()
 
 
 class ReminderSchema(Base):
@@ -12,7 +12,7 @@ class ReminderSchema(Base):
     id = Column(Integer, primary_key=True)
     time = Column(DateTime)
     text = Column(String)
-    user_id = Column(ForeignKey("users.id"))
+    user_id = Column(ForeignKey(UserSchema.id))
 
 
 def schema_to_reminder(reminder: ReminderSchema) -> Reminder:
