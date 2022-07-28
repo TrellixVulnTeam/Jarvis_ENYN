@@ -15,7 +15,8 @@ from Users import Users
 from database.database_connection import DataBase
 from models.user import User
 from resources.analyze import Sentence_Analyzer
-from resources.intent.Wrapper import IntentWrapper as AIWrapper
+
+# from resources.intent.Wrapper import IntentWrapper as AIWrapper
 from resources.module_skills import Skills
 
 
@@ -57,7 +58,7 @@ class Core:
         self.continuous_modules: dict = {}
         self.system_name: str = self.config_data["system_name"]
 
-        self.ai: AIWrapper = AIWrapper()
+        # self.ai: AIWrapper = AIWrapper()
 
         if self.local_storage["home_location"] == "":
             self.local_storage["home_location"] = requests.get(
@@ -183,16 +184,18 @@ class Core:
             if not self.modules.start_module(text=str(text), user=user) and self.use_ai:
                 # if isValid() functions does not found a matching module and the user wants to try with AI (use_ai),
                 # start AI
-                response: str | dict = self.ai.proceed_with_user_input(text)
-                if response is None:
-                    # if the AI has not found a matching module, try to find one via isValid()
-                    self.modules.start_module(text=str(text), user=user)
-                elif type(response) is str:
-                    self.audio_output.say(response)
-                elif type(response) is dict:
-                    self.start_module(text, response["module"], user=user)
-                else:
-                    raise ValueError('Invalid type of attribute "text"!')
+
+                # response: str | dict = self.ai.proceed_with_user_input(text)
+                # if response is None:
+                #     # if the AI has not found a matching module, try to find one via isValid()
+                #     self.modules.start_module(text=str(text), user=user)
+                # elif type(response) is str:
+                #     self.audio_output.say(response)
+                # elif type(response) is dict:
+                #     self.start_module(text, response["module"], user=user)
+                # else:
+                #     raise ValueError('Invalid type of attribute "text"!')
+                print("AI not working at the moment!")
 
     def start_module(self, text: str, name: str, user: dict = None) -> bool:
         # user prediction is not implemented yet, therefore here the workaround
