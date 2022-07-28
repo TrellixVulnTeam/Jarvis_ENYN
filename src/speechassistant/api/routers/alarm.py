@@ -1,7 +1,7 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Response
 
-from api.logic.alarmLogic import AlarmLogic
-from models.alarm import Alarm
+from src.speechassistant.api.logic.alarmLogic import AlarmLogic
+from src.speechassistant.models.alarm import Alarm
 
 router: APIRouter = APIRouter()
 
@@ -37,8 +37,7 @@ async def update_alarm(alarm_id: int, alarm: Alarm):
     return AlarmLogic.update_alarm(alarm)
 
 
-@router.delete(
-    "/{alarm_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
-)
+@router.delete("/{alarm_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_alarm(alarm_id: int):
-    return AlarmLogic.delete_alarm(alarm_id)
+    AlarmLogic.delete_alarm(alarm_id)
+    return Response()

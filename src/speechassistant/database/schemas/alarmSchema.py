@@ -1,17 +1,32 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Time, DateTime
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.speechassistant.database.DataBasePersistency import DBPersistency
+from src.speechassistant.database.schemas.userSchema import UserSchema
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 
-Base = DBPersistency.Base
+Base = declarative_base()
+
+
+class AlarmSchema(Base):
+    __tablename__ = "alarms"
+
+    id = Column(Integer, primary_key=True)
+    text = Column(String)
+    alarm_time = Column(Time)
+    repeating = relationship("AlarmRepeatingSchema", uselist=False, backref="alarms")
+    song_name = Column(String)
+    active = Column(Boolean)
+    initiated = Column(Boolean)
+    user_id = Column(Integer, ForeignKey(UserSchema.id))
+    last_executed = Column(DateTime)
 
 
 class AlarmRepeatingSchema(Base):
     __tablename__ = "alarm_repeatings"
 
     id = Column(Integer, primary_key=True)
-    alarm_id = Column(Integer, ForeignKey("alarms.id"))
+    alarm_id = Column(Integer, ForeignKey(AlarmSchema.id))
     monday = Column(Boolean)
     tuesday = Column(Boolean)
     wednesday = Column(Boolean)
@@ -23,20 +38,6 @@ class AlarmRepeatingSchema(Base):
 
     def __repr__(self) -> str:
         return f"AlarmRepeatingSchema(monday={self.monday}, tuesday={self.tuesday}, wednesday={self.wednesday}, thursday={self.thursday}, friday={self.friday}, saturday={self.saturday}, sunday={self.sunday}"
-
-
-class AlarmSchema(Base):
-    __tablename__ = "alarms"
-
-    id = Column(Integer, primary_key=True)
-    text = Column(String)
-    alarm_time = Column(Time)
-    repeating = relationship("AlarmRepeatingSchema")
-    song_name = Column(String)
-    active = Column(Boolean)
-    initiated = Column(Boolean)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    last_executed = Column(DateTime)
 
 
 def alarm_to_schema(alarm: Alarm) -> AlarmSchema:

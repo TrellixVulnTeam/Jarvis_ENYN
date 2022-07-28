@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime, time
+from datetime import datetime
 
-from api.utils.converter import CamelModel
+from pydantic import datetime_parse
+
+from src.speechassistant.api.utils.converter import CamelModel
 
 
 class AlarmRepeating(CamelModel):
@@ -18,7 +20,7 @@ class AlarmRepeating(CamelModel):
 
 class Alarm(CamelModel):
     text: str
-    alarm_time: time
+    alarm_time: datetime_parse.time
     repeating: AlarmRepeating
     song_name: str
     active: bool = True
