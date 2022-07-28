@@ -1,21 +1,14 @@
-FROM debian:latest
+FROM python:3.10.5
 
-RUN apt-get update -y \
-    && apt-get install -y python3 \
-    && apt-get install -y python3-pip \
-    && apt-get install -y libatlas-base-dev \
-    && apt-get install -y portaudio19-dev \
-    && apt-get install -y sox \
-    && apt-get install -y flac \
-    && apt-get install -y sqlite3 \
-    && apt-get install -y vlc \
-    && apt-get install -y xvfb
+RUN apt -y update \
+    && apt install libasound-dev libportaudio2 libportaudiocpp0 portaudio19-dev -y \
+    && apt install -y python3-dev sqlite3 vlc build-essential
 
-WORKDIR /home/jarvis
+WORKDIR /usr/app
 
-COPY requirements.txt requirements.txt
-COPY . /home/jarvis
+COPY requirements.txt .
+COPY . .
 
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
-CMD [ "python3", "main.py" ]
+CMD [ "python3.10", "main.py" ]
