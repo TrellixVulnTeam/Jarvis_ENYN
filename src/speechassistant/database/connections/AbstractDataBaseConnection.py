@@ -1,6 +1,6 @@
 from abc import ABC
 
-from database.DataBasePersistency import DBPersistency
+from src.speechassistant.database.DataBasePersistency import DBPersistency
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker
 

@@ -1,6 +1,6 @@
 from datetime import time
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.future import Engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -15,7 +15,9 @@ from src.speechassistant.database.schemas.alarmSchema import (
     alarm_to_schema,
     schema_to_alarm,
 )
-from src.speechassistant.database.tables.alarmTables import create_alarm_tables
+
+import src.speechassistant.database.tables
+
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 from src.speechassistant.models.audio_file import AudioFile
 
@@ -29,13 +31,15 @@ from src.speechassistant.models.audio_file import AudioFile
 
 class _AlarmInterface(AbstractDataBaseConnection):
     def __init__(self):
+        super().__init__()
         self.engine = create_engine(
             DBPersistency.DATABASE_URL,
             echo=True,
             connect_args={"check_same_thread": False},
         )
 
-        create_alarm_tables(self.engine)
+        meta = MetaData()
+        meta.create_all(self.engine)
 
         self.SessionLocal = sessionmaker(
             autocommit=False, autoflush=False, bind=self.engine
