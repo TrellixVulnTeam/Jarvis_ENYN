@@ -46,7 +46,7 @@ class SpecificDateSchema(Base):
 
 
 class RoutineTimeSchema(Base):
-    __tablename__ = "routinetime"
+    __tablename__ = "routinetimes"
 
     id = Column(Integer, primary_key=True)
     clock_times = relationship("RoutineClockTimeSchema")
@@ -58,7 +58,7 @@ class RoutineTimeSchema(Base):
 
 
 class RoutineClockTimeSchema(Base):
-    __tablename__ = "routineclocktime"
+    __tablename__ = "routineclocktimes"
 
     id = Column(Integer, primary_key=True)
     clock_time = Column(Time)
@@ -84,7 +84,7 @@ class RoutineCommandSchema(Base):
 
 
 class RoutineCommandTextSchema(Base):
-    __tablename__ = "routine_command_text"
+    __tablename__ = "routinecommandtext"
 
     text = Column(String, primary_key=True)
     routine_command_id = Column(Integer, ForeignKey(RoutineCommandSchema.id))

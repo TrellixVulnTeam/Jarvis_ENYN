@@ -6,7 +6,7 @@ Base = declarative_base()
 
 
 class WaitingNotifications(Base):
-    __tablename__ = "waiting_notifications"
+    __tablename__ = "waitingnotifications"
     text = Column(String, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
 

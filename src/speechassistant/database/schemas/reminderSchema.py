@@ -1,5 +1,5 @@
-from database.schemas.userSchema import UserSchema
-from models.reminder import Reminder
+from src.speechassistant.database.schemas.userSchema import UserSchema
+from src.speechassistant.models.reminder import Reminder
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
