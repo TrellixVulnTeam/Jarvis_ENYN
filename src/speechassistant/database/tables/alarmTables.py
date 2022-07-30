@@ -1,11 +1,15 @@
 from sqlalchemy import Table, Column, Integer, String, DateTime, Time, Boolean, MetaData
 from sqlalchemy.future import Engine
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
 
 ALARM_TABLE_NAME = "alarms"
 ALARM_REPEATING_TABLE_NAME = "alarm_repeatings"
 
 alarmTable = Table(
     ALARM_TABLE_NAME,
+    Base.metadata,
     Column("id", Integer),
     Column("text", String),
     Column("alarm_time", Time),
@@ -18,6 +22,7 @@ alarmTable = Table(
 
 alarmRepeatingTable = Table(
     ALARM_REPEATING_TABLE_NAME,
+    Base.metadata,
     Column("alarm_id", Integer),
     Column("monday", Boolean),
     Column("tuesday", Boolean),
