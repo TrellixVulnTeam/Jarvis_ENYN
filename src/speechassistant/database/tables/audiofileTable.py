@@ -1,13 +1,14 @@
-from sqlalchemy import Table, String, LargeBinary, Column
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Table, String, LargeBinary, Column, MetaData
+from sqlalchemy.future import Engine
 
-Base = declarative_base()
+meta = MetaData()
 
 AUDIO_FILE_TABLE_NAME = "audiofiles"
 
 audioFileTable = Table(
-    AUDIO_FILE_TABLE_NAME,
-    Base.metadata,
-    Column("name", String),
-    Column("data", LargeBinary)
+    AUDIO_FILE_TABLE_NAME, meta, Column("name", String), Column("data", LargeBinary)
 )
+
+
+def create_tables(engine: Engine):
+    meta.create_all(engine)

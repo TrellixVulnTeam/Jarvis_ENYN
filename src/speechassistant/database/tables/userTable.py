@@ -1,26 +1,30 @@
-from sqlalchemy import Table, Column, Integer, String, DateTime
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData
+from sqlalchemy.future import Engine
 
-Base = declarative_base()
+meta = MetaData()
 
 USER_TABLE_NAME = "users"
 WAITING_NOTIFICATIONS_TABLE_NAME = "waitingnotifications"
 
 waitingNotificationsTable = Table(
     WAITING_NOTIFICATIONS_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("text", String),
-    Column("user_id", Integer)
+    Column("user_id", Integer),
 )
 
 userTable = Table(
     USER_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
     Column("alias", String),
     Column("first_name", String),
     Column("last_name", String),
     Column("birthday", DateTime),
     Column("messenger_id", Integer),
-    Column("song_name", String)
+    Column("song_name", String),
 )
+
+
+def create_tables(engine: Engine):
+    meta.create_all(engine)

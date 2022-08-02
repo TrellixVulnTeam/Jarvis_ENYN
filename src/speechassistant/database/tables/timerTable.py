@@ -1,15 +1,19 @@
-from sqlalchemy import Table, Column, Integer, String, Time
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Table, Column, Integer, String, Time, MetaData
+from sqlalchemy.future import Engine
 
-Base = declarative_base()
+meta = MetaData()
 
 TIMER_TABLE_NAME = "timer"
 
 timerTable = Table(
     TIMER_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
     Column("duration", String),
     Column("start_time", Time),
-    Column("text", String)
+    Column("text", String),
 )
+
+
+def create_tables(engine: Engine):
+    meta.create_all(engine)

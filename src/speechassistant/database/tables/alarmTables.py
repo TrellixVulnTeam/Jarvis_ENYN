@@ -1,16 +1,15 @@
 from sqlalchemy import Table, Column, Integer, String, DateTime, Time, Boolean, MetaData
 from sqlalchemy.future import Engine
-from sqlalchemy.orm import declarative_base
 
-Base = declarative_base()
+meta = MetaData()
 
 ALARM_TABLE_NAME = "alarms"
 ALARM_REPEATING_TABLE_NAME = "alarm_repeatings"
 
 alarmTable = Table(
     ALARM_TABLE_NAME,
-    Base.metadata,
-    Column("id", Integer),
+    meta,
+    Column("id", Integer, primary_key=True),
     Column("text", String),
     Column("alarm_time", Time),
     Column("song_name", String),
@@ -22,8 +21,8 @@ alarmTable = Table(
 
 alarmRepeatingTable = Table(
     ALARM_REPEATING_TABLE_NAME,
-    Base.metadata,
-    Column("alarm_id", Integer),
+    meta,
+    Column("alarm_id", Integer, primary_key=True),
     Column("monday", Boolean),
     Column("tuesday", Boolean),
     Column("wednesday", Boolean),
@@ -35,6 +34,5 @@ alarmRepeatingTable = Table(
 )
 
 
-def create_alarm_tables(engine: Engine):
-    meta = MetaData()
+def create_tables(engine: Engine):
     meta.create_all(engine)

@@ -1,7 +1,7 @@
-from sqlalchemy import Table, Column, String, Integer, Boolean, Time
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Table, Column, String, Integer, Boolean, Time, MetaData
+from sqlalchemy.future import Engine
 
-Base = declarative_base()
+meta = MetaData()
 
 ROUTINE_TABLE_NAME = "routines"
 ROUTINE_DAYS_TABLE_NAME = "routinedays"
@@ -16,63 +16,63 @@ CALLING_COMMAND_TABLE_NAME = "callingcommands"
 
 routineCallingCommandTable = Table(
     CALLING_COMMAND_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
     Column("routine_name", Integer),
-    Column("command", String)
+    Column("command", String),
 )
 
 routineCommandTextTable = Table(
     ROUTINE_COMMAND_TEXT_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("text", String),
-    Column("routine_command_id", Integer)
+    Column("routine_command_id", Integer),
 )
 
 routineCommandTable = Table(
     ROUTINE_COMMAND_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
     Column("module_name", String),
-    Column("routine_name", Integer)
+    Column("routine_name", Integer),
 )
 
 routineRetakesTable = Table(
     ROUTINE_RETAKES_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
-    Column("routine_name", Integer)
+    Column("routine_name", Integer),
 )
 
 routineClockTimeTable = Table(
     ROUTINE_CLOCK_TIME_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
     Column("clock_time", Time),
-    Column("clock_time_id", Integer)
+    Column("clock_time_id", Integer),
 )
 
 routineTimeTable = Table(
     ROUTINE_TIMES_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
     Column("after_alarm", Boolean),
     Column("after_sunrise", Boolean),
     Column("after_sunset", Boolean),
     Column("after_call", Boolean),
-    Column("routine_retake_id", Integer)
+    Column("routine_retake_id", Integer),
 )
 
 specificDatesTable = Table(
     SPECIFIC_DATES_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
-    Column("routine_days_id", Integer)
+    Column("routine_days_id", Integer),
 )
 
 routineDaysTable = Table(
     ROUTINE_DAYS_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("routine_day_id", Integer),
     Column("monday", Boolean),
     Column("tuesday", Boolean),
@@ -81,12 +81,13 @@ routineDaysTable = Table(
     Column("friday", Boolean),
     Column("saturday", Boolean),
     Column("sunday", Boolean),
-    Column("routine_retake_id", Integer)
+    Column("routine_retake_id", Integer),
 )
 
 routineTable = Table(
-    ROUTINE_TABLE_NAME,
-    Base.metadata,
-    Column("name", String),
-    Column("description", String)
+    ROUTINE_TABLE_NAME, meta, Column("name", String), Column("description", String)
 )
+
+
+def create_tables(engine: Engine):
+    meta.create_all(engine)

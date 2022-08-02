@@ -1,15 +1,19 @@
-from sqlalchemy import Table, Column, Integer, DateTime, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Table, Column, Integer, DateTime, String, MetaData
+from sqlalchemy.future import Engine
 
-Base = declarative_base()
+meta = MetaData()
 
 REMINDER_TABLE_NAME = "reminder"
 
 reminderTable = Table(
     REMINDER_TABLE_NAME,
-    Base.metadata,
+    meta,
     Column("id", Integer),
     Column("time", DateTime),
     Column("text", String),
-    Column("user_id", Integer)
+    Column("user_id", Integer),
 )
+
+
+def create_tables(engine: Engine):
+    meta.create_all(engine)
