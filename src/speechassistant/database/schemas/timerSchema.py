@@ -1,7 +1,8 @@
-from src.speechassistant.database.schemas.userSchema import UserSchema
 from sqlalchemy import Column, Integer, String, Time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
+from src.speechassistant.database.schemas.userSchema import UserSchema
 
 Base = declarative_base()
 
@@ -13,4 +14,4 @@ class Timer(Base):
     duration = Column(String)
     start_time = Column(Time)
     text = Column(String)
-    user = relationship(UserSchema, back_populates="timer")
+    user = relationship(UserSchema, back_populates="timer", cascade="all, delete")

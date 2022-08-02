@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Time, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -14,19 +16,21 @@ class AlarmSchema(Base):
     id = Column(Integer, primary_key=True)
     text = Column(String)
     alarm_time = Column(Time)
-    repeating = relationship("AlarmRepeatingSchema", uselist=False, backref="alarms")
+    repeating = relationship("AlarmRepeatingSchema", uselist=False, backref="alarms", cascade="all, delete")
     song_name = Column(String)
     active = Column(Boolean)
     initiated = Column(Boolean)
     user_id = Column(Integer, ForeignKey(UserSchema.id))
     last_executed = Column(DateTime)
 
+    def __repr__(self):
+        return f"AlarmSchema(alarm_id: {self.id}, user_id: {self.user_id}, text: {self.text}, alarm_time: {self.alarm_time}, repeating: {self.repeating}, song_name: {self.song_name}, active: {self.active}, initiated: {self.initiated}, last_executed: {self.last_executed})"
+
 
 class AlarmRepeatingSchema(Base):
     __tablename__ = "alarm_repeatings"
 
-    id = Column(Integer, primary_key=True)
-    alarm_id = Column(Integer, ForeignKey(AlarmSchema.id))
+    alarm_id = Column(Integer, ForeignKey(AlarmSchema.id), primary_key=True)
     monday = Column(Boolean)
     tuesday = Column(Boolean)
     wednesday = Column(Boolean)
@@ -65,7 +69,9 @@ def alarm_to_schema(alarm: Alarm) -> AlarmSchema:
     )
 
 
-def schema_to_alarm(alarm_schema: AlarmSchema) -> Alarm:
+def schema_to_alarm(alarm_schema: AlarmSchema) -> Optional[Alarm]:
+    if alarm_schema is None:
+        return None
     alarm_repeating: AlarmRepeating = AlarmRepeating(
         monday=alarm_schema.repeating.monday,
         tuesday=alarm_schema.repeating.tuesday,

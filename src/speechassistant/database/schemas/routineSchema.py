@@ -17,9 +17,9 @@ class RoutineSchema(Base):
 
     name = Column(String, primary_key=True)
     description = Column(String)
-    calling_commands = relationship("CallingCommandSchema")
-    retakes = relationship("RoutineRetakesSchema")
-    actions = relationship("RoutineCommandSchema")
+    calling_commands = relationship("CallingCommandSchema", cascade="all, delete")
+    retakes = relationship("RoutineRetakesSchema", cascade="all, delete")
+    actions = relationship("RoutineCommandSchema", cascade="all, delete")
 
 
 class RoutineDaysSchema(Base):
@@ -33,7 +33,7 @@ class RoutineDaysSchema(Base):
     friday = Column(Boolean)
     saturday = Column(Boolean)
     sunday = Column(Boolean)
-    specific_dates = relationship("SpecificDateSchema")
+    specific_dates = relationship("SpecificDateSchema", cascade="all, delete")
     routine_retake_id = Column(Integer, ForeignKey("routineclocktime.id"))
 
 
@@ -49,7 +49,7 @@ class RoutineTimeSchema(Base):
     __tablename__ = "routinetimes"
 
     id = Column(Integer, primary_key=True)
-    clock_times = relationship("RoutineClockTimeSchema")
+    clock_times = relationship("RoutineClockTimeSchema", cascade="all, delete")
     after_alarm = Column(Boolean)
     after_sunrise = Column(Boolean)
     after_sunset = Column(Boolean)
@@ -69,8 +69,8 @@ class RoutineRetakesSchema(Base):
     __tablename__ = "routineretakes"
 
     id = Column(Integer, primary_key=True)
-    days = relationship("RoutineDaysSchema")
-    times = relationship("RoutineTimeSchema")
+    days = relationship("RoutineDaysSchema", cascade="all, delete")
+    times = relationship("RoutineTimeSchema", cascade="all, delete")
     routine_name = Column(Integer, ForeignKey(RoutineSchema.name))
 
 
@@ -79,7 +79,7 @@ class RoutineCommandSchema(Base):
 
     id = Column(Integer, primary_key=True)
     module_name = Column(String, primary_key=True)
-    with_text = relationship("RoutineCommandTextSchema")
+    with_text = relationship("RoutineCommandTextSchema", cascade="all, delete")
     routine_name = Column(Integer, ForeignKey("routines.name"))
 
 
@@ -105,7 +105,7 @@ def __schema_to_calling_command(schema: CallingCommandSchema) -> CallingCommand:
 
 
 def __calling_command_to_schema(
-    calling_command: CallingCommand,
+        calling_command: CallingCommand,
 ) -> CallingCommandSchema:
     return CallingCommandSchema(
         id=calling_command.ocid,
