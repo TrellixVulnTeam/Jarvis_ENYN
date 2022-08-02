@@ -21,4 +21,4 @@ class UserSchema(Base):
     birthday = Column(DateTime)
     messenger_id = Column(Integer)
     song_name = Column(String)
-    waiting_notifications = relationship("WaitingNotifications")
+    waiting_notifications = relationship("WaitingNotifications", cascade="all, delete")
