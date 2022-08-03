@@ -1,290 +1,229 @@
+import datetime
 from datetime import time
+from typing import Type
 
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.future import Engine, select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.future import select
+from sqlalchemy.orm import Session
 
-from src.speechassistant.database.DataBasePersistency import DBPersistency
-
-# toDo: add cascade in schemas where it has to
 from src.speechassistant.database.connections.AbstractDataBaseConnection import (
-    AbstractDataBaseConnection,
+    AbstractDataBaseConnection, Model, Schema,
 )
 from src.speechassistant.database.schemas.alarmSchema import (
     AlarmSchema,
     alarm_to_schema,
     schema_to_alarm,
 )
-
-import src.speechassistant.database.tables
-
+from src.speechassistant.database.schemas.audioFileSchema import audio_file_to_schema, schema_to_audio_file, \
+    AudioFileSchema
+from src.speechassistant.database.schemas.birthdaySchema import BirthdaySchema, schema_to_birthday, birthday_to_schema
+from src.speechassistant.database.schemas.reminderSchema import ReminderSchema, schema_to_reminder, reminder_to_schema
+from src.speechassistant.database.schemas.routineSchema import RoutineSchema, schema_to_routine, routine_to_schema
+from src.speechassistant.database.schemas.shoppingListSchema import ShoppingListSchema, schema_to_shopping_list, \
+    shopping_list_to_schema
+from src.speechassistant.database.schemas.timerSchema import TimerSchema, schema_to_timer, timer_to_schema
+from src.speechassistant.database.schemas.userSchema import UserSchema, schema_to_user, user_to_schema
 from src.speechassistant.models.alarm import Alarm, AlarmRepeating
 from src.speechassistant.models.audio_file import AudioFile
-
-
 # class DataBase:
 #    def __int__(self) -> None:
 #      self.engine: Engine = create_engine(
 #        DBPersistency.DATABASE_URL, echo=True, future=True, connect_args={"check_same_thread": False}
 #   )
+from src.speechassistant.models.birthday import Birthday
+from src.speechassistant.models.reminder import Reminder
+from src.speechassistant.models.routine import Routine
+from src.speechassistant.models.shopping_list import ShoppingListItem
+from src.speechassistant.models.timer import Timer
+# toDo: add cascade in schemas where it has to
+from src.speechassistant.models.user import User
 
 
-class _AlarmInterface(AbstractDataBaseConnection):
+class _AlarmInterface(AbstractDataBaseConnection[Alarm, AlarmSchema]):
+
+    def get_schema_type(self) -> Type[Schema]:
+        return AlarmSchema
+
+    def get_model_type(self) -> Type[Model]:
+        return Alarm
+
+    def schema_to_model(self, model_schema: AlarmSchema) -> Alarm:
+        return schema_to_alarm(model_schema)
+
+    def model_to_schema(self, model: Alarm) -> AlarmSchema:
+        return alarm_to_schema(model)
+
+    def get_model_id(self, model: Alarm) -> int:
+        return model.alarm_id
+
     def __init__(self):
         super().__init__()
-        self.engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            connect_args={"check_same_thread": False},
-        )
 
-        meta = MetaData()
-        meta.create_all(self.engine)
+        from src.speechassistant.database.tables.alarmTables import create_tables
+        create_tables(self.engine)
 
-        self.SessionLocal = sessionmaker(
-            autocommit=False, autoflush=False, bind=self.engine
-        )
-        self.Base = DBPersistency.Base
 
-    def create_alarm(self, new_alarm: Alarm) -> Alarm:
-        alarm_schema: AlarmSchema = alarm_to_schema(new_alarm)
-        with Session(self.engine, future=True) as session:
-            session.add(alarm_schema)
-            session.commit()
-            return alarm_schema
+class _AudioFileInterface(AbstractDataBaseConnection[AudioFile, AudioFileSchema]):
+    def get_model_type(self) -> Type[Model]:
+        return AudioFile
 
-    def get_alarm_by_id(self, alarm_id: int) -> Alarm:
+    def get_schema_type(self) -> Type[Schema]:
+        return AudioFileSchema
+
+    def schema_to_model(self, model_schema: AudioFileSchema) -> AudioFile:
+        return schema_to_audio_file(model_schema)
+
+    def model_to_schema(self, model: AudioFile) -> AudioFileSchema:
+        return audio_file_to_schema(model)
+
+    def get_model_id(self, model: AudioFile) -> int:
+        return model.id
+
+    def __int__(self) -> None:
+        super().__init__()
+        from src.speechassistant.database.tables.audiofileTable import create_tables
+        create_tables(self.engine)
+
+
+class _BirthdayInterface(AbstractDataBaseConnection[Birthday, BirthdaySchema]):
+    def schema_to_model(self, model_schema: Schema) -> Model:
+        return schema_to_birthday(model_schema)
+
+    def model_to_schema(self, model: Model) -> Schema:
+        return birthday_to_schema(model)
+
+    def get_model_id(self, model: Birthday) -> int:
+        return -1
+
+    def get_model_type(self) -> Type[Model]:
+        return Birthday
+
+    def get_schema_type(self) -> Type[Schema]:
+        return BirthdaySchema
+
+    def __int__(self) -> None:
+        super().__init__()
+        from src.speechassistant.database.tables.birthdayTable import create_tables
+        create_tables(self.engine)
+
+
+class _ReminderInterface(AbstractDataBaseConnection[Reminder, ReminderSchema]):
+    def schema_to_model(self, model_schema: Schema) -> Model:
+        return schema_to_reminder(model_schema)
+
+    def model_to_schema(self, model: Model) -> Schema:
+        return reminder_to_schema(model)
+
+    def get_model_id(self, model: Reminder) -> int:
+        return model.reminder_id
+
+    def get_model_type(self) -> Type[Model]:
+        return Reminder
+
+    def get_schema_type(self) -> Type[Schema]:
+        return ReminderSchema
+
+    def __int__(self) -> None:
+        super().__init__()
+        from src.speechassistant.database.tables.reminderTable import create_tables
+        create_tables(self.engine)
+
+
+class _RoutineInterface(AbstractDataBaseConnection[Routine, RoutineSchema]):
+    def schema_to_model(self, model_schema: Schema) -> Model:
+        return schema_to_routine(model_schema)
+
+    def model_to_schema(self, model: Model) -> Schema:
+        return routine_to_schema(model)
+
+    def get_by_id(self, model_id: int) -> Model:
+        raise NotImplemented
+
+    def get_by_name(self, model_name: str) -> Routine:
+        model_schema: Schema
         with Session(self.engine) as session:
-            stmt = select(AlarmSchema).where(AlarmSchema.id == alarm_id)
-            return session.scalars(stmt).one()
+            stmt = select(self.get_schema_type()).where(self.get_schema_type().name == model_name)
+            model_schema = session.execute(stmt).scalars().first()
+            return self.schema_to_model(model_schema)
 
-    def get_all_alarms(self) -> list[Alarm]:
-        with Session(self.engine) as session:
-            stmt = select(AlarmSchema)
-            return [schema_to_alarm(a) for a in session.scalars(stmt)]
+    def get_model_id(self, model: Model) -> int:
+        return -1
 
-    def update_alarm_by_id(self, alarm_id: int, alarm: Alarm) -> Alarm:
-        alarm_schema: AlarmSchema = alarm_to_schema(alarm)
-        with Session(self.engine) as session:
-            stmt = select(AlarmSchema).where(AlarmSchema.id == alarm_id)
-            alarm_in_db: AlarmSchema = session.scalars(stmt).one()
-            alarm_in_db = alarm_schema
-            session.commit()
-        return schema_to_alarm(alarm_in_db)
+    def get_model_type(self) -> Type[Model]:
+        return Routine
 
-    def delete_alarm_by_id(self, alarm_id: int) -> None:
-        pass
+    def get_schema_type(self) -> Type[Schema]:
+        return RoutineSchema
 
-
-class _AudioFileInterface:
     def __int__(self) -> None:
-        self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            future=True,
-            connect_args={"check_same_thread": False},
-        )
-
-    def create_audio_file(self) -> AudioFile:
-        pass
-
-    def get_audio_file_by_id(self, audio_file_id: int) -> AudioFile:
-        pass
-
-    def get_audio_file_by_name(self, audio_file_name: str) -> AudioFile:
-        pass
-
-    def get_all_audio_files(self) -> list[AudioFile]:
-        pass
-
-    def update_audio_file_by_id(
-        self, audio_file_id: int, audio_file: AudioFile
-    ) -> AudioFile:
-        pass
-
-    def delete_audio_file_by_id(self, audio_file_id: int) -> None:
-        pass
-
-    def delete_audio_file_by_name(self, audio_file_name: str) -> None:
-        pass
+        super().__init__()
+        from src.speechassistant.database.tables.routineTable import create_tables
+        create_tables(self.engine)
 
 
-class _BirthdayInterface:
+class _ShoppingListInterface(AbstractDataBaseConnection[ShoppingListItem, ShoppingListSchema]):
+    def schema_to_model(self, model_schema: Schema) -> Model:
+        return schema_to_shopping_list(model_schema)
+
+    def model_to_schema(self, model: Model) -> Schema:
+        return shopping_list_to_schema(model)
+
+    def get_model_id(self, model: ShoppingListItem) -> int:
+        return model.id
+
+    def get_model_type(self) -> Type[Model]:
+        return ShoppingListItem
+
+    def get_schema_type(self) -> Type[Schema]:
+        return ShoppingListSchema
+
     def __int__(self) -> None:
-        self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            future=True,
-            connect_args={"check_same_thread": False},
-        )
-
-    def create_birthday(self) -> AudioFile:
-        pass
-
-    def get_birthday_by_id(self, audio_file_id: int) -> AudioFile:
-        pass
-
-    def get_birthday_by_first_and_last_name(self, audio_file_name: str) -> AudioFile:
-        pass
-
-    def get_all_birthdays(self) -> list[AudioFile]:
-        pass
-
-    def update_birthday_by_id(
-        self, audio_file_id: int, audio_file: AudioFile
-    ) -> AudioFile:
-        pass
-
-    def delete_birthday_by_id(self, audio_file_id: int) -> None:
-        pass
-
-    def delete_birthday_by_first_and_last_name(self, audio_file_name: str) -> None:
-        pass
+        super().__init__()
+        from src.speechassistant.database.tables.shoppinglistTable import create_tables
+        create_tables(self.engine)
 
 
-class _ReminderInterface:
+class _TimerInterface(AbstractDataBaseConnection[Timer, TimerSchema]):
+    def schema_to_model(self, model_schema: Schema) -> Model:
+        return schema_to_timer(model_schema)
+
+    def model_to_schema(self, model: Model) -> Schema:
+        return timer_to_schema(model)
+
+    def get_model_id(self, model: Timer) -> int:
+        return Timer.tid
+
+    def get_model_type(self) -> Type[Model]:
+        return Timer
+
+    def get_schema_type(self) -> Type[Schema]:
+        return TimerSchema
+
     def __int__(self) -> None:
-        self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            future=True,
-            connect_args={"check_same_thread": False},
-        )
-
-    def create_reminder(self) -> AudioFile:
-        pass
-
-    def get_reminder_by_id(self, audio_file_id: int) -> AudioFile:
-        pass
-
-    def get_all_reminder(self) -> list[AudioFile]:
-        pass
-
-    def update_reminder_by_id(
-        self, audio_file_id: int, audio_file: AudioFile
-    ) -> AudioFile:
-        pass
-
-    def delete_reminder_by_id(self, audio_file_id: int) -> None:
-        pass
+        super().__init__()
+        from src.speechassistant.database.tables.timerTable import create_tables
+        create_tables(self.engine)
 
 
-class _RoutineInterface:
+class _UserInterface(AbstractDataBaseConnection[User, UserSchema]):
+    def schema_to_model(self, model_schema: Schema) -> Model:
+        return schema_to_user(model_schema)
+
+    def model_to_schema(self, model: Model) -> Schema:
+        return user_to_schema(model)
+
+    def get_model_id(self, model: User) -> int:
+        return model.uid
+
+    def get_model_type(self) -> Type[Model]:
+        return User
+
+    def get_schema_type(self) -> Type[Schema]:
+        return UserSchema
+
     def __int__(self) -> None:
-        self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            future=True,
-            connect_args={"check_same_thread": False},
-        )
-
-    def create_routine(self) -> AudioFile:
-        pass
-
-    def get_routine_by_id(self, audio_file_id: int) -> AudioFile:
-        pass
-
-    def get_routine_by_name(self, audio_file_name: str) -> AudioFile:
-        pass
-
-    def get_all_routine(self) -> list[AudioFile]:
-        pass
-
-    def update_routine_by_id(
-        self, audio_file_id: int, audio_file: AudioFile
-    ) -> AudioFile:
-        pass
-
-    def delete_routine_by_id(self, audio_file_id: int) -> None:
-        pass
-
-
-class _ShoppingListInterface:
-    def __int__(self) -> None:
-        self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            future=True,
-            connect_args={"check_same_thread": False},
-        )
-
-    def create_shopping_list(self) -> AudioFile:
-        pass
-
-    def get_shopping_list_by_id(self, audio_file_id: int) -> AudioFile:
-        pass
-
-    def get_shopping_list_by_name(self, audio_file_name: str) -> AudioFile:
-        pass
-
-    def update_shopping_list_by_id(
-        self, audio_file_id: int, audio_file: AudioFile
-    ) -> AudioFile:
-        pass
-
-    def delete_shopping_list_by_id(self, audio_file_id: int) -> None:
-        pass
-
-    def delete_shopping_list_by_name(self, audio_file_name: str) -> None:
-        pass
-
-
-class _TimerInterface:
-    def __int__(self) -> None:
-        self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            future=True,
-            connect_args={"check_same_thread": False},
-        )
-
-    def create_timer(self) -> AudioFile:
-        pass
-
-    def get_timer_by_id(self, audio_file_id: int) -> AudioFile:
-        pass
-
-    def get_all_timer(self) -> list[AudioFile]:
-        pass
-
-    def update_timer_by_id(
-        self, audio_file_id: int, audio_file: AudioFile
-    ) -> AudioFile:
-        pass
-
-    def delete_timer_by_id(self, audio_file_id: int) -> None:
-        pass
-
-
-class _UserInterface:
-    def __int__(self) -> None:
-        self.engine: Engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=True,
-            future=True,
-            connect_args={"check_same_thread": False},
-        )
-
-    def create_user(self) -> AudioFile:
-        pass
-
-    def get_user_by_id(self, audio_file_id: int) -> AudioFile:
-        pass
-
-    def get_user_by_alias(self, audio_file_name: str) -> AudioFile:
-        pass
-
-    def get_all_user(self) -> list[AudioFile]:
-        pass
-
-    def update_user_by_id(self, audio_file_id: int, audio_file: AudioFile) -> AudioFile:
-        pass
-
-    def delete_user_by_id(self, audio_file_id: int) -> None:
-        pass
-
-    def delete_user_by_alias(self, audio_file_name: str) -> None:
-        pass
+        super().__init__()
+        from src.speechassistant.database.tables.userTable import create_tables
+        create_tables(self.engine)
 
 
 if __name__ == "__main__":
@@ -305,5 +244,14 @@ if __name__ == "__main__":
         ),
         song_name="standard",
     )
-
-    print(interface.create_alarm(alarm))
+    result: Alarm = interface.create(alarm)
+    print(
+        "-------------------------------------------" + result.__repr__() + "-------------------------------------------")
+    print("-------------------------------------------" + interface.get_by_id(
+        result.alarm_id).__repr__() + "-------------------------------------------")
+    result.last_executed = datetime.datetime.now()
+    print("-------------------------------------------" + interface.update(
+        result).__repr__() + "-------------------------------------------")
+    interface.delete_by_id(result.alarm_id)
+    print("-------------------------------------------" + interface.get_by_id(
+        result.alarm_id).__repr__() + "-------------------------------------------")
