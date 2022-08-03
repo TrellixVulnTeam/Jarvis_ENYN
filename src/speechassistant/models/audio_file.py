@@ -10,6 +10,7 @@ def to_camel(string: str) -> str:
 
 
 class AudioFile(BaseModel):
+    id: int
     name: str
     data: bytes
 
