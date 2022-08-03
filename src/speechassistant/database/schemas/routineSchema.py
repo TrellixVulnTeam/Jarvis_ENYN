@@ -1,6 +1,9 @@
 from sqlalchemy import Column, Integer, String, Boolean, Time, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
+from src.speechassistant.database.tables import ROUTINE_TABLE_NAME, ROUTINE_DAYS_TABLE_NAME, SPECIFIC_DATES_TABLE_NAME, \
+    ROUTINE_TIMES_TABLE_NAME, ROUTINE_CLOCK_TIME_TABLE_NAME, ROUTINE_RETAKES_TABLE_NAME, ROUTINE_COMMAND_TABLE_NAME, \
+    ROUTINE_COMMAND_TEXT_TABLE_NAME, CALLING_COMMAND_TABLE_NAME
 from src.speechassistant.models.routine import (
     Routine,
     CallingCommand,
@@ -13,7 +16,7 @@ Base = declarative_base()
 
 
 class RoutineSchema(Base):
-    __tablename__ = "routines"
+    __tablename__ = ROUTINE_TABLE_NAME
 
     name = Column(String, primary_key=True)
     description = Column(String)
@@ -23,7 +26,7 @@ class RoutineSchema(Base):
 
 
 class RoutineDaysSchema(Base):
-    __tablename__ = "routinedays"
+    __tablename__ = ROUTINE_DAYS_TABLE_NAME
 
     routine_day_id = Column(Integer, primary_key=True)
     monday = Column(Boolean)
@@ -38,7 +41,7 @@ class RoutineDaysSchema(Base):
 
 
 class SpecificDateSchema(Base):
-    __tablename__ = "specificdates"
+    __tablename__ = SPECIFIC_DATES_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)
@@ -46,7 +49,7 @@ class SpecificDateSchema(Base):
 
 
 class RoutineTimeSchema(Base):
-    __tablename__ = "routinetimes"
+    __tablename__ = ROUTINE_TIMES_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
     clock_times = relationship("RoutineClockTimeSchema", cascade="all, delete")
@@ -58,7 +61,7 @@ class RoutineTimeSchema(Base):
 
 
 class RoutineClockTimeSchema(Base):
-    __tablename__ = "routineclocktimes"
+    __tablename__ = ROUTINE_CLOCK_TIME_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
     clock_time = Column(Time)
@@ -66,7 +69,7 @@ class RoutineClockTimeSchema(Base):
 
 
 class RoutineRetakesSchema(Base):
-    __tablename__ = "routineretakes"
+    __tablename__ = ROUTINE_RETAKES_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
     days = relationship("RoutineDaysSchema", cascade="all, delete")
@@ -75,7 +78,7 @@ class RoutineRetakesSchema(Base):
 
 
 class RoutineCommandSchema(Base):
-    __tablename__ = "routinecommands"
+    __tablename__ = ROUTINE_COMMAND_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
     module_name = Column(String, primary_key=True)
@@ -84,17 +87,17 @@ class RoutineCommandSchema(Base):
 
 
 class RoutineCommandTextSchema(Base):
-    __tablename__ = "routinecommandtext"
+    __tablename__ = ROUTINE_COMMAND_TEXT_TABLE_NAME
 
     text = Column(String, primary_key=True)
     routine_command_id = Column(Integer, ForeignKey(RoutineCommandSchema.id))
 
 
 class CallingCommandSchema(Base):
-    __tablename__ = "callingcommands"
+    __tablename__ = CALLING_COMMAND_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    routine_name = Column(Integer, ForeignKey(RoutineSchema.name))
+    routine_name = Column(String, ForeignKey(RoutineSchema.name))
     command = Column(String)
 
 
@@ -145,10 +148,19 @@ def __retakes_to_schema(retakes: RoutineRetakes) -> RoutineRetakesSchema:
     )
 
 
-def schema_to_routine(routine: RoutineSchema) -> Routine:
+def schema_to_routine(schema: RoutineSchema) -> Routine:
     return Routine(
-        name=routine.name,
-        description=routine.description,
-        calling_commands=__schema_to_calling_command(routine.calling_commands),
-        retakes=__schema_to_retakes(routine.retakes),
+        name=schema.name,
+        description=schema.description,
+        calling_commands=__schema_to_calling_command(schema.calling_commands),
+        retakes=__schema_to_retakes(schema.retakes),
+    )
+
+
+def routine_to_schema(model: Routine) -> RoutineSchema:
+    return RoutineSchema(
+        name=model.name,
+        description=model.description,
+        calling_commands=None,
+        retakes=None
     )
