@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Time, MetaData
+from sqlalchemy import Table, Column, Integer, String, Time, MetaData, BigInteger
 from sqlalchemy.future import Engine
 
 meta = MetaData()
@@ -9,7 +9,7 @@ timerTable = Table(
     TIMER_TABLE_NAME,
     meta,
     Column("id", Integer),
-    Column("duration", String),
+    Column("duration", BigInteger),
     Column("start_time", Time),
     Column("text", String),
 )
