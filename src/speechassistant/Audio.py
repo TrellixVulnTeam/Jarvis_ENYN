@@ -38,8 +38,6 @@ def play_audio_bytes(item: QueueItem) -> None:
     if type(item.value) != BytesIO:
         raise ValueError()
 
-    print(len(item.value.read()))
-
     stream = PyAudio()
     stream = stream.open(
         rate=44100,
@@ -49,7 +47,7 @@ def play_audio_bytes(item: QueueItem) -> None:
         frames_per_buffer=2,
     )
 
-    stream.write(item.value.read())
+    stream.write(item.value.getvalue())
 
     stream.stop_stream()
     stream.close()
