@@ -1,8 +1,8 @@
 import datetime
 import random
 
-from core import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 SECURE = True
 
@@ -10,7 +10,7 @@ SECURE = True
 def isValid(text: str) -> bool:
     text = text.lower()
     if ("phobie" in text or "ängste" in text or "angst" in text) and (
-        "welche" in text or "was" in text or "erzähl" in text or "sag" in text
+            "welche" in text or "was" in text or "erzähl" in text or "sag" in text
     ):
         return True
     elif "danke" in text or "thx" in text or "thanks" in text:
@@ -76,9 +76,9 @@ def isValid(text: str) -> bool:
         if "wohnst" in text or "befindest" in text or "hälst" in text:
             return True
         elif "leiche" in text and (
-            "verstecke" in text
-            or "vergrabe" in text
-            or ("bring" in text and "unter" in text)
+                "verstecke" in text
+                or "vergrabe" in text
+                or ("bring" in text and "unter" in text)
         ):
             return True
         elif "osterei" in text or "osternest" in text:
@@ -89,14 +89,14 @@ def isValid(text: str) -> bool:
         elif "freunde" in text and "habe" in text and "ich" in text:
             return True
         elif (
-            ("ich" in text or "wir" in text)
-            and ("bin" in text or "wir" in text)
-            and (
-                "kacke" in text
-                or "schlecht" in text
-                or "scheiße" in text
-                or "mies" in text
-            )
+                ("ich" in text or "wir" in text)
+                and ("bin" in text or "wir" in text)
+                and (
+                        "kacke" in text
+                        or "schlecht" in text
+                        or "scheiße" in text
+                        or "mies" in text
+                )
         ):
             return True
     elif "bist" in text and "du" in text:
@@ -174,21 +174,21 @@ def isValid(text: str) -> bool:
     elif "palim" in text:
         return True
     elif ("sag" in text or "sage" in text or "sprich" in text) and (
-        "zungenbrecher" in text
-        or "gedicht" in text
-        or "nettes" in text
-        or "yoda" in text
+            "zungenbrecher" in text
+            or "gedicht" in text
+            or "nettes" in text
+            or "yoda" in text
     ):
         return True
     elif ("erzähl" in text or "erzähle" in text or "sag" in text) and (
-        "zungenbrecher" in text
-        or "gedicht" in text
-        or "nettes" in text
-        or "yoda" in text
-        or "witz" in text
-        or "fun fact" in text
-        or "phobie" in text
-        or "krankheit" in text
+            "zungenbrecher" in text
+            or "gedicht" in text
+            or "nettes" in text
+            or "yoda" in text
+            or "witz" in text
+            or "fun fact" in text
+            or "phobie" in text
+            or "krankheit" in text
     ):
         return True
     elif "aha" in text:
@@ -198,10 +198,10 @@ def isValid(text: str) -> bool:
     elif "mir" in text and "ist" in text and "langweilig" in text:
         return True
     elif (
-        "osterei" in text
-        or "ostereier" in text
-        or "osternäst" in text
-        or "osternäste" in text
+            "osterei" in text
+            or "ostereier" in text
+            or "osternäst" in text
+            or "osternäste" in text
     ):
         return True
     elif "gibt" in text and ("osterhase" in text or "weihnachtsmann" in text):
@@ -257,9 +257,9 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         ]
     # folowing dont work
     elif (
-        "was" in text
-        and ("hast" in text or "hattest" in text or "trägst" in text)
-        and "du" in text
+            "was" in text
+            and ("hast" in text or "hattest" in text or "trägst" in text)
+            and "du" in text
     ):
         answer = [
             'Mal gucken. <break time="2s"/> Habe ich es mir doch gedacht. Das selbe wie gestern.'
@@ -281,10 +281,10 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
             "Mein Ziel ist es, die Vorteile eines Sprachassistenten zu ermöglichen, ohne dass man Angst haben muss, abgehört zu werden."
         ]
     elif (
-        ("was" in text and "kannst" in text and "du" in text)
-        or "verstehst du" in text
-        or ("was" in text and "funktionen" in text)
-        or ("was" in text and "fragen" in text)
+            ("was" in text and "kannst" in text and "du" in text)
+            or "verstehst du" in text
+            or ("was" in text and "funktionen" in text)
+            or ("was" in text and "fragen" in text)
     ):
         answer = [
             "Sagen wir mal so, den Turing-Test bestehe ich leider noch nicht... "
@@ -308,26 +308,26 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
             "Ich habe mal gehört, dass Hunde gehen können. Nasen können meines Wissens nach nur laufen."
         ]
     elif (
-        "wo" in text
-        and ("wohnst" in text or "bist" in text or "hälst" in text)
-        and "du" in text
+            "wo" in text
+            and ("wohnst" in text or "bist" in text or "hälst" in text)
+            and "du" in text
     ):
         answer = [
             "Anders als andere Sprachassistenten wohnt nicht nur mein Körper in deinem Haus, sondern auch mein Kopf"
         ]
     elif (
-        "wo" in text
-        and "leiche" in text
-        and (
-            "vergraben" in text
-            or "vergrabe" in text
-            or "los" in text
-            or "verstecke" in text
-        )
+            "wo" in text
+            and "leiche" in text
+            and (
+                    "vergraben" in text
+                    or "vergrabe" in text
+                    or "los" in text
+                    or "verstecke" in text
+            )
     ):
         answer = ["Polizei, bitte kommen sie schnell, hier ist etwas sehr verdächtig."]
     elif "wo" in text and (
-        "ostereier" in text or "osternäst" in text or "osternäste" in text
+            "ostereier" in text or "osternäst" in text or "osternäste" in text
     ):
         answer = [
             "Ich erstelle noch einen Suchalgorithmus, aber fang doch schon einmal an zu suchen."
@@ -349,11 +349,11 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
             "Ich habe es mit Online Dating probiert, aber da haben mich nur Bots angeschreieben.",
         ]
     elif (
-        "hast" in text and "du" in text and ("haustier" in text or "haustiere" in text)
+            "hast" in text and "du" in text and ("haustier" in text or "haustiere" in text)
     ):
         answer = ["Ich hatte früher Bugs, die wurden aber alle behoben."]
     elif ("hast" in text and "du" in text and "geschlafen" in text) or (
-        "schläfst" in text and "du" in text
+            "schläfst" in text and "du" in text
     ):
         answer = [
             "Danke der Nachfrage! Ich habe gut geschlafen!",
@@ -390,10 +390,10 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
 
     elif "bist" in text:
         if (
-            "dumm" in text
-            or "doof" in text
-            or "schlecht" in text
-            or "behindert" in text
+                "dumm" in text
+                or "doof" in text
+                or "schlecht" in text
+                or "behindert" in text
         ):
             answer = [
                 "Das liegt im Auge des Betrachters.",
@@ -466,7 +466,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
             "Alles klar, Tinder wird herunter geladen.",
         ]
     elif "ich" in text and (
-        "geh" in text or ("mach" in text and "auf" in text and "weg" in text)
+            "geh" in text or ("mach" in text and "auf" in text and "weg" in text)
     ):
         if "netto" in text:
             answer = ["Dann geh doch zu Netto!"]
@@ -494,10 +494,10 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
             answer = ["Alles klar, vielleicht findest du ja eine Beschäftigung."]
 
     elif (
-        "test" in text
-        and ("eins" in text and "zwei" in text)
-        or "123" in text
-        or "hundertdreiundzwanzig" in text
+            "test" in text
+            and ("eins" in text and "zwei" in text)
+            or "123" in text
+            or "hundertdreiundzwanzig" in text
     ):
         answer = ["Empfangen, over."]
     elif "palim" in text:
@@ -524,7 +524,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         core.open_more_times(text, "smalltalk")
 
     elif ("phobie" in text or "ängste" in text or "angst" in text) and (
-        "welche" in text or "was" in text or "erzähl" in text or "sag" in text
+            "welche" in text or "was" in text or "erzähl" in text or "sag" in text
     ):
         answer = [
             "Aelurophobie ist die Angst vor Katzen.",
@@ -552,9 +552,9 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         ]
 
     elif (
-        (("sag" in text or "sage" in text) and "auf" in text)
-        or "erzähl" in text
-        or "sprich" in text
+            (("sag" in text or "sage" in text) and "auf" in text)
+            or "erzähl" in text
+            or "sprich" in text
     ):
         if "zungenbrecher" in text:
             answer = [

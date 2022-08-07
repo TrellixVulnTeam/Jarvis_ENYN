@@ -26,7 +26,7 @@ import json
 import re
 import time
 
-from modules.resources.akinator.utils import (
+from src.speechassistant.modules.resources.akinator.utils import (
     ans_to_id,
     get_lang_and_theme,
     raise_connection_error,

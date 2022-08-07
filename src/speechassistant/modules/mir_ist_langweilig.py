@@ -1,7 +1,7 @@
 import random
 
-from core import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
 def isValid(text: str) -> bool:

@@ -1,8 +1,7 @@
 from datetime import datetime
-from time import sleep
 
-from core import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
 def isValid(text):
@@ -103,12 +102,12 @@ def get_text(core, text):
     ausgabe = ausgabe.replace("mich", ("dich"))
     if "dass " in text:
         lang = len(ausgabe)
-        if ausgabe[(lang - 1) :] == " ":
+        if ausgabe[(lang - 1):] == " ":
             ausgabe = ausgabe[: (lang - 1)]
         l = len(ausgabe)
-        if ausgabe[(l - 2) :] == "st":
+        if ausgabe[(l - 2):] == "st":
             ausgabe = ausgabe
-        elif ausgabe[(l - 1) :] == "s":
+        elif ausgabe[(l - 1):] == "s":
             ausgabe = ausgabe + "t"
         else:
             ausgabe = ausgabe + "st"
@@ -139,7 +138,7 @@ def get_reply_time(core, dicanalyse):
     month = core.skills.Statics.numb_to_month.get(str(monat))
     hour = core.skills.Statics.numb_to_hour.get(str(stunde))
     zeit_der_erinnerung = (
-        str(day) + " " + str(month) + " um " + str(hour) + " Uhr " + str(mine)
+            str(day) + " " + str(month) + " um " + str(hour) + " Uhr " + str(mine)
     )
     reply = zeit_der_erinnerung
     return reply
@@ -173,26 +172,26 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         rep = get_reply_time(core, core.analysis)
         if "dass " in reminder_text:
             antwort = (
-                "Alles klar, ich sage dir am "
-                + rep
-                + " bescheid, "
-                + reminder_text
-                + "."
+                    "Alles klar, ich sage dir am "
+                    + rep
+                    + " bescheid, "
+                    + reminder_text
+                    + "."
             )  ###
         elif "ans " in text:
             antwort = (
-                "Alles klar, ich erinnere dich am "
-                + rep
-                + " ans "
-                + reminder_text
-                + "."
+                    "Alles klar, ich erinnere dich am "
+                    + rep
+                    + " ans "
+                    + reminder_text
+                    + "."
             )
         else:
             antwort = (
-                "Alles klar, ich sage dir am "
-                + rep
-                + " bescheid, dass du "
-                + reminder_text
-                + " musst."
+                    "Alles klar, ich sage dir am "
+                    + rep
+                    + " bescheid, dass du "
+                    + reminder_text
+                    + " musst."
             )
         core.say(antwort)

@@ -1,10 +1,4 @@
-import platform
-import random
-import string
-
-import requests
-
-from resources.services.philips_tv.philips_tv import Pylips
+from src.speechassistant.resources.services.philips_tv.philips_tv import Pylips
 
 user = ""
 password = ""
