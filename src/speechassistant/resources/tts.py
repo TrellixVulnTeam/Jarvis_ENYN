@@ -22,7 +22,7 @@ class TTS:
         tts = gTTS(text=text, lang=self.language, slow=False)
         tts.write_to_fp(audio_bytes)
 
-        model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False)
+        model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False, sample_rate=23000)
 
         self.play_function(model)
 
