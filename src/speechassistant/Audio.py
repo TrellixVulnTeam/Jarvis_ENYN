@@ -278,7 +278,7 @@ class AudioOutput:
     def __insert_to_given_queue(model: QueueItem, queue: list) -> list:
         queue.append(model)
         # sort queue by type (ascending) and then by priority (descending)
-        return sorted(queue, key=lambda x: (- x.type, x.PRIORITY))
+        return sorted(queue, key=lambda x: (- x.type.value, x.PRIORITY))
 
     def __build_queue_item(self, queue, queue_type: QueueType, value: str | BytesIO, as_next: bool,
                            sample_rate: int = None,
