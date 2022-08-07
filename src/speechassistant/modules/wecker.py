@@ -1,9 +1,7 @@
 import datetime
-import logging
-import traceback
 
-from core import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
 def isValid(text: str) -> bool:
@@ -24,10 +22,10 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
     """
 
     if (
-        "abends" not in text
-        or "abend" not in text
-        or not ("spät" in text and "Stunde" in text)
-        or not ("in" in text and ("stunde" in text or "minute" in text))
+            "abends" not in text
+            or "abend" not in text
+            or not ("spät" in text and "Stunde" in text)
+            or not ("in" in text and ("stunde" in text or "minute" in text))
     ):
         # Alarm clocks are usually set for the morning. Since there are otherwise problems with analyze, the morning is
         # automatically assumed here if evening is not explicitly meant.
@@ -54,7 +52,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
 def is_regular(text: str) -> bool:
     text = text.lower()
     if ("jeden" in text or "immer" in text) and not (
-        "nur am" in text or "nur an dem" in text
+            "nur am" in text or "nur an dem" in text
     ):
         return True
     else:
@@ -66,11 +64,11 @@ def get_repeating(text: str, skills: Skills) -> list[dict]:
     repeating: list[dict] = []
 
     if (
-        "täglich" in text
-        or "jeden tag" in text
-        or "alle" in text
-        or "jeden morgen" in text
-        or "jeden abend" in text
+            "täglich" in text
+            or "jeden tag" in text
+            or "alle" in text
+            or "jeden morgen" in text
+            or "jeden abend" in text
     ):
         repeating = [
             {each_day.lower(): True} for each_day in skills.statics.weekdays_engl
@@ -132,13 +130,13 @@ class Alarm:
         self.list: dict
 
     def create_alarm(
-        self,
-        is_regular: bool,
-        time: dict = None,
-        hour: int = None,
-        minute: int = None,
-        text: str = None,
-        sound: str = None,
+            self,
+            is_regular: bool,
+            time: dict = None,
+            hour: int = None,
+            minute: int = None,
+            text: str = None,
+            sound: str = None,
     ) -> None:
         if not (time is not None or (hour is not None and minute is not None)):
             raise ValueError("missing values!")

@@ -1,7 +1,7 @@
 import time
-
-from resources.services.light_systems.Phue import PhilipsWrapper
 from threading import Thread
+
+from src.speechassistant.resources.services.light_systems.Phue import PhilipsWrapper
 
 
 def isValid(text):

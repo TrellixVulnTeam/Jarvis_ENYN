@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-import logging
 
-from core import ModuleWrapper
-from resources.module_skills import Skills
-from resources.enums import OutputTypes
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.enums import OutputTypes
+from src.speechassistant.resources.module_skills import Skills
 
 PRIORITY = 2  # Conflicts with module "wie_lange_noch"
 
@@ -33,7 +32,7 @@ def handle(text, core, skills):
 
 
 def create_timer(
-    core: ModuleWrapper, skills: Skills, timer_interface, text: str
+        core: ModuleWrapper, skills: Skills, timer_interface, text: str
 ) -> None:
     # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
     text = text.replace(" auf ", " in ")
@@ -82,10 +81,10 @@ def get_remain_duration(timer_interface, skills: Skills) -> str:
 
         for timer_id, duration, time, text, uid in user_timer:
             output += (
-                duration
-                + "Timer mit "
-                + skills.get_time_difference(datetime.now(), time)
-                + " verbleibend.\n "
+                    duration
+                    + "Timer mit "
+                    + skills.get_time_difference(datetime.now(), time)
+                    + " verbleibend.\n "
             )
     return output
 

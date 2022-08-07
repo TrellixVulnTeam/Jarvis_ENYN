@@ -3,7 +3,7 @@ from __future__ import annotations  # compatibility for < 3.10
 import json
 import logging
 
-from resources.intent.AI import GenericAssistant
+from src.speechassistant.resources.intent.AI import GenericAssistant
 
 
 class IntentWrapper:
@@ -57,8 +57,8 @@ class IntentWrapper:
                 if response is None:
                     print(f"Couldn't find a matching value for {item}")
                 elif (
-                    type(response) is str
-                    and response != validation_data["validation"][item]
+                        type(response) is str
+                        and response != validation_data["validation"][item]
                 ):
                     print(f'Got wrong response for "{item}": {response}')
                 # else:
@@ -74,12 +74,14 @@ if __name__ == "__main__":
             )
             self.audio_output = Audio()
 
+
     class Audio:
         def __init__(self):
             pass
 
         def say(self, text):
             print(text)
+
 
     iw = IntentWrapper(path="\\resources\\intent")
     iw.train_model()

@@ -11,8 +11,8 @@ from datetime import datetime
 from threading import Thread
 from urllib.request import Request, urlopen
 
-from Wrapper import IntentWrapper
-from resources.analyze import Sentence_Analyzer as Analyzer
+# from src.speechassistant.Wrapper import IntentWrapper
+from src.speechassistant.resources.analyze import Sentence_Analyzer as Analyzer
 
 logging.disable(logging.INFO)
 
@@ -256,7 +256,7 @@ class skills:
     @staticmethod
     def is_approved(text):
         if ("ja" in text or "gerne" in text or "bitte" in text) and not (
-            "nein" in text or "nicht" in text or "nö" in text or "ne" in text
+                "nein" in text or "nicht" in text or "nö" in text or "ne" in text
         ):
             return True
         else:
@@ -264,7 +264,7 @@ class skills:
 
     @staticmethod
     def get_text_beetween(
-        start_word, text, end_word="", output="array", split_text=True
+            start_word, text, end_word="", output="array", split_text=True
     ):
         ausgabe = []
         index = -1
@@ -318,9 +318,9 @@ class skills:
                     item2 = field.lower()
                 # print(f"value1: {item1}, {number1}, {value1};    value2: {item2}, {number2}, {value2}")
                 if (
-                    item1 == item2
-                    or item1.rstrip(item1[-1]) == item2
-                    or item1 == item2.rstrip(item2[-1])
+                        item1 == item2
+                        or item1.rstrip(item1[-1]) == item2
+                        or item1 == item2.rstrip(item2[-1])
                 ):
                     if item1[-1] == "e":
                         item1 += "n"
@@ -357,9 +357,9 @@ class skills:
             except:
                 item_position = position.lower()
             if (
-                item_position == item
-                or item_position.rstrip(item_position[-1]) == item
-                or item_position == item.rstrip(item[-1])
+                    item_position == item
+                    or item_position.rstrip(item_position[-1]) == item
+                    or item_position == item.rstrip(item[-1])
             ):
                 valid = False
         return valid
@@ -758,14 +758,14 @@ class Modulewrapper:
             self.Audio_Output.play_playback(data, next)
 
     def play_music(
-        self,
-        by_name=None,
-        url=None,
-        path=None,
-        next=None,
-        now=None,
-        playlist=None,
-        announce=None,
+            self,
+            by_name=None,
+            url=None,
+            path=None,
+            next=None,
+            now=None,
+            playlist=None,
+            announce=None,
     ):
         if by_name is not None:
             by_name = "'" + by_name + "'"

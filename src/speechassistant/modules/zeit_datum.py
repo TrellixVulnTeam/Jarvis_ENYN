@@ -1,7 +1,7 @@
 import datetime
 
-from core import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
 def isValid(text):
@@ -10,12 +10,12 @@ def isValid(text):
     elif "weche" in text and ("tag" in text or "datum" in text or "uhrzeit" in text):
         return True
     elif (
-        "welchen tag" in text
-        or "welcher tag" in text
-        or "wochentag" in text
-        or "datum" in text
-        or "den wievielten haben wir heute" in text
-        or "der wievielte ist es" in text
+            "welchen tag" in text
+            or "welcher tag" in text
+            or "wochentag" in text
+            or "datum" in text
+            or "den wievielten haben wir heute" in text
+            or "der wievielte ist es" in text
     ):
         return True
     elif "den wievielten haben wir heute" in text or "der wievielte ist es" in text:
@@ -29,12 +29,12 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
     if " uhr " in text or "spät" in text:
         core.say("Es ist " + skills.get_time(now))
     elif (
-        "welchen tag" in text
-        or "welcher tag" in text
-        or "wochentag" in text
-        or "datum" in text
-        or "den wievielten haben wir heute" in text
-        or "der wievielte ist es" in text
+            "welchen tag" in text
+            or "welcher tag" in text
+            or "wochentag" in text
+            or "datum" in text
+            or "den wievielten haben wir heute" in text
+            or "der wievielte ist es" in text
     ):
         core.say(get_day())
 
@@ -53,12 +53,12 @@ def get_day() -> str:
     }
 
     output: str = (
-        "Heute ist "
-        + str(tage.get(weekday))
-        + " der "
-        + str(now.day)
-        + "."
-        + str(now.month)
-        + "."
+            "Heute ist "
+            + str(tage.get(weekday))
+            + " der "
+            + str(now.day)
+            + "."
+            + str(now.month)
+            + "."
     )
     return output
