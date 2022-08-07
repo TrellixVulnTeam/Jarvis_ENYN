@@ -1,4 +1,5 @@
 import logging
+import pathlib
 from typing import Callable
 
 import playsound
@@ -17,9 +18,9 @@ class TTS:
     def say(self, text):
         logging.info(f"[ACTION] saying '{text}'")
         # audio_bytes: BytesIO = BytesIO()
-        temp_path = "temp.mp3"
+        temp_path = pathlib.Path(__file__).parent.joinpath("temp.mp3").absolute()
         tts = gTTS(text=text, lang=self.language, slow=False)
-        tts.save(temp_path)
+        tts.save(str(temp_path))
 
         # model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False,
         #                             sample_rate=self.framerate)
