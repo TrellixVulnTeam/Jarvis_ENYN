@@ -60,7 +60,13 @@ class Core:
         if self.local_storage["home_location"] == "":
             self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
 
+        self.__start_audio()
+
         Core.__instance = self
+
+    def __start_audio(self) -> None:
+        self.audio_input.start()
+        self.audio_output.start()
 
     def __load_config_data(self):
         with open(self.relPath.joinpath("config.toml"), "r") as config_file:
@@ -194,10 +200,6 @@ class Core:
         if user is None:
             user: dict = self.local_storage["user"]
         return self.modules.query_threaded(name, text, user)
-
-
-def start() -> None:
-    core: Core = Core.get_instance()
 
 
 # def start() -> None:
