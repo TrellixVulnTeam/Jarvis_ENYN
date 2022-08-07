@@ -34,6 +34,7 @@ audio_config: dict[str, Any] = config.get("audio")
 
 
 def play_audio_bytes(item: QueueItem) -> None:
+    print("play bytes")
     if type(item.value) != BytesIO:
         raise ValueError()
     stream = PyAudio()
@@ -45,6 +46,7 @@ def play_audio_bytes(item: QueueItem) -> None:
         frames_per_buffer=2,
     )
     for data in item.value:
+        print(data)
         stream.write(data)
 
     stream.stop_stream()
