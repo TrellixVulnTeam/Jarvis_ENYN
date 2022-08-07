@@ -302,4 +302,7 @@ class AudioOutput:
 
     @staticmethod
     def __get_highest_priority_plus_one(queue) -> int:
-        return queue.__getitem__(1).PRIORITY + 1
+        try:
+            return queue.__getitem__(0).PRIORITY + 1
+        except IndexError:
+            return 1
