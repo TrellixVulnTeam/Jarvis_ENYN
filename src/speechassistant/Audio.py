@@ -240,7 +240,7 @@ class AudioOutput:
                 time.sleep(0.25)
 
     def __choose_output_method(self, item):
-        match type(item.value):
+        match type(item.value).__class__:
             case str.__class__:
                 print("to tts")
                 self.tts.say(item.value)

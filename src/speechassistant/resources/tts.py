@@ -4,7 +4,7 @@ from typing import Callable
 
 from gtts import gTTS
 
-from src.speechassistant.models.audio.QueueItem import QueueItem
+from src.speechassistant.models.audio.QueueItem import QueueItem, QueueType
 
 
 class TTS:
@@ -22,7 +22,7 @@ class TTS:
         tts = gTTS(text=text, lang=self.language, slow=False)
         tts.write_to_fp(audio_bytes)
 
-        model: QueueItem = QueueItem(value=audio_bytes)
+        model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False)
 
         self.play_function(model)
 
