@@ -14,7 +14,7 @@ import simpleaudio as sa
 import speech_recognition as sr
 import toml
 from pvporcupine import Porcupine
-from pyaudio import PyAudio, Stream
+from pyaudio import PyAudio, Stream, paInt16
 
 from src.speechassistant.models.audio.QueueItem import QueueItem, QueueType, AudioQueryType, MusicQueueItem
 from src.speechassistant.resources.tts import TTS
@@ -170,12 +170,11 @@ class AudioInput:
             self.speech_engine.adjust_for_ambient_noise(source)
 
     @staticmethod
-    def __create_pyaudio_instance(pyaudio: PyAudio, porcupine: Porcupine) -> Stream:
-        print(porcupine.sample_rate)
-        return pyaudio.open(
+    def __create_pyaudio_instance(pyaudio_object: PyAudio, porcupine: Porcupine) -> Stream:
+        return pyaudio_object.open(
             rate=porcupine.sample_rate,
             channels=1,
-            format=2,
+            format=paInt16,
             input=True,
             frames_per_buffer=porcupine.frame_length,
         )
