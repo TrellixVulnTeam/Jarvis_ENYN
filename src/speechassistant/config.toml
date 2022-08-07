@@ -44,6 +44,7 @@ voice = "male"
 
 [api]
 open_weather_map = "bd4d17c6eedcff6efc70b9cefda99082"
+porcupine = ""
 
 [change_output]
 timer = "timer"
