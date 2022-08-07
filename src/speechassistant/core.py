@@ -29,6 +29,8 @@ class Core:
         return Core.__instance
 
     def __init__(self) -> None:
+        self.__configure_logger()
+
         if Core.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
         self.relPath = Path(__file__).parent
@@ -63,6 +65,9 @@ class Core:
         self.__start_audio()
 
         Core.__instance = self
+
+    def __configure_logger(self) -> None:
+        pass
 
     def __start_audio(self) -> None:
         self.audio_input.start()
