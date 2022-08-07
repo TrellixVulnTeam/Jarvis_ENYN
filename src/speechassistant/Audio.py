@@ -234,6 +234,7 @@ class AudioOutput:
         while self.running:
             try:
                 item: QueueItem = self.__get_next_item()
+                print(f"-------->Next Item: {item}<-------")
                 self.__choose_output_method(item)
             except IndexError:
                 time.sleep(0.25)
@@ -241,6 +242,7 @@ class AudioOutput:
     def __choose_output_method(self, item):
         match type(item.value):
             case str.__class__:
+                print("to tts")
                 self.tts.say(item.value)
             case BytesIO.__class__:
                 play_audio_bytes(item.value)
@@ -276,7 +278,6 @@ class AudioOutput:
 
     @staticmethod
     def __insert_to_given_queue(model: QueueItem, queue: list) -> list:
-        print(f"-------->model: {model} <----------")
         queue.append(model)
         # sort queue by type (ascending) and then by priority (descending)
         return sorted(queue, key=lambda x: (- x.type.value, x.PRIORITY))
