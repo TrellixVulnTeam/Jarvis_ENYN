@@ -41,7 +41,7 @@ def play_audio_bytes(item: QueueItem) -> None:
         rate=44100,
         channels=1,
         format=paInt16,
-        input=False,
+        output=True,
         frames_per_buffer=2,
     )
     for data in item.value:
