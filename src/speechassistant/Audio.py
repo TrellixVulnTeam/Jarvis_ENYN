@@ -69,6 +69,7 @@ class AudioInput:
     def run(self) -> None:
         keywords: list[str] = self.config.get("keywords")
         # toDo: access key
+        print("key: " + config["api"]["porcupine"])
         porcupine: Porcupine = pvporcupine.create(keywords=keywords, sensitivities=[self.sensitivity],
                                                   access_key=config["api"]["porcupine"])
 
