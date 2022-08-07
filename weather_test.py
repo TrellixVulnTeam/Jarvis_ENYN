@@ -81,7 +81,7 @@ class Weather:
     def __fill_data(self) -> None:
         # from core import Core
         # core: Core = Core.get_instance()
-        self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.data["api_keys"]["open_weather_map"]
+        self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.config_data["api"]["open_weather_map"]
         self.city = "Würzburg"  # core.local_storage["actual_location"]
 
     def start(self) -> None:
@@ -110,11 +110,11 @@ class Weather:
     """
 
     def get_sunrise_sunset(
-        self,
-        city_name: str = None,
-        lat: int = None,
-        lon: int = None,
-        day_offset: int = 0,
+            self,
+            city_name: str = None,
+            lat: int = None,
+            lon: int = None,
+            day_offset: int = 0,
     ) -> set[datetime, datetime]:
         if city_name is None and lat is None and lon is None:
             # user has not specified any geo data, so use the position of the system
@@ -146,7 +146,7 @@ class Weather:
     """
 
     def get_current_weather(
-        self, city_name: str = None, lat: int = None, lon: int = None
+            self, city_name: str = None, lat: int = None, lon: int = None
     ) -> dict:
         if city_name is None and lat is None and lon is None:
             self.__update_all()
@@ -174,7 +174,7 @@ class Weather:
     """
 
     def get_forcast_of_one_day(
-        self, day_offset, city_name=None, lat=None, lon=None
+            self, day_offset, city_name=None, lat=None, lon=None
     ) -> dict:
         if day_offset > 7:
             raise ValueError("Day offset was higher than 7.")
@@ -241,7 +241,7 @@ class Weather:
     """
 
     def get_hourly_forecast_string(
-        self, city: str = None, lat: float = None, lon: float = None, offset: int = 1
+            self, city: str = None, lat: float = None, lon: float = None, offset: int = 1
     ) -> str:
         if city is None and lat is None and lon is None:
             data_offset: int = offset + round(self.get_offset_hours())
@@ -285,7 +285,7 @@ class Weather:
     """
 
     def get_daily_forecast_string(
-        self, city: str = None, lat: float = None, lon: float = None, offset: int = 1
+            self, city: str = None, lat: float = None, lon: float = None, offset: int = 1
     ):
         if offset > 7:
             raise ValueError("Invalid offset input")
@@ -454,7 +454,7 @@ class Weather:
     """
 
     def __get_current_weather(
-        self, city: str = None, lat: int = None, lon: int = None
+            self, city: str = None, lat: int = None, lon: int = None
     ) -> dict:
         if city is None and lat is None and lon is None:
             url = (
@@ -477,11 +477,11 @@ class Weather:
     """
 
     def __get_weather_string(
-        self,
-        _forecast: dict,
-        city: str,
-        days_offset: int = None,
-        hours_offset: int = None,
+            self,
+            _forecast: dict,
+            city: str,
+            days_offset: int = None,
+            hours_offset: int = None,
     ) -> str:
         weather_id = _forecast["weather"][0]["id"]
         weather_description = (
@@ -527,7 +527,7 @@ class Weather:
 
     @staticmethod
     def __get_time_string(
-        days_offset: int = None, hours_offset: int = None, minutes_offset: int = None
+            days_offset: int = None, hours_offset: int = None, minutes_offset: int = None
     ):
         is_days_offset_none: bool = days_offset is None
         is_hours_offset_none: bool = hours_offset is None

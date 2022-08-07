@@ -36,13 +36,12 @@ class Core:
         self.config_data: dict = {}
         self.__load_config_data()
         self.use_ai = self.config_data["services"]["activation"]["ai"]
-        self.path: str = str(Path(__file__).parent) + "/"
-        self.data: dict = self.config_data
+        self.path: Path = Path(__file__).parent
         self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.skills: Skills = Skills()
         self.data_base = DataBase()
-        self.services: ServiceWrapper = ServiceWrapper(self, self.data)
+        self.services: ServiceWrapper = ServiceWrapper(self, self.config_data)
         self.messenger = None
         self.messenger_queued_users: list = []
         self.messenger_queue_output: dict = {}
