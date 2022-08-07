@@ -276,6 +276,7 @@ class AudioOutput:
 
     @staticmethod
     def __insert_to_given_queue(model: QueueItem, queue: list) -> list:
+        print(f"-------->model: {model} <----------")
         queue.append(model)
         # sort queue by type (ascending) and then by priority (descending)
         return sorted(queue, key=lambda x: (- x.type.value, x.PRIORITY))
