@@ -60,7 +60,7 @@ class AudioInput:
         logging.info("[ACTION] Starting audio input module...")
         self.running = True
 
-        audio_input_thread: Thread = Thread(target=self.run)
+        audio_input_thread: Thread = Thread(target=self.run, args=())
         audio_input_thread.daemon = True
         audio_input_thread.start()
 
@@ -216,31 +216,25 @@ class AudioOutput:
         self.running: bool = False
 
     def start(self):
-        try:
-            logging.info("[ACTION] Starting Audio Output")
+        logging.info("[ACTION] Starting Audio Output")
 
-            self.running = True
+        self.running = True
 
-            audio_output_thread: Thread = Thread(target=self.run)
-            audio_output_thread.daemon = True
-            audio_output_thread.start()
+        audio_output_thread: Thread = Thread(target=self.run, args=())
+        audio_output_thread.daemon = True
+        audio_output_thread.start()
 
-            logging.info("[SUCCESS] Audio Output started")
+        logging.info("[SUCCESS] Audio Output started")
 
-            return self
-        except:
-            traceback.print_exc()
+        return self
 
     def run(self) -> None:
-        try:
-            while self.running:
-                try:
-                    item: QueueItem = self.__get_next_item()
-                    self.__choose_output_method(item)
-                except IndexError:
-                    time.sleep(0.25)
-        except:
-            traceback.print_exc()
+        while self.running:
+            try:
+                item: QueueItem = self.__get_next_item()
+                self.__choose_output_method(item)
+            except IndexError:
+                time.sleep(0.25)
 
     def __choose_output_method(self, item):
         match type(item.value):
