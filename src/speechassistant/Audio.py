@@ -36,9 +36,22 @@ audio_config: dict[str, Any] = config.get("audio")
 def play_audio_bytes(item: QueueItem) -> None:
     if type(item.value) != BytesIO:
         raise ValueError()
-    play_obj = sa.play_buffer(item.value.read(), 2, 2, item.sample_rate)
-    if item.wait_until_done:
-        play_obj.wait_done()
+    stream = PyAudio()
+    stream = stream.open(
+        rate=44100,
+        channels=2,
+        format=paInt16,
+        input=True,
+        frames_per_buffer=2,
+    )
+    for data in item.value:
+        stream.write(data)
+
+    stream.stop_stream()
+    stream.close()
+    # play_obj = sa.play_buffer(item.value.read(), 2, 2, item.sample_rate)
+    # if item.wait_until_done:
+    #     play_obj.wait_done()
 
 
 class AudioInput:
