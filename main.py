@@ -1,4 +1,6 @@
 import logging
+import time
+import traceback
 from pathlib import Path
 
 import toml
@@ -17,3 +19,11 @@ if __name__ == "__main__":
     with open(__get_config_path(), "r") as config_file:
         config_data: dict[str, any] = toml.load(config_file)
     core = Core.get_instance()
+    core.messenger_thread()
+
+    while True:
+        try:
+            time.sleep(10)
+        except Exception:
+            traceback.print_exc()
+            break
