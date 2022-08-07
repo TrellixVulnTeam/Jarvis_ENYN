@@ -1,3 +1,4 @@
+import logging
 from io import BytesIO
 from typing import Callable
 
@@ -16,6 +17,7 @@ class TTS:
         self.play_function = play_function
 
     def say(self, text):
+        logging.info(f"[ACTION] saying '{text}'")
         audio_bytes: BytesIO = BytesIO()
         tts = gTTS(text=text, lang=self.language, slow=False)
         tts.write_to_fp(audio_bytes)
