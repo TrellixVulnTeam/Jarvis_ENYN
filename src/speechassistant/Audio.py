@@ -25,7 +25,7 @@ def __load_configuration() -> dict[str, Any]:
 
 
 def __get_path_of_config_file() -> Path:
-    return pathlib.Path(__file__).joinpath("config").joinpath("audio.toml").absolute()
+    return pathlib.Path(__file__).parent.joinpath("config").joinpath("audio.toml").absolute()
 
 
 config: dict[str, Any] = __load_configuration()
