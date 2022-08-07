@@ -36,9 +36,9 @@ audio_config: dict[str, Any] = config.get("audio")
 def play_audio_bytes(item: QueueItem) -> None:
     if type(item.value) != BytesIO:
         raise ValueError()
-    audio = sa.play_buffer(item.value.read(), 2, 2, item.sample_rate)
+    play_obj = sa.play_buffer(item.value, 2, 2, item.sample_rate)
     if item.wait_until_done:
-        audio.wait_done()
+        play_obj.wait_done()
 
 
 class AudioInput:
