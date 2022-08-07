@@ -37,9 +37,8 @@ def play_audio_bytes(item: QueueItem) -> None:
     if type(item.value) != BytesIO:
         raise ValueError()
     audio = sa.play_buffer(item.value.read(), 2, 2, item.sample_rate)
-    play_obj = audio.play()
     if item.wait_until_done:
-        play_obj.wait_done()
+        audio.wait_done()
 
 
 class AudioInput:
