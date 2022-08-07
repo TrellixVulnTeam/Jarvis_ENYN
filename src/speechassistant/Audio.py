@@ -42,8 +42,7 @@ def play_audio_bytes(item: QueueItem) -> None:
         rate=item.sample_rate,
         channels=1,
         format=paALSA,
-        output=True,
-        frames_per_buffer=2
+        output=True
     )
     stream.start_stream()
 

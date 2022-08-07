@@ -11,7 +11,7 @@ class TTS:
     def __init__(self, play_function: Callable) -> None:
         self.is_reading = False
         self.language = "de"
-        self.framerate = 16000
+        self.framerate = 44100
         self.channels = 2
 
         self.play_function = play_function
@@ -22,7 +22,8 @@ class TTS:
         tts = gTTS(text=text, lang=self.language, slow=False)
         tts.write_to_fp(audio_bytes)
 
-        model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False, sample_rate=23000)
+        model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False,
+                                     sample_rate=self.framerate)
 
         self.play_function(model)
 
