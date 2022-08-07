@@ -6,6 +6,7 @@ import traceback
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
+from threading import Thread
 from typing import Any
 
 import pvporcupine
@@ -58,9 +59,12 @@ class AudioInput:
     def start(self) -> None:
         logging.info("[ACTION] Starting audio input module...")
         self.running = True
-        self.run()
 
-    async def run(self) -> None:
+        audio_input_thread: Thread = Thread(target=self.run)
+        audio_input_thread.daemon = True
+        audio_input_thread.start()
+
+    def run(self) -> None:
         keywords: list[str] = self.config.get("keywords")
         # toDo: access key
         porcupine: Porcupine = pvporcupine.create(keywords, sensitivities=[self.sensitivity * len(keywords)])
@@ -211,10 +215,14 @@ class AudioOutput:
 
     def start(self):
         self.running = True
-        self.run()
+
+        audio_output_thread: Thread = Thread(target=self.run)
+        audio_output_thread.daemon = True
+        audio_output_thread.start()
+
         return self
 
-    async def run(self) -> None:
+    def run(self) -> None:
         while self.running:
             try:
                 item: QueueItem = self.__get_next_item()
