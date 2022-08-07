@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import timedelta, time
 from typing import Optional
 
-from models.user import User
+from src.speechassistant.models.user import User
 
 
 @dataclass
