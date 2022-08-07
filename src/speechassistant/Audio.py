@@ -174,7 +174,6 @@ class AudioInput:
         return pyaudio.open(
             rate=porcupine.sample_rate,
             channels=1,
-            format=pyaudio.paInt16,
             input=True,
             frames_per_buffer=porcupine.frame_length,
         )
