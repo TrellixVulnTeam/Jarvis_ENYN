@@ -39,7 +39,7 @@ def play_audio_bytes(item: QueueItem) -> None:
     stream = PyAudio()
     stream = stream.open(
         rate=44100,
-        channels=2,
+        channels=1,
         format=paInt16,
         input=True,
         frames_per_buffer=2,
