@@ -69,7 +69,7 @@ class AudioInput:
     def run(self) -> None:
         keywords: list[str] = self.config.get("keywords")
         # toDo: access key
-        porcupine: Porcupine = pvporcupine.create(keywords, sensitivities=[self.sensitivity])
+        porcupine: Porcupine = pvporcupine.create(keywords=keywords, sensitivities=[self.sensitivity])
 
         try:
             pa: PyAudio = PyAudio()
