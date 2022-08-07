@@ -15,6 +15,7 @@ def __get_config_path() -> Path:
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
                         filename='speechassistant.log', encoding='utf-8', level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
 
     with open(__get_config_path(), "r") as config_file:
         config_data: dict[str, any] = toml.load(config_file)
