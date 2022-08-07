@@ -1,46 +1,28 @@
-from pathlib import Path
+from io import BytesIO
+from typing import Callable
 
-import soundcard as sc
-import soundfile as sf
 from gtts import gTTS
-from pydub import AudioSegment
+
+from src.speechassistant.models.audio.QueueItem import QueueItem
 
 
 class TTS:
-    def __init__(self) -> None:
+    def __init__(self, play_function: Callable) -> None:
         self.is_reading = False
         self.language = "de"
         self.framerate = 16000
         self.channels = 2
 
+        self.play_function = play_function
+
     def say(self, text):
-        filename: Path = Path(__file__).parent
+        audio_bytes: BytesIO = BytesIO()
         tts = gTTS(text=text, lang=self.language, slow=False)
-        tts.save(filename.joinpath("temp.mp3").absolute())
+        tts.write_to_fp(audio_bytes)
 
-        print(filename)
+        model: QueueItem = QueueItem(value=audio_bytes)
 
-        sound = AudioSegment.from_mp3(filename.joinpath("temp.mp3").absolute())
-        sound.export("temp.wav", format="wav")
-
-        # audio_file: parselmouth.Parselmouth = parselmouth.Parselmouth(
-        #     filename.joinpath("temp.wav").absolute()
-        # )
-
-        # librosa_file, sample_rate = librosa.load("temp.wav", mono=True)
-        # librosa_file = librosa.effects.time_stretch(librosa_file, rate=1.5)
-        # librosa_file = librosa.effects.pitch_shift(librosa_file, sample_rate, -6)
-
-        # sf.write("temp.wav", audio_file, samplerate=48000)
-
-        default_speaker = sc.default_speaker()
-        samples, samplerate = sf.read(filename.joinpath("temp.wav").absolute())
-        default_speaker.play(samples, samplerate=samplerate)
-
-
-if __name__ == "__main__":
-    while True:
-        TTS().say(input())
+        self.play_function(model)
 
 # import logging
 # import time
