@@ -5,6 +5,7 @@ import time
 import traceback
 from datetime import datetime
 from io import BytesIO
+from pathlib import Path
 from typing import Any
 
 import pvporcupine
@@ -16,6 +17,18 @@ from pyaudio import PyAudio, Stream
 
 from src.speechassistant.models.audio.QueueItem import QueueItem, QueueType, AudioQueryType, MusicQueueItem
 from src.speechassistant.resources.tts import TTS
+
+
+def __load_configuration() -> dict[str, Any]:
+    with open(__get_path_of_config_file()) as file:
+        return toml.load(file)
+
+
+def __get_path_of_config_file() -> Path:
+    return pathlib.Path(__file__).joinpath("config").joinpath("audio.toml").absolute()
+
+
+config: dict[str, Any] = __load_configuration()
 
 
 def play_audio_bytes(item: QueueItem) -> None:
@@ -32,12 +45,11 @@ class AudioInput:
     def __init__(self) -> None:
         self.speech_engine: sr.Recognizer = sr.Recognizer()
 
-        self.config = self.__load_configuration()
         self.__configure_microphone()
 
         self.running: bool = False
         self.recording: bool = False
-        self.sensitivity: float = self.config.get("sensitivity")
+        self.sensitivity: float = config.get("sensitivity")
 
         logging.info("[SUCCESS] Audio Input initialized!")
 
@@ -47,7 +59,7 @@ class AudioInput:
         self.run()
 
     async def run(self) -> None:
-        keywords: list[str] = self.config.get("keywords")
+        keywords: list[str] = config.get("keywords")
         # toDo: access key
         porcupine: Porcupine = pvporcupine.create(keywords, sensitivities=[self.sensitivity * len(keywords)])
 
@@ -115,13 +127,13 @@ class AudioInput:
 
     def __translate_audio_to_text(self, audio: any):
         text = self.speech_engine.recognize_goole(
-            audio, language=self.config.get("language")
+            audio, language=config.get("language")
         )
         logging.info("[USER INPUT]\t" + text)
 
     def __signalize_to_listen(self, play_bling_before_listen: bool) -> None:
         # toDo change name
-        if play_bling_before_listen or (not play_bling_before_listen and self.config.get("play_bling_before_listen")):
+        if play_bling_before_listen or (not play_bling_before_listen and config.get("play_bling_before_listen")):
             self.play_bling_sound()
 
     def play_bling_sound(self) -> None:
@@ -139,15 +151,12 @@ class AudioInput:
     def stop(self) -> None:
         pass
 
-    def __load_configuration(self) -> dict[str, any]:
-        raise NotImplemented
-
     def __configure_microphone(self) -> None:
         with sr.Microphone(device_index=None) as source:
-            self.speech_engine.pause_threshold = self.config.get("pause_threshold")
-            self.speech_engine.energy_threshold = self.config.get("energy_threshold")
-            self.speech_engine.dynamic_energy_threshold = self.config.get("dynamic_energy_threshold")
-            self.speech_engine.dynamic_energy_adjustment_damping = self.config.get("dynamic_energy_adjustment_damping")
+            self.speech_engine.pause_threshold = config.get("pause_threshold")
+            self.speech_engine.energy_threshold = config.get("energy_threshold")
+            self.speech_engine.dynamic_energy_threshold = config.get("dynamic_energy_threshold")
+            self.speech_engine.dynamic_energy_adjustment_damping = config.get("dynamic_energy_adjustment_damping")
             self.speech_engine.adjust_for_ambient_noise(source)
 
     @staticmethod
@@ -188,9 +197,7 @@ class PlayBlingSound:
 class AudioOutput:
 
     def __init__(self) -> None:
-        self.configuration: dict[str, any] = self.__load_configuration()
-
-        self.tts: TTS = TTS()
+        self.tts: TTS = TTS(play_audio_bytes)
 
         self.queue: list[QueueItem] = list()
         self.priority_queue: list[QueueItem] = list()
@@ -240,13 +247,6 @@ class AudioOutput:
             return self.priority_queue.pop(0)
         except IndexError:
             return self.queue.pop(0)
-
-    def __load_configuration(self) -> dict[str, Any]:
-        with open(self.__get_path_of_config_file()) as file:
-            return toml.load(file)
-
-    def __get_path_of_config_file(self) -> str:
-        raise NotImplemented
 
     def __insert_to_queue(self, model: QueueItem) -> None:
         self.queue = self.__insert_to_given_queue(model, self.queue)
