@@ -14,7 +14,7 @@ import simpleaudio as sa
 import speech_recognition as sr
 import toml
 from pvporcupine import Porcupine
-from pyaudio import PyAudio, Stream, paInt16
+from pyaudio import PyAudio, Stream, paALSA
 
 from src.speechassistant.models.audio.QueueItem import QueueItem, QueueType, AudioQueryType, MusicQueueItem
 from src.speechassistant.resources.tts import TTS
@@ -41,7 +41,7 @@ def play_audio_bytes(item: QueueItem) -> None:
     stream = stream.open(
         rate=item.sample_rate,
         channels=1,
-        format=paInt16,
+        format=paALSA,
         output=True,
         frames_per_buffer=2,
     )
@@ -187,7 +187,7 @@ class AudioInput:
         return pyaudio_object.open(
             rate=44100,
             channels=1,
-            format=paInt16,
+            format=paALSA,
             input=True,
             frames_per_buffer=porcupine.frame_length,
         )
