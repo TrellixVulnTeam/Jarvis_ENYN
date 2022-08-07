@@ -34,13 +34,12 @@ audio_config: dict[str, Any] = config.get("audio")
 
 
 def play_audio_bytes(item: QueueItem) -> None:
-    print("play bytes")
     if type(item.value) != BytesIO:
         raise ValueError()
-
+    item.value.seek(0)
     stream = PyAudio()
     stream = stream.open(
-        rate=44100,
+        rate=19000,
         channels=1,
         format=paInt16,
         output=True,
