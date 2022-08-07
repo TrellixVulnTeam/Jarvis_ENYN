@@ -25,10 +25,10 @@ def __load_configuration() -> dict[str, Any]:
 
 
 def __get_path_of_config_file() -> Path:
-    return pathlib.Path(__file__).parent.joinpath("config").joinpath("audio.toml").absolute()
+    return pathlib.Path(__file__).parent.joinpath("config.toml").absolute()
 
 
-config: dict[str, Any] = __load_configuration()
+config: dict[str, Any] = __load_configuration().get("audio")
 
 
 def play_audio_bytes(item: QueueItem) -> None:
@@ -45,11 +45,13 @@ class AudioInput:
     def __init__(self) -> None:
         self.speech_engine: sr.Recognizer = sr.Recognizer()
 
+        self.config = config.get("input")
+
         self.__configure_microphone()
 
         self.running: bool = False
         self.recording: bool = False
-        self.sensitivity: float = config.get("sensitivity")
+        self.sensitivity: float = self.config.get("sensitivity")
 
         logging.info("[SUCCESS] Audio Input initialized!")
 
@@ -59,7 +61,7 @@ class AudioInput:
         self.run()
 
     async def run(self) -> None:
-        keywords: list[str] = config.get("keywords")
+        keywords: list[str] = self.config.get("keywords")
         # toDo: access key
         porcupine: Porcupine = pvporcupine.create(keywords, sensitivities=[self.sensitivity * len(keywords)])
 
@@ -127,13 +129,13 @@ class AudioInput:
 
     def __translate_audio_to_text(self, audio: any):
         text = self.speech_engine.recognize_goole(
-            audio, language=config.get("language")
+            audio, language=self.config.get("language")
         )
         logging.info("[USER INPUT]\t" + text)
 
     def __signalize_to_listen(self, play_bling_before_listen: bool) -> None:
         # toDo change name
-        if play_bling_before_listen or (not play_bling_before_listen and config.get("play_bling_before_listen")):
+        if play_bling_before_listen or (not play_bling_before_listen and self.config.get("play_bling_before_listen")):
             self.play_bling_sound()
 
     def play_bling_sound(self) -> None:
@@ -153,10 +155,10 @@ class AudioInput:
 
     def __configure_microphone(self) -> None:
         with sr.Microphone(device_index=None) as source:
-            self.speech_engine.pause_threshold = config.get("pause_threshold")
-            self.speech_engine.energy_threshold = config.get("energy_threshold")
-            self.speech_engine.dynamic_energy_threshold = config.get("dynamic_energy_threshold")
-            self.speech_engine.dynamic_energy_adjustment_damping = config.get("dynamic_energy_adjustment_damping")
+            self.speech_engine.pause_threshold = self.config.get("pause_threshold")
+            self.speech_engine.energy_threshold = self.config.get("energy_threshold")
+            self.speech_engine.dynamic_energy_threshold = self.config.get("dynamic_energy_threshold")
+            self.speech_engine.dynamic_energy_adjustment_damping = self.config.get("dynamic_energy_adjustment_damping")
             self.speech_engine.adjust_for_ambient_noise(source)
 
     @staticmethod
@@ -198,6 +200,8 @@ class AudioOutput:
 
     def __init__(self) -> None:
         self.tts: TTS = TTS(play_audio_bytes)
+
+        self.config = config.get("output")
 
         self.queue: list[QueueItem] = list()
         self.priority_queue: list[QueueItem] = list()

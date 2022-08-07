@@ -1,12 +1,12 @@
 from __future__ import annotations  # compatibility for < 3.10
 
-import json
 import logging
 import time
 from pathlib import Path
 from threading import Thread
 
 import requests
+import toml
 
 from src.speechassistant.Audio import AudioOutput, AudioInput
 from src.speechassistant.Modules import Modules
@@ -38,7 +38,6 @@ class Core:
         self.use_ai = self.config_data["ai"]
         self.path: str = str(Path(__file__).parent) + "/"
         self.data: dict = self.config_data
-        self.__fill_data()  # since the path is needed, __fill_data() is called only here
         self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.skills: Skills = Skills()
@@ -60,21 +59,15 @@ class Core:
         # self.ai: AIWrapper = AIWrapper()
 
         if self.local_storage["home_location"] == "":
-            self.local_storage["home_location"] = requests.get(
-                "https://ipinfo.io"
-            ).json()["city"]
+            self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
 
         Core.__instance = self
 
-    def __fill_data(self) -> None:
-        with open(self.relPath + "config/api_keys.dat") as api_file:
-            self.data["api_keys"] = json.load(api_file)
-
     def __load_config_data(self):
-        with open(self.relPath + "config.json", "r") as config_file:
+        with open(self.relPath.join("config.toml"), "r") as config_file:
             logging.info("[INFO] loading configs...")
-            self.config_data = json.load(config_file)
-            self.local_storage = self.config_data["Local_storage"]
+            self.config_data = toml.load(config_file)
+            self.local_storage = self.config_data["local_storage"]
 
     def messenger_thread(self) -> None:
         # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.
@@ -167,7 +160,7 @@ class Core:
         pass
 
     def hotword_detected(self, text: str) -> None:
-        user: User = self.users.get_user_by_name(self.local_storage["user"])
+        user: User = self.users.get_user_by_name(self.config_data["default_user"])
 
         matching_routines: list[dict] = self.data_base.routine_interface.get_routines(
             on_command=text
