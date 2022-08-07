@@ -29,7 +29,8 @@ def __get_path_of_config_file() -> Path:
     return pathlib.Path(__file__).parent.joinpath("config.toml").absolute()
 
 
-config: dict[str, Any] = __load_configuration().get("audio")
+config: dict[str, Any] = __load_configuration()
+audio_config: dict[str, Any] = config.get("audio")
 
 
 def play_audio_bytes(item: QueueItem) -> None:
@@ -46,7 +47,7 @@ class AudioInput:
     def __init__(self) -> None:
         self.speech_engine: sr.Recognizer = sr.Recognizer()
 
-        self.config = config.get("input")
+        self.config = audio_config.get("input")
 
         self.__configure_microphone()
 
@@ -69,7 +70,6 @@ class AudioInput:
     def run(self) -> None:
         keywords: list[str] = self.config.get("keywords")
         # toDo: access key
-        print("key: " + config["api"]["porcupine"])
         porcupine: Porcupine = pvporcupine.create(keywords=keywords, sensitivities=[self.sensitivity],
                                                   access_key=config["api"]["porcupine"])
 
@@ -209,7 +209,7 @@ class AudioOutput:
     def __init__(self) -> None:
         self.tts: TTS = TTS(play_audio_bytes)
 
-        self.config = config.get("output")
+        self.config = audio_config.get("output")
 
         self.queue: list[QueueItem] = list()
         self.priority_queue: list[QueueItem] = list()
