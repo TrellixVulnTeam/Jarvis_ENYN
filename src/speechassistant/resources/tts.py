@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import parselmouth
 import soundcard as sc
 import soundfile as sf
 from gtts import gTTS
@@ -9,6 +8,7 @@ from pydub import AudioSegment
 
 class TTS:
     def __init__(self) -> None:
+        self.is_reading = False
         self.language = "de"
         self.framerate = 16000
         self.channels = 2
@@ -23,14 +23,15 @@ class TTS:
         sound = AudioSegment.from_mp3(filename.joinpath("temp.mp3").absolute())
         sound.export("temp.wav", format="wav")
 
-        audio_file: parselmouth.Parselmouth = parselmouth.Parselmouth(
-            filename.joinpath("temp.wav").absolute()
-        )
+        # audio_file: parselmouth.Parselmouth = parselmouth.Parselmouth(
+        #     filename.joinpath("temp.wav").absolute()
+        # )
 
         # librosa_file, sample_rate = librosa.load("temp.wav", mono=True)
         # librosa_file = librosa.effects.time_stretch(librosa_file, rate=1.5)
         # librosa_file = librosa.effects.pitch_shift(librosa_file, sample_rate, -6)
-        sf.write("temp.wav", audio_file, samplerate=48000)
+
+        # sf.write("temp.wav", audio_file, samplerate=48000)
 
         default_speaker = sc.default_speaker()
         samples, samplerate = sf.read(filename.joinpath("temp.wav").absolute())
