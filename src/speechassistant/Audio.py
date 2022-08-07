@@ -45,8 +45,8 @@ def play_audio_bytes(item: QueueItem) -> None:
         output=True,
         frames_per_buffer=2,
     )
-    print(item.value.read(1024))
-    stream.write(item.value.read(1024))
+    item.value.seek(0)
+    stream.write(item.value.read())
 
     stream.stop_stream()
     stream.close()
