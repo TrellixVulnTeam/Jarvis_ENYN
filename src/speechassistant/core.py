@@ -50,8 +50,8 @@ class Core:
 
         self.users: Users = Users()
 
-        self.audio_output: AudioOutput = AudioOutput.get_instance()
-        self.audio_input: AudioInput = AudioInput.get_instance()
+        self.audio_output: AudioOutput = AudioOutput()
+        self.audio_input: AudioInput = AudioInput()
 
         self.active_modules: dict = {}
         self.continuous_modules: dict = {}
@@ -67,7 +67,7 @@ class Core:
         Core.__instance = self
 
     def __fill_data(self) -> None:
-        with open(self.relPath + "/data/api_keys.dat") as api_file:
+        with open(self.relPath + "data/api_keys.dat") as api_file:
             self.data["api_keys"] = json.load(api_file)
 
     def __load_config_data(self):
@@ -121,7 +121,8 @@ class Core:
         )
         self.messenger.messages.remove(msg)
 
-    def __log_message_from_unknown_user(self, msg):
+    @staticmethod
+    def __log_message_from_unknown_user(msg):
         try:
             logging.warning(
                 "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
