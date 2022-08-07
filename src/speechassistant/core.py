@@ -35,7 +35,7 @@ class Core:
         self.local_storage: dict = {}
         self.config_data: dict = {}
         self.__load_config_data()
-        self.use_ai = self.config_data["ai"]
+        self.use_ai = self.config_data["services"]["activation"]["ai"]
         self.path: str = str(Path(__file__).parent) + "/"
         self.data: dict = self.config_data
         self.modules: Modules = None
