@@ -43,10 +43,10 @@ def play_audio_bytes(item: QueueItem) -> None:
         channels=1,
         format=paALSA,
         output=True,
-        frames_per_buffer=2,
+        frames_per_buffer=2
     )
 
-    stream.write(item.value.getvalue())
+    stream.write(item.value.read(1024))
 
     stream.stop_stream()
     stream.close()
