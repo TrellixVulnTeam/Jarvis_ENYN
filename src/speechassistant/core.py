@@ -31,7 +31,7 @@ class Core:
     def __init__(self) -> None:
         if Core.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
-        self.relPath = str(Path(__file__).parent) + "/"
+        self.relPath = Path(__file__).parent
         self.local_storage: dict = {}
         self.config_data: dict = {}
         self.__load_config_data()
@@ -64,7 +64,7 @@ class Core:
         Core.__instance = self
 
     def __load_config_data(self):
-        with open(self.relPath.join("config.toml"), "r") as config_file:
+        with open(self.relPath.joinpath("config.toml"), "r") as config_file:
             logging.info("[INFO] loading configs...")
             self.config_data = toml.load(config_file)
             self.local_storage = self.config_data["local_storage"]
