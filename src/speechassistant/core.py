@@ -67,7 +67,7 @@ class Core:
         Core.__instance = self
 
     def __fill_data(self) -> None:
-        with open(self.relPath + "data/api_keys.dat") as api_file:
+        with open(self.relPath + "config/api_keys.dat") as api_file:
             self.data["api_keys"] = json.load(api_file)
 
     def __load_config_data(self):
