@@ -8,16 +8,15 @@ from threading import Thread
 
 import requests
 
-from Audio import AudioOutput, AudioInput
-from Modules import Modules
-from Services import ServiceWrapper
-from Users import Users
-from database.database_connection import DataBase
-from models.user import User
-from resources.analyze import Sentence_Analyzer
-
+from src.speechassistant.Audio import AudioOutput, AudioInput
+from src.speechassistant.Modules import Modules
+from src.speechassistant.Services import ServiceWrapper
+from src.speechassistant.Users import Users
+from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.models.user import User
+from src.speechassistant.resources.analyze import Sentence_Analyzer
 # from resources.intent.Wrapper import IntentWrapper as AIWrapper
-from resources.module_skills import Skills
+from src.speechassistant.resources.module_skills import Skills
 
 
 class Core:
