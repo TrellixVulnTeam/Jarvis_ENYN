@@ -64,6 +64,8 @@ class Core:
 
         self.__start_audio()
 
+        self.audio_output.say("Jarvis wurde erfolgreich gestartet!")
+
         Core.__instance = self
 
     def __configure_logger(self) -> None:
