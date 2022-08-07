@@ -171,6 +171,7 @@ class AudioInput:
 
     @staticmethod
     def __create_pyaudio_instance(pyaudio: PyAudio, porcupine: Porcupine) -> Stream:
+        print(porcupine.sample_rate)
         return pyaudio.open(
             rate=porcupine.sample_rate,
             channels=1,
