@@ -59,7 +59,7 @@ class Core:
 
         # self.ai: AIWrapper = AIWrapper()
 
-        if self.local_storage[""] == "":
+        if self.local_storage["home_location"] == "":
             self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
 
         self.__start_audio()
