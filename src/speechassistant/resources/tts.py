@@ -11,14 +11,14 @@ class TTS:
     def __init__(self, play_function: Callable) -> None:
         self.is_reading = False
         self.language = "de"
-        self.framerate = 22000
+        self.framerate = 48000
         self.channels = 2
 
         self.play_function = play_function
 
     def say(self, text):
         logging.info(f"[ACTION] saying '{text}'")
-        path = pathlib.Path(__file__).parent.joinpath("tmp.mp3")
+        path = str(pathlib.Path(__file__).parent.joinpath("tmp.mp3"))
 
         tts = gTTS(text=text, lang=self.language, slow=False)
         tts.save(str(path))

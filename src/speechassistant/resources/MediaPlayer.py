@@ -10,12 +10,14 @@ class MyMediaPlayer:
 
     def play_tts(self, path: str) -> None:
         self.player.set_rate(1.5)
-        media = vlc.Media("file:///" + path)
-        os.remove(path)
-        self.player.set_media(media)
-        self.player.play()
+        try:
+            media = vlc.Media(path)
+            self.player.set_media(media)
+            self.player.play()
 
-        while self.player.is_playing():
-            time.sleep(0.5)
-
+            while self.player.is_playing():
+                time.sleep(0.5)
+            os.remove(path)
+        except:
+            pass
         self.player.set_rate(1)
