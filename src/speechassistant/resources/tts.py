@@ -11,7 +11,7 @@ class TTS:
     def __init__(self, play_function: Callable) -> None:
         self.is_reading = False
         self.language = "de"
-        self.framerate = 44100
+        self.framerate = 22000
         self.channels = 2
 
         self.play_function = play_function
