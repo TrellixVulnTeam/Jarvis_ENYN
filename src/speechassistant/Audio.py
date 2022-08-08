@@ -3,7 +3,6 @@ import pathlib
 import struct
 import time
 import traceback
-import wave
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -38,7 +37,6 @@ def play_audio_bytes(item: QueueItem) -> None:
     if type(item.value) != BytesIO:
         raise ValueError()
     item.value.seek(0)
-    f = wave.open(item.value, "rb")
 
     stream = PyAudio()
     stream = stream.open(
@@ -49,11 +47,11 @@ def play_audio_bytes(item: QueueItem) -> None:
     )
     stream.start_stream()
 
-    data = f.readframes(1024)
+    data = item.value.read(1024)
 
     while data != '':
         stream.write(data)
-        data = f.readframes(1024)
+        data = item.value.read(1024)
 
     stream.stop_stream()
     stream.close()
