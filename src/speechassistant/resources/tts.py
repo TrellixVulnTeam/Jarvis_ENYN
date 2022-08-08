@@ -1,10 +1,10 @@
 import logging
-import pathlib
 from io import BytesIO
 from typing import Callable
 
-import playsound
 from gtts import gTTS
+
+from src.speechassistant.models.audio.QueueItem import QueueItem, QueueType
 
 
 class TTS:
@@ -17,24 +17,14 @@ class TTS:
         self.play_function = play_function
 
     def say(self, text):
-        src = "tmp.mp3"
-        dst = "tmp.wav"
-
         logging.info(f"[ACTION] saying '{text}'")
         audio_bytes: BytesIO = BytesIO()
         tts = gTTS(text=text, lang=self.language, slow=False)
-        tts.save(src)
-        from pydub import AudioSegment
+        tts.write_to_fp(audio_bytes)
 
-        sound = AudioSegment.from_mp3(src)
-        sound.export(dst, format="wav")
-
-        playsound.playsound(pathlib.Path(__file__).parent.joinpath(dst))
-
-        # model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False,
-        #                              sample_rate=self.framerate)
-
-        # self.play_function(model)
+        model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False,
+                                     sample_rate=self.framerate)
+        self.play_function(model)
 
 # import logging
 # import time
