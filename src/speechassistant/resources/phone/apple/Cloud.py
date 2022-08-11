@@ -88,7 +88,3 @@ class CloudService:
 
     def enable_lost_phone_mode(self, number, message):
         self.api.iphone.lost_device(number, message)
-
-
-if __name__ == "__main__":
-    cloud = CloudService("jakob_gmx.de@hotmail.com", "an5+43B6z", None)

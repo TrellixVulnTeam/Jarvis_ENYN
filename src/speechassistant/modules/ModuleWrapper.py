@@ -13,7 +13,7 @@ from Audio import AudioOutput, AudioInput
 from database.database_connection import DataBase
 from models.user import User
 from resources.analyze import Sentence_Analyzer
-from resources.module_skills import Skills
+from src.speechassistant.modules.ModuleSkills import Skills
 
 
 class ModuleWrapper:

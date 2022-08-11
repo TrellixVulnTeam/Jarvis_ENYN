@@ -56,7 +56,7 @@ def handle(text, core, skills):
         endNumber = match.start() - 1
         distanceTxt = distanceTxt[0:endNumber]
 
-        distance = float(re.sub(",", ".", distanceTxt))
+        distance = float(re.sub(",", "..", distanceTxt))
 
     core.say(
         "Von "
