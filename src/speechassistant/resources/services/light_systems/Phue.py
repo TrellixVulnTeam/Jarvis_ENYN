@@ -1,7 +1,7 @@
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
 from phue import Bridge
 
-from resources.module_skills import Skills
+from src.speechassistant.resources.module_skills import Skills
 
 colors = [
     "blau",
@@ -253,9 +253,9 @@ class PhilipsWrapper:
                     for light in group.lights:
                         lights.append(light.lower())
             if (
-                ("alle" in text or "überall" in text)
-                and "außer" in text
-                and lights != []
+                    ("alle" in text or "überall" in text)
+                    and "außer" in text
+                    and lights != []
             ):
                 temp_lights = []
                 for item in wrapper.light_names:

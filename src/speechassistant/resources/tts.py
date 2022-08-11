@@ -1,45 +1,34 @@
-from pathlib import Path
+import logging
+import pathlib
+from typing import Callable
 
-import parselmouth
-import soundcard as sc
-import soundfile as sf
 from gtts import gTTS
-from pydub import AudioSegment
+
+from src.speechassistant.resources.MediaPlayer import MyMediaPlayer
 
 
 class TTS:
-    def __init__(self) -> None:
+    def __init__(self, play_function: Callable) -> None:
+        self.is_reading = False
         self.language = "de"
-        self.framerate = 16000
+        self.framerate = 48000
         self.channels = 2
 
+        self.play_function = play_function
+
     def say(self, text):
-        filename: Path = Path(__file__).parent
+        logging.info(f"[ACTION] saying '{text}'")
+        path = str(pathlib.Path(__file__).parent.joinpath("tmp.mp3"))
+
         tts = gTTS(text=text, lang=self.language, slow=False)
-        tts.save(filename.joinpath("temp.mp3").absolute())
+        tts.save(str(path))
 
-        print(filename)
+        MyMediaPlayer().play_tts(str(path))
 
-        sound = AudioSegment.from_mp3(filename.joinpath("temp.mp3").absolute())
-        sound.export("temp.wav", format="wav")
+        # model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False,
+        #                              sample_rate=self.framerate)
+        # self.play_function(model)
 
-        audio_file: parselmouth.Parselmouth = parselmouth.Parselmouth(
-            filename.joinpath("temp.wav").absolute()
-        )
-
-        # librosa_file, sample_rate = librosa.load("temp.wav", mono=True)
-        # librosa_file = librosa.effects.time_stretch(librosa_file, rate=1.5)
-        # librosa_file = librosa.effects.pitch_shift(librosa_file, sample_rate, -6)
-        sf.write("temp.wav", audio_file, samplerate=48000)
-
-        default_speaker = sc.default_speaker()
-        samples, samplerate = sf.read(filename.joinpath("temp.wav").absolute())
-        default_speaker.play(samples, samplerate=samplerate)
-
-
-if __name__ == "__main__":
-    while True:
-        TTS().say(input())
 
 # import logging
 # import time

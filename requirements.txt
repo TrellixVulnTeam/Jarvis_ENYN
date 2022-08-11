@@ -29,4 +29,7 @@ fritzconnection==1.9.1
 PyAudio==0.2.12
 SoundFile==0.10.3.post1
 gTTS==2.2.4
-librosa==0.9.2
+parselmouth==1.1.1
+SoundCard==0.4.2
+sounddevice~=0.4.4
+toml~=0.10.2

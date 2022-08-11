@@ -3,17 +3,17 @@ import logging
 from flask import request, Response
 from flask_restx import Resource
 from flask_restx.reqparse import ParseResult
-from api_old.myapi import api
-from api_old.speechassistant.api_definition import alarm_file
-from api_old.speechassistant.logic.alarm import (
+
+from src.speechassistant.api_old.myapi import api
+from src.speechassistant.api_old.speechassistant.api_definition import alarm_file
+from src.speechassistant.api_old.speechassistant.logic.alarm import (
     create_alarm,
     read_alarm,
     update_alarm,
     delete_alarm,
 )
-from api_old.speechassistant.parser import alarm_parser as alarm
-
-from models.alarm import Alarm
+from src.speechassistant.api_old.speechassistant.parser import alarm_parser as alarm
+from src.speechassistant.models.alarm import Alarm
 
 namespace = api.namespace("alarms")
 

@@ -1,5 +1,5 @@
-from core import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
 def isValid(text: str) -> bool:
@@ -9,7 +9,6 @@ def isValid(text: str) -> bool:
 
 
 def handle(text: str, core: ModuleWrapper, skills: Skills) -> None:
-
     city: str = core.analysis.get("town")
     if city is None:
         city = core.local_storage.get("city")

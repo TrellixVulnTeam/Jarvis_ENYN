@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from resources.enums import Measures
+from src.speechassistant.resources.enums import Measures
 
 
 @dataclass

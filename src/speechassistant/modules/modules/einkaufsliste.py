@@ -1,6 +1,7 @@
 import re
-from core import ModuleWrapper
-from resources.module_skills import Skills
+
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 
 def isValid(text):
@@ -9,16 +10,16 @@ def isValid(text):
         return False
     if "einkaufsliste" in text:
         if (
-            "setz" in text
-            or "setzte" in text
-            or "schreib" in text
-            or "schreibe" in text
-            or "füg" in text
-            or "füge" in text
+                "setz" in text
+                or "setzte" in text
+                or "schreib" in text
+                or "schreibe" in text
+                or "füg" in text
+                or "füge" in text
         ):
             return True
         elif ("was" in text and "steht" in text and "auf" in text) or (
-            "gib" in text and "aus" in text
+                "gib" in text and "aus" in text
         ):
             return True
         elif ("lösch" in text or "leere" in text) and "einkaufsliste" in text:
@@ -51,7 +52,7 @@ def get_items(text: str) -> list:
 
 
 def get_shopping_list(
-    shopping_list: dict, skills: Skills, for_messenger: bool = False
+        shopping_list: dict, skills: Skills, for_messenger: bool = False
 ) -> str:
     anz_items = len(shopping_list)
     if anz_items == 0:
@@ -75,7 +76,7 @@ def get_shopping_list(
         response += "\n"
         for item in item_list:
             response += "\t" + item + ", \n"
-        return response[0 : len(response) - 3] + "\n" + "auf deiner Einkaufsliste."
+        return response[0: len(response) - 3] + "\n" + "auf deiner Einkaufsliste."
     else:
         return response + skills.get_enumerate(item_list) + " auf deiner Einkaufsliste."
 
@@ -179,7 +180,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
                     item.get("name"), item.get("measure"), item.get("quantity")
                 )
     elif ("was" in lower_text and "steht" in lower_text) or (
-        "gib" in lower_text and "aus" in lower_text
+            "gib" in lower_text and "aus" in lower_text
     ):
         core.say(
             get_shopping_list(shopping_list, skills, for_messenger=core.messenger_call)

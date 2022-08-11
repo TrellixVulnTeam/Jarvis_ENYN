@@ -1,5 +1,5 @@
-from ModuleWrapper import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.ModuleWrapper import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 PRIORITY = 1
 
@@ -15,9 +15,9 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
     text = text.lower()
     for user in core.core.users:
         if (
-            user.alias.lower() in text
-            or user.first_name.lower() in text
-            or user.last_name.lower() in text
+                user.alias.lower() in text
+                or user.first_name.lower() in text
+                or user.last_name.lower() in text
         ):
             try:
                 room = core.local_storage["users"][user]["room"]

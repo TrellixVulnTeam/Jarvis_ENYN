@@ -2,8 +2,8 @@
 
 from spacex_py import launches
 
-from core import ModuleWrapper
-from resources.module_skills import Skills
+from src.speechassistant.core import ModuleWrapper
+from src.speechassistant.resources.module_skills import Skills
 
 SECURE = True
 
@@ -31,7 +31,7 @@ def handle(text, core: ModuleWrapper, skills: Skills):
         if core.messenger_call is True:
             return_string = ""
             return_string += (
-                f"Time (UTC): " + got_launches[-1]["launch_date_utc"] + "\n"
+                    f"Time (UTC): " + got_launches[-1]["launch_date_utc"] + "\n"
             )
             core.say(return_string)
             return
@@ -70,16 +70,16 @@ def handle(text, core: ModuleWrapper, skills: Skills):
             return_string += "Nächster start: \n"
             return_string += f"Mission ID: " + got_launches[-1]["mission_id"][0] + "\n"
             return_string += (
-                f"Launch site: "
-                + got_launches[-1]["launch_site"]["site_name_long"]
-                + "\n"
+                    f"Launch site: "
+                    + got_launches[-1]["launch_site"]["site_name_long"]
+                    + "\n"
             )
             return_string += got_launches[-1]["rocket"]["rocket_name"] + "\n"
             return_string += (
-                f"Time (UTC): " + got_launches[-1]["launch_date_utc"] + "\n"
+                    f"Time (UTC): " + got_launches[-1]["launch_date_utc"] + "\n"
             )
             return_string += (
-                f"Telemetry: " + got_launches[-1]["telemetry"]["flight_club"] + "\n"
+                    f"Telemetry: " + got_launches[-1]["telemetry"]["flight_club"] + "\n"
             )
 
             return_string += "\n\nDetails:\n"

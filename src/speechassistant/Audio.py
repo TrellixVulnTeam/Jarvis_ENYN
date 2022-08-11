@@ -1,178 +1,186 @@
-from __future__ import annotations  # compatibility for < 3.10
-
-import io
 import logging
-import os
-import random
-import re
+import pathlib
 import struct
 import time
 import traceback
-import urllib.request
-from abc import ABCMeta
 from datetime import datetime
+from io import BytesIO
+from pathlib import Path
 from threading import Thread
-from typing import IO, Callable
+from typing import Any
 
-import pafy
 import pvporcupine
-import pyaudio
+import simpleaudio as sa
 import speech_recognition as sr
-import vlc
+import toml
+from pvporcupine import Porcupine
+from pyaudio import PyAudio, Stream, paInt8
 
-# from pygame import mixer as mixer
+from src.speechassistant.models.audio.QueueItem import (
+    QueueItem,
+    QueueType,
+    AudioQueryType,
+    MusicQueueItem,
+)
+from src.speechassistant.resources.tts import TTS
 
-from resources.tts import TTS
+
+def __load_configuration() -> dict[str, Any]:
+    with open(__get_path_of_config_file()) as file:
+        return toml.load(file)
 
 
-class AudioInput(metaclass=ABCMeta):
-    """
-    -------------------------
-    AudioInput:
-        - responsible for the whole audio input
-    -------------------------
-    """
+def __get_path_of_config_file() -> Path:
+    return pathlib.Path(__file__).parent.joinpath("config.toml").absolute()
 
-    __instance = None
 
-    @staticmethod
-    def get_instance():
-        if AudioInput.__instance is None:
-            AudioInput()
-        return AudioInput.__instance
+config: dict[str, Any] = __load_configuration()
+audio_config: dict[str, Any] = config.get("audio")
 
+
+def play_audio_bytes(item: QueueItem) -> None:
+    if type(item.value) != BytesIO:
+        raise ValueError()
+    item.value.seek(0)
+
+    stream = PyAudio()
+    stream = stream.open(
+        rate=item.sample_rate,
+        channels=1,
+        format=paInt8,
+        output=True,
+        frames_per_buffer=1024,
+    )
+    stream.start_stream()
+
+    data = item.value.read(1024)
+
+    while data != "":
+        stream.write(data)
+        data = item.value.read(1024)
+
+    stream.stop_stream()
+    stream.close()
+    # play_obj = sa.play_buffer(item.value.read(), 2, 2, item.sample_rate)
+    # if item.wait_until_done:
+    #     play_obj.wait_done()
+
+
+class AudioInput:
     def __init__(self) -> None:
-        if AudioInput.__instance is not None:
-            raise Exception("Singleton cannot be instantiated more than once!")
-
-        self.audio_output: AudioOutput
-        self.adjust_after_hot_word: Callable = AudioOutput.get_instance()
-        logging.getLogger().setLevel(logging.INFO)
-        self.stopped: bool = False
-        # load microphone
         self.speech_engine: sr.Recognizer = sr.Recognizer()
-        self.speech_engine.pause_threshold = 0.5
 
-        with sr.Microphone(device_index=None) as source:
-            self.speech_engine.pause_threshold = 0.8
-            self.speech_engine.energy_threshold = 300
-            self.speech_engine.dynamic_energy_threshold = True
-            self.speech_engine.dynamic_energy_adjustment_damping = 0.15
-            self.speech_engine.adjust_for_ambient_noise(source)
+        self.config = audio_config.get("input")
+
+        self.__configure_microphone()
+
+        self.running: bool = False
         self.recording: bool = False
-        self.sensitivity: float = 0.5
-        AudioInput.__instance = self
+        self.sensitivity: float = self.config.get("sensitivity")
 
         logging.info("[SUCCESS] Audio Input initialized!")
 
-    def start(self, sensitivity: float, _hot_word_detected: Callable) -> None:
-        # starts the hot-word detection
+    def start(self) -> None:
         logging.info("[ACTION] Starting audio input module...")
-        self.sensitivity = sensitivity
-        self.stopped = False
-        audio_input_thread: Thread = Thread(
-            target=self.run,
-            args=(
-                sensitivity,
-                _hot_word_detected,
-            ),
-        )
+        self.running = True
+
+        audio_input_thread: Thread = Thread(target=self.run, args=())
         audio_input_thread.daemon = True
         audio_input_thread.start()
 
-    def run(self, sensitivity: float, _hot_word_detected: Callable) -> None:
-        porcupine: any = None
+        logging.info("[SUCCESS] Audio Input started")
+
+    def run(self) -> None:
+        keywords: list[str] = self.config.get("keywords")
+        # toDo: access key
+        porcupine: Porcupine = pvporcupine.create(
+            keywords=keywords,
+            sensitivities=[self.sensitivity],
+            access_key=config["api"]["porcupine"],
+        )
+
         try:
-            keywords: list = ["jarvis"]
-            # toDo: access_key
-            porcupine = pvporcupine.create(
-                keywords=keywords, sensitivities=[sensitivity]
-            )
-            pa = pyaudio.PyAudio()
-            audio_stream: IO = pa.open(
-                rate=porcupine.sample_rate,
-                channels=1,
-                format=pyaudio.paInt16,
-                input=True,
-                frames_per_buffer=porcupine.frame_length,
-            )
-
-            logging.info("\nListening {%s}" % keywords)
-
-            while not self.stopped:
-                pcm: tuple[any, ...] = audio_stream.read(porcupine.frame_length)
-                pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
-                keyword_index = porcupine.process(pcm)
-                if keyword_index >= 0 and not self.recording:
-                    self.recording = True
-                    logging.info(
-                        f"[ACTION] Detected {keywords[keyword_index]} at "
-                        f"{datetime.now().hour}:{datetime.now().minute}"
-                    )
-                    self.recognize_input(_hot_word_detected)
-
+            pa: PyAudio = PyAudio()
+            audio_stream: Stream = self.__create_pyaudio_instance(pa, porcupine)
+            self.__wait_for_calls(porcupine, audio_stream, keywords)
         except MemoryError:
-            porcupine.delete()
-            self.start(self.sensitivity, _hot_word_detected)
-        except Exception:
             logging.error(f"[ERROR] {traceback.print_exc()}")
+            porcupine.delete()
+            self.start()
 
-    def recognize_file(self, audio_file) -> str:
+    def __wait_for_calls(
+        self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]
+    ) -> None:
+        logging.info("\nListening {%s}" % keywords)
+
+        while self.running:
+            input_bytes: bytes = audio_stream.read(porcupine.frame_length)
+            pcm: tuple = struct.unpack_from("h" * porcupine.frame_length, input_bytes)
+            keyword_index: int = porcupine.process(pcm)
+            if keyword_index >= 0 and not self.recording:
+                self.recording = True
+                logging.info(
+                    f"[ACTION] Detected {keywords[keyword_index]} at "
+                    f"{datetime.now().hour}:{datetime.now().minute}"
+                )
+                self.__handle_input()
+
+    def recognize_file(self, audio_file: str) -> str:
         with audio_file as source:
             audio = self.speech_engine.record(source)
             text = self.speech_engine.recognize_google(audio, language="de-DE")
             return text
 
-    def recognize_input(
-        self,
-        _hot_word_detected: Callable,
-        listen: bool = False,
-        play_bling_before_listen: bool = False,
+    def __handle_input(
+        self, listen: bool = False, play_bling_before_listen: bool = None
     ) -> str:
         self.recording = True
-        logging.info("[Listening] for user-input")
-        # recognize user input through the microphone
+        logging.info("[ACTION] listening for userinput")
+
         try:
-            with sr.Microphone(device_index=None) as source:
-                # record user input
-                self.adjust_after_hot_word()
-
-                # duration was the last change ---------------------------------------------------------
-                audio = self.speech_engine.listen(source)
-                # self.speech_engine.record(source)
-                try:
-                    # translate audio to text
-                    text: str = self.speech_engine.recognize_google(
-                        audio, language="de-DE"
-                    )
-                    logging.info("[USER INPUT]\t" + text)
-                except sr.UnknownValueError:
-                    try:
-                        # if it didn't worked, adjust the ambient-noise and try again
-                        self.__adjusting()
-                        text: str = self.speech_engine.recognize_google(
-                            audio, language="de-DE"
-                        )
-                        logging.info("[USER INPUT]\t" + text)
-                    except sr.UnknownValueError:
-                        text: str = "Audio could not be recorded"
-            if not listen and not play_bling_before_listen:
-                self.recording = False
-                _hot_word_detected(text)
-            else:
-                # if the function was called by listen(), the text must be returned
-                self.recording = False
-                return text
-        except Exception:
-            traceback.print_exc()
-            logging.warning("Text could not be translated...")
-            self.recording = False
+            return self.__recognize_input()
+        except Exception as e:
+            logging.debug(e)
+            logging.info("Text could not be translated...")
             return "Das habe ich nicht verstanden."
+        finally:
+            self.recording = False
 
-    def play_bling_sound(self, listen: bool) -> None:
-        if not listen:
-            # if there is no conservation, play a bling sound
-            self.audio_output.play_bling_sound()
+    def __recognize_input(self):
+        with sr.Microphone(device_index=None) as source:
+            audio = self.speech_engine.listen()
+            return self.__recognize_input_from_audio_data(audio)
+
+    def __recognize_input_from_audio_data(self, audio: any):
+        # toDo: audio type
+        text: str = ""
+        try:
+            self.__translate_audio_to_text(audio)
+        except sr.UnknownValueError:
+            try:
+                self.__adjusting()
+                self.__translate_audio_to_text(audio)
+            except sr.UnknownValueError:
+                text = "Audio could not be recorded"
+        finally:
+            return text
+
+    def __translate_audio_to_text(self, audio: any):
+        text = self.speech_engine.recognize_goole(
+            audio, language=self.config.get("language")
+        )
+        logging.info("[USER INPUT]\t" + text)
+
+    def __signalize_to_listen(self, play_bling_before_listen: bool) -> None:
+        # toDo change name
+        if play_bling_before_listen or (
+            not play_bling_before_listen and self.config.get("play_bling_before_listen")
+        ):
+            self.play_bling_sound()
+
+    def play_bling_sound(self) -> None:
+        if not self.recording:
+            PlayBlingSound.play()
 
     def __adjusting(self) -> None:
         with sr.Microphone(device_index=None) as source:
@@ -183,371 +191,185 @@ class AudioInput(metaclass=ABCMeta):
         pass
 
     def stop(self) -> None:
-        # ends the hotword detection
-        self.stopped = True
+        pass
 
-
-class MusicPlayer:
-    """
-    -------------------------
-    Music-Player:
-        - responsible for any music playback
-        - can search a given topic on youtube (also bands or music genres) and then stream them
-        - in no case to use for notifications or similar audio like e.g. for playing the news
-          in the "tagesthemen" module
-    -------------------------
-    """
-
-    __instance = None
+    def __configure_microphone(self) -> None:
+        with sr.Microphone(device_index=None) as source:
+            self.speech_engine.pause_threshold = self.config.get("pause_threshold")
+            self.speech_engine.energy_threshold = self.config.get("energy_threshold")
+            self.speech_engine.dynamic_energy_threshold = self.config.get(
+                "dynamic_energy_threshold"
+            )
+            self.speech_engine.dynamic_energy_adjustment_damping = self.config.get(
+                "dynamic_energy_adjustment_damping"
+            )
+            self.speech_engine.adjust_for_ambient_noise(source)
 
     @staticmethod
-    def get_instance(_audio_output: AudioOutput):
-        if MusicPlayer.__instance is None:
-            MusicPlayer(_audio_output)
-        return MusicPlayer.__instance
+    def __create_pyaudio_instance(
+        pyaudio_object: PyAudio, porcupine: Porcupine
+    ) -> Stream:
+        return pyaudio_object.open(
+            rate=44100,
+            channels=1,
+            format=paInt8,
+            input=True,
+            frames_per_buffer=porcupine.frame_length,
+        )
 
-    def __init__(self, _audio_output: AudioOutput) -> None:
-        if MusicPlayer.__instance is not None:
-            raise Exception("Singleton cannot be instantiated more than once!")
 
-        self.music_thread: Thread = None
-        self.playlist: list = []
-        self.instance: vlc.Instance = vlc.Instance()
-        self.player = self.instance.media_player_new()
-        self.audio_output: AudioOutput = _audio_output
-        self.player_alive: bool = True
-        self.is_playing: bool = False
-        self.stopped: bool = False
-        self.paused: bool = False
-        self.skip: bool = False
-        self.old_volume: int = 50
+class PlayBlingSound:
+    bling_sound: BytesIO
 
-        MusicPlayer.__instance = self
+    def __new__(cls, *args, **kwargs):
+        PlayBlingSound.__load_bling_sound()
+        return cls
 
-    def start(self) -> MusicPlayer:
-        self.music_thread: Thread = Thread(target=self.run)
-        self.music_thread.daemon = True
-        self.music_thread.start()
-        return self
+    @staticmethod
+    def play() -> None:
+        audio = sa.play_buffer(PlayBlingSound.bling_sound, 2, 2, 44100)
+        audio.play()
 
-    def run(self) -> None:
-        self.player = self.instance.media_player_new()
-        # wait until song is loaded in playlist
-        while not self.playlist:
-            time.sleep(0.2)
-        while self.playlist:
-            self.player.set_media(self.playlist[0])
-            self.player.play()
-            self.playlist.pop(0)
-            # wait a second so that the player values are correct
-            time.sleep(1)
-            while self.player.is_playing() or self.paused:
-                if self.skip:
-                    # if skip is True, the next medium is loaded, skip is set to False and then by ending the
-                    # loop the old video is stopped and in the next step the next one is loaded
-                    self.skip = False
-                    break
-                time.sleep(2)
+    @staticmethod
+    def __load_bling_sound() -> None:
+        bling_byte_array: BytesIO = BytesIO()
+        with open(PlayBlingSound.__get_path_of_bling_file(), "r") as file:
+            bling_byte_array.write(file.read())
+        PlayBlingSound.bling_sound = bling_byte_array
 
-        self.is_playing = False
-        self.player.stop()
-
-    def play(
-        self,
-        by_name: str = None,
-        url: str = False,
-        path: str = False,
-        as_next: bool = False,
-        now: bool = False,
-        playlist: bool = False,
-        announce: bool = False,
-    ) -> None:
-        self.stopped = False
-        if not self.is_playing and not self.paused:
-            self.is_playing = True
-            self.start()
-        media = None
-        """if playlist:
-            self.add_playlist(url, by_name, next)"""
-        if by_name is not None:
-            _url = (
-                f"https://www.youtube.com/results?search_query={str(by_name)}".replace(
-                    "'", ""
-                )
-                .replace(" ", "+")
-                .rstrip("+")
-            )
-            html = urllib.request.urlopen(_url)
-            video_ids: list = re.findall(r"watch\?v=(\S{11})", html.read().decode())
-            while True:
-                try:
-                    video: pafy = pafy.new(random.choice(video_ids))
-                    duration: list = str(video.duration).split(":")
-                    if int(duration[0]) == 0 and int(duration[1]) < 10:
-                        best = video.getbest()
-                        media = self.instance.media_new(best.url)
-                        break
-                    else:
-                        continue
-                except Exception:
-                    continue
-        elif url:
-            media = self.instance.media_new(url)
-        elif path:
-            media = self.instance.media_new(path)
-        else:
-            return
-        if media is not None:
-            media.get_mrl()
-        if as_next:
-            self.playlist.insert(0, media)
-        elif now:
-            self.playlist.insert(0, media)
-            self.skip_actual()
-        else:
-            self.playlist.append(media)
-
-    def add_playlist(self, url: str, by_name: str, as_next: bool) -> None:
-        playlist_ = pafy.get_playlist2(url)
-        for item in playlist_:
-            best = item.getbest()
-            media = self.instance.media_new(item)
-            media.get_mrl()
-            if as_next:
-                self.playlist.insert(0, media)
-            else:
-                self.playlist.append(media)
-
-    def skip_actual(self) -> None:
-        self.skip = True
-
-    def clear(self) -> None:
-        self.is_playing = False
-        self.playlist.clear()
-        self.player.stop()
-
-    def pause(self) -> None:
-        # when the player is paused, it is still playing in the sense of is_playing. Therefore the value of
-        # is_playing remains at True
-        self.paused = True
-        self.player.pause()
-
-    def resume(self) -> None:
-        self.paused = False
-        self.player.play()
-
-    def set_volume(self, volume: float) -> None:
-        if 0 < volume < 1:
-            volume *= 100
-        self.old_volume = self.player.audio_get_volume()
-        self.player.audio_set_volume(int(volume))
-
-    def stop(self) -> None:
-        self.playlist = []
-        self.is_playing = False
-        self.player.stop()
-        self.skip = True
-
-    def stop_player(self) -> None:
-        self.is_playing = False
-        self.player_alive = False
+    @staticmethod
+    def __get_path_of_bling_file():
+        return (
+            pathlib.Path(__file__)
+            .parent.joinpath("resources")
+            .joinpath("sounds")
+            .joinpath("bling.wav")
+        )
 
 
 class AudioOutput:
-    """
-    -------------------------
-    AudioOutput:
-        - responsible for the "normal" audio output
-        - don´t use it for playing music (this is the task of the "MusicPlayer" class)
-    -------------------------
-    """
+    def __init__(self) -> None:
+        self.tts: TTS = TTS(play_audio_bytes)
 
-    __instance = None
+        self.config = audio_config.get("output")
 
-    @staticmethod
-    def get_instance():
-        if AudioOutput.__instance is None:
-            AudioOutput("default")
-        return AudioOutput.__instance
+        self.queue: list[QueueItem] = list()
+        self.priority_queue: list[QueueItem] = list()
+        self.music_queue: list[QueueItem] = list()
 
-    def __init__(self, voice: str) -> None:
-        # The channel are splittet on the buffers:
-        # Channel(0): notification
-        # Channel(1): music
-        # Channel(2): playback
+        self.running: bool = False
 
-        if AudioOutput.__instance is not None:
-            raise Exception("Singleton cannot be instantiated more than once!")
+    def start(self):
+        logging.info("[ACTION] Starting Audio Output")
 
-        if voice is None:
-            # toDo
-            pass
+        self.running = True
 
-        self.listen: bool = False
+        audio_output_thread: Thread = Thread(target=self.run, args=())
+        audio_output_thread.daemon = True
+        audio_output_thread.start()
 
-        # music means "Background music" or something like that
-        self.music: list = []
-        # playback are similar to music, but don´t contain "music"
-        self.playback: list = []
-        # notifications reduce the loudness from music but don´t pause it
-        self.notification: list = []
-        # mixer0: notification, mixer1: music
-        self.mixer: list = []
+        logging.info("[SUCCESS] Audio Output started")
 
-        self.music_player: MusicPlayer = MusicPlayer.get_instance(self)
-        mixer.pre_init(44100, -16, 1, 512)
-        self.tts: TTS = TTS()
-        self.tts.start(voice)
-
-        self.stopped: bool = True
-
-        # toDo: optimize PATH
-        TOP_DIR: str = os.path.dirname(os.path.abspath(__file__))
-        DETECT_DONG: str = os.path.join(TOP_DIR, "resources/sounds/bling.wav")
-
-        with open(DETECT_DONG, "rb") as wavfile:
-            input_wav: bytes = wavfile.read()
-        self.bling_file: io.BytesIO = io.BytesIO(input_wav)
-
-        AudioOutput.__instance = self
-        logging.info("[SUCCESS] Audio Output initialized!")
-
-    def start(self) -> AudioOutput:
-        logging.info("[ACTION] Starting audio output module...")
-        self.stopped = False
-        mixer.init()
-        time.sleep(2)
-        ot: Thread = Thread(target=self.run)
-        ot.daemon = True
-        ot.start()
         return self
 
     def run(self) -> None:
-        # toDo: cleancode
-        while not self.stopped:
+        while self.running:
             try:
-                if self.listen:
-                    mixer.Channel(0).set_volume(0.1)
-                    mixer.Channel(1).set_volume(0.1)
-                    mixer.Channel(2).set_volume(0.1)
-                    self.music_player.set_volume(0.1)
-                if (
-                    not self.notification == []
-                    and mixer.Channel(0).get_busy() == 0
-                    and not self.tts.is_reading
-                ):
-                    if mixer.Channel(0).get_busy() == 1:
-                        mixer.Channel(1).set_volume(0.10)
-                        mixer.Channel(2).set_volume(0.10)
-                    if type(self.notification[0]) is str:
-                        logging.info(f'Saying "{self.notification[0]}"')
-                        # if the notification is a string (a message to say), pass through to tts
-                        self.tts.say(self.notification[0])
-                        self.notification.pop(0)
-                    else:
-                        logging.info(f'Playing the track "{self.notification[0]}"')
-                        try:
-                            # else pass through to mixer-manager
-                            track: mixer.Sound = mixer.Sound(self.notification[0])
-                            mixer.Channel(0).play(track)
-                        except TypeError:
-                            logging.warning(
-                                f'Could not handle type of "{self.notification[0]}" (=> Type: {type(self.notification[0])})'
-                            )
-                        finally:
-                            self.notification.pop(0)
+                item: QueueItem = self.__get_next_item()
+                print(f"-------->Next Item: {item}<-------")
+                self.__choose_output_method(item)
+            except IndexError:
+                time.sleep(0.25)
 
-                if not self.music == [] and mixer.Channel(2).get_busy() == 0:
-                    if isinstance(self.music[0], str):
-                        logging.info(f"Play music with name {self.music[0]}")
-                        topic = self.music[0]
-                        self.music.pop(0)
-                        self.music_player.play(by_name=topic)
-                    else:
-                        logging.info(f"Play track with path {self.music[0]}")
-                        track = mixer.Sound(self.music[0])
-                        mixer.Channel(2).play(track)
-                        self.playback.pop(0)
-                if not self.playback == [] and mixer.Channel(1).get_busy() == 0:
-                    track = mixer.Sound(self.playback[0])
-                    self.playback.pop(0)
-                    mixer.Channel(1).play(track)
-                if (
-                    not mixer.Channel(0).get_busy() is 1
-                    and mixer.Channel(1).get_volume is not 1
-                    and mixer.Channel(2).get_volume is not 1
-                ):
-                    mixer.Channel(1).set_volume(1)
-                    mixer.Channel(2).set_volume(1)
-                time.sleep(0.2)
-            except Exception:
-                traceback.print_exc()
+    def __choose_output_method(self, item):
+        match type(item.value).__class__:
+            case str.__class__:
+                print("to tts")
+                self.tts.say(item.value)
+            case BytesIO.__class__:
+                play_audio_bytes(item.value)
+            case _:
+                pass
 
-    def say(self, text: str, wait_until_done: bool = True) -> None:
-        # Forwards the given text to the text-to-speech function and waits
-        # until the announcement has ended.
-        if text == "" or text is None:
-            text: str = "Das sollte nicht passieren. Eines meiner internen Module antwortet nicht mehr."
-        self.notification.append(text)
-        if wait_until_done:
-            while text in self.notification:
-                time.sleep(0.2)
-
-    def adjust_after_hot_word(self) -> None:
-        self.listen = True
-        self.music_player.set_volume(10)
-
-    def continue_after_hotword(self) -> None:
-        self.listen = False
-        self.music_player.set_volume(100)
+    def say(self, text: str) -> None:
+        model: QueueItem = self.__build_queue_item(
+            self.priority_queue, QueueType.TTS, text, True, 44100
+        )
+        self.__insert_to_priority_queue(model)
 
     def play_music(self, name: str, as_next: bool = False) -> None:
+        pass
+
+    def play_notification(
+        self, buff: BytesIO, as_next: bool, sample_rate: int = 44100
+    ) -> None:
+        model: QueueItem = self.__build_queue_item(
+            self.priority_queue, QueueType.AUDIO, buff, as_next, sample_rate
+        )
+        self.__insert_to_priority_queue(model)
+
+    @staticmethod
+    def stop() -> None:
+        sa.close()
+
+    def __get_next_item(self) -> QueueItem:
+        try:
+            return self.priority_queue.pop(0)
+        except IndexError:
+            return self.queue.pop(0)
+
+    def __insert_to_queue(self, model: QueueItem) -> None:
+        self.queue = self.__insert_to_given_queue(model, self.queue)
+
+    def __insert_to_priority_queue(self, model: QueueItem) -> None:
+        self.priority_queue = self.__insert_to_given_queue(model, self.priority_queue)
+
+    @staticmethod
+    def __insert_to_given_queue(model: QueueItem, queue: list) -> list:
+        queue.append(model)
+        # sort queue by type (ascending) and then by priority (descending)
+        return sorted(queue, key=lambda x: (-x.type.value, x.PRIORITY))
+
+    def __build_queue_item(
+        self,
+        queue,
+        queue_type: QueueType,
+        value: str | BytesIO,
+        as_next: bool,
+        sample_rate: int = None,
+        wait_until_done: bool = False,
+    ) -> QueueItem:
+        if not sample_rate:
+            sample_rate = 44100
+        model: QueueItem = QueueItem(
+            type=queue_type,
+            value=value,
+            wait_until_done=wait_until_done,
+            sample_rate=sample_rate,
+        )
         if as_next:
-            self.music.insert(0, name)
-        else:
-            self.music.append(name)
+            model.PRIORITY = self.__get_highest_priority_plus_one(queue)
+        return model
 
-    def play_playback(self, buff: io.BytesIO, as_next: bool) -> None:
-        if not as_next:
-            self.playback.append(buff)
-        else:
-            self.playback.insert(0, buff)
-
-    def play_notification(self, buff: io.BytesIO, as_next: bool) -> None:
-        if not as_next:
-            self.notification.append(buff)
-        else:
-            self.notification.insert(0, buff)
-
-    def play_bling_sound(self) -> None:
-        self.play_notification(self.bling_file, as_next=True)
-
-    @staticmethod
-    def pause(channel: int) -> None:
-        mixer.Channel(channel).pause()
+    def __build_music_queue_item(
+        self,
+        query_type: AudioQueryType,
+        value: str | BytesIO,
+        as_next: bool,
+        sample_rate: int = None,
+    ) -> MusicQueueItem:
+        if not sample_rate:
+            sample_rate = 44100
+        model: MusicQueueItem = MusicQueueItem(
+            query_type=query_type, value=value, sample_rate=sample_rate
+        )
+        if as_next:
+            model.PRIORITY = self.__get_highest_priority_plus_one(self.music_queue)
+        return model
 
     @staticmethod
-    def resume(channel: int) -> None:
-        mixer.Channel(channel).unpause()
-
-    @staticmethod
-    def set_volume(channel: int, volume: float) -> None:
-        mixer.Channel(channel).set_volume(volume)
-
-    @staticmethod
-    def stop_notification() -> None:
-        mixer.Channel(0).stop()
-
-    @staticmethod
-    def stop_music() -> None:
-        mixer.Channel(1).stop()
-
-    @staticmethod
-    def stop_playback() -> None:
-        mixer.Channel(2).stop()
-
-    def stop(self) -> None:
-        self.stopped = True
-        self.music_player.stop()
-        mixer.stop()
-        self.tts.stop()
+    def __get_highest_priority_plus_one(queue) -> int:
+        try:
+            return queue.__getitem__(0).PRIORITY + 1
+        except IndexError:
+            return 1

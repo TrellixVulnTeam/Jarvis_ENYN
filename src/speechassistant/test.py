@@ -1,33 +1,47 @@
-import logging
-import struct
-from datetime import datetime
+def create_alarm(self, new_alarm: Alarm) -> Alarm:
+    result_alarm: Alarm
+    with Session(self.engine, future=True) as session:
+        alarm_schema: AlarmSchema = alarm_to_schema(new_alarm)
+        session.add(alarm_schema)
+        session.flush()
+        result_alarm = schema_to_alarm(alarm_schema)
+        session.commit()
+    return result_alarm
 
-import pvporcupine
-import pyaudio
+
+def get_alarm_by_id(self, alarm_id: int) -> Alarm:
+    alarm_schema: AlarmSchema
+    with Session(self.engine) as session:
+        stmt = select(AlarmSchema).where(AlarmSchema.id == alarm_id)
+        alarm_schema = session.execute(stmt).scalars().first()
+    return schema_to_alarm(alarm_schema)
 
 
-if __name__ == "__main__":
+def get_all_alarms(self) -> list[Alarm]:
+    alarms: list[Alarm]
+    with Session(self.engine) as session:
+        stmt = select(AlarmSchema)
+        alarms = [schema_to_alarm(a) for a in session.execute(stmt).scalars().all()]
+    return alarms
 
-    access_key = "1mQJEO2ad9yDRxrOi8M7N5e0c/wnHm8WHyGFhTn5VwsYzsiimoBZaQ=="
-    porcupine = pvporcupine.create(access_key=access_key, keywords=["jarvis"])
 
-    pa = pyaudio.PyAudio()
-    audio_stream = pa.open(
-        rate=porcupine.sample_rate,
-        channels=1,
-        format=pyaudio.paInt16,
-        input=True,
-        frames_per_buffer=porcupine.frame_length,
-    )
+def update_alarm(self, updated_alarm: Alarm) -> Alarm:
+    return self.update_alarm_by_id(updated_alarm.alarm_id, updated_alarm)
 
-    logging.info("\nListening {%s}" % {"jarvis"})
 
-    while True:
-        pcm = audio_stream.read(porcupine.frame_length)
-        pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
-        keyword_index = porcupine.process(pcm)
-        if keyword_index >= 0:
-            logging.info(
-                f"[ACTION] Detected JARVIS at "
-                f"{datetime.now().hour}:{datetime.now().minute}"
-            )
+def update_alarm_by_id(self, alarm_id: int, alarm: Alarm) -> Alarm:
+    result_alarm: Optional[Alarm]
+    with Session(self.engine) as session:
+        alarm_in_db: AlarmSchema = session.get(AlarmSchema, alarm_id)
+        alarm_in_db = alarm_to_schema(alarm)
+        session.flush()
+        result_alarm = schema_to_alarm(alarm_in_db)
+        session.commit()
+    return result_alarm
+
+
+def delete_alarm_by_id(self, alarm_id: int) -> None:
+    with Session(self.engine) as session:
+        alarm_in_db = session.get(AlarmSchema, alarm_id)
+        session.delete(alarm_in_db)
+        session.commit()

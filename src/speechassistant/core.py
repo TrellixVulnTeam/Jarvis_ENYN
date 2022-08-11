@@ -1,23 +1,22 @@
 from __future__ import annotations  # compatibility for < 3.10
 
-import json
 import logging
 import time
 from pathlib import Path
 from threading import Thread
 
 import requests
+import toml
 
-from Audio import AudioOutput, AudioInput
-from Modules import Modules
-from Services import ServiceWrapper
-from Users import Users
-from database.database_connection import DataBase
-from models.user import User
-from resources.analyze import Sentence_Analyzer
-
+from src.speechassistant.Audio import AudioOutput, AudioInput
+from src.speechassistant.Modules import Modules
+from src.speechassistant.Services import ServiceWrapper
+from src.speechassistant.Users import Users
+from src.speechassistant.database.database_connection import DataBase
+from src.speechassistant.models.user import User
+from src.speechassistant.resources.analyze import Sentence_Analyzer
 # from resources.intent.Wrapper import IntentWrapper as AIWrapper
-from resources.module_skills import Skills
+from src.speechassistant.resources.module_skills import Skills
 
 
 class Core:
@@ -30,29 +29,29 @@ class Core:
         return Core.__instance
 
     def __init__(self) -> None:
+        self.__configure_logger()
+
         if Core.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
-        self.relPath = str(Path(__file__).parent) + "/"
+        self.relPath = Path(__file__).parent
         self.local_storage: dict = {}
         self.config_data: dict = {}
         self.__load_config_data()
-        self.use_ai = self.config_data["ai"]
-        self.path: str = str(Path(__file__).parent) + "/"
-        self.data: dict = self.config_data
-        self.__fill_data()  # since the path is needed, __fill_data() is called only here
+        self.use_ai = self.config_data["services"]["activation"]["ai"]
+        self.path: Path = Path(__file__).parent
         self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.skills: Skills = Skills()
         self.data_base = DataBase()
-        self.services: ServiceWrapper = ServiceWrapper(self, self.data)
+        self.services: ServiceWrapper = ServiceWrapper(self, self.config_data)
         self.messenger = None
         self.messenger_queued_users: list = []
         self.messenger_queue_output: dict = {}
 
         self.users: Users = Users()
 
-        self.audio_output: AudioOutput = AudioOutput.get_instance()
-        self.audio_input: AudioInput = AudioInput.get_instance()
+        self.audio_output: AudioOutput = AudioOutput()
+        self.audio_input: AudioInput = AudioInput()
 
         self.active_modules: dict = {}
         self.continuous_modules: dict = {}
@@ -61,21 +60,26 @@ class Core:
         # self.ai: AIWrapper = AIWrapper()
 
         if self.local_storage["home_location"] == "":
-            self.local_storage["home_location"] = requests.get(
-                "https://ipinfo.io"
-            ).json()["city"]
+            self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
+
+        self.__start_audio()
+
+        self.audio_output.say("Jarvis wurde erfolgreich gestartet!")
 
         Core.__instance = self
 
-    def __fill_data(self) -> None:
-        with open(self.relPath + "/data/api_keys.dat") as api_file:
-            self.data["api_keys"] = json.load(api_file)
+    def __configure_logger(self) -> None:
+        pass
+
+    def __start_audio(self) -> None:
+        self.audio_input.start()
+        self.audio_output.start()
 
     def __load_config_data(self):
-        with open(self.relPath + "config.json", "r") as config_file:
+        with open(self.relPath.joinpath("config.toml"), "r") as config_file:
             logging.info("[INFO] loading configs...")
-            self.config_data = json.load(config_file)
-            self.local_storage = self.config_data["Local_storage"]
+            self.config_data = toml.load(config_file)
+            self.local_storage = self.config_data["local_storage"]
 
     def messenger_thread(self) -> None:
         # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.
@@ -122,7 +126,8 @@ class Core:
         )
         self.messenger.messages.remove(msg)
 
-    def __log_message_from_unknown_user(self, msg):
+    @staticmethod
+    def __log_message_from_unknown_user(msg):
         try:
             logging.warning(
                 "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
@@ -167,7 +172,7 @@ class Core:
         pass
 
     def hotword_detected(self, text: str) -> None:
-        user: User = self.users.get_user_by_name(self.local_storage["user"])
+        user: User = self.users.get_user_by_name(self.config_data["default_user"])
 
         matching_routines: list[dict] = self.data_base.routine_interface.get_routines(
             on_command=text
@@ -202,10 +207,6 @@ class Core:
         if user is None:
             user: dict = self.local_storage["user"]
         return self.modules.query_threaded(name, text, user)
-
-
-def start() -> None:
-    core: Core = Core.get_instance()
 
 
 # def start() -> None:
