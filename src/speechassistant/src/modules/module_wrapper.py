@@ -9,8 +9,8 @@ from random import random
 from typing import AnyStr, Any
 from urllib.request import Request, urlopen
 
-from src.Audio import AudioOutput, AudioInput
-from src.database.database_connection import DataBase
+from src.audio import AudioOutput, AudioInput
+from backup.database_connection import DataBase
 from src.models.user import User
 from src.resources.analyze import Sentence_Analyzer
 from src.resources import Skills

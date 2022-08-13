@@ -8,7 +8,3 @@ class DBPersistency:
     USER_NAME = ""
     PASSWORD = ""
     Base = declarative_base()
-
-    """
-    Base.metadata.create_all(engine)
-    """

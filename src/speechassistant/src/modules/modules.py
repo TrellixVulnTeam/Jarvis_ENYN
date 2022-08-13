@@ -6,7 +6,7 @@ import time
 import traceback
 from threading import Thread
 
-from ModuleWrapper import ModuleWrapper, ModuleWrapperContinuous
+from module_wrapper import ModuleWrapper, ModuleWrapperContinuous
 from src.models.user import User
 from src.resources import Skills
 

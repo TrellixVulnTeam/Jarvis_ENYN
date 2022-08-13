@@ -1,2 +1,2 @@
-from .Weather import Weather
-from .Light import LightController
+from .weather import Weather
+from .light import LightController

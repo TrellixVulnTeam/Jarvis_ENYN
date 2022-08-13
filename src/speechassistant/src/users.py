@@ -1,4 +1,4 @@
-from src.database.database_connection import DataBase
+from backup.database_connection import DataBase
 from src.models.user import User
 
 
@@ -9,18 +9,8 @@ class Users:
     def get_user_list(self) -> list[User]:
         return self.user_interface.get_users()
 
-    def add_user(
-            self,
-            alias: str,
-            first_name: str,
-            last_name: str,
-            birthday: dict,
-            messenger_id: int,
-            song_id: int = 1,
-    ) -> None:
-        self.user_interface.add_user(
-            alias, first_name, last_name, birthday, messenger_id, song_id
-        )
+    def add_user(self, new_user: User) -> None:
+        self.user_interface.add_user(new_user)
 
     def get_user_by_name(self, name: str) -> User:
         return self.user_interface.get_user(name)

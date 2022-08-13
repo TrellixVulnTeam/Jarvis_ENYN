@@ -2,8 +2,8 @@ from sqlite3 import OperationalError
 
 from fastapi import status, HTTPException
 
-from src.database.database_connection import DataBase
-from src.exceptions.SQLException import NoMatchingEntry
+from backup.database_connection import DataBase
+from src.exceptions.sql_exception import NoMatchingEntry
 from src.models.reminder import Reminder
 
 reminder_interface = DataBase().reminder_interface

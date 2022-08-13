@@ -13,7 +13,7 @@ from src.api_old.speechassistant.logic.audio import (
 from src.api_old.speechassistant.parser import (
     audio_file_parser as audio_file,
 )
-from src.exceptions.CriticalExceptions import UnsolvableException
+from src.exceptions.critical_exception import UnsolvableException
 
 namespace = api.namespace(
     "audio", desciption="Handles audiofiles of the speech-assistant"

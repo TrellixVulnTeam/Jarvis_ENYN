@@ -16,7 +16,7 @@ import toml
 from pvporcupine import Porcupine
 from pyaudio import PyAudio, Stream, paInt8
 
-from src.models.audio.QueueItem import (
+from src.models.audio.queue_item import (
     QueueItem,
     QueueType,
     AudioQueryType,

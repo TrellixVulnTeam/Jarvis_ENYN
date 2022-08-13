@@ -7,8 +7,8 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 from flask import Response
 
-from src.database.database_connection import DataBase
-from src.exceptions.CriticalExceptions import UnsolvableException
+from backup.database_connection import DataBase
+from src.exceptions.critical_exception import UnsolvableException
 from src.models.alarm import Alarm
 
 database: DataBase = DataBase()

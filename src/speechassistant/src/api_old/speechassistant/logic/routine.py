@@ -4,8 +4,8 @@ import json
 
 from flask import Response
 
-from src.database.database_connection import DataBase
-from src.exceptions.SQLException import NoMatchingEntry
+from backup.database_connection import DataBase
+from src.exceptions.sql_exception import NoMatchingEntry
 
 database: DataBase = DataBase()
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, Response
 from fastapi.responses import StreamingResponse
 
-from src.api.logic.audioFileLogic import AudioFileLogic
+from src.api.logic.audio_file import AudioFileLogic
 from src.models.audio_file import AudioFile
 
 router: APIRouter = APIRouter()

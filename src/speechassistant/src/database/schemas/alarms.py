@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Time, DateT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.database.schemas.userSchema import UserSchema
+from src.database.schemas.users import UserSchema
 from src.models.alarm import Alarm, AlarmRepeating
 
 Base = declarative_base()

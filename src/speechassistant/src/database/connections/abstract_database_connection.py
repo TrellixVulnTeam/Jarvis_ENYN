@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from sqlalchemy.pool import StaticPool
 
-from src.database.DataBasePersistency import DBPersistency
+from src.database.database_persistency import DBPersistency
 
 Model = TypeVar('Model')
 Schema = TypeVar('Schema')
@@ -22,7 +22,7 @@ class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
         self.meta = MetaData()
         self.engine = create_engine(
             DBPersistency.DATABASE_URL,
-            echo=True,
+            echo=False,
             future=True,
             connect_args={"check_same_thread": False},
             poolclass=StaticPool
@@ -75,22 +75,27 @@ class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
             session.delete(model_in_db)
             session.commit()
 
+    @staticmethod
     @abstractmethod
-    def schema_to_model(self, model_schema: Schema) -> Model:
+    def schema_to_model(model_schema: Schema) -> Model:
         ...
 
+    @staticmethod
     @abstractmethod
-    def model_to_schema(self, model: Model) -> Schema:
+    def model_to_schema(model: Model) -> Schema:
         ...
 
+    @staticmethod
     @abstractmethod
-    def get_model_id(self, model: Model) -> int:
+    def get_model_id(model: Model) -> int:
         ...
 
+    @staticmethod
     @abstractmethod
-    def get_model_type(self) -> Type[Model]:
+    def get_model_type() -> Type[Model]:
         ...
 
+    @staticmethod
     @abstractmethod
-    def get_schema_type(self) -> Type[Schema]:
+    def get_schema_type() -> Type[Schema]:
         ...

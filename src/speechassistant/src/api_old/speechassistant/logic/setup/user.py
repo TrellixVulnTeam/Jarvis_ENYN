@@ -1,7 +1,7 @@
 from flask import Response
 from models.User import User
 
-from src.database.database_connection import DataBase
+from backup.database_connection import DataBase
 
 database: DataBase = DataBase(
     "C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\", None

@@ -8,9 +8,9 @@ from datetime import datetime, time
 from sqlite3 import Connection, Cursor
 from typing import TYPE_CHECKING
 
-from src.exceptions.CriticalExceptions import UnsolvableException
-from src.exceptions.SQLException import *
-from src.modules.ModuleSkills import Skills
+from src.exceptions.critical_exception import UnsolvableException
+from src.exceptions.sql_exception import *
+from src.modules.module_skills import Skills
 
 if TYPE_CHECKING:
     from src.models.shopping_list import ShoppingListItem

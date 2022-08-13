@@ -8,11 +8,11 @@ from threading import Thread
 import requests
 import toml
 
-from src.Audio import AudioOutput, AudioInput
+from src.audio import AudioOutput, AudioInput
 from src.Modules import Modules
-from src.Services import ServiceWrapper
-from src.Users import Users
-from src.database.database_connection import DataBase
+from src.services import ServiceWrapper
+from src.users import Users
+from backup.database_connection import DataBase
 from src.models.user import User
 from src.resources.analyze import Sentence_Analyzer
 # from resources.intent.Wrapper import IntentWrapper as AIWrapper

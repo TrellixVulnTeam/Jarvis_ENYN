@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from src.api.logic.moduleLogic import ModuleLogic
+from src.api.logic.module import ModuleLogic
 from src.models.module import Module
 
 router: APIRouter = APIRouter()

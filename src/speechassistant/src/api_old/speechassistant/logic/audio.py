@@ -6,11 +6,11 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from src.api_old.settings import ALLOWED_AUDIO_EXTENSIONS
-from src.database.database_connection import DataBase
-from src.exceptions.CriticalExceptions import (
+from backup.database_connection import DataBase
+from src.exceptions.critical_exception import (
     UnsolvableException,
 )
-from src.exceptions.SQLException import FileNameAlreadyExists
+from src.exceptions.sql_exception import FileNameAlreadyExists
 
 folder: str = "C:\\Users\\Jakob\\PycharmProjects\\Jarvis"
 database: DataBase = DataBase()

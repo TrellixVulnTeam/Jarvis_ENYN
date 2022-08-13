@@ -4,7 +4,7 @@ from typing import Callable
 
 from gtts import gTTS
 
-from src.resources.MediaPlayer import MyMediaPlayer
+from src.resources.media_player import MyMediaPlayer
 
 
 class TTS:

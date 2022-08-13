@@ -52,7 +52,7 @@ def isValid(text):
 
 def handle(text, core, skills):
     text = text.lower()
-    AUDIO_PFAD = core.path + "/modules/resources/Quiz/Audio"
+    AUDIO_PFAD = core.path + "/modules/resources/Quiz/audio"
     with open(
         core.path + "/modules/resources/Quiz/questions.json", "r"
     ) as question_file:

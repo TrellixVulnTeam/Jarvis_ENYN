@@ -1,4 +1,4 @@
-from src.database.schemas.userSchema import UserSchema
+from src.database.schemas.users import UserSchema
 from src.models.reminder import Reminder
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base

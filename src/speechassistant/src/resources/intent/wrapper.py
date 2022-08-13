@@ -3,7 +3,7 @@ from __future__ import annotations  # compatibility for < 3.10
 import json
 import logging
 
-from src.resources.intent.AI import GenericAssistant
+from src.resources.intent.ai import GenericAssistant
 
 
 class IntentWrapper:

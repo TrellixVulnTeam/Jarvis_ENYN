@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from src.api.logic.routineLogic import RoutineLogic
+from src.api.logic.routine import RoutineLogic
 from src.models.routine import Routine
 
 router: APIRouter = APIRouter()
