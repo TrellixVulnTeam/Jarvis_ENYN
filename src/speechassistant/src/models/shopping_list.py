@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from src.resources.enums import Measures
+from src.enums import Measures
 
 
 @dataclass

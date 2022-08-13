@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from src.core import ModuleWrapper
-from src.resources.enums import OutputTypes
+from src.enums import OutputTypes
 from src.resources import Skills
 
 PRIORITY = 2  # Conflicts with module "wie_lange_noch"

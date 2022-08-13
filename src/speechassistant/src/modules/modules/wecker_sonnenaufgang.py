@@ -1,7 +1,7 @@
 import time
 from threading import Thread
 
-from src.resources.services.light_systems.Phue import PhilipsWrapper
+from src.services import PhilipsWrapper
 
 
 def isValid(text):

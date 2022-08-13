@@ -1,5 +1,5 @@
 from src.models.user import User
-from src.resources.services import PhilipsWrapper
+from src.services import PhilipsWrapper
 
 
 def handle(text, core, skills):

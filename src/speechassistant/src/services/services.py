@@ -1,4 +1,4 @@
-from src.resources.services import Weather, LightController
+from src.services import Weather, LightController
 
 
 class ServiceWrapper:

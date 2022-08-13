@@ -1,6 +1,6 @@
 from flask import Response
 
-from src.resources.services.light_systems.Phue import PhilipsWrapper
+from src.services import PhilipsWrapper
 
 service = PhilipsWrapper()
 

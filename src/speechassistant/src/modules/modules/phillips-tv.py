@@ -1,4 +1,4 @@
-from src.resources.services.philips_tv.philips_tv import Pylips
+from src.services.philips_tv.philips_tv import Pylips
 
 user = ""
 password = ""

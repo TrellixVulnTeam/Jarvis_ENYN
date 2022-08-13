@@ -1,4 +1,4 @@
-from .light_systems import Phue
+from src.services.light_systems import Phue
 
 
 class LightController:
