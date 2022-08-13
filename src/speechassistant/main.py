@@ -5,7 +5,7 @@ from pathlib import Path
 
 import toml
 
-from src.speechassistant.core import Core
+from src import Core
 
 
 def __get_config_path() -> Path:
