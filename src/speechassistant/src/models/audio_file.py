@@ -2,11 +2,7 @@ import base64
 
 from pydantic import BaseModel
 
-
-def to_camel(string: str) -> str:
-    from humps import camel
-
-    return camel.case(string)
+from src.api.utils.converter import to_camel
 
 
 class AudioFile(BaseModel):
