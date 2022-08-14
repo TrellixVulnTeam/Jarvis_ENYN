@@ -1,15 +1,23 @@
 from sqlalchemy import Column, Integer, String, Boolean, Time, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
-from src.database.tables import ROUTINE_TABLE_NAME, ROUTINE_DAYS_TABLE_NAME, SPECIFIC_DATES_TABLE_NAME, \
-    ROUTINE_TIMES_TABLE_NAME, ROUTINE_CLOCK_TIME_TABLE_NAME, ROUTINE_RETAKES_TABLE_NAME, ROUTINE_COMMAND_TABLE_NAME, \
-    ROUTINE_COMMAND_TEXT_TABLE_NAME, CALLING_COMMAND_TABLE_NAME
 from src.models.routine import (
     Routine,
     CallingCommand,
     RoutineRetakes,
     RoutineDays,
     RoutineTime,
+)
+from ..tables import (
+    ROUTINE_TABLE_NAME,
+    ROUTINE_DAYS_TABLE_NAME,
+    SPECIFIC_DATES_TABLE_NAME,
+    ROUTINE_TIMES_TABLE_NAME,
+    ROUTINE_CLOCK_TIME_TABLE_NAME,
+    ROUTINE_RETAKES_TABLE_NAME,
+    ROUTINE_COMMAND_TABLE_NAME,
+    ROUTINE_COMMAND_TEXT_TABLE_NAME,
+    CALLING_COMMAND_TABLE_NAME,
 )
 
 Base = declarative_base()
@@ -108,7 +116,7 @@ def __schema_to_calling_command(schema: CallingCommandSchema) -> CallingCommand:
 
 
 def __calling_command_to_schema(
-        calling_command: CallingCommand,
+    calling_command: CallingCommand,
 ) -> CallingCommandSchema:
     return CallingCommandSchema(
         id=calling_command.ocid,
@@ -162,5 +170,5 @@ def routine_to_schema(model: Routine) -> RoutineSchema:
         name=model.name,
         description=model.description,
         calling_commands=None,
-        retakes=None
+        retakes=None,
     )
