@@ -16,13 +16,13 @@ import toml
 from pvporcupine import Porcupine
 from pyaudio import PyAudio, Stream, paInt8
 
-from src.models.audio.queue_item import (
+from models.audio.queue_item import (
     QueueItem,
     QueueType,
     AudioQueryType,
     MusicQueueItem,
 )
-from src.resources.tts import TTS
+from resources.tts import TTS
 
 
 def __load_configuration() -> dict[str, Any]:
@@ -31,7 +31,7 @@ def __load_configuration() -> dict[str, Any]:
 
 
 def __get_path_of_config_file() -> Path:
-    return pathlib.Path(__file__).parent.joinpath("config.toml").absolute()
+    return pathlib.Path(__file__).parent.parent.joinpath("config.toml").absolute()
 
 
 config: dict[str, Any] = __load_configuration()

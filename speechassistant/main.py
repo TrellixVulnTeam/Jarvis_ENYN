@@ -5,16 +5,27 @@ from pathlib import Path
 
 import toml
 
-from src import Core
+from src.speechassistant.src.core import Core
 
 
 def __get_config_path() -> Path:
-    return Path(__file__).parent.joinpath("src").joinpath("speechassistant").joinpath("config.toml").absolute()
+    return (
+        Path(__file__)
+        .parent.joinpath("src")
+        .joinpath("speechassistant")
+        .joinpath("config.toml")
+        .absolute()
+    )
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
-                        filename='speechassistant.log', encoding='utf-8', level=logging.DEBUG)
+    logging.basicConfig(
+        format="%(asctime)s %(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
+        filename="speechassistant.log",
+        encoding="utf-8",
+        level=logging.DEBUG,
+    )
     logging.getLogger().addHandler(logging.StreamHandler())
 
     with open(__get_config_path(), "r") as config_file:

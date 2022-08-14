@@ -9,6 +9,8 @@ WORKDIR /usr/app
 COPY requirements.txt .
 COPY . .
 
-RUN pip3 install -r requirements.txt
+RUN pip3.10 install -r requirements.txt
+
+RUN ["pip3", "install", "parselmouth"]
 
 CMD [ "python3.10", "main.py" ]

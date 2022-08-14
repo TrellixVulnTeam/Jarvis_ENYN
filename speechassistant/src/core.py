@@ -8,15 +8,16 @@ from threading import Thread
 import requests
 import toml
 
-from src.audio import AudioOutput, AudioInput
-from src.Modules import Modules
-from src.services import ServiceWrapper
-from src.users import Users
-from backup.database_connection import DataBase
-from src.models.user import User
-from src.resources.analyze import Sentence_Analyzer
+from audio import AudioOutput, AudioInput
+from models.user import User
+
 # from resources.intent.Wrapper import IntentWrapper as AIWrapper
-from src.resources import Skills
+from modules.module_skills import Skills
+from modules.modules import Modules
+from resources.analyze import Sentence_Analyzer
+from services import ServiceWrapper
+from speechassistant.src.database.connection import *
+from users import Users
 
 
 class Core:
@@ -42,7 +43,6 @@ class Core:
         self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.skills: Skills = Skills()
-        self.data_base = DataBase()
         self.services: ServiceWrapper = ServiceWrapper(self, self.config_data)
         self.messenger = None
         self.messenger_queued_users: list = []
@@ -60,7 +60,9 @@ class Core:
         # self.ai: AIWrapper = AIWrapper()
 
         if self.local_storage["home_location"] == "":
-            self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
+            self.local_storage["home_location"] = requests.get(
+                "https://ipinfo.io"
+            ).json()["city"]
 
         self.__start_audio()
 
@@ -117,7 +119,8 @@ class Core:
             time.sleep(0.5)
 
     def __reject_message(self, msg):
-        self.data_base.messenger_interface.add_rejected_message(msg)
+        # toDo
+        # messenger_interface.add_rejected_message(msg)
         self.__log_message_from_unknown_user(msg)
         self.messenger.say(
             "Entschuldigung, aber ich darf leider zur Zeit nicht mit Fremden reden.",
@@ -174,9 +177,7 @@ class Core:
     def hotword_detected(self, text: str) -> None:
         user: User = self.users.get_user_by_name(self.config_data["default_user"])
 
-        matching_routines: list[dict] = self.data_base.routine_interface.get_routines(
-            on_command=text
-        )
+        matching_routines: list[dict] = RoutineInterface.get_routines(on_command=text)
         if matching_routines:
             # if there are matching routines of this command, start the matching modules
             for routine in matching_routines:
