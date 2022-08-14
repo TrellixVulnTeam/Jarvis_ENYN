@@ -2,8 +2,7 @@ from __future__ import annotations  # compatibility for < 3.10
 
 import datetime
 import re
-
-from typing import Tuple, List
+from typing import Tuple
 
 
 def split_text(text: str) -> list[str]:

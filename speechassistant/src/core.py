@@ -8,16 +8,16 @@ from threading import Thread
 import requests
 import toml
 
-from audio import AudioOutput, AudioInput
-from models.user import User
+from .audio import AudioOutput, AudioInput
+from .database.connection import *
+from .models.user import User
 
-# from resources.intent.Wrapper import IntentWrapper as AIWrapper
-from modules.module_skills import Skills
-from modules.modules import Modules
-from resources.analyze import Sentence_Analyzer
-from services import ServiceWrapper
-from speechassistant.src.database.connection import *
-from users import Users
+# from .resources.intent.Wrapper import IntentWrapper as AIWrapper
+from .modules.module_skills import Skills
+from .modules.modules import Modules
+from .resources.analyze import Sentence_Analyzer
+from .services import ServiceWrapper
+from .users import Users
 
 
 class Core:

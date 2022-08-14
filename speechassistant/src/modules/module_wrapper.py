@@ -5,14 +5,14 @@ import json
 import logging
 import random
 import urllib
+from pathlib import Path
 from random import random
 from typing import AnyStr, Any
 from urllib.request import Request, urlopen
 
-from backup.database_connection import DataBase
 from src.audio import AudioOutput, AudioInput
 from src.models.user import User
-from src.resources import Skills
+from src.modules.module_skills import Skills
 from src.resources.analyze import Sentence_Analyzer
 
 
@@ -27,8 +27,8 @@ class ModuleWrapper:
 
         self.core: Core = Core.get_instance()
 
-        self.audio_output: AudioOutput = AudioOutput.get_instance()
-        self.audio_input: AudioInput = AudioInput.get_instance()
+        self.audio_output: AudioOutput = AudioOutput()
+        self.audio_input: AudioInput = AudioInput()
 
         self.messenger_call: bool = messenger
 
@@ -36,13 +36,12 @@ class ModuleWrapper:
         self.messenger = self.core.messenger
 
         self.skills: Skills = Skills()
-        self.data_base = DataBase()
 
         self.Analyzer: Sentence_Analyzer = self.core.analyzer
 
         self.local_storage: dict = self.core.local_storage
         self.system_name: str = self.core.system_name
-        self.path: str = self.core.path
+        self.path: Path = self.core.path
         self.user: User = user
 
     def say(self, text: str | list, output: str = "auto") -> None:
@@ -233,8 +232,7 @@ class ModuleWrapperContinuous:
         self.messenger = core.messenger
         self.core = core
         self.Analyzer = core.analyzer
-        self.services = core.services
-        self.data_base: DataBase = core.data_base
+        self.services = core.servicesf
         self.audio_Input = core.audio_input
         self.audio_output = core.audio_output
         self.local_storage = core.local_storage

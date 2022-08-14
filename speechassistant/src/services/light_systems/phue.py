@@ -253,9 +253,9 @@ class PhilipsWrapper:
                     for light in group.lights:
                         lights.append(light.lower())
             if (
-                    ("alle" in text or "überall" in text)
-                    and "außer" in text
-                    and lights != []
+                ("alle" in text or "überall" in text)
+                and "außer" in text
+                and lights != []
             ):
                 temp_lights = []
                 for item in wrapper.light_names:

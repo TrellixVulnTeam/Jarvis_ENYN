@@ -1,4 +1,4 @@
-from src.services.light_systems import Phue
+from .phue import PhilipsWrapper
 
 
 class LightController:
@@ -21,7 +21,7 @@ class LightController:
 
     def generate_light_systems(self):
         system_list = []
-        phue = Phue.PhilipsWrapper(
+        phue = PhilipsWrapper(
             self.core.local_storage["service_storage"]["philips_hue"]["Bridge-IP"]
         )
         system_list.append({"name": "phue", "systemObject": phue})
