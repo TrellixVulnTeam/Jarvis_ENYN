@@ -1,7 +1,7 @@
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
 from phue import Bridge
 
-from src.resources import Skills
+from src.modules import Skills
 
 colors = [
     "blau",
