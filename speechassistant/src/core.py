@@ -78,7 +78,10 @@ class Core:
         self.audio_output.start()
 
     def __load_config_data(self):
-        with open(self.relPath.joinpath("config.toml"), "r") as config_file:
+        with open(
+            Path(__file__).parent.parent.absolute().joinpath("config.toml").absolute(),
+            "r",
+        ) as config_file:
             logging.info("[INFO] loading configs...")
             self.config_data = toml.load(config_file)
             self.local_storage = self.config_data["local_storage"]
