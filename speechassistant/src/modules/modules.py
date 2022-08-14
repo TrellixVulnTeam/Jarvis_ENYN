@@ -6,9 +6,9 @@ import time
 import traceback
 from threading import Thread
 
-from module_wrapper import ModuleWrapper, ModuleWrapperContinuous
 from src.models.user import User
-from src.resources import Skills
+from src.modules.module_skills import Skills
+from src.modules.module_wrapper import ModuleWrapper, ModuleWrapperContinuous
 
 
 class Modules:
@@ -93,7 +93,7 @@ class Modules:
         return modules
 
     def query_threaded(
-            self, name: str, text: str, user: dict, messenger: bool = False
+        self, name: str, text: str, user: dict, messenger: bool = False
     ) -> bool:
         mod_skill: Skills = self.core.skills
         if text is None:
@@ -115,7 +115,7 @@ class Modules:
                     self.core.active_modules[
                         str(text)
                     ]: ModuleWrapper = self.module_wrapper(
-                        self.core, text, analysis, messenger, user
+                        text, analysis, messenger, user
                     )
                     mt: Thread = Thread(
                         target=self.run_threaded_module, args=(text, module, mod_skill)
@@ -158,11 +158,11 @@ class Modules:
         return
 
     def start_module(
-            self,
-            user: User = None,
-            text: str = None,
-            name: str = None,
-            messenger: bool = False,
+        self,
+        user: User = None,
+        text: str = None,
+        name: str = None,
+        messenger: bool = False,
     ) -> bool:
         mod_skill: Skills = self.core.skills
         analysis: dict = {}
@@ -251,7 +251,7 @@ class Modules:
             return
 
     def run_module(
-            self, text: str, module_wrapper: ModuleWrapper, mod_skill: Skills
+        self, text: str, module_wrapper: ModuleWrapper, mod_skill: Skills
     ) -> None:
         for module in self.modules:
             if module.isValid(text):
@@ -280,9 +280,9 @@ class Modules:
         while not self.continuous_stopped:
             for module in self.continuous_modules:
                 if (
-                        time.time()
-                        - self.core.continuous_modules[module.__name__].last_call
-                        >= self.core.continuous_modules[module.__name__].intervall_time
+                    time.time()
+                    - self.core.continuous_modules[module.__name__].last_call
+                    >= self.core.continuous_modules[module.__name__].intervall_time
                 ):
                     self.core.continuous_modules[
                         module.__name__

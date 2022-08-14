@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 from flask import Response
-from models.User import User
 
-from backup.database_connection import DataBase
+from src.database.connection import UserInterface
+from src.models.user import User
 
-database: DataBase = DataBase(
-    "C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\src\\speechassistant\\", None
-)
+
+# toDo
 
 
 def create_user(data: dict) -> Response:
-    uid: int = database.user_interface.add_user(
+    uid: int = UserInterface().add_user(
         data["alias"],
         data["firstname"],
         data["lastname"],
@@ -21,13 +22,13 @@ def create_user(data: dict) -> Response:
     return Response({"id": uid}, status=201)
 
 
-def read_user(data: int | None) -> Response:
-    user_set: dict = database.user_interface.get_user(data)
+def read_user(data: int) -> Response:
+    user_set: User = UserInterface().get_by_id(data)
     return Response(user_set, status=200)
 
 
 def update_user(data: dict) -> Response:
-    updated_user: User = database.user_interface.update_user(
+    updated_user: User = UserInterface().update(
         data["uid"],
         _new_alias=data["alias"],
         _new_first_name=data["firstname"],

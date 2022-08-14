@@ -9,11 +9,11 @@ from random import random
 from typing import AnyStr, Any
 from urllib.request import Request, urlopen
 
-from src.audio import AudioOutput, AudioInput
 from backup.database_connection import DataBase
+from src.audio import AudioOutput, AudioInput
 from src.models.user import User
-from src.resources.analyze import Sentence_Analyzer
 from src.resources import Skills
+from src.resources.analyze import Sentence_Analyzer
 
 
 class ModuleWrapper:
@@ -73,11 +73,11 @@ class ModuleWrapper:
         return
 
     def play(
-            self,
-            path: str = None,
-            audiofile: str = None,
-            as_next: bool = False,
-            notification: bool = False,
+        self,
+        path: str = None,
+        audiofile: str = None,
+        as_next: bool = False,
+        notification: bool = False,
     ) -> None:
         if path is not None:
             with open(path, "rb") as wav_file:
@@ -92,14 +92,14 @@ class ModuleWrapper:
             self.audio_output.play_playback(data, as_next)
 
     def play_music(
-            self,
-            by_name: str = None,
-            url: str = None,
-            path: str = None,
-            as_next: bool = False,
-            now: bool = False,
-            playlist: bool = False,
-            announce: bool = False,
+        self,
+        by_name: str = None,
+        url: str = None,
+        path: str = None,
+        as_next: bool = False,
+        now: bool = False,
+        playlist: bool = False,
+        announce: bool = False,
     ) -> None:
         if by_name is not None:
             by_name = "'" + by_name + "'"
@@ -115,7 +115,7 @@ class ModuleWrapper:
         )
 
     def listen(
-            self, text: str = None, messenger: bool = None, play_sound: bool = False
+        self, text: str = None, messenger: bool = None, play_sound: bool = False
     ) -> str:
         if messenger is None:
             messenger: bool = self.messenger_call
@@ -141,12 +141,12 @@ class ModuleWrapper:
         return True
 
     def start_module(
-            self, name: str = None, text: str = None, user: dict = None
+        self, name: str = None, text: str = None, user: dict = None
     ) -> None:
         self.core.start_module(text, name, user)
 
     def start_module_and_confirm(
-            self, name: str = None, text: str = None, user: dict = None
+        self, name: str = None, text: str = None, user: dict = None
     ) -> bool:
         return self.core.start_module(text, name, user)
 
@@ -193,9 +193,7 @@ class ModuleWrapper:
         return text
 
     def start_hotword_detection(self):
-        self.audio_input.start(
-            self.local_storage["wakeword_sentensivity"], self.core.hotword_detected
-        )
+        self.audio_input.start()
 
     def stopp_hotword_detection(self):
         self.audio_input.stop()

@@ -16,13 +16,13 @@ import toml
 from pvporcupine import Porcupine
 from pyaudio import PyAudio, Stream, paInt8
 
-from models.audio.queue_item import (
+from .models.audio.queue_item import (
     QueueItem,
     QueueType,
     AudioQueryType,
     MusicQueueItem,
 )
-from resources.tts import TTS
+from .resources.tts import TTS
 
 
 def __load_configuration() -> dict[str, Any]:
@@ -148,7 +148,7 @@ class AudioInput:
 
     def __recognize_input(self):
         with sr.Microphone(device_index=None) as source:
-            audio = self.speech_engine.listen()
+            audio = self.speech_engine.listen(source)
             return self.__recognize_input_from_audio_data(audio)
 
     def __recognize_input_from_audio_data(self, audio: any):

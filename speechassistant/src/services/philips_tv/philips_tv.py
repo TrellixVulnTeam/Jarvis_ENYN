@@ -14,9 +14,9 @@ class Pylips:
     __instance = None
 
     @staticmethod
-    def get_instance(param):
+    def get_instance():
         if Pylips.__instance is None:
-            Pylips(param)
+            Pylips()
         return Pylips.__instance
 
     def __init__(self):

@@ -16,7 +16,7 @@ geo_location = Nominatim(user_agent="my_app")
         city    (str): name of the city from which the data are required
     Returns:
         dict: Dictionary with the values of the city
-"""
+    """
 
 
 def get_data_of_city(city: str) -> dict:
@@ -25,11 +25,11 @@ def get_data_of_city(city: str) -> dict:
 
 
 """ Returns geological data of a city
-    Args:
-        lat    (int): latutude of the city from which the data are required
-        lon    (int): longitude of the city from which the data are required
-    Returns:
-        dict: Dictionary with the values of the city
+Args:
+    lat    (int): latutude of the city from which the data are required
+    lon    (int): longitude of the city from which the data are required
+Returns:
+    dict: Dictionary with the values of the city
 """
 
 
@@ -53,22 +53,21 @@ class Weather:
     __instance = None
 
     @staticmethod
-    def get_instance():
+    def get_instance(_api_key: str, _city: str):
         if Weather.__instance is None:
-            Weather()
+            Weather(_api_key, _city)
         return Weather.__instance
 
-    def __init__(self):
+    def __init__(self, _api_key: str, _city: str):
         if Weather.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
 
-        self.__api_key: str = ""
+        self.__api_key: str = _api_key
         self.__minutely_forecast = None
         self.__hourly_forecast = None
         self.__daily_forcast = None
         self.__sunrise_sunset = None
-        self.city = "Würzburg"
-        self.__fill_data()
+        self.city = "Würzburg"  # toDo
         self.__geo_data = get_data_of_city(self.city)
         self.__last_updated = datetime.now()
         self.old_weather_inf = []
@@ -81,7 +80,7 @@ class Weather:
     def __fill_data(self) -> None:
         # from core import Core
         # core: Core = Core.get_instance()
-        self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.config_data["api"]["open_weather_map"]
+        self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.data["api_keys"]["open_weather_map"]
         self.city = "Würzburg"  # core.local_storage["actual_location"]
 
     def start(self) -> None:

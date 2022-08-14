@@ -2,11 +2,11 @@ from sqlite3 import OperationalError
 
 from fastapi import HTTPException, status
 
-from backup.database_connection import DataBase
+from src.database.connection import AlarmInterface
 from src.exceptions.sql_exception import NoMatchingEntry
 from src.models.alarm import Alarm
 
-alarm_interface: any = DataBase().alarm_interface
+alarm_interface: any = AlarmInterface()
 
 
 class AlarmLogic:
