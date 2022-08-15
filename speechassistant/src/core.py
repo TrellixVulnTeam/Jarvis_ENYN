@@ -11,7 +11,6 @@ import toml
 from .audio import AudioOutput, AudioInput
 from .database.connection import *
 from .models.user import User
-
 # from .resources.intent.Wrapper import IntentWrapper as AIWrapper
 from .modules.module_skills import Skills
 from .modules.modules import Modules
@@ -59,16 +58,20 @@ class Core:
 
         # self.ai: AIWrapper = AIWrapper()
 
-        if self.local_storage["home_location"] == "":
-            self.local_storage["home_location"] = requests.get(
-                "https://ipinfo.io"
-            ).json()["city"]
+        self.__prepare_local_storage()
 
         self.__start_audio()
 
         self.audio_output.say("Jarvis wurde erfolgreich gestartet!")
 
         Core.__instance = self
+
+    def __prepare_local_storage(self):
+        self.local_storage["modules"] = {}
+        if self.local_storage["home_location"] == "":
+            self.local_storage["home_location"] = requests.get(
+                "https://ipinfo.io"
+            ).json()["city"]
 
     def __configure_logger(self) -> None:
         pass
@@ -79,8 +82,8 @@ class Core:
 
     def __load_config_data(self):
         with open(
-            Path(__file__).parent.parent.absolute().joinpath("config.toml").absolute(),
-            "r",
+                Path(__file__).parent.parent.absolute().joinpath("config.toml").absolute(),
+                "r",
         ) as config_file:
             logging.info("[INFO] loading configs...")
             self.config_data = toml.load(config_file)
