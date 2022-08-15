@@ -1,6 +1,4 @@
-import datetime
-
-from core import ModuleWrapperContinuous
+from src.modules import ModuleWrapperContinuous
 
 INTERVALL = 10
 

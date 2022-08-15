@@ -1,3 +1,5 @@
-
-[philips-hue]
+[on-call]
+[on-call.philips-hue]
 color-adjustment = true
+
+[continuous]
