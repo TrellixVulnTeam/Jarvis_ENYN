@@ -36,7 +36,7 @@ def create_timer(
 ) -> None:
     # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
     text = text.replace(" auf ", " in ")
-    target_time: datetime = core.Analyzer.analyze(text)["datetime"]
+    target_time: datetime = core.analyzer.analyze(text)["datetime"]
     timer_text: str = "Dein Timer ist abgelaufen."
     duration = get_duration(core, skills, text)
     if duration is None:
