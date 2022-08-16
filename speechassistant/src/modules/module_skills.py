@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from geopy.geocoders import Nominatim
 from geopy.location import Location
+
+from src.enums import OutputTypes
 
 
 class Statics:
@@ -268,12 +270,11 @@ class Skills:
     @staticmethod
     def get_enumerate(array: list) -> str:
         if type(array) != list:
-            logging.warning(f"Get the wrong data type: {type(array)} -> {array}")
+            logging.debug(f"Get the wrong data type: {type(array)} -> {array}")
             raise ValueError
-        result = ""
-        for i in range(len(array) - 1):
-            result += array[i] + ", "
-        return result[0 : len(result) - 2] + " und " + array[len(array) - 1]
+        result = ", ".join(array)
+        result = " und ".join(result.rsplit(", ", 1))
+        return result
 
     """ Returns a text starting from one word or between 2 words as array or string
 
@@ -290,39 +291,41 @@ class Skills:
     """
 
     @staticmethod
-    def get_text_between(
-        start_word: str,
-        text: str,
-        end_word: str = "",
-        output: str = "array",
-        could_included: bool = True,
-    ) -> str | list:
+    def get_text_between(start_word: str, text: str, end_word: str = "", output: str = "array",
+                         target_included: bool = True) -> str | list:
         if start_word not in text:
-            start_index = 0
-        else:
-            temp_start = re.search(f"{start_word}", text)
-            if could_included:
-                start_index = temp_start.start()
-            else:
-                start_index = (
-                    temp_start.end() + 1
-                )  # the space character should also be deleted
+            raise ValueError(f"Text does not contain the start_word {start_word}!")
+        if end_word == "":
+            raise ValueError(f"Text does not contain the end_word {end_word}!")
 
-        if end_word == "" or not end_word in text:
-            end_index = len(text)
+        start_index = Skills.__get_start_index(start_word, target_included, text)
+        target_index = Skills.__get_target_index(end_word, target_included, text)
+
+        result_string = text[start_index:target_index]
+
+        if output == OutputTypes.STRING:
+            return result_string
+        elif output == OutputTypes.ARRAY:
+            return result_string.split(" ")
+
+    @staticmethod
+    def __get_start_index(start_word, target_included, text):
+        temp_start = re.search(f"{start_word}", text)
+        if target_included:
+            return temp_start.start()
+        else:
+            return temp_start.end() + 1
+
+    @staticmethod
+    def __get_target_index(end_word, target_included, text):
+        if end_word not in text:
+            return len(text)
         else:
             temp_end = re.search(f"{end_word}", text)
-            if could_included:
-                end_index = temp_end.start()
+            if target_included:
+                return temp_end.start()
             else:
-                end_index = (
-                    temp_end.end() + 1
-                )  # the space character should also be deleted
-        result_string = text[start_index:end_index]
-        if output == "string":
-            return result_string
-        else:
-            return result_string.split(" ")
+                return temp_end.end() + 1
 
     """ Returns an array without duplicate elements
     Args:
@@ -346,46 +349,52 @@ class Skills:
 
     @staticmethod
     def get_time(time: datetime | dict) -> str:
-        if isinstance(time, datetime):
-            hour = time.hour
-            minute = time.minute
+        hours, minutes = Skills.__get_hour_and_minute_from_time(time)
+        return Skills.__convert_time_to_spoken_time(hours, hours % 12, minutes)
+
+    @staticmethod
+    def __get_hour_and_minute_from_time(time: datetime | dict) -> tuple[int, int]:
+        if type(time) == datetime:
+            return time.hour, time.minute
+        elif type(time) == dict:
+            return time["hour"], time["minute"]
         else:
-            hour = time["hour"]
-            minute = time["minute"]
+            raise ValueError("Got time in invalid date format! It has to be datetime or dict.")
 
-        hour_str = str(hour % 12)
-        next_hour_str = str((hour + 1) % 12)
+    @staticmethod
+    def __convert_time_to_spoken_time(hours_24: int, hours_12: int, minutes: int):
+        hour_str: str = str(hours_12)
+        next_hour_str: str = str((hours_12 + 1) % 12)
 
-        if minute == 0:
-            output = str(hour) + " Uhr."
-        elif minute == 5:
-            output = "fünf nach " + hour_str
-        elif minute == 10:
-            output = "zehn nach " + hour_str
-        elif minute == 15:
-            output = "viertel nach " + hour_str
-        elif minute == 20:
-            output = "zwanzig nach " + hour_str
-        elif minute == 25:
-            output = "fünf vor halb " + hour_str
-        elif minute == 30:
-            output = "halb " + next_hour_str
-        elif minute == 35:
-            output = "fünf nach halb " + next_hour_str
-        elif minute == 40:
-            output = "zwanzig vor " + next_hour_str
-        elif minute == 45:
-            output = "viertel vor " + next_hour_str
-        elif minute == 50:
-            output = "zehn vor " + next_hour_str
-        elif minute == 55:
-            output = "fünf vor " + next_hour_str
-        else:
-            hour = str(hour) if hour > 9 else "0" + str(hour)
-            minute = str(minute) if minute > 9 else "0" + str(minute)
-            output = hour + ":" + minute + " Uhr"
-
-        return output
+        match minutes:
+            case 0:
+                return str(hours_24) + " Uhr."
+            case 5:
+                return "fünf nach " + hour_str
+            case 10:
+                return "zehn nach " + hour_str
+            case 15:
+                return "viertel nach " + hour_str
+            case 20:
+                return "zwanzig nach " + hour_str
+            case 25:
+                return "fünf vor halb " + hour_str
+            case 30:
+                return "halb " + next_hour_str
+            case 35:
+                return "fünf nach halb " + next_hour_str
+            case 40:
+                return "zwanzig vor " + next_hour_str
+            case 45:
+                return "viertel vor " + next_hour_str
+            case 50:
+                return "zehn vor " + next_hour_str
+            case 55:
+                return "fünf vor " + next_hour_str
+            case _:
+                hour = str(hours_24).rjust(2, "0")
+                minute = str(minutes).rjust(2, "0")
+                return hour + ":" + minute + " Uhr"
 
     """ Returns the difference between 2 timestamps as string
     Args:
@@ -396,19 +405,38 @@ class Skills:
         str: time difference
     """
 
-    def get_time_difference(
-        self, start_time: datetime, time: datetime = datetime.now()
-    ) -> str:
-        aussage = []
+    def get_time_difference(self, start_time: datetime, time: datetime = datetime.now()) -> str:
+        years, days, hours, minutes, seconds = self.__split_days_and_seconds_to_time_units(time - start_time)
+        output: list[str] = self.__translate_time_units_to_text(years, days, hours, minutes, seconds)
+        return self.get_enumerate(output)
 
-        time_difference = time - start_time
-        days = time_difference.days
-        seconds = time_difference.seconds
-        microseconds = time_difference.microseconds
+    def __translate_time_units_to_text(self, years: int, days: int, hours: int, minutes: int, seconds: int) -> list[
+        str]:
+        output: list[str] = []
 
-        years = 0
-        hours = 0
-        minutes = 0
+        self.__handle_singular_and_plural(output, years, "einem Jahr", "Jahren")
+        self.__handle_singular_and_plural(output, days, "einem Tag", "Tagen")
+        self.__handle_singular_and_plural(output, hours, "einer Stunde", "Stunden")
+        self.__handle_singular_and_plural(output, minutes, "einer Minute", "Minuten")
+        self.__handle_singular_and_plural(output, seconds, "einer Sekunde", "Sekunden")
+
+        return output
+
+    @staticmethod
+    def __handle_singular_and_plural(output: list[str], value: int, singular: str, plural: str) -> None:
+        if value == 1:
+            output.append(singular)
+        elif value > 1:
+            output.append(f"{value} {plural}")
+
+    @staticmethod
+    def __split_days_and_seconds_to_time_units(time_difference: timedelta):
+        years: int = 0
+        days: int = time_difference.days
+        hours: int = 0
+        minutes: int = 0
+        seconds: int = time_difference.seconds
+        microseconds: int = time_difference.microseconds
 
         if days >= 365:
             years = int(days / 365)
@@ -421,28 +449,7 @@ class Skills:
             seconds = seconds % 60
         if microseconds >= 5:
             seconds += 1
-
-        if years == 1:
-            aussage.append("einem Jahr")
-        elif years > 1:
-            aussage.append(str(years) + " Jahren")
-        if days == 1:
-            aussage.append("einem Tag")
-        elif days > 1:
-            aussage.append(str(days) + " Tagen")
-        if hours == 1:
-            aussage.append("einer Stunde")
-        elif hours > 1:
-            aussage.append(str(hours) + " Stunden")
-        if minutes == 1:
-            aussage.append("einer Minute")
-        elif minutes > 1:
-            aussage.append(str(minutes) + " Minuten")
-        if seconds == 1:
-            aussage.append("einer Sekunde")
-        elif seconds > 1:
-            aussage.append(str(seconds) + " Sekunden")
-        return self.get_enumerate(aussage)
+        return years, days, hours, minutes, seconds
 
     """ Checks whether a user has answered in the affirmative or in the negative
 
@@ -456,7 +463,7 @@ class Skills:
     @staticmethod
     def is_desired(text: str) -> bool:
         text = text.lower()
-        if "ja" in text or "gern" in text or ("bitte" in text and "nicht" not in text):
+        if "ja" in text or "gern" in text:
             return True
         elif "bitte" in text and "nicht" not in text:
             return True
