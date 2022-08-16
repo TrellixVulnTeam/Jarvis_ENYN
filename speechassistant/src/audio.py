@@ -10,7 +10,6 @@ from threading import Thread
 from typing import Any
 
 import pvporcupine
-import simpleaudio as sa
 import speech_recognition as sr
 import toml
 from pvporcupine import Porcupine
@@ -43,15 +42,7 @@ def play_audio_bytes(item: QueueItem) -> None:
         raise ValueError()
     item.value.seek(0)
 
-    stream = PyAudio()
-    stream = stream.open(
-        rate=item.sample_rate,
-        channels=1,
-        format=paInt8,
-        output=True,
-        frames_per_buffer=1024,
-    )
-    stream.start_stream()
+    stream: Stream = __create_pyaudio_stream(item)
 
     data = item.value.read(1024)
 
@@ -61,13 +52,26 @@ def play_audio_bytes(item: QueueItem) -> None:
 
     stream.stop_stream()
     stream.close()
-    # play_obj = sa.play_buffer(item.value.read(), 2, 2, item.sample_rate)
-    # if item.wait_until_done:
-    #     play_obj.wait_done()
+
+
+def __create_pyaudio_stream(item):
+    stream = PyAudio()
+    stream = stream.open(
+        rate=item.sample_rate,
+        channels=1,
+        format=paInt8,
+        output=True,
+        frames_per_buffer=1024,
+    )
+    stream.start_stream()
+    return stream
 
 
 class AudioInput:
-    def __init__(self) -> None:
+    from .core import Core
+
+    def __init__(self, core: Core) -> None:
+        self.__core = core
         self.speech_engine: sr.Recognizer = sr.Recognizer()
 
         self.config = audio_config.get("input")
@@ -108,9 +112,7 @@ class AudioInput:
             porcupine.delete()
             self.start()
 
-    def __wait_for_calls(
-        self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]
-    ) -> None:
+    def __wait_for_calls(self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]) -> None:
         logging.info("\nListening {%s}" % keywords)
 
         while self.running:
@@ -123,30 +125,30 @@ class AudioInput:
                     f"[ACTION] Detected {keywords[keyword_index]} at "
                     f"{datetime.now().hour}:{datetime.now().minute}"
                 )
-                self.__handle_input()
+                self.__core.hotword_detected(self.recognize_input())
 
-    def recognize_file(self, audio_file: str) -> str:
+    def recognize_file(self, audio_file: any) -> str:
         with audio_file as source:
             audio = self.speech_engine.record(source)
             text = self.speech_engine.recognize_google(audio, language="de-DE")
             return text
 
-    def __handle_input(
-        self, listen: bool = False, play_bling_before_listen: bool = None
-    ) -> str:
+    def recognize_input(self, play_bling_before_listen: bool = None) -> str:
         self.recording = True
         logging.info("[ACTION] listening for userinput")
 
+        self.__signalize_to_listen(play_bling_before_listen)
+
         try:
-            return self.__recognize_input()
+            return self.record_input_and_recognize()
         except Exception as e:
             logging.debug(e)
-            logging.info("Text could not be translated...")
+            logging.info("[ERROR] Text could not be translated...")
             return "Das habe ich nicht verstanden."
         finally:
             self.recording = False
 
-    def __recognize_input(self):
+    def record_input_and_recognize(self):
         with sr.Microphone(device_index=None) as source:
             audio = self.speech_engine.listen(source)
             return self.__recognize_input_from_audio_data(audio)
@@ -171,11 +173,9 @@ class AudioInput:
         )
         logging.info("[USER INPUT]\t" + text)
 
-    def __signalize_to_listen(self, play_bling_before_listen: bool) -> None:
+    def __signalize_to_listen(self, play_bling_before_listen: bool = None) -> None:
         # toDo change name
-        if play_bling_before_listen or (
-            not play_bling_before_listen and self.config.get("play_bling_before_listen")
-        ):
+        if play_bling_before_listen or (not play_bling_before_listen and self.config.get("play_bling_before_listen")):
             self.play_bling_sound()
 
     def play_bling_sound(self) -> None:
@@ -207,7 +207,7 @@ class AudioInput:
 
     @staticmethod
     def __create_pyaudio_instance(
-        pyaudio_object: PyAudio, porcupine: Porcupine
+            pyaudio_object: PyAudio, porcupine: Porcupine
     ) -> Stream:
         return pyaudio_object.open(
             rate=44100,
@@ -227,8 +227,8 @@ class PlayBlingSound:
 
     @staticmethod
     def play() -> None:
-        audio = sa.play_buffer(PlayBlingSound.bling_sound, 2, 2, 44100)
-        audio.play()
+        item: QueueItem = QueueItem(value=PlayBlingSound.bling_sound.read(), type=QueueType.EFFECT)
+        play_audio_bytes(item)
 
     @staticmethod
     def __load_bling_sound() -> None:
@@ -284,7 +284,6 @@ class AudioOutput:
     def __choose_output_method(self, item):
         match type(item.value).__class__:
             case str.__class__:
-                print("to tts")
                 self.tts.say(item.value)
             case BytesIO.__class__:
                 play_audio_bytes(item.value)
@@ -292,25 +291,39 @@ class AudioOutput:
                 pass
 
     def say(self, text: str) -> None:
-        model: QueueItem = self.__build_queue_item(
+        model: QueueItem = build_queue_item(
             self.priority_queue, QueueType.TTS, text, True, 44100
         )
         self.__insert_to_priority_queue(model)
 
-    def play_music(self, name: str, as_next: bool = False) -> None:
+    def play_music_from_name(self, name: str, as_next: bool = False, announce: bool = False) -> None:
         pass
 
-    def play_notification(
-        self, buff: BytesIO, as_next: bool, sample_rate: int = 44100
+    def play_music_from_url(self, url: str, as_next: bool = False, announce: bool = False) -> None:
+        pass
+
+    def play_music_from_bytes(self, buff: BytesIO, as_next: bool = False, sample_rate: int = 44100,
+                              announce: bool = False) -> None:
+        pass
+
+    def play(
+            self, queue_type: QueueType, buff: BytesIO, as_next: bool, sample_rate: int = 44100
     ) -> None:
-        model: QueueItem = self.__build_queue_item(
-            self.priority_queue, QueueType.AUDIO, buff, as_next, sample_rate
-        )
-        self.__insert_to_priority_queue(model)
+        model: QueueItem = build_queue_item(self.priority_queue, QueueType.AUDIO, buff, as_next, sample_rate)
+
+        match queue_type:
+            case QueueType.EFFECT:
+                play_audio_bytes(model)
+            case QueueType.NOTIFICATION:
+                self.__insert_to_priority_queue(model)
+            case QueueType.AUDIO:
+                self.__insert_to_queue(model)
+            case QueueType.MUSIC:
+                self.play_music_from_bytes(buff, as_next, sample_rate)
 
     @staticmethod
     def stop() -> None:
-        sa.close()
+        pass
 
     def __get_next_item(self) -> QueueItem:
         try:
@@ -328,35 +341,14 @@ class AudioOutput:
     def __insert_to_given_queue(model: QueueItem, queue: list) -> list:
         queue.append(model)
         # sort queue by type (ascending) and then by priority (descending)
-        return sorted(queue, key=lambda x: (-x.type.value, x.PRIORITY))
-
-    def __build_queue_item(
-        self,
-        queue,
-        queue_type: QueueType,
-        value: str | BytesIO,
-        as_next: bool,
-        sample_rate: int = None,
-        wait_until_done: bool = False,
-    ) -> QueueItem:
-        if not sample_rate:
-            sample_rate = 44100
-        model: QueueItem = QueueItem(
-            type=queue_type,
-            value=value,
-            wait_until_done=wait_until_done,
-            sample_rate=sample_rate,
-        )
-        if as_next:
-            model.PRIORITY = self.__get_highest_priority_plus_one(queue)
-        return model
+        return sorted(queue, key=lambda x: (-x.queue_type.value, x.PRIORITY))
 
     def __build_music_queue_item(
-        self,
-        query_type: AudioQueryType,
-        value: str | BytesIO,
-        as_next: bool,
-        sample_rate: int = None,
+            self,
+            query_type: AudioQueryType,
+            value: str | BytesIO,
+            as_next: bool,
+            sample_rate: int = None,
     ) -> MusicQueueItem:
         if not sample_rate:
             sample_rate = 44100
@@ -364,12 +356,34 @@ class AudioOutput:
             query_type=query_type, value=value, sample_rate=sample_rate
         )
         if as_next:
-            model.PRIORITY = self.__get_highest_priority_plus_one(self.music_queue)
+            model.PRIORITY = get_highest_priority_plus_one(self.music_queue)
         return model
 
-    @staticmethod
-    def __get_highest_priority_plus_one(queue) -> int:
-        try:
-            return queue.__getitem__(0).PRIORITY + 1
-        except IndexError:
-            return 1
+
+def build_queue_item(
+
+        queue,
+        queue_type: QueueType,
+        value: str | BytesIO,
+        as_next: bool,
+        sample_rate: int = None,
+        wait_until_done: bool = False,
+) -> QueueItem:
+    if not sample_rate:
+        sample_rate = 44100
+    model: QueueItem = QueueItem(
+        type=queue_type,
+        value=value,
+        wait_until_done=wait_until_done,
+        sample_rate=sample_rate,
+    )
+    if as_next:
+        model.PRIORITY = get_highest_priority_plus_one(queue)
+    return model
+
+
+def get_highest_priority_plus_one(queue) -> int:
+    try:
+        return queue.__getitem__(0).PRIORITY + 1
+    except IndexError:
+        return 1
