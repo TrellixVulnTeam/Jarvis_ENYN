@@ -9,8 +9,9 @@ class QueueType(Enum):
     # music is played separate.
     EFFECT = 0
     TTS = 1
-    AUDIO = 2
-    MUSIC = 3
+    NOTIFICATION = 2
+    AUDIO = 3
+    MUSIC = 4
 
 
 class AudioQueryType(Enum):
@@ -20,7 +21,7 @@ class AudioQueryType(Enum):
 
 class QueueItem(BaseModel):
     PRIORITY: int = 1
-    type: QueueType
+    queue_type: QueueType
     value: str | BytesIO
     wait_until_done: bool
     sample_rate: int = 44100
