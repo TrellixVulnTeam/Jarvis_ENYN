@@ -50,7 +50,7 @@ class Core:
         self.users: Users = Users()
 
         self.audio_output: AudioOutput = AudioOutput()
-        self.audio_input: AudioInput = AudioInput()
+        self.audio_input: AudioInput = AudioInput(self)
 
         self.active_modules: dict = {}
         self.continuous_modules: dict = {}
