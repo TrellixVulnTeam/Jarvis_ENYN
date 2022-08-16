@@ -4,10 +4,14 @@ import time
 import traceback
 from pathlib import Path
 from threading import Thread
+from typing import TYPE_CHECKING
 
 from src.models import User, ContinuousModule
 from src.modules import Skills, ModuleWrapper, ModuleWrapperContinuous
 from src.modules.continuous import ContinuousModuleHandler
+
+if TYPE_CHECKING:
+    from src.core import Core
 
 
 class Modules:
@@ -24,7 +28,6 @@ class Modules:
             raise Exception("Singleton cannot be instantiated more than once!")
 
         logging.getLogger().setLevel(logging.INFO)
-        from src.core import Core
 
         self.core: Core = Core.get_instance()
         self.local_storage: dict = self.core.local_storage
