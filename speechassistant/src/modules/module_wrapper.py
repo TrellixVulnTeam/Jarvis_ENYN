@@ -4,13 +4,13 @@ import io
 import json
 import logging
 import random
-import urllib
 from pathlib import Path
 from random import random
 from typing import AnyStr, Any
 from urllib.request import Request, urlopen
 
 from src.audio import AudioOutput, AudioInput
+from src.models.audio.queue_item import QueueType
 from src.models.user import User
 from src.modules.module_skills import Skills
 from src.resources.analyze import Sentence_Analyzer
@@ -23,16 +23,16 @@ class ModuleWrapper:
         # toDo: down below
         # self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
 
-        from core import Core
+        from src.core import Core
 
         self.core: Core = Core.get_instance()
 
-        self.audio_output: AudioOutput = AudioOutput()
-        self.audio_input: AudioInput = AudioInput()
+        self.audio_output: AudioOutput = self.core.audio_output
+        self.audio_input: AudioInput = self.core.audio_input
 
         self.messenger_call: bool = messenger
 
-        self.room: str = "messenger" if messenger else "raum"
+        self.room: str = "messenger" if messenger else "raum"  # toDo when enabling rooms
         self.messenger = self.core.messenger
 
         self.skills: Skills = Skills()
@@ -48,86 +48,68 @@ class ModuleWrapper:
         if type(text) is list:
             text = random.choice(text)
         text: str = self.speech_variation(text)
-        if output == "auto":
-            if self.messenger_call:
-                output = "messenger"
-        if "messenger" in output.lower() or self.messenger_call:
+
+        if output == "messenger" or (self.__output_auto_and_messanger_call(output)):
             self.messenger_say(text)
-        else:
+        elif output == "text":
             text = self.correct_output_automate(text)
             self.audio_output.say(text)
+
+    def __output_auto_and_messanger_call(self, output):
+        return output == "auto" and self.messenger_call
 
     def messenger_say(self, text: str) -> None:
         try:
             self.messenger.say(text, self.user.messenger_id)
         except KeyError:
-            logging.warning(
-                '[WARNING] Sending message "{}" to messenger failed, because there is no Telegram-ID for this user '
-                "({}) ".format(text, self.user.alias)
+            logging.info(
+                f'[WARNING] Sending message "{text}" to messenger failed, because there is no Messenger-ID for this '
+                f'user ({self.user.alias}) '
             )
         except AttributeError:
-            logging.info(
-                "[WARNING] Sending message to messenger failed,  because there is no key for it!"
-            )
+            logging.info("[WARNING] Sending message to messenger failed, because there is no key for it!")
         return
 
     def play(
-        self,
-        path: str = None,
-        audiofile: str = None,
-        as_next: bool = False,
-        notification: bool = False,
+            self,
+            path: str = None,
+            audio_bytes: io.BytesIO = None,
+            as_next: bool = False,
+            notification: bool = False,
     ) -> None:
-        if path is not None:
+        data: io.BytesIO | None = None
+
+        if path:
             with open(path, "rb") as wav_file:
                 input_wav: AnyStr = wav_file.read()
-        if audiofile is not None:
-            with open(audiofile, "rb"):
-                input_wav: AnyStr = wav_file.read()
-        data: io.BytesIO = io.BytesIO(input_wav)
+                data = io.BytesIO(input_wav)
+        elif audio_bytes:
+            data = audio_bytes
+
         if notification:
-            self.audio_output.play_notification(data, as_next)
+            self.audio_output.play(QueueType.NOTIFICATION, data, as_next)
         else:
-            self.audio_output.play_playback(data, as_next)
+            self.audio_output.play(QueueType.AUDIO, data, as_next)
 
-    def play_music(
-        self,
-        by_name: str = None,
-        url: str = None,
-        path: str = None,
-        as_next: bool = False,
-        now: bool = False,
-        playlist: bool = False,
-        announce: bool = False,
-    ) -> None:
-        if by_name is not None:
-            by_name = "'" + by_name + "'"
-        # simply forward information
-        self.audio_output.music_player.play(
-            by_name=by_name,
-            url=url,
-            path=path,
-            as_next=as_next,
-            now=now,
-            playlist=playlist,
-            announce=announce,
-        )
+    def play_music_from_name(self, name: str, as_next: bool = False, announce: bool = False) -> None:
+        self.audio_output.play_music_from_name(name, as_next, announce)
 
-    def listen(
-        self, text: str = None, messenger: bool = None, play_sound: bool = False
-    ) -> str:
-        if messenger is None:
-            messenger: bool = self.messenger_call
-        if text is not None:
+    def play_music_from_url(self, url: str, as_next: bool = False, announce: bool = False) -> None:
+        self.audio_output.play_music_from_url(url, as_next, announce)
+
+    def play_music_from_bytes(self, buff: io.BytesIO, as_next: bool = False, sample_rate: int = 44100,
+                              announce: bool = False) -> None:
+        self.audio_output.play_music_from_bytes(buff, as_next, sample_rate, announce)
+
+    def listen(self, text: str = None, messenger: bool = None, play_sound: bool = False) -> str:
+        if text:
             self.say(text)
+
+        messenger = self.messenger_call if messenger is None else messenger
         if messenger:
-            return self.core.messenger_listen(self.user["first_name"].lower())
+            return self.core.messenger_listen(self.user.first_name.lower())
         else:
-            return self.audio_input.recognize_input(
-                self.core.hotword_detected,
-                listen=True,
-                play_bling_before_listen=play_sound,
-            )
+            return self.audio_input.recognize_input(play_bling_before_listen=play_sound)
 
     def recognize(self, audio_file: Any) -> str:
         return self.audio_input.recognize_file(audio_file)
@@ -140,12 +122,12 @@ class ModuleWrapper:
         return True
 
     def start_module(
-        self, name: str = None, text: str = None, user: dict = None
+            self, name: str = None, text: str = None, user: dict = None
     ) -> None:
         self.core.start_module(text, name, user)
 
     def start_module_and_confirm(
-        self, name: str = None, text: str = None, user: dict = None
+            self, name: str = None, text: str = None, user: dict = None
     ) -> bool:
         return self.core.start_module(text, name, user)
 
@@ -159,18 +141,15 @@ class ModuleWrapper:
 
     @staticmethod
     def translate(text, target_lang="de"):
-        try:
-            request = Request(
-                "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl="
-                + urllib.parse.quote(target_lang)
-                + "&dt=t&q="
-                + urllib.parse.quote(text)
-            )
-            response = urlopen(request)
-            answer = json.loads(response.read())
-            return answer[0][0][0]
-        except Exception:
-            return text
+        request = Request(
+            "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl="
+            + target_lang
+            + "&dt=t&q="
+            + text
+        )
+        response = urlopen(request)
+        answer = json.loads(response.read())
+        return answer[0][0][0]
 
     def correct_output(self, core_array, messenger_array):
         if self.messenger_call is True:
