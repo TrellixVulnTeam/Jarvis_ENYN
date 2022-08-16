@@ -4,45 +4,30 @@ import io
 import json
 import logging
 import random
-from pathlib import Path
 from random import random
 from typing import AnyStr, Any
+from typing import TYPE_CHECKING
 from urllib.request import Request, urlopen
 
-from src.audio import AudioOutput, AudioInput
 from src.models.audio.queue_item import QueueType
 from src.models.user import User
-from src.modules.module_skills import Skills
-from src.resources.analyze import Sentence_Analyzer
+from src.modules.AbstractWrapper import AbstractWrapper
+
+if TYPE_CHECKING:
+    from src.core import Core
 
 
-class ModuleWrapper:
-    def __init__(self, text: str, analysis: dict, messenger: bool, user: User) -> None:
+class ModuleWrapper(AbstractWrapper):
+    def __init__(self, text: str, analysis: dict, messenger: bool, user: User, core: Core) -> None:
+        super().__init__(core)
         self.text: str = text
         self.analysis: dict = analysis
+        self.messenger_call: bool = messenger
+        self.room: str = "messenger" if messenger else "raum"  # toDo when enabling rooms
+        self.user: User = user
+
         # toDo: down below
         # self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
-
-        from src.core import Core
-
-        self.core: Core = Core.get_instance()
-
-        self.audio_output: AudioOutput = self.core.audio_output
-        self.audio_input: AudioInput = self.core.audio_input
-
-        self.messenger_call: bool = messenger
-
-        self.room: str = "messenger" if messenger else "raum"  # toDo when enabling rooms
-        self.messenger = self.core.messenger
-
-        self.skills: Skills = Skills()
-
-        self.Analyzer: Sentence_Analyzer = self.core.analyzer
-
-        self.local_storage: dict = self.core.local_storage
-        self.system_name: str = self.core.system_name
-        self.path: Path = self.core.path
-        self.user: User = user
 
     def say(self, text: str | list, output: str = "auto") -> None:
         if type(text) is list:
@@ -121,24 +106,6 @@ class ModuleWrapper:
                 return False
         return True
 
-    def start_module(
-            self, name: str = None, text: str = None, user: dict = None
-    ) -> None:
-        self.core.start_module(text, name, user)
-
-    def start_module_and_confirm(
-            self, name: str = None, text: str = None, user: dict = None
-    ) -> bool:
-        return self.core.start_module(text, name, user)
-
-    def module_storage(self, module_name=None):
-        module_storage = self.core.local_storage.get("module_storage")
-        if module_name is None:
-            return module_storage
-        # I am now just so free and lazy and assume that a module name is passed from a module that actually exists.
-        else:
-            return module_storage[module_name]
-
     @staticmethod
     def translate(text, target_lang="de"):
         request = Request(
@@ -152,7 +119,7 @@ class ModuleWrapper:
         return answer[0][0][0]
 
     def correct_output(self, core_array, messenger_array):
-        if self.messenger_call is True:
+        if self.messenger_call:
             return messenger_array
         else:
             return core_array
@@ -162,9 +129,7 @@ class ModuleWrapper:
         # This function is to correct words that should always be corrected right away,
         # so that correct_output doesn't have to be called every time and corrected manually
         # must be corrected
-        if self.messenger_call:
-            pass
-        else:
+        if not self.messenger_call:
             correct_output = self.core.config_data["correct_output"]
             for item in correct_output:
                 text = text.replace(item, correct_output[item])
@@ -199,38 +164,14 @@ def translate(text, target_lang="de"):
     return ModuleWrapper.translate(text, target_lang)
 
 
-class ModuleWrapperContinuous:
+class ModuleWrapperContinuous(AbstractWrapper):
     # The same class for continuous_modules. The peculiarity: The say- and listen-functions
     # are missing (so exactly what the module wrapper was actually there for xD), because continuous_-
     # modules are not supposed to make calls to the outside. For this there is a
     # parameter for the time between two calls of the module.
     def __init__(self, core, intervall_time, modules):
+        super().__init__(core)
         self.intervall_time = intervall_time
         self.last_call = 0
         self.counter = 0
-        self.messenger = core.messenger
-        self.core = core
-        self.Analyzer = core.analyzer
-        self.services = core.servicesf
-        self.audio_Input = core.audio_input
-        self.audio_output = core.audio_output
-        self.local_storage = core.local_storage
-        self.system_name = core.system_name
-        self.path = core.path
         self.modules = modules
-
-    def start_module(self, name=None, text=None, user=None):
-        # user prediction is not implemented yet, therefore here the workaround
-        # user = self.local_storage['user']
-        self.modules.start_module(text=text, user=user, name=name)
-
-    def start_module_and_confirm(self, name=None, text=None, user=None):
-        return self.core.start_module(name, text, user)
-
-    def module_storage(self, module_name=None):
-        module_storage = self.core.local_storage.get("module_storage")
-        if module_name is None:
-            return module_storage
-        # I am now just so free and lazy and assume that a module name is passed from a module that actually exists.
-        else:
-            return module_storage[module_name]
