@@ -1,9 +1,9 @@
-import logging
 import pathlib
 from typing import Callable
 
 from gtts import gTTS
 
+from src import log
 from src.resources.media_player import MyMediaPlayer
 
 
@@ -17,7 +17,7 @@ class TTS:
         self.play_function = play_function
 
     def say(self, text):
-        logging.info(f"[ACTION] saying '{text}'")
+        log.action(f"saying '{text}'")
         path = str(pathlib.Path(__file__).parent.joinpath("tmp.mp3"))
 
         tts = gTTS(text=text, lang=self.language, slow=False)
@@ -29,8 +29,7 @@ class TTS:
         #                              sample_rate=self.framerate)
         # self.play_function(model)
 
-
-# import logging
+# from src import log
 # import time
 # import traceback
 # from threading import Thread
@@ -57,7 +56,7 @@ class TTS:
 #         tts_thread.start()
 #
 #     def run(self, gender: str) -> None:
-#         logging.info("[ACTION] Load Speechmodule")
+#         log.info("[ACTION] Load Speechmodule")
 #         # self.display: Display = Display(size=(800, 600))
 #         # self.display.start()
 #         self.gender: str = gender

@@ -1,6 +1,6 @@
-import logging
 import time
 
+from src import log
 from src.models import ContinuousModule
 from src.modules import Modules
 from src.modules.continuous.observer import ObserverItem
@@ -23,11 +23,11 @@ class ContinuousModuleHandler:
     def stop_all(self) -> None:
         self.active = False
         if self.counter > 0:
-            logging.info("[ACTION] ------ Modules are terminated...")
+            log.info("------ Modules are terminated!")
             [observer.stop() for observer in self.observer.values()]
             while self.running_counter > 0:
                 time.sleep(0.05)
-            logging.info("[INFO] Continuous Modules stopped!")
+            log.info("Continuous Modules stopped!")
 
         else:
-            logging.info("-- (None to finish)")
+            log.info("-- (None to finish)")

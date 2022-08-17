@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
-import logging
 import time
 from datetime import datetime, timedelta
 from threading import Thread
 
 import requests
 from geopy import Location, Nominatim
+
+from src import log
 
 geo_location = Nominatim(user_agent="my_app")
 
@@ -85,10 +86,11 @@ class Weather:
         self.city = "Würzburg"  # core.local_storage["actual_location"]
 
     def start(self) -> None:
-        logging.info("[ACTION] Starting weather module...")
+        log.action("Starting weather module...")
         thr = Thread(target=self.run)
         thr.daemon = True
         thr.start()
+        log.info("Weather module started!")
 
     def run(self) -> None:
         while self.updating:
@@ -645,9 +647,8 @@ class Weather:
             self.__daily_forcast = weather_data["daily"]
             self.__last_updated = datetime.now()
         except Exception as e:
-            logging.warning(
-                f"[WARNING] Problem when querying new data from Open-Weather-API: \n{str(e)}"
-            )
+            log.exception(e)
+            log.warning(f"Problem when querying new data from Open-Weather-API")
 
     class Statics:
         def __init__(self):

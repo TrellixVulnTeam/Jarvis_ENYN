@@ -1,5 +1,5 @@
 from flask_restx import Api
-import logging
+from src import log
 
 api: Api = Api(
     version="0.1",
@@ -10,5 +10,5 @@ api: Api = Api(
 
 @api.errorhandler
 def std_handler(e):
-    logging.warning(e)
+    log.warning(e)
     return {"message": "An unexpected error has occurred."}, 500

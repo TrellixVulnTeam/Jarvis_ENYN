@@ -1,4 +1,4 @@
-import logging
+from src import log
 
 PRIORITY = 9
 
@@ -12,4 +12,4 @@ def isValid(text):
 
 
 def handle(text, core, skills):
-    logging.info("[ACTION] Befehl abgebrochen")
+    log.action("Command canceled!")

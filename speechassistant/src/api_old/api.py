@@ -1,6 +1,3 @@
-import logging
-
-from flask import Flask, Blueprint
 from api_old import settings
 from api_old.myapi import api
 from api_old.speechassistant.endpoints.alarm import (
@@ -15,20 +12,23 @@ from api_old.speechassistant.endpoints.modules import (
 from api_old.speechassistant.endpoints.routine import (
     namespace as routine_namespace,
 )
+from flask import Flask, Blueprint
+
+from src import log
 
 app: Flask = Flask(__name__)
 
 
 def configure_app(app) -> None:
-    logging.info("[ACTION] Configure REST Api")
+    log.action("Configure REST Api...")
     app.config["SWAGGER_UI_DOC_EXPANSION"] = settings.RESTPLUS_SWAGGER_EXPANSION
     app.config["RESTPLUS_VALIDATE"] = settings.RESTPLUS_VAL
     app.config["RESTPLUS_MASK_SWAGGER"] = settings.RESTPLUS_MASK_SWAGGER
-    logging.info("[SUCCESS] Configure done")
+    log.info("API configured.")
 
 
 def init_app(app) -> None:
-    logging.info("[ACTION] Init REST Api")
+    log.action("Init REST Api...")
     configure_app(app)
     blueprint: Blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
     api.init_app(blueprint)
@@ -37,7 +37,7 @@ def init_app(app) -> None:
     api.add_namespace(routine_namespace)
     api.add_namespace(modules_namespace)
     app.register_blueprint(blueprint)
-    logging.info("[SUCCESS] Init done")
+    log.info("API initialized!")
 
 
 def main() -> None:

@@ -1,8 +1,8 @@
-import logging
 from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from src import log
 from src.audio import AudioOutput, AudioInput
 from src.modules import Skills
 from src.resources.analyze import Sentence_Analyzer
@@ -33,7 +33,7 @@ class AbstractWrapper(ABC):
             try:
                 return module_storage[module_name]
             except IndexError:
-                logging.debug(f"[ERROR] Asked for module_storage with wrong module-name ('{module_name}')")
+                log.warning(f"Asked for module_storage with wrong module-name ('{module_name}')")
 
     def start_module(
             self, name: str = None, text: str = None, user: dict = None

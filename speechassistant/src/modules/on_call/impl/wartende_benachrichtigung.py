@@ -1,6 +1,7 @@
-import logging
 import traceback
 from datetime import datetime
+
+from src import log
 
 SECURE = True
 
@@ -65,7 +66,5 @@ def handle(text, core, skills):
                     core.say(txt)
                 core.user["waiting_notifications"].remove(item)
     except RuntimeError:
-        logging.warning(
-            '[WARNING] Something went wrong in Module "wartende_benachrichtigungen"'
-        )
+        log.warning('Something went wrong in Module "wartende_benachrichtigungen"')
         traceback.print_exc()

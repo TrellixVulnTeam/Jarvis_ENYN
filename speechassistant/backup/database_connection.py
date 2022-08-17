@@ -39,13 +39,11 @@ if TYPE_CHECKING:
 
 class DataBase:
     def __init__(self) -> None:
-        logging.basicConfig(level=logging.DEBUG)
-        logging.info("[ACTION] Initialize DataBase...\n")
-        logging.info(os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"))
+        log.basicConfig(level=log.DEBUG)
+        log.action("Initialize DataBase...\n")
 
         self.db: Connection = sqlite3.connect(
-            "C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\db.sqlite",
-            # os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"),
+            os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"),
             check_same_thread=False,
         )
         self.error_counter: int = 0
@@ -64,19 +62,19 @@ class DataBase:
 
         self.create_tables()
 
-        logging.info("[INFO] DataBase successfully initialized.")
+        log.info("DataBase successfully initialized.")
 
     def close(self):
         self.db.close()
         DataBase.__instance = None
-        logging.info("[ACTION] DataBase closed!")
+        log.info("DataBase closed!")
 
     def create_tables(self) -> None:
         # toDo: CONSTRAINTS
 
         # CHECK (mycolumn IN (0, 1)) -> BOOL
 
-        logging.info("[ACTION] Create tables...")
+        log.action("Create tables...")
         self.__create_table(
             "CREATE TABLE IF NOT EXISTS audio ("
             "name VARCHAR(30) PRIMARY KEY UNIQUE,"
@@ -254,7 +252,7 @@ class DataBase:
         # #self.db.commit()
 
         if self.error_counter == 0:
-            logging.info("[INFO] Tables successfully created!")
+            log.info("Tables successfully created!")
         else:
             msg: str = (
                 f"During the creation of {self.error_counter} tables there were problems. Manual intervention "
@@ -266,11 +264,11 @@ class DataBase:
         cursor: Cursor = self.db.cursor()
         try:
             cursor.execute(command)
-            logging.info(f"[INFO] Successfully created table {command.split(' ')[5]}!")
+            log.info(f"Successfully created table {command.split(' ')[5]}!")
         except Exception as e:
             self.error_counter += 1
-            logging.warning(
-                f"[ERROR] Couldn't create table {command.split(' ')[5]}:\n {e}"
+            log.fatal(
+                f"Couldn't create table {command.split(' ')[5]}:\n {e}"
             )
         cursor.close()
         self.db.commit()
@@ -279,14 +277,14 @@ class DataBase:
         pass
 
     def stop(self):
-        logging.info("[ACTION] Stopping database...")
+        log.action("Stopping database...")
         self.db.commit()
         self.db.close()
 
     class _UserInterface:
         def __init__(self, _db: Connection) -> None:
             self.db: Connection = _db
-            logging.info("[INFO] UserInterface initialized.")
+            log.info("UserInterface initialized.")
 
         def get_user_by_id(self, user_id: int) -> User:
             cursor: Cursor = self.db.cursor()
@@ -470,7 +468,7 @@ class DataBase:
         def __init__(self, _db: Connection) -> None:
             self.db: Connection = _db
             self.skills = Skills()
-            logging.info("[INFO] AlarmInterface initialized.")
+            log.info("AlarmInterface initialized.")
 
         def get_alarm_by_id(self, aid: int) -> Alarm:
             cursor: Cursor = self.db.cursor()
@@ -714,7 +712,7 @@ class DataBase:
         def __init__(self, _db: Connection) -> None:
             self.db: Connection = _db
             self.audio_path: str = "C:\\Users\\Jakob\\PycharmProjects\\Jarvis"
-            logging.info("[INFO] AudioInterface initialized.")
+            log.info("AudioInterface initialized.")
 
         def add_audio(self, name: str, audio_file: io.BytesIO = None) -> str:
             cursor: Cursor = self.db.cursor()
@@ -776,7 +774,7 @@ class DataBase:
         def __init__(self, _db: Connection, user_interface) -> None:
             self.db: Connection = _db
             self.user_interface = user_interface
-            logging.info("[INFO] TimerInterface initialized.")
+            log.info("TimerInterface initialized.")
 
         def get_all_timer(self) -> list[Timer]:
             cursor: Cursor = self.db.cursor()
@@ -874,7 +872,7 @@ class DataBase:
             self.user_interface = (
                 user_interface  # connection is necessary for get_user_by_id()
             )
-            logging.info("[INFO] ReminderInterface initialized.")
+            log.info("ReminderInterface initialized.")
 
         def get_passed_reminder(self) -> list[Reminder]:
             cursor: Cursor = self.db.cursor()
@@ -947,7 +945,7 @@ class DataBase:
     class _ShoppingListInterface:
         def __init__(self, _db: Connection) -> None:
             self.db: Connection = _db
-            logging.info("[INFO] ShoppingListInterface initialized.")
+            log.info("ShoppingListInterface initialized.")
 
         def get_list(self) -> list[ShoppingListItem]:
             cursor: Cursor = self.db.cursor()
@@ -1034,7 +1032,7 @@ class DataBase:
     class _RoutineInterface:
         def __init__(self, _db: Connection) -> None:
             self.db: Connection = _db
-            logging.info("[INFO] RoutineInterface initialized.")
+            log.info("RoutineInterface initialized.")
 
         def get_routine(self, name: str) -> Routine:
             cursor: Cursor = self.db.cursor()
@@ -1543,7 +1541,7 @@ class DataBase:
     class _QuizInterface:
         def __init__(self, _db: Connection) -> None:
             self.db: Connection = _db
-            logging.info("[INFO] QuizInterface initialized.")
+            log.info("QuizInterface initialized.")
 
         def add_question(
                 self, theme: str, question: str, audio: str | io.BytesIO, answer: str

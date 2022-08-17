@@ -1,4 +1,4 @@
-import logging
+from src import log
 
 
 def isValid(text):
@@ -20,6 +20,6 @@ def handle(text, core, skills):
                     name=action["module_name"], text=action["text"], user=core.user
                 )
     except:
-        logging.warning(
+        log.warning(
             f'Routine with action {text["description"]} doesnt works. It is removed from the List!'
         )

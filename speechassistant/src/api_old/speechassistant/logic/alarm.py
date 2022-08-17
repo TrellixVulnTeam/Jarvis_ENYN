@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-import logging
+from src import log
 
 from fastapi import status
 from fastapi.responses import JSONResponse
@@ -34,7 +34,7 @@ def read_alarm(data: int | None) -> Response:
     if data:
         alarm: dict = database.alarm_interface.get_alarm(data)
         alarm["sound"] = "standard"
-        logging.info(alarm)
+        log.info(alarm)
         return Response(json.dumps(alarm), mimetype="application/json")
     else:
         alarms: list[dict] = database.alarm_interface.get_alarms(unfiltered=True)
@@ -42,7 +42,7 @@ def read_alarm(data: int | None) -> Response:
             return Response([], mimetype="application/json")
         for alarm in alarms:
             alarm["sound"] = "standard"
-        logging.info(alarms)
+        log.info(alarms)
         return Response(json.dumps(alarms), mimetype="application/json")
 
 

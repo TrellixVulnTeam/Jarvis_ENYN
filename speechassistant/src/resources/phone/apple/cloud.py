@@ -1,4 +1,4 @@
-import logging
+from src import log
 from datetime import datetime
 from pyicloud import PyiCloudService
 
@@ -12,26 +12,26 @@ class CloudService:
     def login(self, username, password):
         api = PyiCloudService(username, password)
         if api.requires_2fa:
-            logging.info(
+            log.info(
                 f"ICloud with mail {username} required Two-factor authentication!"
             )
             result = api.validate_2fa_code(self.__get_2fa_code())
 
             if not result:
-                logging.critical(
+                log.critical(
                     f"Failed to verify security code of ICloud-Account with mail {username}"
                 )
                 self.connected = False
 
             if not api.is_trusted_session:
-                logging.info(
+                log.info(
                     f"Session for mail, {username} is not trusted. Requesting trust..."
                 )
                 result = api.trust_session()
                 print(f"Session trust for mail {username} result '{result}'")
 
                 if not result:
-                    logging.critical(
+                    log.critical(
                         "Failed to request trust. You will likely be prompted for the code again in the coming weeks!"
                     )
                     self.connected = False
@@ -53,11 +53,11 @@ class CloudService:
             device = click.prompt("Which device would you like to use?", default=0)
             device = devices[device]
             if not api.send_verification_code(device):
-                logging.critical("Failed to send verification code")
+                log.critical("Failed to send verification code")
             code = click.prompt("Please enter validation code")
 
             if not api.validate_verification_code(device, code):
-                logging.critical("Failed to verify verification code!")
+                log.critical("Failed to verify verification code!")
                 self.connected = False
 
         return api

@@ -1,7 +1,7 @@
+from src import log
 from src.core import Core
-from src.resources.MyLogger import configure_logging
 
 if __name__ == "__main__":
-    configure_logging()
+    log.configure_log()
 
     core = Core.get_instance()

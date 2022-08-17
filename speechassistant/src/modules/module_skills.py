@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import logging
+from src import log
 import re
 from datetime import datetime, timedelta
 
@@ -270,7 +270,7 @@ class Skills:
     @staticmethod
     def get_enumerate(array: list) -> str:
         if type(array) != list:
-            logging.debug(f"Get the wrong data type: {type(array)} -> {array}")
+            log.debug(f"Get the wrong data type: {type(array)} -> {array}")
             raise ValueError
         result = ", ".join(array)
         result = " und ".join(result.rsplit(", ", 1))

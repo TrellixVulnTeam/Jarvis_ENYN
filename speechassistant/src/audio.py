@@ -1,8 +1,6 @@
-import logging
 import pathlib
 import struct
 import time
-import traceback
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -15,6 +13,7 @@ import toml
 from pvporcupine import Porcupine
 from pyaudio import PyAudio, Stream, paInt8
 
+from src import log
 from .models.audio.queue_item import (
     QueueItem,
     QueueType,
@@ -82,17 +81,17 @@ class AudioInput:
         self.recording: bool = False
         self.sensitivity: float = self.config.get("sensitivity")
 
-        logging.info("[SUCCESS] Audio Input initialized!")
+        log.info("Audio Input initialized.")
 
     def start(self) -> None:
-        logging.info("[ACTION] Starting audio input module...")
+        log.action("Starting audio input module...")
         self.running = True
 
         audio_input_thread: Thread = Thread(target=self.run, args=())
         audio_input_thread.daemon = True
         audio_input_thread.start()
 
-        logging.info("[SUCCESS] Audio Input started")
+        log.info("Audio Input started.")
 
     def run(self) -> None:
         keywords: list[str] = self.config.get("keywords")
@@ -107,13 +106,14 @@ class AudioInput:
             pa: PyAudio = PyAudio()
             audio_stream: Stream = self.__create_pyaudio_instance(pa, porcupine)
             self.__wait_for_calls(porcupine, audio_stream, keywords)
-        except MemoryError:
-            logging.error(f"[ERROR] {traceback.print_exc()}")
+        except MemoryError as e:
+            log.warning("Memory is full!")
+            log.action("Restart porcupine...")
             porcupine.delete()
             self.start()
 
     def __wait_for_calls(self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]) -> None:
-        logging.info("\nListening {%s}" % keywords)
+        log.info("\nListening {%s}" % keywords)
 
         while self.running:
             input_bytes: bytes = audio_stream.read(porcupine.frame_length)
@@ -121,8 +121,8 @@ class AudioInput:
             keyword_index: int = porcupine.process(pcm)
             if keyword_index >= 0 and not self.recording:
                 self.recording = True
-                logging.info(
-                    f"[ACTION] Detected {keywords[keyword_index]} at "
+                log.info(
+                    f"Detected {keywords[keyword_index]} at "
                     f"{datetime.now().hour}:{datetime.now().minute}"
                 )
                 self.__core.hotword_detected(self.recognize_input())
@@ -135,15 +135,15 @@ class AudioInput:
 
     def recognize_input(self, play_bling_before_listen: bool = None) -> str:
         self.recording = True
-        logging.info("[ACTION] listening for userinput")
+        log.action("Listening for userinput...")
 
         self.__signalize_to_listen(play_bling_before_listen)
 
         try:
             return self.record_input_and_recognize()
         except Exception as e:
-            logging.debug(e)
-            logging.info("[ERROR] Text could not be translated...")
+            log.debug(e)
+            log.warning("Text could not be translated...")
             return "Das habe ich nicht verstanden."
         finally:
             self.recording = False
@@ -171,7 +171,7 @@ class AudioInput:
         text = self.speech_engine.recognize_goole(
             audio, language=self.config.get("language")
         )
-        logging.info("[USER INPUT]\t" + text)
+        log.info("[USER INPUT]\t" + text)
 
     def __signalize_to_listen(self, play_bling_before_listen: bool = None) -> None:
         # toDo change name
@@ -260,7 +260,7 @@ class AudioOutput:
         self.running: bool = False
 
     def start(self):
-        logging.info("[ACTION] Starting Audio Output")
+        log.action("Starting Audio Output....")
 
         self.running = True
 
@@ -268,7 +268,7 @@ class AudioOutput:
         audio_output_thread.daemon = True
         audio_output_thread.start()
 
-        logging.info("[SUCCESS] Audio Output started")
+        log.info("Audio Output started!")
 
         return self
 

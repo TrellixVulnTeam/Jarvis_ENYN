@@ -1,6 +1,5 @@
 import io
 import json
-import logging
 import os
 import pkgutil
 import random
@@ -11,10 +10,11 @@ from datetime import datetime
 from threading import Thread
 from urllib.request import Request, urlopen
 
+from src import log
 # from Wrapper import IntentWrapper
 from src.resources.analyze import Sentence_Analyzer as Analyzer
 
-logging.disable(logging.INFO)
+log.disable(log.INFO)
 
 
 # toDO: smalltalk, spacex, transkribieren
@@ -39,7 +39,7 @@ class Core:
 
 class Modules:
     def __init__(self, core, local_storage):
-        logging.getLogger().setLevel(logging.INFO)
+        log.getLogger().setLevel(log.INFO)
         self.core = core
         self.local_storage = local_storage
         self.modules = []
@@ -58,7 +58,7 @@ class Modules:
         print("---------- MODULES...  ----------")
         self.modules = self.get_modules("modules")
         if self.modules is []:
-            print("[INFO] -- (None present)")
+            log.info("-- (None present)")
 
     def get_modules(self, directory, continuous=False):
         dirname = os.path.abspath("C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\Jarvis")
@@ -74,14 +74,14 @@ class Modules:
             except Exception:
                 traceback.print_exc()
                 self.local_storage["modules"][name] = {"name": name, "status": "error"}
-                print("[WARNING] Modul {} is incorrect and was skipped!".format(name))
+                log.warning(f"Modul {name} is incorrect and was skipped!")
                 continue
             else:
                 if continuous:
-                    print("[INFO] Continuous module {} loaded".format(name))
+                    log.info("Continuous module {} loaded".format(name))
                     modules.append(mod)
                 else:
-                    print("[INFO] Modul {} loaded".format(name))
+                    log.info("Modul {} loaded".format(name))
                     modules.append(mod)
         modules.sort(
             key=lambda mod: mod.PRIORITY if hasattr(mod, "PRIORITY") else 0,
@@ -99,9 +99,9 @@ class Modules:
             # else there is a valid text -> analyze
             try:
                 analysis = self.core.analyzer.analyze(str(text))
-            except:
-                traceback.print_exc()
-                print("[ERROR] Sentence analysis failed!")
+            except Exception as e:
+                log.exception(e)
+                log.warning("Sentence analysis failed!")
                 analysis = {}
         if name is not None:
             # Module was called via start_module
@@ -116,7 +116,7 @@ class Modules:
                     mt.daemon = True
                     mt.start()
                     return True
-            print("[ERROR] Modul {} could not be found!".format(name))
+            log.warning("Modul {} could not be found!".format(name))
         elif text is not None:
             # Search the modules normally
             for module in self.modules:
@@ -132,11 +132,9 @@ class Modules:
                         mt.daemon = True
                         mt.start()
                         return True
-                except:
-                    traceback.print_exc()
-                    print(
-                        "[ERROR] Modul {} could not be queried!".format(module.__name__)
-                    )
+                except Exception as e:
+                    log.exception(e)
+                    log.error(f"Modul {module.__name__} could not be queried!")
         return False
 
     def start_module(self, user=None, text=None, name=None, messenger=False):
@@ -148,19 +146,15 @@ class Modules:
         else:
             try:
                 analysis = self.core.analyzer.analyze(str(text))
-                # logging.info('Analysis: ' + str(analysis))
+                # log.info('Analysis: ' + str(analysis))
             except:
                 traceback.print_exc()
-                logging.warning("[WARNING] Sentence analysis failed!")
+                log.warning("Sentence analysis failed!")
 
         if name is not None:
             for module in self.modules:
                 if module.__name__ == name:
-                    logging.info(
-                        "[ACTION] --Modul {} was called directly (Parameter: {})--".format(
-                            name, text
-                        )
-                    )
+                    log.action(f"--Modul {name} was called directly (Parameter: {text})--")
                     self.core.active_modules[str(text)] = self.module_wrapper(
                         self.core, text, analysis, messenger, user
                     )
@@ -173,9 +167,9 @@ class Modules:
         else:
             try:
                 analysis = self.core.analyzer.analyze(str(text))
-            except:
-                traceback.print_exc()
-                print("[ERROR] Sentence analysis failed!")
+            except Exception as e:
+                log.exception(e)
+                log.warning("Sentence analysis failed!")
                 analysis = {}
             for module in self.modules:
                 try:
@@ -192,23 +186,17 @@ class Modules:
                         mt.join()  # wait until Module is done...
                         self.start_module(user=user, name="wartende_benachrichtigung")
                         break
-                except:
-                    traceback.print_exc()
-                    print(
-                        "[ERROR] Modul {} could not be queried!".format(module.__name__)
-                    )
+                except Exception as e:
+                    log.exception(e)
+                    log.error("Modul {} could not be queried!".format(module.__name__))
         return False
 
     def run_threaded_module(self, text, module, mod_skill):
         try:
             module.handle(text, self.core.active_modules[str(text)], mod_skill)
-        except:
+        except Exception as e:
             traceback.print_exc()
-            print(
-                "[ERROR] Runtime error in module {}. The module was terminated.\n".format(
-                    module.__name__
-                )
-            )
+            log.error(f"Runtime error in module {module.__name__}. The module was terminated.\n")
             self.core.active_modules[str(text)].say(
                 "Entschuldige, es gab ein Problem mit dem Modul {}.".format(
                     module.__name__
@@ -734,13 +722,13 @@ class Modulewrapper:
         try:
             self.messenger.say(text, self.user["telegram_id"])
         except KeyError:
-            logging.warning(
-                '[WARNING] Sending message "{}" to messenger failed, because there is no Telegram-ID for this user '
-                "({}) ".format(text, self.user["name"])
+            log.warning(
+                f"Sending message '{text}' to messenger failed, because there is no Telegram-ID for this user "
+                f"({self.user['name']})"
             )
         except AttributeError:
-            logging.info(
-                "[WARNING] Sending message to messenger failed,  because there is no key for it!"
+            log.warning(
+                "Sending message to messenger failed,  because there is no key for it!"
             )
         return
 

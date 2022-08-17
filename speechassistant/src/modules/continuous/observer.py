@@ -1,8 +1,8 @@
-import logging
 import time
 import traceback
 from threading import Thread
 
+from src import log
 from src.models import ContinuousModule
 from src.modules import Modules
 from src.modules.continuous import ContinuousModuleHandler
@@ -36,14 +36,14 @@ class ObserverItem:
                 module.run_function(self.__core.continuous_modules[module.name],
                                     self.__core.local_storage, )
                 self.__handler.running_counter -= 1
-                logging.debug(f"[ACTION] Module {module.name} started")
+                log.info(f"Module {module.name} started")
             except Exception:
                 self.__handle_error(module)
 
     def __handle_error(self, module):
-        logging.debug(traceback.print_exc())
-        logging.info(
-            f"[ERROR] Runtime-Error in Continuous-Module {module.name}. The module is no longer executed.\n")
+        log.debug(traceback.print_exc())
+        log.error(
+            f"Runtime-Error in Continuous-Module {module.name}. The module is no longer executed.\n")
         del self.__core.continuous_modules[module.name]
         self.__modules.continuous_modules.remove(module)
 

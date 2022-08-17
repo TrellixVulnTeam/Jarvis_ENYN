@@ -1,8 +1,8 @@
 from __future__ import annotations  # compatibility for < 3.10
 
 import json
-import logging
 
+from src import log
 from src.resources.intent.ai import GenericAssistant
 
 
@@ -14,6 +14,7 @@ class IntentWrapper:
         # with open(core.path + "/resources/intent/mappings.json", 'r') as mapping_file:
         with open(self.core.path + path + "/mappings.json", "r") as mapping_file:
             mappings = json.loads(mapping_file.read())
+            # toDo: i think intents.json should be mappings
             self.ai = GenericAssistant(
                 "intents.json",
                 self.core.path + "/resources/intent/",
@@ -21,13 +22,14 @@ class IntentWrapper:
             )
             try:
                 self.ai.load_model()
-                logging.info("[SUCCESS] Model loaded successfully")
-            except FileNotFoundError as e:
-                logging.info("[WARNING] Couldn't find a model. Disable AI-function...")
+                log.info("[SUCCESS] Model loaded successfully")
+            except FileNotFoundError:
+                log.warning("Could not find a model for AI. Disable AI-function...")
                 self.core.use_ai = False
-                logging.info("[SUCCESS] AI-function disabled.")
+                log.info("AI-function disabled.")
+                return
 
-        logging.info("AI initialized successfully!")
+        log.info("AI initialized successfully!")
 
     def proceed_with_user_input(self, user_input: str) -> dict | str:
         return self.ai.request(user_input)
@@ -40,9 +42,9 @@ class IntentWrapper:
             return response["intent"]
 
     def train_model(self) -> None:
-        logging.info("[ACTION] Start training model")
+        log.action("Start with training model for AI...")
         self.ai.train_model(5000)
-        logging.info("[SUCCESS] Training done")
+        log.info("Training of AI done!")
         self.ai.save_model()
         self.ai.load_model()
 

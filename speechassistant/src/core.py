@@ -1,6 +1,5 @@
 from __future__ import annotations  # compatibility for < 3.10
 
-import logging
 import time
 from pathlib import Path
 from threading import Thread
@@ -8,6 +7,7 @@ from threading import Thread
 import requests
 import toml
 
+from src import log
 from .audio import AudioOutput, AudioInput
 from .database.connection import *
 from .models.user import User
@@ -85,7 +85,7 @@ class Core:
                 Path(__file__).parent.parent.absolute().joinpath("config.toml").absolute(),
                 "r",
         ) as config_file:
-            logging.info("[INFO] loading configs...")
+            log.info("loading configs...")
             self.config_data = toml.load(config_file)
             self.local_storage = self.config_data["local_storage"]
 
@@ -138,17 +138,9 @@ class Core:
     @staticmethod
     def __log_message_from_unknown_user(msg):
         try:
-            logging.warning(
-                "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
-                    msg["from"]["first_name"]
-                )
-            )
+            log.warning(f"Message from unknown Telegram user {msg['from']['first_name']}. Access denied.")
         except KeyError:
-            logging.warning(
-                "[WARNING] Message from unknown Telegram user {}. Access denied.".format(
-                    msg["from"]["id"]
-                )
-            )
+            log.warning(f"Message from unknown Telegram user {msg['from']['id']}. Access denied.")
 
     def messenger_listen(self, user: str):
         # Tell the Telegram thread that you are waiting for a reply,
@@ -161,11 +153,7 @@ class Core:
             response = self.messenger_queue_output.pop(user, None)
             if response is not None:
                 self.messenger_queued_users.remove(user)
-                logging.info(
-                    "[ACTION] --{}-- (Messenger): {}".format(
-                        user.upper(), response["text"]
-                    )
-                )
+                log.info(f"--{user.upper()}-- (Messenger): {response['text']}")
                 return response["text"]
             time.sleep(0.03)
 
@@ -232,7 +220,7 @@ class Core:
 #        print("[WARNING] There was a problem with the Setup-Wizard!")
 #        traceback.print_exc()"""
 
-# logging.info('--------- Start System ---------\n\n')
+# log.info('--------- Start System ---------\n\n')
 
 # system_name: str = config_data['System_name']
 # config_data['Local_storage']['CORE_PATH']: AnyStr = os.path.dirname(os.path.abspath(__file__))
@@ -260,7 +248,7 @@ class Core:
 # web_thr.daemon = True
 # web_thr.start()
 
-# logging.info('--------- DONE ---------\n\n')
+# log.info('--------- DONE ---------\n\n')
 # core.audio_output.say("Jarvis wurde erfolgreich gestartet!")
 
 ## Starting the main-loop
@@ -281,9 +269,9 @@ class Core:
 
 # def start_telegram(core: Core) -> None:
 # if config_data['messenger']:
-#    logging.info('[ACTION] Start Telegram...')
+#    log.info('[ACTION] Start Telegram...')
 #    if config_data['messenger_key'] == '':
-#        logging.error('[INFO] No Telegram-Bot-Token entered!')
+#        log.error('No Telegram-Bot-Token entered!')
 #    else:
 #        from resources.messenger import TelegramInterface
 
@@ -295,10 +283,10 @@ class Core:
 
 
 # def reload(core: Core) -> None:
-# logging.info('[ACTION] Reload System...\n')
+# log.info('[ACTION] Reload System...\n')
 # time.sleep(0.3)
 # with open(relPath + "config.json", "r") as config_file:
-#    logging.info('[INFO] loading configs...')
+#    log.info('loading configs...')
 #    core.config_data = json.load(config_file)
 #    core.local_storage = core.config_data["Local_storage"]
 
@@ -308,28 +296,28 @@ class Core:
 
 # time.sleep(0.3)
 # if core.messenger is None:
-# logging.info('[INFO] Load Telegram-API')
+# log.info('Load Telegram-API')
 # start_telegram(core)
 
 # time.sleep(0.3)
-# logging.info('[ACTION] Reload modules')
+# log.info('[ACTION] Reload modules')
 # core.modules.load_modules()
 
-# """logging.info('Stop Audio-Devices')
+# """log.info('Stop Audio-Devices')
 # core.Audio_Input.stop()
 # core.Audio_Output.stop()"""
 
 # """time.sleep(1)
-# logging.info('Start Audio-Devices')
+# log.info('Start Audio-Devices')
 # core.Audio_Input.start()
 # core.Audio_Output.start()"""
 
 # time.sleep(0.3)
-# logging.info('[ACTION] Reload Analyzer')
+# log.info('[ACTION] Reload Analyzer')
 # core.analyzer = Sentence_Analyzer()
 
 # time.sleep(0.9)
-# logging.info('[INFO] System reloaded successfully!')
+# log.info('System reloaded successfully!')
 # """if webThr is not None:
 #    if not webThr.is_alive():
 #        webThr = Thread(target=ws.Webserver, args=[core])
@@ -343,13 +331,13 @@ class Core:
 
 
 # def stop(core: Core) -> None:
-# logging.info('[ACTION] Stop System...')
+# log.info('[ACTION] Stop System...')
 # core.local_storage["users"]: dict = {}
 # config_data["Local_storage"]: dict = core.local_storage
 # core.modules.stop_continuous()
 # core.audio_input.stop()
 # core.audio_output.stop()
-# logging.info('\n[{}] Goodbye!\n'.format(config_data['System_name'].upper()))
+# log.info('\n[{}] Goodbye!\n'.format(config_data['System_name'].upper()))
 
 ## with open(str(Path(__file__).parent) + '/config.json', 'w') as file:
 ##    json.dump(config_data, file, indent=4)

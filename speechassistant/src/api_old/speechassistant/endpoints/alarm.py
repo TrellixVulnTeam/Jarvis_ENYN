@@ -1,4 +1,4 @@
-import logging
+from src import log
 
 from flask import request, Response
 from flask_restx import Resource
@@ -56,7 +56,7 @@ class AlarmConnectionById(Resource):
     def put(self, alarm_id) -> Response:
         # args: ParseResult = alarm.parse_args(request)
         args: dict = request.get_json()
-        logging.info(args)
+        log.info(args)
         if "id" not in args.keys():
             args["id"] = alarm_id
         return update_alarm(args)

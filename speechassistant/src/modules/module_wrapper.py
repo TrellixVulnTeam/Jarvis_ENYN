@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import io
 import json
-import logging
 import random
 from random import random
 from typing import AnyStr, Any
 from typing import TYPE_CHECKING
 from urllib.request import Request, urlopen
 
+from src import log
 from src.models.audio.queue_item import QueueType
 from src.models.user import User
 from src.modules.AbstractWrapper import AbstractWrapper
@@ -47,12 +47,12 @@ class ModuleWrapper(AbstractWrapper):
         try:
             self.messenger.say(text, self.user.messenger_id)
         except KeyError:
-            logging.info(
-                f'[WARNING] Sending message "{text}" to messenger failed, because there is no Messenger-ID for this '
+            log.warning(
+                f'Sending message "{text}" to messenger failed, because there is no Messenger-ID for this '
                 f'user ({self.user.alias}) '
             )
         except AttributeError:
-            logging.info("[WARNING] Sending message to messenger failed, because there is no key for it!")
+            log.warning("Sending message to messenger failed, because there is no key for it!")
         return
 
     def play(

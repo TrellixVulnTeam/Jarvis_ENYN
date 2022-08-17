@@ -1,4 +1,4 @@
-import logging
+from src import log
 import os
 import subprocess
 import wave
@@ -26,7 +26,7 @@ class TelegramInterface:
             user = self.core.local_storage["LUNA_messenger_id_to_name_table"][uid]
         except:
             user = uid
-        logging.info(
+        log.info(
             "--{}--@{} (Telegram): {}".format(self.core.system_name.upper(), user, text)
         )
         self.bot.sendMessage(uid, text, parse_mode="HTML")

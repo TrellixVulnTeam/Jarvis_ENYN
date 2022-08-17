@@ -1,4 +1,4 @@
-import logging
+from src import log
 
 
 class SQLException(Exception):

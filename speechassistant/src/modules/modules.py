@@ -1,4 +1,3 @@
-import logging
 import pkgutil
 import time
 import traceback
@@ -6,6 +5,7 @@ from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING
 
+from src import log
 from src.models import User, ContinuousModule
 from src.modules import Skills, ModuleWrapper, ModuleWrapperContinuous
 from src.modules.continuous import ContinuousModuleHandler
@@ -27,7 +27,7 @@ class Modules:
         if Modules.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
 
-        logging.getLogger().setLevel(logging.INFO)
+        log.getLogger().setLevel(log.INFO)
 
         self.core: Core = Core.get_instance()
         self.local_storage: dict = self.core.local_storage
@@ -49,14 +49,14 @@ class Modules:
     def load_modules(self) -> None:
         self.local_storage["modules"]: dict = {}
         time.sleep(1)
-        logging.info("---------- MODULES...  ----------")
+        log.info("---------- MODULES...  ----------")
         self.modules: list = self.get_modules(self.__get_modules_impl_path())
         if self.modules is []:
-            logging.info("[INFO] -- (None present)")
-        logging.info("\n----- Continuous MODULES... -----")
+            log.info("-- (None present)")
+        log.info("\n----- Continuous MODULES... -----")
         self.continuous_modules: list = self.get_modules(self.__get_continuous_impl_path(), continuous=True)
         if self.continuous_modules is []:
-            logging.info("[INFO] -- (None present)")
+            log.info("-- (None present)")
 
     def get_modules(self, directory: Path, continuous: bool = False) -> list:
         modules: list = []
@@ -91,19 +91,19 @@ class Modules:
         return mod
 
     def __handle_loading_error(self, name):
-        logging.debug(traceback.print_exc())
+        log.debug(traceback.print_exc())
         self.local_storage["modules"][name]: dict = {
             "name": name,
             "status": "error",
         }
-        logging.info("[WARNING] Module {} is incorrect and was skipped!".format(name))
+        log.warning(f"Module {name} is incorrect and was skipped!")
 
     @staticmethod
     def __log_module_status(continuous, name):
         if continuous:
-            logging.info("[INFO] Continuous module {} loaded".format(name))
+            log.info("Continuous module {} loaded".format(name))
         else:
-            logging.info("[INFO] Modul {} loaded".format(name))
+            log.info("Modul {} loaded".format(name))
 
     @staticmethod
     def __path_with_impl(path: Path) -> str:
@@ -128,15 +128,15 @@ class Modules:
                     self.core.active_modules[str(text)] = self.module_wrapper(text, analysis, messenger, user)
                     return self.__start_module_in_new_thread(mod_skill, module, text)
             except AttributeError:
-                logging.info(f"[WARNING] {module.__name__} has no isValid() function!")
-            except Exception:
-                logging.debug(traceback.print_exc())
-                logging.info(f"[ERROR] Module {module.__name__} could not be queried!")
+                log.warning(f"Module {module.__name__} has no isValid() function!")
+            except Exception as e:
+                log.exception(e)
+                log.warning(f"Module {module.__name__} could not be queried!")
 
     def __start_module(self, analysis, messenger, mod_skill, name, text, user):
         module = next((x for x in self.modules if x.__name__ == name), None)
         if not module:
-            logging.info(f"[ERROR] Modul {name} could not be found!")
+            log.error(f"Modul {name} could not be found!")
             return False
         self.core.active_modules[str(text)] = self.module_wrapper(text, analysis, messenger, user)
         self.__start_module_in_new_thread(mod_skill, module, text)
@@ -146,23 +146,23 @@ class Modules:
         if text:
             try:
                 return self.core.analyzer.analyze(str(text))
-            except Exception:
-                logging.debug(traceback.print_exc())
-                logging.info("[ERROR] Sentence analysis failed!")
+            except Exception as e:
+                log.exception(e)
+                log.warning("Sentence analysis failed!")
         return {}
 
     def __start_module_in_new_thread(self, mod_skill, module, text) -> Thread:
         mt: Thread = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
         mt.daemon = True
         mt.start()
-        logging.debug(f"[INFO] Module {module.__name__} started...")
+        log.debug(f"Module {module.__name__} started...")
         return mt
 
     def start_continuous(self) -> None:
         if not self.continuous_modules == []:
             self.__start_all_continuous_modules()
         else:
-            logging.info("[INFO] -- (None present)")
+            log.info("-- (None present)")
 
     def start_module(
             self,
@@ -177,7 +177,7 @@ class Modules:
         if name is not None:
             if not self.__start_module(analysis, messenger, mod_skill, name, text, user):
                 return False
-            logging.info(f"[ACTION] --Modul {name} was called directly (Parameter: {text})--")
+            log.info(f"--Modul {name} was called directly (Parameter: {text})--")
         else:
             thread: Thread = self.__find_matching_module(analysis, messenger, mod_skill, text, user)
             if not thread:
@@ -190,7 +190,7 @@ class Modules:
             module.handle(text, self.core.active_modules[str(text)], mod_skill)
         except Exception:
             traceback.print_exc()
-            logging.info(f"[ERROR] Runtime error in module {module.__name__}. The module was terminated.\n")
+            log.error(f"Runtime error in module {module.__name__}. The module was terminated.\n")
             self.core.active_modules[str(text)].say(
                 f"Entschuldige, es gab ein Problem mit dem Modul {module.__name__}.")
         finally:

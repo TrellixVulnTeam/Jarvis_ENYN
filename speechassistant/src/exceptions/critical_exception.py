@@ -1,4 +1,4 @@
-import logging
+from src import log
 
 
 class UnsolvableException(Exception):
@@ -9,9 +9,9 @@ class UnsolvableException(Exception):
     """
 
     def __init__(
-        self,
-        message: str = "Extremely serious error occurred. Manual intervention necessary!",
+            self,
+            message: str = "Extremely serious error occurred. Manual intervention necessary!",
     ) -> None:
         self.message: str = message
         super().__init__(self.message)
-        logging.warning("[ERROR] " + message)
+        log.fatal(message)
