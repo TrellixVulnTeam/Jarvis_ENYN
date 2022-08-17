@@ -7,23 +7,23 @@ from src.models.shopping_list import ShoppingListItem
 
 class ShoppingListInterface(AbstractDataBaseConnection[ShoppingListItem, ShoppingListSchema]):
     @staticmethod
-    def schema_to_model(model_schema: Schema) -> Model:
+    def _schema_to_model(model_schema: Schema) -> Model:
         return schema_to_shopping_list(model_schema)
 
     @staticmethod
-    def model_to_schema(model: Model) -> Schema:
+    def _model_to_schema(model: Model) -> Schema:
         return shopping_list_to_schema(model)
 
     @staticmethod
-    def get_model_id(model: ShoppingListItem) -> int:
+    def _get_model_id(model: ShoppingListItem) -> int:
         return model.id
 
     @staticmethod
-    def get_model_type() -> Type[Model]:
+    def _get_model_type() -> Type[Model]:
         return ShoppingListItem
 
     @staticmethod
-    def get_schema_type() -> Type[Schema]:
+    def _get_schema_type() -> Type[Schema]:
         return ShoppingListSchema
 
     def __int__(self) -> None:

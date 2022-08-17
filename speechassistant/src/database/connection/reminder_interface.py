@@ -7,23 +7,23 @@ from src.models.reminder import Reminder
 
 class ReminderInterface(AbstractDataBaseConnection[Reminder, ReminderSchema]):
     @staticmethod
-    def schema_to_model(model_schema: Schema) -> Model:
+    def _schema_to_model(model_schema: Schema) -> Model:
         return schema_to_reminder(model_schema)
 
     @staticmethod
-    def model_to_schema(model: Model) -> Schema:
+    def _model_to_schema(model: Model) -> Schema:
         return reminder_to_schema(model)
 
     @staticmethod
-    def get_model_id(model: Reminder) -> int:
+    def _get_model_id(model: Reminder) -> int:
         return model.reminder_id
 
     @staticmethod
-    def get_model_type() -> Type[Model]:
+    def _get_model_type() -> Type[Model]:
         return Reminder
 
     @staticmethod
-    def get_schema_type() -> Type[Schema]:
+    def _get_schema_type() -> Type[Schema]:
         return ReminderSchema
 
     def __int__(self) -> None:

@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
 from src.database.database_persistency import DBPersistency
+from src.exceptions import NoMatchingEntry
 
 Model = TypeVar("Model")
 Schema = TypeVar("Schema")
@@ -32,72 +33,75 @@ class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
     def create(self, model: Model) -> Model:
         result_model: Model
         with Session(self.engine, future=True) as session:
-            model_schema: Schema = self.model_to_schema(model)
+            model_schema: Schema = self._model_to_schema(model)
             session.add(model_schema)
             session.flush()
-            result_model = self.schema_to_model(model_schema)
+            result_model = self._schema_to_model(model_schema)
             session.commit()
         return result_model
 
     def get_by_id(self, model_id: int) -> Model:
         model_schema: Schema
         with Session(self.engine) as session:
-            stmt = select(self.get_schema_type()).where(
-                self.get_schema_type().id == model_id
+            stmt = select(self._get_schema_type()).where(
+                self._get_schema_type().id == model_id
             )
             model_schema = session.execute(stmt).scalars().first()
-            return self.schema_to_model(model_schema)
+            if model_schema is None:
+                raise NoMatchingEntry()
+            return self._schema_to_model(model_schema)
 
     def get_all(self) -> list[Model]:
         result_models: list[Model]
         with Session(self.engine) as session:
-            stmt = select(self.get_schema_type())
+            stmt = select(self._get_schema_type())
             result_models = [
-                self.schema_to_model(a) for a in session.execute(stmt).scalars().all()
+                self._schema_to_model(a) for a in session.execute(stmt).scalars().all()
             ]
         return result_models
 
     def update(self, updated_model: Model) -> Model:
-        return self.update_by_id(self.get_model_id(updated_model), updated_model)
+        return self.update_by_id(self._get_model_id(updated_model), updated_model)
 
     def update_by_id(self, model_id: int, model: Model) -> Optional[Model]:
         result_model: Optional[Model]
         with Session(self.engine) as session:
-            model_in_db: Schema = session.get(self.get_schema_type(), model_id)
-            model_in_db = self.model_to_schema(model)
+            model_in_db: Schema = session.get(self._get_schema_type(), model_id)
+            model_in_db = self._model_to_schema(model)
             session.flush()
-            result_model = self.schema_to_model(model_in_db)
+            result_model = self._schema_to_model(model_in_db)
             session.commit()
         return result_model
 
     def delete_by_id(self, model_id: int) -> None:
-        # todo: return count of deleted items
         with Session(self.engine) as session:
-            model_in_db = session.get(self.get_schema_type(), model_id)
+            model_in_db = session.get(self._get_schema_type(), model_id)
+            if model_in_db is None:
+                raise NoMatchingEntry()
             session.delete(model_in_db)
             session.commit()
 
     @staticmethod
     @abstractmethod
-    def schema_to_model(model_schema: Schema) -> Model:
+    def _schema_to_model(model_schema: Schema) -> Model:
         ...
 
     @staticmethod
     @abstractmethod
-    def model_to_schema(model: Model) -> Schema:
+    def _model_to_schema(model: Model) -> Schema:
         ...
 
     @staticmethod
     @abstractmethod
-    def get_model_id(model: Model) -> int:
+    def _get_model_id(model: Model) -> int:
         ...
 
     @staticmethod
     @abstractmethod
-    def get_model_type() -> Type[Model]:
+    def _get_model_type() -> Type[Model]:
         ...
 
     @staticmethod
     @abstractmethod
-    def get_schema_type() -> Type[Schema]:
+    def _get_schema_type() -> Type[Schema]:
         ...

@@ -7,23 +7,23 @@ from src.models.birthday import Birthday
 
 class BirthdayInterface(AbstractDataBaseConnection[Birthday, BirthdaySchema]):
     @staticmethod
-    def schema_to_model(model_schema: Schema) -> Model:
+    def _schema_to_model(model_schema: Schema) -> Model:
         return schema_to_birthday(model_schema)
 
     @staticmethod
-    def model_to_schema(model: Model) -> Schema:
+    def _model_to_schema(model: Model) -> Schema:
         return birthday_to_schema(model)
 
     @staticmethod
-    def get_model_id(model: Birthday) -> int:
+    def _get_model_id(model: Birthday) -> int:
         return -1
 
     @staticmethod
-    def get_model_type() -> Type[Model]:
+    def _get_model_type() -> Type[Model]:
         return Birthday
 
     @staticmethod
-    def get_schema_type() -> Type[Schema]:
+    def _get_schema_type() -> Type[Schema]:
         return BirthdaySchema
 
     def __int__(self) -> None:

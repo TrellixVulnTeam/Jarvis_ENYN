@@ -7,23 +7,23 @@ from src.models.user import User
 
 class UserInterface(AbstractDataBaseConnection[User, UserSchema]):
     @staticmethod
-    def schema_to_model(model_schema: Schema) -> Model:
+    def _schema_to_model(model_schema: Schema) -> Model:
         return schema_to_user(model_schema)
 
     @staticmethod
-    def model_to_schema(model: Model) -> Schema:
+    def _model_to_schema(model: Model) -> Schema:
         return user_to_schema(model)
 
     @staticmethod
-    def get_model_id(model: User) -> int:
+    def _get_model_id(model: User) -> int:
         return model.uid
 
     @staticmethod
-    def get_model_type() -> Type[Model]:
+    def _get_model_type() -> Type[Model]:
         return User
 
     @staticmethod
-    def get_schema_type() -> Type[Schema]:
+    def _get_schema_type() -> Type[Schema]:
         return UserSchema
 
     def __int__(self) -> None:
