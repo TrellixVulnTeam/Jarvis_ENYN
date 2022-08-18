@@ -6,22 +6,22 @@ from src.database.connection import AlarmInterface
 from src.exceptions.sql_exception import NoMatchingEntry
 from src.models.alarm import Alarm
 
-alarm_interface: any = AlarmInterface()
+alarm_interface: AlarmInterface = AlarmInterface()
 
 
 class AlarmLogic:
     @staticmethod
     def create_alarm(alarm: Alarm) -> Alarm:
-        return alarm_interface.add_alarm(alarm)
+        return alarm_interface.create(alarm)
 
     @staticmethod
     def read_all_alarms() -> list[Alarm]:
-        return alarm_interface.get_all_alarms()
+        return alarm_interface.get_all()
 
     @staticmethod
     def read_alarm_by_id(alarm_id: int) -> Alarm:
         try:
-            return alarm_interface.get_alarm_by_id(alarm_id)
+            return alarm_interface.get_by_id(alarm_id)
         except (OperationalError, NoMatchingEntry):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -31,7 +31,7 @@ class AlarmLogic:
     @staticmethod
     def update_alarm(alarm: Alarm) -> Alarm:
         try:
-            return alarm_interface.update_alarm(alarm)
+            return alarm_interface.update(alarm)
         except (OperationalError, NoMatchingEntry):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -40,7 +40,9 @@ class AlarmLogic:
 
     @staticmethod
     def delete_alarm(alarm_id: int) -> None:
-        if alarm_interface.delete_alarm(alarm_id) < 1:
+        try:
+            alarm_interface.delete_by_id(alarm_id)
+        except NoMatchingEntry:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"There is no Alarm with the ID {alarm_id} in the database!",
