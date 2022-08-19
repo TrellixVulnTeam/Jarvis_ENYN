@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date
 from typing import Optional
 
 
@@ -8,7 +8,7 @@ class User:
     alias: str
     first_name: str
     last_name: str
-    birthday: datetime
+    birthday: date
     messenger_id: int
     song_name: str
     waiting_notifications: list[str]
