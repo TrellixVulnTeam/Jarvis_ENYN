@@ -187,7 +187,7 @@ class Modules:
 
     def run_threaded_module(self, text: str, module, mod_skill: Skills) -> None:
         try:
-            module.handle(text, self.core.active_modules[str(text)], mod_skill)
+            module.handle(text, self.core.active_modules[str(text)])
         except Exception:
             traceback.print_exc()
             log.error(f"Runtime error in module {module.__name__}. The module was terminated.\n")
@@ -199,7 +199,7 @@ class Modules:
     def run_module(self, text: str, module_wrapper: ModuleWrapper, mod_skill: Skills) -> None:
         for module in self.modules:
             if module.isValid(text):
-                module.handle(text, module_wrapper, mod_skill)
+                module.handle(text, module_wrapper)
 
     def run_continuous(self) -> None:
         # Runs the continuous_modules. Continuous_modules always run in the background,
