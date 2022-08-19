@@ -13,7 +13,7 @@ from .database.connection import *
 from .models.user import User
 # from .resources.intent.Wrapper import IntentWrapper as AIWrapper
 from .modules.modules import Modules
-from .resources.analyze import Sentence_Analyzer
+from src.modules.analyze import Sentence_Analyzer
 from .services import ServiceWrapper
 from .users import Users
 

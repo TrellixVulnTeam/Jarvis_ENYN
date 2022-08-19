@@ -6,7 +6,7 @@ from src import log
 from src.audio import AudioOutput, AudioInput
 from src.models import User
 from src.modules import Skills
-from src.resources.analyze import Sentence_Analyzer
+from src.modules.analyze import Sentence_Analyzer
 from src.services import ServiceWrapper
 
 if TYPE_CHECKING:
