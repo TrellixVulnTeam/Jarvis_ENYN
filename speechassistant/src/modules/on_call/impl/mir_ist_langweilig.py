@@ -1,21 +1,18 @@
 import random
 
-from src.core import ModuleWrapper
-from src.resources import Skills
+from src.modules import ModuleWrapper, skills
 
 
 def isValid(text: str) -> bool:
-    if "mir" in text and "langweilig" in text:
-        return True
-    return False
+    return "mir" in text and "langweilig" in text
 
 
-def handle(text, core: ModuleWrapper, skills: Skills):
-    core.say("Soll ich dir was interessantes erzählen?")
-    response = core.listen()
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    wrapper.say("Soll ich dir was interessantes erzählen?")
+    response = wrapper.listen()
     if skills.is_desired(response):
         options = ["witz", "fun fact", "zungenbrecher", "phobie", "gedicht"]
         text = "erzähl mir einen " + random.choice(options)
-        handle(text, core, skills)
+        wrapper.start_module(name="smalltalk", text=text)
     else:
-        core.say("Alles klar, vielleicht findest du ja eine Beschäftigung.")
+        wrapper.say("Alles klar, vielleicht findest du ja eine Beschäftigung.")

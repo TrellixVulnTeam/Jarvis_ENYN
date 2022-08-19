@@ -1,5 +1,7 @@
 import subprocess
 
+from src.modules import ModuleWrapper
+
 PRIORITY = -1
 
 
@@ -8,7 +10,7 @@ PRIORITY = -1
 # Das Modul wird nur aktiv, wenn `fortunes-de` installiert ist.
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     if ("erzähl" in text.lower() or "sag" in text.lower()) and (
         "irgendwas" in text.lower()
         or "irgendetwas" in text.lower()
@@ -31,7 +33,7 @@ def isValid(text):
     return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     try:
         fortune = (
             subprocess.check_output("fortune", shell=True)
@@ -40,13 +42,13 @@ def handle(text, core, skills):
             .lower()
         )
         if fortune != "":
-            core.say(fortune)
+            wrapper.say(fortune)
         elif "irgendetwas" in text.lower():
-            core.say("irgendetwas")
+            wrapper.say("irgendetwas")
         else:
-            core.say("irgendwas")
+            wrapper.say("irgendwas")
     except subprocess.CalledProcessError:
         if "irgendetwas" in text.lower():
-            core.say("irgendetwas")
+            wrapper.say("irgendetwas")
         else:
-            core.say("irgendwas")
+            wrapper.say("irgendwas")

@@ -1,4 +1,7 @@
-def handle(text, core, skills):
+from src.modules import ModuleWrapper
+
+
+def handle(text: dict, core: ModuleWrapper):
     duration = text.get("Dauer")
     core.say("Dein Timer von {} ist abgelaufen!".format(duration))
     if not core.messenger_call:
@@ -7,5 +10,5 @@ def handle(text, core, skills):
         )
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     return False

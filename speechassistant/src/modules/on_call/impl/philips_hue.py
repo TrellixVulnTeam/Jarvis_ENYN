@@ -28,6 +28,7 @@ color_code = [
     [0.4689, 0.4124],
 ]
 
+# toDo: missing handle()
 
 class PhilipsWrapper:
     def __init__(self, core):

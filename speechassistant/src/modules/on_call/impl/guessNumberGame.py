@@ -1,41 +1,29 @@
 import random
 
-# Beschreibung
-"""
-In diesem Spiel geht es darum, eine Zufallszahl in möglichst wenigen Schritten zu erraten.
-"""
-
-SECURE = True
+from src.modules import ModuleWrapper
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
-    if "spiel" in text and ("zahl" in text or "erraten" in text):
-        return True
-    else:
-        return False
+    return "spiel" in text and ("zahl" in text or "erraten" in text)
 
 
-def handle(text, core, skills):
-    if core.messenger_call:
-        zahl = random.randrange(1000)
-        tipp = 0
-        i = 0
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    number = random.randrange(1000)
+    guess = 0
+    steps = 0
 
-        core.say(
-            "Ok, lasse uns spielen. Versuche die Zufallszahl in möglichst wenigen Schritten zu erraten"
-        )
+    wrapper.say(
+        "Ok, lasse uns spielen. Versuche die Zufallszahl in möglichst wenigen Schritten zu erraten. Sag bitte immer nur die Zahl!"
+    )
 
-        while tipp != zahl:
-            tipp = int(core.listen(text="Dein Tipp:"))
+    while guess != number:
+        guess = int(wrapper.listen(text="Dein Tipp:"))
 
-            if zahl < tipp:
-                core.say("Die gesuchte Zahl ist kleiner als " + str(tipp))
-            if zahl > tipp:
-                core.say("Die gesuchte Zahl ist größer als " + str(tipp))
-            i += 1
+        if number < guess:
+            wrapper.say("Die gesuchte Zahl ist kleiner als " + str(guess))
+        if number > guess:
+            wrapper.say("Die gesuchte Zahl ist größer als " + str(guess))
+        steps += 1
 
-        core.say("Du hast die Zahl beim " + str(i) + ". Tipp erraten! SUPER!")
-
-    else:
-        core.say("Das Spiel kann leider nur über Telegram gespielt werden")
+    wrapper.say("Du hast die Zahl beim " + str(steps) + ". Tipp erraten! SUPER!")

@@ -1,10 +1,10 @@
 import re
+from src.database.connection import ShoppingListInterface
+from src.modules import ModuleWrapper, skills
 
-from src.core import ModuleWrapper
-from src.resources import Skills
+database: ShoppingListInterface = ShoppingListInterface()
 
-
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     if "to" in text and "do" in text and "liste" in text:
         return False
@@ -52,7 +52,7 @@ def get_items(text: str) -> list:
 
 
 def get_shopping_list(
-        shopping_list: dict, skills: Skills, for_messenger: bool = False
+        shopping_list: dict, for_messenger: bool = False
 ) -> str:
     anz_items = len(shopping_list)
     if anz_items == 0:
@@ -92,16 +92,16 @@ def simplify_unit(item: dict) -> str:
         return str(item.get("quantity")) + item.get("measure")
 
 
-def dlt_items(text: str, core: ModuleWrapper) -> list:
+def dlt_items(text: str, wrapper: ModuleWrapper) -> list:
     text = text.lower()
     del_items = []
     # search for items to be deleted from text
-    for item in core.data_base.shoppinglist_interface.get_list():
+    for item in wrapper.data_base.shoppinglist_interface.get_list():
         if item["name"].lower() in text:
             del_items.append(item["name"])
     # delete items
     for item in del_items:
-        core.data_base.shoppinglist_interface.remove_item(item)
+        wrapper.data_base.shoppinglist_interface.remove_item(item)
 
     return del_items
 
@@ -157,10 +157,12 @@ def is_float(string: str) -> bool:
         return False
 
 
-def handle(text: str, core: ModuleWrapper, skills: Skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    # toDo: database access
+
     text = prepare_text(text)
     lower_text = text.lower()
-    shopping_list = core.data_base.shoppinglist_interface.get_list()
+    shopping_list = wrapper.data_base.shoppinglist_interface.get_list()
     if "setz" in lower_text or "schreib" in lower_text:
         text = text.replace("Setz ", "")
         text = text.replace("setz", "")
@@ -168,40 +170,40 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         new_items = calculate_units(get_items(text))
         for item in new_items:
             item_name = item.get("name")
-            if core.data_base.shoppinglist_interface.is_item_in_list(item_name):
-                new_quantity = core.data_base.shoppinglist_interface.get_item(
+            if wrapper.data_base.shoppinglist_interface.is_item_in_list(item_name):
+                new_quantity = wrapper.data_base.shoppinglist_interface.get_item(
                     item_name
                 ).get("quantity") + float(item.get("quantity"))
-                core.data_base.shoppinglist_interface.update_item(
+                wrapper.data_base.shoppinglist_interface.update_item(
                     item_name, new_quantity
                 )
             else:
-                core.data_base.shoppinglist_interface.add_item(
+                database.create(
                     item.get("name"), item.get("measure"), item.get("quantity")
                 )
     elif ("was" in lower_text and "steht" in lower_text) or (
             "gib" in lower_text and "aus" in lower_text
     ):
-        core.say(
-            get_shopping_list(shopping_list, skills, for_messenger=core.messenger_call)
+        wrapper.say(
+            get_shopping_list(shopping_list, skills, for_messenger=wrapper.messenger_call)
         )
     elif "lösch" in lower_text or "entfern" in lower_text:
         if len(shopping_list) == 0:
-            core.say(
+            wrapper.say(
                 [
                     "Deine Einkaufsliste ist bereits leer.",
                     "Ich kann das nicht aus deiner Einkaufsliste löschen, da sie leer ist.",
                 ]
             )
         else:
-            deleted_items: list = dlt_items(text, core)
+            deleted_items: list = dlt_items(text, wrapper)
             if len(deleted_items) == 1:
-                core.say(
+                wrapper.say(
                     deleted_items[0]
                     + " wurde [|erfolgreich] von der Einkaufsliste entfernt."
                 )
             else:
-                core.say(
+                wrapper.say(
                     skills.get_enumerate(deleted_items)
                     + " wurden [|erfolgreich] von der Einkaufsliste entfernt."
                 )

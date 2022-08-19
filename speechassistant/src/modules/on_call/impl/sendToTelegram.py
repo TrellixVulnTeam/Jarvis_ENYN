@@ -1,5 +1,7 @@
 import re
 
+from src.modules import ModuleWrapper
+
 # Beschreibung
 """
 Mit diesem Modul kann man sich Nachrichten per Telegram zuschicken lassen.
@@ -7,7 +9,7 @@ Dazu sagt man "Sende <text> an mein Smartphone" oder "Smartphone Nachricht <text
 """
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     if "smartphone" in text and ("nachricht" in text or "sende" in text):
         return True
@@ -15,7 +17,7 @@ def isValid(text):
         return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     length = len(text)
 
@@ -36,12 +38,12 @@ def handle(text, core, skills):
                     nachricht += liste[i]
                     nachricht += " "
 
-    if nachricht != "":
-        if core.messenger_call:
-            core.say("Du hast folgende Nachricht an dich selbst geschrieben:")
+    if nachricht:
+        if wrapper.messenger_call:
+            wrapper.say("Du hast folgende Nachricht an dich selbst geschrieben:")
         else:
-            core.say("Ok, ich sende " + nachricht + " an dein Smartphone")
-            core.say("Nachricht an dich:", output="messenger")
-        core.say(nachricht, output="messenger")
+            wrapper.say("Ok, ich sende " + nachricht + " an dein Smartphone")
+            wrapper.say("Nachricht an dich:", output="messenger")
+        wrapper.say(nachricht, output="messenger")
     else:
-        core.say("Ich konnte deine Nachricht nicht heraus filtern")
+        wrapper.say("Ich konnte deine Nachricht nicht heraus filtern")

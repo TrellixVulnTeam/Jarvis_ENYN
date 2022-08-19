@@ -1,10 +1,10 @@
 from src.database.connection import RoutineInterface
 from src.models.user import User
-from src.modules import Skills, ModuleWrapper
+from src.modules import ModuleWrapper
 from src.services.light_systems.phue import PhilipsWrapper
 
 
-def handle(text: dict, wrapper: ModuleWrapper, skills: Skills):
+def handle(text: dict, wrapper: ModuleWrapper):
     ton: str = text.get("Ton")
     user: User = text.get("User")
     path: str = str(wrapper.path.joinpath("modules", "resources", "alarm", ton))

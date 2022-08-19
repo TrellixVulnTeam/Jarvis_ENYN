@@ -1,15 +1,13 @@
 from src import log
+from src.modules import ModuleWrapper
 
 PRIORITY = 9
 
 
 def isValid(text):
     text = text.lower()
-    if "abbruch" in text:
-        return True
-    elif "abbrechen" in text:
-        return True
+    return "abbruch" in text or "abbrechen" in text
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     log.action("Command canceled!")

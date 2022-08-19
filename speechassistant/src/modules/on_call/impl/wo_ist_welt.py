@@ -3,13 +3,15 @@ import re
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
+from src.modules import ModuleWrapper
+
 _PATTERNS = [
     (re.compile(r"^wo (ist|liegt|befindet sich) (.+?)[.?]?$", re.I), 2),
     (re.compile(r"^(.+?) (liegt|ist) wo[.?]?$", re.I), 1),
 ]
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     for pattern, groupId in _PATTERNS:
         match = pattern.match(text)
@@ -18,15 +20,15 @@ def isValid(text):
     return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     # Wenn es ein direkter aufruf von wo_ist.py ist, muss der prefix
     # entfernt werden.
     if text.startswith("§DIRECTCALL_FROM_WO_IST§"):
         text = text[len("§DIRECTCALL_FROM_WO_IST§") :]
 
     ort = None
-    if "town" in core.analysis:
-        ort = core.analysis["town"]
+    if "town" in wrapper.analysis:
+        ort = wrapper.analysis["town"]
         if ort == "":
             ort = None
     for pattern, groupId in _PATTERNS:
@@ -37,7 +39,7 @@ def handle(text, core, skills):
                 ort = match.group(groupId)
                 break
     if ort is None:
-        core.say("Entschuldigung, das habe ich nicht verstanden.")
+        wrapper.say("Entschuldigung, das habe ich nicht verstanden.")
     else:
         request = Request(
             "https://nominatim.openstreetmap.org/search?q="
@@ -47,7 +49,7 @@ def handle(text, core, skills):
         response = urlopen(request)
         answer = json.loads(response.read())
         if len(answer) == 0:
-            core.say(
+            wrapper.say(
                 "Diesen Ort kenne ich nicht. Wenn du weißt, wo er liegt, hilf mir doch und trage ihn auf Open Street Map ein."
             )
         else:
@@ -119,7 +121,7 @@ def handle(text, core, skills):
                     type = "country"
 
                 if not type.lower() in strMap:
-                    core.say(
+                    wrapper.say(
                         "Da fällt mir etwas zu ein, aber es ist besser du suchst es selbst. Ich vermute mein Ergebnis ist nicht das, was du suchst."
                     )
                     return
@@ -189,8 +191,8 @@ def handle(text, core, skills):
                 if type == "country" and f7 != "":
                     type = "country_with_capital"
 
-                core.say(
+                wrapper.say(
                     strMap[type.lower()].format(ort, f1, f2, f3, f4, f5, f6, f7, f8, f9)
                 )
             except KeyError:
-                core.say("Es ist ein Fehler aufgetreten.")
+                wrapper.say("Es ist ein Fehler aufgetreten.")

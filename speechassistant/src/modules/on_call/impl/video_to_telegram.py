@@ -10,10 +10,10 @@ from pathlib import Path
 import pytube
 
 from src import log
-from src.modules import ModuleWrapper, Skills
+from src.modules import ModuleWrapper
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
 
     if (
@@ -28,7 +28,7 @@ def isValid(text):
         return False
 
 
-def handle(text: str, core: ModuleWrapper, skills: Skills):
+def handle(text: str, core: ModuleWrapper):
     SAVE_PATH: Path = core.path.joinpath("modules").joinpath("resources")
     VIDEO_PATH: Path = SAVE_PATH
 

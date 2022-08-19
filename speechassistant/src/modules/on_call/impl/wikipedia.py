@@ -1,30 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
+from src.modules import ModuleWrapper, skills
+from src.modules.batches import batchMatch
+import wikipedia
+
 PRIORITY = -1
 SECURE = True
-import wikipedia
+
+# toDo: refactor
 
 # wikipedia.set_lang("de")
 
-"""
-Was weißt du über <>
-Was ist <>
-Was sind <>
-Wer war <>
-Definiere mir <>
-Was verstehst du unter <>
-Weißt du etwas über <>
-"""
 
-
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     batch = [
         "was weißt du über",
         "[was|wer] [ist|sind|war|waren]",
     ]
-    if " mal " in text or " plus " in text or " minus " in text or " geteilt " in text:
+    if skills.match_any(text, " mal ", " plus ", " minus", " geteilt "):
         return False
     elif batchMatch(batch, text) or "was versteh" in text or "definier" in text:
         return True
@@ -32,7 +27,7 @@ def isValid(text):
         return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower().replace("ß", "ss")
     try:
         if "über" in text:
@@ -90,7 +85,7 @@ def handle(text, core, skills):
         try:
             wikitext = wikipedia.summary(article)
             wikitext = shorten(wikitext)
-            core.say("Ich habe folgendes herausgefunden: " + wikitext)
+            wrapper.say("Ich habe folgendes herausgefunden: " + wikitext)
         except wikipedia.exceptions.DisambiguationError as e:
             succ = False
             for el in e.options:
@@ -116,16 +111,16 @@ def handle(text, core, skills):
                     print("EEERRR", ef)
                     outstr = "Leider kann ich dir im Moment nichts darüber erzählen. vielleicht versuchst du, deine Frage klarer zu formulieren?"
                 except wikipedia.exceptions.PageError:
-                    core.say(
+                    wrapper.say(
                         "Ich habe zwar Antworten gefunden, aber keine davon passt so richtig auf deine Frage. Entschuldige."
                     )
-            core.say(outstr)
+            wrapper.say(outstr)
         except wikipedia.exceptions.PageError:
-            core.say(
+            wrapper.say(
                 "Leider weiß ich keine Antwort auf deine Frage. Vielleicht hilft dir eine Suche im Internet weiter?"
             )
     except IndexError:
-        core.say(
+        wrapper.say(
             "Leider hast du deine Frage so forumliert, dass ich sie nicht verstehen konnte. Das tut mir leid, versuch s doch einfach erneut!"
         )
 
@@ -161,40 +156,3 @@ def masstrip(input, blacklist):
     for word in blacklist:
         input = input.replace(word, "")
     return input.strip()
-
-
-def batchGen(batch):
-    """
-    With the batchGen-function you can generate fuzzed compare-strings
-    with the help of a easy syntax:
-        "Wann [fährt|kommt] [der|die|das] nächst[e,er,es] [Bahn|Zug]"
-    is compiled to a list of sentences, each of them combining the words
-    in the brackets in all different combinations.
-    This list can then fox example be used by the batchMatch-function to
-    detect special sentences.
-    """
-    outlist = []
-    ct = 0
-    while len(batch) > 0:
-        piece = batch.pop()
-        if "[" not in piece and "]" not in piece:
-            outlist.append(piece)
-        else:
-            frontpiece = piece.split("]")[0]
-            inpiece = frontpiece.split("[")[1]
-            inoptns = inpiece.split("|")
-            for optn in inoptns:
-                rebuild = frontpiece.split("[")[0] + optn
-                rebuild += "]".join(piece.split("]")[1:])
-                batch.append(rebuild)
-    return outlist
-
-
-def batchMatch(batch, match):
-    t = False
-    if isinstance(batch, str):
-        batch = [batch]
-    for piece in batchGen(batch):
-        if piece.lower() in match.lower():
-            t = True
-    return t

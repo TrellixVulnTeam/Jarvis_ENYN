@@ -1,19 +1,15 @@
 from datetime import datetime
 
-from src.core import ModuleWrapper
-from src.resources import Skills
+from src.modules import skills, ModuleWrapper
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
-    if "erinner" in text or "erinnere" in text:
-        return True
-    else:
-        return False
+    return skills.match_all(text, "erinner", "mich")
 
 
 # toDo: rework get_text
-def get_text(core, text):
+def get_text(text: str):
     remembrall = ""
     e_ind = 0
     text = text.lower()
@@ -114,7 +110,7 @@ def get_text(core, text):
     return ausgabe
 
 
-def get_reply_time(core, dicanalyse):
+def get_reply_time(wrapper: ModuleWrapper, dicanalyse: dict):
     time = dicanalyse.get("time")
     jahr = str(time["year"])
     monat = str(time["month"])
@@ -134,9 +130,9 @@ def get_reply_time(core, dicanalyse):
             mine = mine
     else:
         mine = minute
-    day = core.skills.Statics.numb_to_day_numb.get(tag)
-    month = core.skills.Statics.numb_to_month.get(str(monat))
-    hour = core.skills.Statics.numb_to_hour.get(str(stunde))
+    day = wrapper.skills.Statics.numb_to_day_numb.get(tag)
+    month = wrapper.skills.Statics.numb_to_month.get(str(monat))
+    hour = wrapper.skills.Statics.numb_to_hour.get(str(stunde))
     zeit_der_erinnerung = (
             str(day) + " " + str(month) + " um " + str(hour) + " Uhr " + str(mine)
     )
@@ -144,32 +140,34 @@ def get_reply_time(core, dicanalyse):
     return reply
 
 
-def handle(text: str, core: ModuleWrapper, skills: Skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    # toDo: database access
+    
     if "lösch" in text:
-        time: datetime = core.analysis["datetime"]
-        erinnerungen = core.local_storage["Erinnerungen"]
+        time: datetime = wrapper.analysis["datetime"]
+        erinnerungen = wrapper.local_storage["Erinnerungen"]
 
-        counter: int = core.data_base.reminder_interface.delete_reminder()
+        counter: int = wrapper.data_base.reminder_interface.delete_reminder()
         if counter == 0:
-            core.say(
+            wrapper.say(
                 f"Du hast keine Erinnerungen am {time.day}.{time.month} um {skills.get_time(time)}."
             )
         elif counter == 1:
-            core.say(
+            wrapper.say(
                 "Ich habe eine Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht."
             )
         else:
-            core.say(
+            wrapper.say(
                 f"Ich habe {counter} Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht."
             )
 
     else:
-        reminder_text: str = get_text(core, text)
-        core.data_base.reminder_interface.add_reminder(
-            reminder_text, core.analysis["datetime"], core.user
+        reminder_text: str = get_text(wrapper, text)
+        wrapper.data_base.reminder_interface.add_reminder(
+            reminder_text, wrapper.analysis["datetime"], wrapper.user
         )
 
-        rep = get_reply_time(core, core.analysis)
+        rep = get_reply_time(wrapper, wrapper.analysis)
         if "dass " in reminder_text:
             antwort = (
                     "Alles klar, ich sage dir am "
@@ -177,7 +175,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
                     + " bescheid, "
                     + reminder_text
                     + "."
-            )  ###
+            )
         elif "ans " in text:
             antwort = (
                     "Alles klar, ich erinnere dich am "
@@ -194,4 +192,4 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
                     + reminder_text
                     + " musst."
             )
-        core.say(antwort)
+        wrapper.say(antwort)

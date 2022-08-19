@@ -1,6 +1,8 @@
 import random
 import re
 
+from src.modules import ModuleWrapper
+
 PRIORITY = 1
 
 data = [
@@ -31,28 +33,28 @@ data = [
 personPattern = re.compile(r".*?wie kann ich (.*?)\s.*", re.I)
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     ret = personPattern.match(text) is not None
     return ret
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     if "wie kann ich jemand" in text:
         for entry in data:
-            for str in entry[0]:
-                if str.lower() in text:
-                    core.say(random.choice(entry[1]))
+            for item in entry[0]:
+                if item.lower() in text:
+                    wrapper.say(random.choice(entry[1]))
                     return
-        core.say("Da kann ich dir leider nicht helfen.")
+        wrapper.say("Da kann ich dir leider nicht helfen.")
     else:
         match = personPattern.match(text)
         if match is not None:
             person = match.group(1)
             for entry in data:
-                for str in entry[0]:
-                    if str.lower() in text:
-                        core.say(random.choice(entry[2]).format(person))
+                for item in entry[0]:
+                    if item.lower() in text:
+                        wrapper.say(random.choice(entry[2]).format(person))
                         return
-        core.say("Da kann ich dir leider nicht helfen.")
+        wrapper.say("Da kann ich dir leider nicht helfen.")

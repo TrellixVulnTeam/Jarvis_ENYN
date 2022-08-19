@@ -1,5 +1,4 @@
-from src.core import ModuleWrapper
-from src.resources import Skills
+from src.modules import ModuleWrapper
 
 
 def isValid(text: str) -> bool:
@@ -8,7 +7,7 @@ def isValid(text: str) -> bool:
     return False
 
 
-def handle(text: str, core: ModuleWrapper, skills: Skills) -> None:
+def handle(text: str, core: ModuleWrapper) -> None:
     city: str = core.analysis.get("town")
     if city is None:
         city = core.local_storage.get("city")

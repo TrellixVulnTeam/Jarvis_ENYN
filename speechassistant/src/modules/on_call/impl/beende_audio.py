@@ -1,4 +1,9 @@
-def isValid(text):
+from src.modules import ModuleWrapper
+
+
+# toDo: rework
+
+def isValid(text: str) -> bool:
     text = text.lower()
     if "stopp" in text:
         return True
@@ -6,18 +11,18 @@ def isValid(text):
         return True
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     if "musik" in text:
-        core.audio_output.music_player.stop()
+        wrapper.audio_output.music_player.stop()
     elif "ausgabe" in text:
-        core.audio_output.stop_notification()
-        core.audio_output.stop_music()
-        core.audio_output.stop_playback()
+        wrapper.audio_output.stop_notification()
+        wrapper.audio_output.stop_music()
+        wrapper.audio_output.stop_playback()
     elif "wecker" in text or "wach" in text:
-        core.audio_output.stop_playback()
+        wrapper.audio_output.stop_playback()
     else:
-        core.audio_output.music_player.stop()
-        core.audio_output.stop_notification()
-        core.audio_output.stop_music()
-        core.audio_output.stop_playback()
+        wrapper.audio_output.music_player.stop()
+        wrapper.audio_output.stop_notification()
+        wrapper.audio_output.stop_music()
+        wrapper.audio_output.stop_playback()

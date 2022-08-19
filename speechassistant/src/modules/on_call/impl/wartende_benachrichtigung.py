@@ -2,40 +2,39 @@ import traceback
 from datetime import datetime
 
 from src import log
+from src.modules import ModuleWrapper
 
 SECURE = True
 
+# toDo: use database connection
 
-def isValid(text):
+def isValid(text: str) -> bool:
     # toDo
     return False
 
 
-def handle(text, core, skills):
-    if core.user is None:
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    if wrapper.user is None:
         return
     try:
-        if "waiting_notifications" not in core.user.keys():
-            core.user["waiting_notifications"] = []
+        if "elapsed_awaiting_notifications" not in wrapper.user.keys():
+            wrapper.user["elapsed_awaiting_notifications"] = []
 
-        if "elapsed_awaiting_notifications" not in core.user.keys():
-            core.user["elapsed_awaiting_notifications"] = []
-
-        for item in core.user["waiting_notifications"]:
+        for item in wrapper.user["waiting_notifications"]:
             # clear the storage
             date = item.get("Date")
             now = datetime.now()
             if date is not None and type(date) is type(datetime):
                 # if Date is defined and in the past: move it
                 if date.day < now.day and date.month <= now.month:
-                    core.user["elapsed_awaiting_notifications"].append(item)
-                    core.user["waiting_notifications"].remove(item)
+                    wrapper.user["elapsed_awaiting_notifications"].append(item)
+                    wrapper.user["waiting_notifications"].remove(item)
 
         # create a parameter with storage, so we can work with it (delete items and co)
-        infos = core.user["waiting_notifications"].copy()
+        infos = wrapper.user["waiting_notifications"].copy()
         print(f"Text: {text} and type: {type(text)}")
 
-        # module was called via core
+        # module was called via wrapper
         for item in infos:
             date = item.get("Date")
             if date is None:
@@ -53,18 +52,18 @@ def handle(text, core, skills):
         if len(infos) >= 1:
             # if at least one or more item(s) is|are there, go on
             if len(infos) > 1:
-                core.say("Hier noch ein paar wichtige Nachrichten für dich:")
+                wrapper.say("Hier noch ein paar wichtige Nachrichten für dich:")
             else:
-                core.say("Hier noch eine wichtige Nachricht für dich:")
+                wrapper.say("Hier noch eine wichtige Nachricht für dich:")
 
             for item in infos:
                 txt = item.get("message")
                 # It also checks whether the notification is audio or not
                 if txt.startswith("\Audio:"):
-                    core.play(pfad=item.remove("\Audio:"))
+                    wrapper.play(pfad=item.remove("\Audio:"))
                 else:
-                    core.say(txt)
-                core.user["waiting_notifications"].remove(item)
+                    wrapper.say(txt)
+                wrapper.user["waiting_notifications"].remove(item)
     except RuntimeError:
         log.warning('Something went wrong in Module "wartende_benachrichtigungen"')
         traceback.print_exc()
