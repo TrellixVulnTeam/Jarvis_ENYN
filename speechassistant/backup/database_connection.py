@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from src.exceptions.critical_exception import UnsolvableException
 from src.exceptions.sql_exception import *
-from src.modules.module_skills import Skills
+import src.modules.skills
 
 if TYPE_CHECKING:
     from src.models.shopping_list import ShoppingListItem
