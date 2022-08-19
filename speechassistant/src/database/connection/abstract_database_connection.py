@@ -49,13 +49,9 @@ class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
             return self.schema_to_model(model_schema)
 
     def get_all(self) -> list[Model]:
-        result_models: list[Model]
         with Session(self.engine) as session:
             stmt = select(self.get_schema_type())
-            result_models = [
-                self.schema_to_model(a) for a in session.execute(stmt).scalars().all()
-            ]
-        return result_models
+            return [self.schema_to_model(a) for a in session.execute(stmt).scalars().all()]
 
     def update(self, updated_model: Model) -> Model:
         return self.update_by_id(self.get_model_id(updated_model), updated_model)
