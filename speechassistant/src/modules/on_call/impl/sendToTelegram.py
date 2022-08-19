@@ -9,7 +9,7 @@ Dazu sagt man "Sende <text> an mein Smartphone" oder "Smartphone Nachricht <text
 """
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "smartphone" in text and ("nachricht" in text or "sende" in text):
         return True

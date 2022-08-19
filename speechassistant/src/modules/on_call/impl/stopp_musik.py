@@ -3,7 +3,7 @@ from src.modules import ModuleWrapper
 
 # toDo
 
-def isValid(text):
+def is_valid(text):
     return False
 
 

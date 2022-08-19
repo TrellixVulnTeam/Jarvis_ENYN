@@ -3,16 +3,16 @@ import datetime
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if (
-        (text.startswith("hallo") or text == "hi" or text == "hey" or text == "/start")
-        and not "geht" in text
-        or "läuft" in text
+            (text.startswith("hallo") or text == "hi" or text == "hey" or text == "/start")
+            and not "geht" in text
+            or "läuft" in text
     ):
         return True
     elif "gute" in text and (
-        "tag" in text or "morgen" in text or "abend" in text or "nacht" in text
+            "tag" in text or "morgen" in text or "abend" in text or "nacht" in text
     ):
         return True
     return False

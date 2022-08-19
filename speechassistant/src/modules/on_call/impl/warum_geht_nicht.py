@@ -1,9 +1,9 @@
-def isValid(text):
+def is_valid(text):
     text = text.lower()
     if (
-        "warum" in text
-        and ("funktioniert" in text or "geht" in text)
-        and "nicht" in text
+            "warum" in text
+            and ("funktioniert" in text or "geht" in text)
+            and "nicht" in text
     ):
         return True
 

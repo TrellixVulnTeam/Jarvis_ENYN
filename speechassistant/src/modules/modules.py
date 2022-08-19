@@ -124,11 +124,11 @@ class Modules:
     def __find_matching_module(self, analysis, messenger, mod_skill, text, user) -> Thread | None:
         for module in self.modules:
             try:
-                if module.isValid(str(text).lower()):
+                if module.is_valid(str(text).lower()):
                     self.core.active_modules[str(text)] = self.module_wrapper(text, analysis, messenger, user)
                     return self.__start_module_in_new_thread(mod_skill, module, text)
             except AttributeError:
-                log.warning(f"Module {module.__name__} has no isValid() function!")
+                log.warning(f"Module {module.__name__} has no is_valid() function!")
             except Exception as e:
                 log.exception(e)
                 log.warning(f"Module {module.__name__} could not be queried!")
@@ -198,7 +198,7 @@ class Modules:
 
     def run_module(self, text: str, module_wrapper: ModuleWrapper, mod_skill: Skills) -> None:
         for module in self.modules:
-            if module.isValid(text):
+            if module.is_valid(text):
                 module.handle(text, module_wrapper)
 
     def run_continuous(self) -> None:

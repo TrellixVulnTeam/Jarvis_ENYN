@@ -6,9 +6,10 @@ from src.modules import ModuleWrapper
 
 SECURE = True
 
+
 # toDo: use database connection
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     # toDo
     return False
 
@@ -39,7 +40,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
             date = item.get("Date")
             if date is None:
                 continue
-            elif type(date) is type([]) and date is not []:
+            elif type(date) is list and date is not []:
                 for d in date:
                     now = datetime.now()
                     if not (d.day == now.day and d.month == now.month):

@@ -3,7 +3,7 @@ from src.modules import ModuleWrapper
 SECURE = True
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     return text.lower().startswith("wiederhole")
 
 

@@ -5,7 +5,7 @@ from spacex_py import launches
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text):
+def is_valid(text):
     hit_list = ["rakete", "spacex"]
     if any((hit for hit in hit_list if hit in text.lower())) is True:
         return True

@@ -8,7 +8,7 @@ def handle(text: dict, wrapper: ModuleWrapper):
     ton: str = text.get("Ton")
     user: User = text.get("User")
     path: str = str(wrapper.path.joinpath("modules", "resources", "alarm", ton))
-    
+
     __turn_on_lights(wrapper)
 
     __ring(wrapper, path)
@@ -41,5 +41,5 @@ def __get_output_for_greeting_user(user: User) -> str:
     return f"Guten Morgen{user_announce}! Ich hoffe du hast gut geschlafen und wünsche dir einen tollen Tag"
 
 
-def isValid(text):
+def is_valid(text):
     return False

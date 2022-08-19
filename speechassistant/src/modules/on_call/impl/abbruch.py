@@ -4,7 +4,7 @@ from src.modules import ModuleWrapper
 PRIORITY = 9
 
 
-def isValid(text):
+def is_valid(text):
     text = text.lower()
     return "abbruch" in text or "abbrechen" in text
 

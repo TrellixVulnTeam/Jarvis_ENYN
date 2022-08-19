@@ -6,9 +6,9 @@ from wordcloud import WordCloud
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     if ("erstell" in text or "generier" in text) and (
-        "wortfeld" in text or "wordmap" in text or "wortwolke" in text
+            "wortfeld" in text or "wordmap" in text or "wortwolke" in text
     ):
         return True
     return False

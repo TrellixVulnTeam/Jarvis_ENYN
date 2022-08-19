@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from src.modules import ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     if "wie" in text and "wird" in text and "wetter" in text:
         return True
     return False

@@ -14,12 +14,12 @@ TAGESSCHAU_URL = (
 )
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "was" in text and ("gibt's" in text or "gibts" in text) and "neues" in text:
         return True
     if (
-        "sage" in text or "erzähl" in text or "erzähle" in text or "sprich" in text
+            "sage" in text or "erzähl" in text or "erzähle" in text or "sprich" in text
     ) and "nachrichten" in text:
         return True
 

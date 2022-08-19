@@ -85,11 +85,11 @@ def handle(text: str, core: ModuleWrapper):
     match = bruchFinder.match(text)
     while match is not None:
         replacement = (
-            "("
-            + numeratorMap.get(match.group(2), match.group(2))
-            + "/"
-            + denomintorMap.get(match.group(3), "1")
-            + ")"
+                "("
+                + numeratorMap.get(match.group(2), match.group(2))
+                + "/"
+                + denomintorMap.get(match.group(3), "1")
+                + ")"
         )
         text = match.group(1) + replacement + match.group(4)
         match = bruchFinder.match(text)
@@ -136,13 +136,13 @@ def handle(text: str, core: ModuleWrapper):
             funktion2 = "**(0.5)"
         if funktion1 != "" or funktion2 != "":
             text = (
-                match.group(1)
-                + funktion1
-                + "("
-                + match.group(3)
-                + ")"
-                + funktion2
-                + match.group(4)
+                    match.group(1)
+                    + funktion1
+                    + "("
+                    + match.group(3)
+                    + ")"
+                    + funktion2
+                    + match.group(4)
             )
             match = bruchFinder.match(text)
         else:
@@ -172,34 +172,34 @@ def handle(text: str, core: ModuleWrapper):
     core.say(resultStr)
 
 
-def isValid(text):
+def is_valid(text):
     text = text.lower()
     if (
-        not "wie viel ist" in text
-        and not "wie viel sind" in text
-        and not "wie viel ergibt" in text
-        and not "was ergibt" in text
-        and not "was macht" in text
-        and not "was ist" in text
-        and not "was sind" in text
+            not "wie viel ist" in text
+            and not "wie viel sind" in text
+            and not "wie viel ergibt" in text
+            and not "was ergibt" in text
+            and not "was macht" in text
+            and not "was ist" in text
+            and not "was sind" in text
     ):
         return False
     if (
-        "+" in text
-        or "*" in text
-        or " x " in text
-        or "- " in text
-        or " / " in text
-        or " geteilt " in text
-        or " hoch " in text
-        or " minus " in text
-        or " plus " in text
-        or " durch " in text
-        or "wurzel " in text
-        or "sinus " in text
-        or " tangens " in text
-        or " quadrat " in text
-        or " pi " in text
+            "+" in text
+            or "*" in text
+            or " x " in text
+            or "- " in text
+            or " / " in text
+            or " geteilt " in text
+            or " hoch " in text
+            or " minus " in text
+            or " plus " in text
+            or " durch " in text
+            or "wurzel " in text
+            or "sinus " in text
+            or " tangens " in text
+            or " quadrat " in text
+            or " pi " in text
     ):
         return True
     if bruchFinder.match(text) is not None:

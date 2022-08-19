@@ -20,10 +20,10 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
     wrapper.say("Die Module wurden neu geladen.")
 
 
-def isValid(text:str):
+def is_valid(text: str):
     text = text.lower()
     if ("lad" in text or "nadel" in text or "load" in text) and (
-        "modul" in text or "Duden" in text
+            "modul" in text or "Duden" in text
     ):
         return True
     else:

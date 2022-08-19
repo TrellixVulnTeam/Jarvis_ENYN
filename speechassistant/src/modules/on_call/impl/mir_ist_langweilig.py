@@ -3,7 +3,7 @@ import random
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     return "mir" in text and "langweilig" in text
 
 

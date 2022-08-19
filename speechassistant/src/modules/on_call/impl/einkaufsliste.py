@@ -4,7 +4,8 @@ from src.modules import ModuleWrapper, skills
 
 database: ShoppingListInterface = ShoppingListInterface()
 
-def isValid(text: str) -> bool:
+
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "to" in text and "do" in text and "liste" in text:
         return False

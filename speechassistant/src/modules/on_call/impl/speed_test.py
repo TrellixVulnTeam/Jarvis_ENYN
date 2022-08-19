@@ -6,12 +6,12 @@ import speedtest as speedtest
 from src.modules import ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if (
-        "speedtest" in text
-        or ("geschwindigkeit" in text and "internet" in text)
-        or ("schnell" in text and "verbindung" in text)
+            "speedtest" in text
+            or ("geschwindigkeit" in text and "internet" in text)
+            or ("schnell" in text and "verbindung" in text)
     ):
         return True
     elif "besteht" in text and "verbindung" in text and "internet" in text:
@@ -23,9 +23,9 @@ def isValid(text: str) -> bool:
 def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     if (
-        "speedtest" in text
-        or ("geschwindigkeit" in text and "internet" in text)
-        or ("schnell" in text and "verbindung" in text)
+            "speedtest" in text
+            or ("geschwindigkeit" in text and "internet" in text)
+            or ("schnell" in text and "verbindung" in text)
     ):
         run_speedtest(wrapper)
     elif "besteht" in text and "verbindung" in text and "internet" in text:

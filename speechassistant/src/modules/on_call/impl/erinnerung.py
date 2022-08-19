@@ -3,7 +3,7 @@ from datetime import datetime
 from src.modules import skills, ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     return skills.match_all(text, "erinner", "mich")
 
@@ -142,7 +142,7 @@ def get_reply_time(wrapper: ModuleWrapper, dicanalyse: dict):
 
 def handle(text: str, wrapper: ModuleWrapper) -> None:
     # toDo: database access
-    
+
     if "lösch" in text:
         time: datetime = wrapper.analysis["datetime"]
         erinnerungen = wrapper.local_storage["Erinnerungen"]

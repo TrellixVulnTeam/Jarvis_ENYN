@@ -3,7 +3,7 @@ from src.modules import ModuleWrapper
 PRIORITY = 1
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.replace(".", (""))
     text = text.replace("?", (""))
     if "wo " in text and "ist" in text:
@@ -12,7 +12,7 @@ def isValid(text: str) -> bool:
 
 def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
-    for user in wrapper.core.users.get_user_list(): # toDo: database query: where text contains user.alias.lower OR ...
+    for user in wrapper.core.users.get_user_list():  # toDo: database query: where text contains user.alias.lower OR ...
         if (
                 user.alias.lower() in text
                 or user.first_name.lower() in text

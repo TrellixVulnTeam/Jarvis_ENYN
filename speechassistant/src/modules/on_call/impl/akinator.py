@@ -5,7 +5,7 @@ import src.modules.skills as skills
 PRIORITY = 3
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     return ("start" in text or "beginn" in text) and (
             "ratespiel" in text or "akinator" in text) or "wer bin ich" in text
@@ -60,8 +60,8 @@ def __assign_user_input(user_input: str, wrapper: ModuleWrapper):
         return "idk"
     else:
         response: str = wrapper.listen(text='Das habe ich leider nicht verstanden. Versuche es bitte noch einmal mit '
-                                         'den Antwortmöglichkeiten '
-                                         '\n"Ja"\n"Ne'
-                                         '#in"\n"wahrscheinlich"\n"wahrscheinlich nicht"\noder "keine '
-                                         'Ahnung"!')
+                                            'den Antwortmöglichkeiten '
+                                            '\n"Ja"\n"Ne'
+                                            '#in"\n"wahrscheinlich"\n"wahrscheinlich nicht"\noder "keine '
+                                            'Ahnung"!')
         __assign_user_input(response, wrapper)

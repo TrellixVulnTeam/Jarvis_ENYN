@@ -10,12 +10,12 @@ PRIORITY = -1
 # Das Modul wird nur aktiv, wenn `fortunes-de` installiert ist.
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     if ("erzähl" in text.lower() or "sag" in text.lower()) and (
-        "irgendwas" in text.lower()
-        or "irgendetwas" in text.lower()
-        or "etwas" in text
-        or "was" in text
+            "irgendwas" in text.lower()
+            or "irgendetwas" in text.lower()
+            or "etwas" in text
+            or "was" in text
     ):
         try:
             installedStr = (

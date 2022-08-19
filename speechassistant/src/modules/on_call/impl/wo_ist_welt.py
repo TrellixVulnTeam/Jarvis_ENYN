@@ -11,7 +11,7 @@ _PATTERNS = [
 ]
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     for pattern, groupId in _PATTERNS:
         match = pattern.match(text)
@@ -24,7 +24,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
     # Wenn es ein direkter aufruf von wo_ist.py ist, muss der prefix
     # entfernt werden.
     if text.startswith("§DIRECTCALL_FROM_WO_IST§"):
-        text = text[len("§DIRECTCALL_FROM_WO_IST§") :]
+        text = text[len("§DIRECTCALL_FROM_WO_IST§"):]
 
     ort = None
     if "town" in wrapper.analysis:
@@ -96,27 +96,27 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
 
                 type = answer["type"]
                 if (
-                    type.lower() == "administrative"
-                    and "linked_place" in answer["extratags"]
+                        type.lower() == "administrative"
+                        and "linked_place" in answer["extratags"]
                 ):
                     type = answer["extratags"]["linked_place"]
                 elif (
-                    type.lower() == "city"
-                    or type.lower() == "town"
-                    or type.lower() == "administrative"
+                        type.lower() == "city"
+                        or type.lower() == "town"
+                        or type.lower() == "administrative"
                 ) and "place" in answer["extratags"]:
                     type = answer["extratags"]["place"]
                 elif (
-                    type.lower() == "administrative"
-                    and len(data) == 2
-                    and "country" in data
-                    and "country_code" in data
+                        type.lower() == "administrative"
+                        and len(data) == 2
+                        and "country" in data
+                        and "country_code" in data
                 ):
                     type = "country"
                 elif (
-                    type.lower() == "administrative"
-                    and len(data) == 1
-                    and "country" in data
+                        type.lower() == "administrative"
+                        and len(data) == 1
+                        and "country" in data
                 ):
                     type = "country"
 
@@ -183,8 +183,8 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
                         f8 = "eine Provinz"
 
                 if (
-                    type.lower() == "administrative"
-                    and "name:prefix" in answer["extratags"]
+                        type.lower() == "administrative"
+                        and "name:prefix" in answer["extratags"]
                 ):
                     f8 = "ein {}".format(answer["extratags"]["name:prefix"])
 

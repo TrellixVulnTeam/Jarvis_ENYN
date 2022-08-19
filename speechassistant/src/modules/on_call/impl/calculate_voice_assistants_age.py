@@ -3,7 +3,7 @@ import datetime
 from src.modules import skills, ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     return skills.match_all(text, "wie", "alt", "du") or skills.match_all(text, "seit", "wann", "dich")
 
 

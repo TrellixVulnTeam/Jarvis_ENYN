@@ -1,7 +1,6 @@
 from src.modules import ModuleWrapper, skills
 from src.services.philips_tv.philips_tv import Pylips
 
-
 # toDo: refactor
 
 user = ""
@@ -17,7 +16,7 @@ color_in_hsb = {
 }
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "fernseh" in text:
         return True

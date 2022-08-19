@@ -3,7 +3,6 @@ import re
 import subprocess
 import tempfile
 
-
 # toDo: refactor
 
 TEXT_EDITOR = "xdotool"
@@ -16,7 +15,7 @@ DELETE = re.compile(
 WORDS = ["diktier", "text"]
 
 
-def isValid(text):
+def is_valid(text):
     text = text.lower().strip()
     if TEXT_EDITOR is "xdotool":
         try:
@@ -62,7 +61,7 @@ def handle(text, core, skill):
     body = []
     text = core.listen().strip()
     while (
-        text.lower() != "stop" and text.lower() != "stopp" and text.lower() != "fertig"
+            text.lower() != "stop" and text.lower() != "stopp" and text.lower() != "fertig"
     ):
         if text != "" and text != "TIMEOUT_OR_INVALID":
             if TEXT_EDITOR is "xdotool":

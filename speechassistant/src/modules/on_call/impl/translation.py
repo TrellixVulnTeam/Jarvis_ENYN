@@ -1,7 +1,7 @@
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "übersetz" in text:
         return True

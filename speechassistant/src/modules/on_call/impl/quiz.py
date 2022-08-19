@@ -48,7 +48,7 @@ ALPHABET = [
 ]
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     # toDo
     return False
 
@@ -57,7 +57,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     AUDIO_PATH = wrapper.path + "/modules/resources/Quiz/audio"
     with open(
-        wrapper.path + "/modules/resources/Quiz/questions.json", "r"
+            wrapper.path + "/modules/resources/Quiz/questions.json", "r"
     ) as question_file:
         questions = json.load(question_file)
 
@@ -117,8 +117,8 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
                         continue
                 # Wenn es keine Audio gibt, einfach nichts machen. Eine Frage wurde ja schon gestellt...
                 if (
-                    item["Antwortmoeglichkeiten"] != []
-                    and len(item["Antwortmoeglichkeiten"]) <= 26
+                        item["Antwortmoeglichkeiten"] != []
+                        and len(item["Antwortmoeglichkeiten"]) <= 26
                 ):  # ich hoffe einfahc mal, dass letzteres zutrifft :)
                     moeglichkeiten = item["Antwortmoeglichkeiten"]
                     for i, item in enumerate(item["Antwortmoeglichkeiten"]):
@@ -161,14 +161,14 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
         # benötigt, damit später die Überprüfung einer Re-
         # aktion auf eine Antwortmöglichkeit überprüft werden kann
         if (
-            "abbruch" in user_response
-            or "stopp" in user_response
-            or (
+                "abbruch" in user_response
+                or "stopp" in user_response
+                or (
                 "ich" in user_response
                 and "kein" in user_response
                 and ("lust" in user_response or "bock" in user_response)
                 or "spaß" in user_response
-            )
+        )
         ):
             if insgesamt == 0:
                 wrapper.say("Okay, Quiz beendet.")
@@ -258,7 +258,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
                 )
                 text += " Die richtige Antwort lautet wie folgt: " + item["Antwort"]
             elif (
-                prozentual >= 0.2
+                    prozentual >= 0.2
             ):  # hier bin ich mir nicht sicher, ob der Wert zu großzügig gewählt wurde. TESTEN!!!
                 text = random.choice(
                     [

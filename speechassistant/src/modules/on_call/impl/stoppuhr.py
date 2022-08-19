@@ -3,7 +3,7 @@ from datetime import datetime
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text):
+def is_valid(text):
     if "stoppuhr" in text.lower():
         return True
     elif "stopp" in text and "zeit" in text:

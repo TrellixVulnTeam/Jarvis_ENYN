@@ -33,7 +33,7 @@ data = [
 personPattern = re.compile(r".*?wie kann ich (.*?)\s.*", re.I)
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     ret = personPattern.match(text) is not None
     return ret

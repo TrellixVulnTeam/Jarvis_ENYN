@@ -10,10 +10,10 @@ from src.modules import ModuleWrapper
 # HTTP-Request: https://maps.googleapis.com/maps/api/distancematrix/json?origins=<>&destinations=<>&language=de&key=<>
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     return ("wie weit" in text or "wie lang" in text) and (
-        "von" in text and ("bis" in text or "nach" in text)
+            "von" in text and ("bis" in text or "nach" in text)
     )
 
 

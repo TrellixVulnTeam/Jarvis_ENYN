@@ -3,7 +3,7 @@ import random
 from src.modules import ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     return "spiel" in text and ("zahl" in text or "erraten" in text)
 

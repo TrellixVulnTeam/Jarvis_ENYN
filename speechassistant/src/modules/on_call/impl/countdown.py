@@ -3,7 +3,7 @@ from time import sleep
 from src.modules import ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     if "countdown" in text.lower():
         return True
     elif "zähl" in text.lower() and "runter" in text.lower():
@@ -16,12 +16,12 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
     time_in_seconds = 0
     for index, item in enumerate(word_bag):
         if "sekunde" in item:
-            time_in_seconds += word_bag[index-1]
+            time_in_seconds += word_bag[index - 1]
         elif "minute" in item:
-            time_in_seconds += word_bag[index-1] * 60
+            time_in_seconds += word_bag[index - 1] * 60
         elif "stunde" in item:
             if "nein" in wrapper.listen(text="Ist das nicht ein bisschen zu lang?"):
-                time_in_seconds += word_bag[index-1] * 3600
+                time_in_seconds += word_bag[index - 1] * 3600
 
     if time_in_seconds == 0:
         wrapper.say(

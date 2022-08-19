@@ -4,7 +4,7 @@ from src.modules import ModuleWrapper, skills
 PRIORITY = 0
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "spiel " in text or "spiele " in text:
         return True

@@ -3,7 +3,7 @@ from src.modules import ModuleWrapper
 
 # toDo: rework
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "stopp" in text:
         return True

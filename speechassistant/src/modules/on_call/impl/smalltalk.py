@@ -4,7 +4,7 @@ import random
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if ("phobie" in text or "ängste" in text or "angst" in text) and (
             "welche" in text or "was" in text or "erzähl" in text or "sag" in text

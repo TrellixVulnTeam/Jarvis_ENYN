@@ -7,7 +7,7 @@ from src.modules import ModuleWrapper
 SECURE = True
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "qr" in text:
         return True

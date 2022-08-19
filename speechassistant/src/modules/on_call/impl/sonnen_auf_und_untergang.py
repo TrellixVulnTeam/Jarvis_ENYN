@@ -87,7 +87,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
         )
 
 
-def isValid(text):
+def is_valid(text):
     text = text.lower()
     if "sonne" in text and ("auf" in text or "unter" in text):
         return True

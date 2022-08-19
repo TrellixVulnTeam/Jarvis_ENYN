@@ -8,12 +8,13 @@ import wikipedia
 PRIORITY = -1
 SECURE = True
 
+
 # toDo: refactor
 
 # wikipedia.set_lang("de")
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     batch = [
         "was weißt du über",
@@ -33,10 +34,10 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
         if "über" in text:
             article = text.split("über ")[1]
         elif (
-            "was ist" in text
-            or "wer ist" in text
-            or "wer war" in text
-            or "was war" in text
+                "was ist" in text
+                or "wer ist" in text
+                or "wer war" in text
+                or "was war" in text
         ):
             article = (
                 text.split("ist ")[1]
@@ -44,10 +45,10 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
                 else text.split(" war")[1]
             )
         elif (
-            "was sind" in text
-            or "wer sind" in text
-            or "wer waren" in text
-            or "was waren" in text
+                "was sind" in text
+                or "wer sind" in text
+                or "wer waren" in text
+                or "was waren" in text
         ):
             article = (
                 text.split("sind ")[1].rstrip("s")
@@ -96,14 +97,14 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
                     wikitext = wikipedia.summary(next)
                     wikitext = shorten(wikitext)
                     outstr = (
-                        "Leider bin ich mir nicht ganz sicher, was du mit dem Begriff "
-                        + article
-                        + " meintest. "
+                            "Leider bin ich mir nicht ganz sicher, was du mit dem Begriff "
+                            + article
+                            + " meintest. "
                     )
                     outstr += (
-                        "Am ehesten passte für mich der Begriff "
-                        + next
-                        + ", den ich deshalb für dich beschreibe. "
+                            "Am ehesten passte für mich der Begriff "
+                            + next
+                            + ", den ich deshalb für dich beschreibe. "
                     )
                     outstr += wikitext
                     succ = True

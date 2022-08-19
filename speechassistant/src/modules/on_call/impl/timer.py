@@ -10,7 +10,7 @@ PRIORITY = 2  # Conflicts with module "wie_lange_noch"
 
 # toDo: refactor and using database
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "timer" in text:
         if "stell" in text or "beginn" in text:

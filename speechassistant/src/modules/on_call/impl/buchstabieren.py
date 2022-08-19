@@ -5,12 +5,12 @@ from src.modules import ModuleWrapper, skills
 PRIORITY = 3  # because hanoi
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if (
-        "buchstabier" in text
-        or "diktier" in text
-        or ("wie" in text and ("geschrieben" in text or "schreibt" in text))
+            "buchstabier" in text
+            or "diktier" in text
+            or ("wie" in text and ("geschrieben" in text or "schreibt" in text))
     ):
         return True
     return False

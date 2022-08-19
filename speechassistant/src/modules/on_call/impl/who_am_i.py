@@ -20,7 +20,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
     )
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "wer" in text and "bin" in text and "ich" in text:
         return True

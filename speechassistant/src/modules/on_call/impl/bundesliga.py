@@ -112,9 +112,9 @@ def getLigaId(txt):
             year = str(datetime.datetime.now().year)
             return ["wm-" + year, "wm" + year, "wm-" + year[2:], "wm" + year[2:]]
         elif (
-            "europameisterschaft" in text
-            or "europa meisterschaft" in text
-            or " em " in text
+                "europameisterschaft" in text
+                or "europa meisterschaft" in text
+                or " em " in text
         ):
             year = str(datetime.datetime.now().year)
             return [
@@ -188,9 +188,9 @@ def ligaResult(rangRaw, liga, verein, hasTriedLastYear=False):
         for t, item in enumerate(js):
             try:
                 if item["TeamName"].lower() in verein.lower() or (
-                    "ShortName" in item
-                    and item["ShortName"] is not None
-                    and item["ShortName"].lower() in verein.lower()
+                        "ShortName" in item
+                        and item["ShortName"] is not None
+                        and item["ShortName"].lower() in verein.lower()
                 ):
                     team = item
                     teamRang = t + 1
@@ -208,18 +208,18 @@ def ligaResult(rangRaw, liga, verein, hasTriedLastYear=False):
             if "ShortName" in team and team["ShortName"] is not None:
                 shortName = team["ShortName"]
             return (
-                team["TeamName"]
-                + " ist mit "
-                + str(team["Points"])
-                + " Punkten auf Platz "
-                + str(teamRang)
-                + " . "
-                + shortName
-                + " konnte "
-                + str(team["Won"])
-                + " Siege erzielen und musste "
-                + str(team["Lost"])
-                + " Niederlagen einstecken."
+                    team["TeamName"]
+                    + " ist mit "
+                    + str(team["Points"])
+                    + " Punkten auf Platz "
+                    + str(teamRang)
+                    + " . "
+                    + shortName
+                    + " konnte "
+                    + str(team["Won"])
+                    + " Siege erzielen und musste "
+                    + str(team["Lost"])
+                    + " Niederlagen einstecken."
             )
         except (IndexError, KeyError):
             return None
@@ -227,15 +227,15 @@ def ligaResult(rangRaw, liga, verein, hasTriedLastYear=False):
         return None
 
 
-def isValid(text):
+def is_valid(text):
     text = text.lower()
     return (
-        "bundesliga" in text
-        or (
-            ("fussball" in text or "fußball" in text)
-            and skills.match_any(text, "weltmeisterschaft", " wm ", "europameisterschaft", " em ")
-        )
-        or "champions league" in text
+            "bundesliga" in text
+            or (
+                    ("fussball" in text or "fußball" in text)
+                    and skills.match_any(text, "weltmeisterschaft", " wm ", "europameisterschaft", " em ")
+            )
+            or "champions league" in text
     )
 
 

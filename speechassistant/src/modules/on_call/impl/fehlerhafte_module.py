@@ -1,7 +1,7 @@
 from src.modules import skills, ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     # funktionier = ["funktionieren", "funktioniert"]
     return "fehlerhaft" in text or skills.match_all(text, "funktionier", "nicht")

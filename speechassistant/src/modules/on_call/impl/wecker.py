@@ -3,7 +3,7 @@ import datetime
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     return "weck" in text.lower()
 
 

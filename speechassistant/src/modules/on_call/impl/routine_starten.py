@@ -5,7 +5,7 @@ from src.modules import ModuleWrapper
 
 # toDo: refactor
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     return False
 
 

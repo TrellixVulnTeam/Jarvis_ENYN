@@ -3,7 +3,7 @@ import datetime
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     if "wie" in text and ("uhr" in text or "spät" in text):
         return True
     elif "weche" in text and ("tag" in text or "datum" in text or "uhrzeit" in text):

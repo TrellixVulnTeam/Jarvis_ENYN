@@ -3,7 +3,7 @@ import time
 from src.modules import ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     return "lad" in text and "audio" in text
 
 

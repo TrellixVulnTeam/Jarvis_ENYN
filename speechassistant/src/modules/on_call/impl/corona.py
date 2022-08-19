@@ -12,7 +12,7 @@ DISTRICT = ""
 
 # toDO: refactor
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower().strip()
     return ("corona" in text or "covid-19" in text) and (
             "info" in text or "daten" in text or "zahlen" in text

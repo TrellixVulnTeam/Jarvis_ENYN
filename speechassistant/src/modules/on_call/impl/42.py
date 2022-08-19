@@ -4,7 +4,7 @@ from src.modules.batches import batchMatch
 PRIORITY = -1
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     batch = ["[was|wie] ist die antwort"]
     return batchMatch(batch, text.lower())
 

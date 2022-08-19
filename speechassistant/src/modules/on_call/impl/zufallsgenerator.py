@@ -83,13 +83,13 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
     wrapper.say(ausgabe)
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if (
-        "münze" in text
-        or ("kopf" in text and "oder" in text and "zahl" in text)
-        or "würfel" in text
-        or (("zufall" in text or "zufällig" in text) and "zahl" in text)
+            "münze" in text
+            or ("kopf" in text and "oder" in text and "zahl" in text)
+            or "würfel" in text
+            or (("zufall" in text or "zufällig" in text) and "zahl" in text)
     ):
         return True
     elif "schere" in text and "stein" in text and "papier" in text:

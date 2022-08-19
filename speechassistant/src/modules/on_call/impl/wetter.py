@@ -1,7 +1,7 @@
 from src.modules import ModuleWrapper
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     if "wie" in text and "ist" in text and "wetter" in text and not "wird" in text:
         return True
     return False

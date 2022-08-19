@@ -4,14 +4,14 @@ from src.models import User
 from src.modules import ModuleWrapper, skills
 
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "timer" in text:
         return False
     elif (
-        "wie" in text
-        and ("weit" in text or "lange") in text
-        and ("noch" in text or "bis" in text)
+            "wie" in text
+            and ("weit" in text or "lange") in text
+            and ("noch" in text or "bis" in text)
     ):
         return True
     return False
@@ -33,7 +33,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
         elif wrapper.user is None:
             user = wrapper.listen(
                 text="Von wessen Geburtstag sprichst du? Antworte bitte nicht im Genitiv und nur den "
-                "Namen!"
+                     "Namen!"
             )
             target_date = get_birthday_date_from_name(user["date_of_birth"])
             targets_name = user.capitalize() + " Geburtstag"

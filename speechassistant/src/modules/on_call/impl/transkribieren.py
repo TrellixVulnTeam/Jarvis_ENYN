@@ -3,7 +3,7 @@ from src.modules import ModuleWrapper, skills
 
 # toDo: refactor
 
-def isValid(text: str) -> bool:
+def is_valid(text: str) -> bool:
     text = text.lower()
     if "transkribier" in text or "schreib mit" in text:
         return True
