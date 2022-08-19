@@ -14,7 +14,9 @@
 # !!!ACHTUNG!!! Bei den Audio-Dateien muss es sich um wav-Dateien handeln
 import json
 
-# toDo: Cleaning up...
+from src.modules import ModuleWrapper
+
+# toDo: refactor
 
 ALPHABET = [
     "a",
@@ -46,34 +48,35 @@ ALPHABET = [
 ]
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
+    # toDo
     return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
-    AUDIO_PFAD = core.path + "/modules/resources/Quiz/audio"
+    AUDIO_PATH = wrapper.path + "/modules/resources/Quiz/audio"
     with open(
-        core.path + "/modules/resources/Quiz/questions.json", "r"
+        wrapper.path + "/modules/resources/Quiz/questions.json", "r"
     ) as question_file:
-        FRAGEN = json.load(question_file)
+        questions = json.load(question_file)
 
     richtig = 0
     insgesamt = 0
-    core.say(
+    wrapper.say(
         "Willkommen im Quiz! Wenn du keine Lust mehr hast, antworte auf eine Frage einfach mit 'Stopp' oder 'Abbruch'."
     )
     # Anschließend werden die richtigen Fragen "geladen"
     if "über" in text or "zu" in text:
         if "allgemeinwissen" in text:
-            possibilities = FRAGEN["allgemeinwissen"]
+            possibilities = questions["allgemeinwissen"]
         elif "geo" in text:
-            possibilities = FRAGEN["geographie"]
+            possibilities = questions["geographie"]
         elif "musik" in text:
-            possibilities = FRAGEN["musik"]
+            possibilities = questions["musik"]
     else:
         pos = ["allgemeinwissen", "geographie", "musik"]
-        possibilities = FRAGEN[random.choice(pos)]
+        possibilities = questions[random.choice(pos)]
 
     # Da man leider nicht random.choice & dict.remove() auf dict-
     # ionarys anwenden kann, muss hier das ganze in eine Array
@@ -91,7 +94,7 @@ def handle(text, core, skills):
         if item["erste_ausgabe"] == "Frage":
             # checken wir mal, ob ein Text drinnen steht
             if item["Frage"] != "":
-                core.say(item["Frage"])
+                wrapper.say(item["Frage"])
                 # Scheinbar gibt es einen zu sagenden Text.
                 # Wie sieht es mit der Audio aus?
                 if item["Audio"] != "":
@@ -99,14 +102,14 @@ def handle(text, core, skills):
                     # wir arbeiten aber leider mit der 3.4, bzw. 3.5. Vlt. sollte man
                     # irgendwann mal über ein Update nachdenken
                     try:
-                        path = AUDIO_PFAD + item["Audio"]
-                        core.play(pfad=path)
+                        path = AUDIO_PATH + item["Audio"]
+                        wrapper.play(pfad=path)
                     except:
                         # WICHTIG: Wenn die Audio wichtig für die Frage ist, aber nicht im Ordner
                         # gefunden wird, wird der Text trotzdem gesagt. Es könnte keinen Sinn ergeben,
                         # Daher sagen wir es einfach dem Nutzer und überspringen die Frage
                         # scheinbar gibt es die Audio nicht.
-                        core.say(
+                        wrapper.say(
                             "Leider gab es ein Problem beim Abspielen einer Audio-Datei. Daher machen wir einfach mit der nächsten Frage weiter!"
                         )
                         fragen.remove(item)
@@ -120,7 +123,7 @@ def handle(text, core, skills):
                     moeglichkeiten = item["Antwortmoeglichkeiten"]
                     for i, item in enumerate(item["Antwortmoeglichkeiten"]):
                         text = ALPHABET[i] + ": " + moeglichkeiten[i]
-                        core.say(text)
+                        wrapper.say(text)
             else:
                 # Man könnte natürlich noch überprüfen, ob es eine Audio
                 # gibt und diese ggf. abspielen. Aber wenn nur ein Lied
@@ -136,9 +139,9 @@ def handle(text, core, skills):
             # erspare ich mal allen die Kommentare. Bei Unklarheiten
             # einfach in das Pardon in der Textausgabe oben nachschauen
             if item["Audio"] != "":
-                core.play(pfad=item["Audio"])
+                wrapper.play(pfad=item["Audio"])
                 if item["Frage"] != "":
-                    core.say(item["Frage"])
+                    wrapper.say(item["Frage"])
             else:
                 fragen.remove(item)
                 # ToDO Log-Eintrag schreiben
@@ -153,7 +156,7 @@ def handle(text, core, skills):
             # ToDO Log-Eintrag schreiben
             continue
 
-        user_response = " " + core.listen().lower() + " "
+        user_response = " " + wrapper.listen().lower() + " "
         # Das Leerzeichen vor und hinter dem listen() wird
         # benötigt, damit später die Überprüfung einer Re-
         # aktion auf eine Antwortmöglichkeit überprüft werden kann
@@ -168,18 +171,18 @@ def handle(text, core, skills):
             )
         ):
             if insgesamt == 0:
-                core.say("Okay, Quiz beendet.")
+                wrapper.say("Okay, Quiz beendet.")
             elif insgesamt == 1:
                 beantwortung = "falsch"
                 if richtig == 1:
                     beantwortung = "richtig"
-                core.say(
+                wrapper.say(
                     "Okay, Quiz beendet. Du hast eine Frage beantwortet, diese war {}.".format(
                         beantwortung
                     )
                 )
             else:
-                core.say(
+                wrapper.say(
                     "Okay, Quiz beendet. Du hast {} Fragen beantwortet, davon waren {}% richtig".format(
                         insgesamt, round(richtig / insgesamt * 100)
                     )
@@ -201,8 +204,8 @@ def handle(text, core, skills):
                     # "Ich glaube es ist a"
                     if " " + ALPHABET[i] + " " in user_response:
                         if i > anz_antwort - 1:
-                            core.say("Ungültige Eingabe! Versuch es nocheinmal!")
-                            user_response = " " + core.listen().lower() + " "
+                            wrapper.say("Ungültige Eingabe! Versuch es nocheinmal!")
+                            user_response = " " + wrapper.listen().lower() + " "
                             break
                         else:
                             user_response = item["Antwortmoeglichkeiten"][i].lower()
@@ -212,8 +215,8 @@ def handle(text, core, skills):
                 if len(user_response) > 0:
                     valid = True
                 else:
-                    core.say("Bitte versuch es noch einmal.")
-                    user_response = " " + core.listen().lower() + " "
+                    wrapper.say("Bitte versuch es noch einmal.")
+                    user_response = " " + wrapper.listen().lower() + " "
 
             # Es soll eine Wahrscheinlichkeit berechnet werden,
             # zu welcher die Antwort richtig ist.
@@ -271,11 +274,11 @@ def handle(text, core, skills):
                     ["Das stimmt nicht. ", "Das ist leider falsch. ", ""]
                 )
                 text += "Die richtige Antwort lautet wie folgt: " + item["Antwort"]
-            core.say(text)
+            wrapper.say(text)
 
     if len(fragen) == 0:
-        core.say("Scheinbar habe ich keine Fragen mehr zu diesem Thema.")
-        core.say(
+        wrapper.say("Scheinbar habe ich keine Fragen mehr zu diesem Thema.")
+        wrapper.say(
             "Du hast {} Fragen beantwortet, davon waren {}% richtig".format(
                 insgesamt, round(richtig / insgesamt * 100)
             )

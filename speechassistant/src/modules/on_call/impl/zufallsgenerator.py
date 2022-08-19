@@ -2,6 +2,8 @@ import random
 import re
 from time import sleep
 
+from src.modules import ModuleWrapper
+
 PRIORITY = 3
 SECURE = True
 
@@ -10,7 +12,7 @@ bisPattern = re.compile(r".*(bis|kleiner gleich) (-?\d+).*", re.I)
 kleinerPattern = re.compile(r".*(unter|kleiner) (als)? (-?\d+).*", re.I)
 
 
-def output(text, core):
+def output(text):
     output = ""
     text = text.lower()
     t = str.split(text)
@@ -68,20 +70,20 @@ def output(text, core):
     return output
 
 
-def handle(text, core, skills):
-    ausgabe = output(text, core).strip()
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    ausgabe = output(text).strip()
     if ausgabe.startswith("-"):
         ausgabe = "minus " + ausgabe[1:]
-    core.say("drei")
+    wrapper.say("drei")
     sleep(1)
-    core.say("zwei")
+    wrapper.say("zwei")
     sleep(1)
-    core.say("eins")
+    wrapper.say("eins")
     sleep(1)
-    core.say(ausgabe)
+    wrapper.say(ausgabe)
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     if (
         "münze" in text

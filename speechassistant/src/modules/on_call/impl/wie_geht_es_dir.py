@@ -1,7 +1,9 @@
 import random
 
+from src.modules import ModuleWrapper
 
-def isValid(text):
+
+def isValid(text: str) -> bool:
     text = text.lower()
     if "wie" in text and (
         ("geht" in text and "dir" in text)
@@ -14,13 +16,13 @@ def isValid(text):
         return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     answers = [
         "Danke, gut!",
-        "Mir gehts gut, {}.".format(core.user["name"]),
-        "Alles gut, {}.".format(core.user["name"]),
+        "Mir gehts gut, {}.".format(wrapper.user.first_name),
+        "Alles gut, {}.".format(wrapper.user.first_name),
     ]
-    reply = core.listen(text=random.choice(answers) + "Und wie geht es dir?").lower()
+    reply = wrapper.listen(text=random.choice(answers) + "Und wie geht es dir?").lower()
     if (
         "nicht so" in reply
         or "schlecht" in reply
@@ -28,7 +30,7 @@ def handle(text, core, skills):
         or "mies" in reply
         or "suboptimal" in reply
     ):
-        core.say(
+        wrapper.say(
             "Das ist blöd, aber denk immer daran: Alles hat ein Ende nur die Wurst hat zwei!"
         )
     elif (
@@ -40,8 +42,8 @@ def handle(text, core, skills):
         or "glücklich" in reply
         or "froh" in reply
     ):
-        core.say("Das freut mich!")
+        wrapper.say("Das freut mich!")
     else:
-        core.say(
+        wrapper.say(
             "Ich fürchte, ich konnte dich nicht verstehen. Geht es dir so schlecht?"
         )

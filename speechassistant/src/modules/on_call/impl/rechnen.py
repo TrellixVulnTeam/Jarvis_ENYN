@@ -1,7 +1,8 @@
 import re
 
+from src.modules import ModuleWrapper
+
 PRIORITY = 5
-SECURE = False  # Verstößt gegen Punkt 1
 
 termFinder = re.compile(
     r".*?((\d|\(|-|minus|sinus|pi|cosinus|kosinus|tangens|kubikwurzel|quadratwurzel|wurzel|ein|null|antwort|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf).*)",
@@ -59,7 +60,7 @@ denomintorMap = {
 }
 
 
-def handle(text, core, skills):
+def handle(text: str, core: ModuleWrapper):
     text = text.lower()
     match = termFinder.match(text)
     if match is None:
@@ -78,9 +79,6 @@ def handle(text, core, skills):
     text = text.replace("hoch", "**")
     text = text.replace("zum quadrat", "**2")
     text = text.replace("quadrat", "**2")
-
-    text = text.replace(" die antwort ", "42")
-    text = text.replace(" antwort ", "42")
 
     text = text.replace("null", "0")
 

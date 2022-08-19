@@ -1,10 +1,9 @@
 import datetime
 
-from src.core import ModuleWrapper
-from src.resources import Skills
+from src.modules import ModuleWrapper, skills
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     if "wie" in text and ("uhr" in text or "spät" in text):
         return True
     elif "weche" in text and ("tag" in text or "datum" in text or "uhrzeit" in text):
@@ -23,7 +22,7 @@ def isValid(text):
     return False
 
 
-def handle(text: str, core: ModuleWrapper, skills: Skills):
+def handle(text: str, core: ModuleWrapper):
     text: str = text.lower()
     now: datetime.datetime = datetime.datetime.now()
     if " uhr " in text or "spät" in text:

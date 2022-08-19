@@ -1,6 +1,11 @@
+from src.modules import ModuleWrapper
+
+
+# toDo
+
 def isValid(text):
     return False
 
 
-def handle(text, core, skills):
-    core.audio_output.music_player.stop()
+def handle(text, wrapper: ModuleWrapper):
+    wrapper.audio_output.music_player.stop()

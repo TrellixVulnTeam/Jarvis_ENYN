@@ -25,7 +25,7 @@ class ModuleWrapper(AbstractWrapper):
         self.messenger_call: bool = messenger
         self.room: str = "messenger" if messenger else "raum"  # toDo when enabling rooms
         self.user: User = user
-
+        self.config = core.config_data
         # toDo: down below
         # self.analysis['town'] = core.local_storage['home_location'] if self.analysis['town'] is None else None
 

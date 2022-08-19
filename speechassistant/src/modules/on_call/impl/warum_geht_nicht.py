@@ -8,7 +8,7 @@ def isValid(text):
         return True
 
 
-def handle(text, core, skills):
+def handle(text, core):
     text = text.lower()
     core.say(
         "Tut mir leid, dieses Modul ist noch in der Entwicklung. Bitte versuche es später erneut."

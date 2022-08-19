@@ -1,24 +1,28 @@
 import json
 import os
 
+from src.modules import ModuleWrapper
 
-def isValid(text):
+
+# toDo: refactor
+
+def isValid(text: str) -> bool:
     text = text.lower()
     if "lad" in text and "routine" in text:
         return True
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     routines = []
-    for file in os.listdir(core.path + "/resources/routine/"):
-        with open(core.path + "/resources/routine/" + file) as routine_file:
+    for file in os.listdir(wrapper.path + "/resources/routine/"):
+        with open(wrapper.path + "/resources/routine/" + file) as routine_file:
             routine = json.load(routine_file)
         routines.append(routine)
 
     for routine in routines:
         if routine["retakes"]["activation"]["after_alarm"]:
-            core.local_storage["alarm_routines"].append(routine)
+            wrapper.local_storage["alarm_routines"].append(routine)
             routines.remove(routine)
-    core.local_storage["routines"] = routines
+    wrapper.local_storage["routines"] = routines
     if text is not "":
-        core.say("Die Routinen wurden aktualisiert.")
+        wrapper.say("Die Routinen wurden aktualisiert.")

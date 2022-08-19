@@ -1,10 +1,7 @@
 import datetime
 import random
 
-from src.core import ModuleWrapper
-from src.resources import Skills
-
-SECURE = True
+from src.modules import ModuleWrapper, skills
 
 
 def isValid(text: str) -> bool:
@@ -214,11 +211,11 @@ def isValid(text: str) -> bool:
         return True
 
 
-def handle(text: str, core: ModuleWrapper, skills: Skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     answer = None
     if "wie" in text and "heißt" in text and "du" in text:
-        sys_name = core.system_name
+        sys_name = wrapper.system_name
         answer = [
             "Ich bin {}, ein Sprachassistent, der auf Datenschutz achtet.".format(
                 sys_name
@@ -448,7 +445,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         else:
             answer = [
                 "Ich bin vieles. Aber dabei achte ich immer darauf, dass ich {} bin.".format(
-                    core.system_name
+                    wrapper.system_name
                 )
             ]
     elif "stell" in text and "dich" in text and "vor" in text:
@@ -484,12 +481,12 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
             "Ich möchte vierundzwanzig sieben zur Verfügung stehen, da ist leider wenig Zeit für einen Partner oder eine Beziehung.",
         ]
     elif "mir" in text and "langweilig" in text:
-        core.say("Soll ich dir was interessantes erzählen?")
-        response = core.listen()
+        wrapper.say("Soll ich dir was interessantes erzählen?")
+        response = wrapper.listen()
         if "ja" in response or "sehr gerne" in response:
             options = ["witz", "fun fact", "zungenbrecher", "phobie", "gedicht"]
             text = "erzähl mir einen " + random.choice(options)
-            handle(text, core, skills)
+            handle(text, wrapper, skills)
         else:
             answer = ["Alles klar, vielleicht findest du ja eine Beschäftigung."]
 
@@ -505,7 +502,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
     elif "aha" in text or "aha?" in text:
         answer = ["Frag mal was vernünftiges!"]
     elif "😂" in text or "haha" in text:
-        core.listen(text="Warum lachst du?")
+        wrapper.listen(text="Warum lachst du?")
         answer = ["Aha...", "In Ordnung"]
     elif "gibt" in text:
         if "osterhase" in text or "osterhasen" in text:
@@ -521,7 +518,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
             ]
 
     elif "paar" in text:
-        core.open_more_times(text, "smalltalk")
+        wrapper.open_more_times(text, "smalltalk")
 
     elif ("phobie" in text or "ängste" in text or "angst" in text) and (
             "welche" in text or "was" in text or "erzähl" in text or "sag" in text
@@ -606,7 +603,7 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
                 answer = [
                     "Viel zu lernen du noch hast!",
                     "Du suchst jemanden, gefunden hast du jemanden.",
-                    "Core, ich bin!",
+                    "wrapper, ich bin!",
                 ]
             elif "weisheit" in text:
                 answer = [
@@ -651,4 +648,4 @@ def handle(text: str, core: ModuleWrapper, skills: Skills):
         else:
             answer = ["Leider weiß ich nicht was ich sagen soll."]
     if answer:
-        core.say(random.choice(answer))
+        wrapper.say(random.choice(answer))

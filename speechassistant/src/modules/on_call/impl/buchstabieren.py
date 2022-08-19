@@ -1,9 +1,11 @@
 import time
 
+from src.modules import ModuleWrapper, skills
+
 PRIORITY = 3  # because hanoi
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     if (
         "buchstabier" in text
@@ -14,7 +16,7 @@ def isValid(text):
     return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     if "buchstabier" in text:
         word = skills.get_text_between("buchstabier", text)[0]
     elif "diktier" in text:
@@ -24,9 +26,9 @@ def handle(text, core, skills):
     elif "wie" in text and "schreibt" in text:
         word = skills.get_text_between("man", text)[0]
     else:
-        core.say("Leider habe ich nicht verstanden, was ich buchstabieren soll.")
+        wrapper.say("Leider habe ich nicht verstanden, was ich buchstabieren soll.")
         return
 
     for letter in word:
-        core.say(letter)
+        wrapper.say(letter)
         time.sleep(0.5)

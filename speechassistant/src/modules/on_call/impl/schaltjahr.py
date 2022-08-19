@@ -1,7 +1,9 @@
 import datetime
 
+from src.modules import ModuleWrapper
 
-def isValid(text):
+
+def isValid(text: str) -> bool:
     text = text.lower()
     if "ist" in text and "schaltjahr" in text:
         return True
@@ -9,13 +11,13 @@ def isValid(text):
         return True
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     if "wann" in text and ("nächste" in text or "wieder" in text):
         year = datetime.date.today().year + 1
         while True:
             if leap_year(year) is True:
-                core.say("Das nächste Schaltjahr ist {}".format(year))
+                wrapper.say("Das nächste Schaltjahr ist {}".format(year))
                 break
             else:
                 year += 1
@@ -26,14 +28,14 @@ def handle(text, core, skills):
             output = "ein"
         else:
             output = "kein"
-        core.say("Das Jahr {} ist {} Schaltjahr.".format(get_year(text), output))
+        wrapper.say("Das Jahr {} ist {} Schaltjahr.".format(get_year(text), output))
     else:
-        core.say(
+        wrapper.say(
             "Ich habe nicht verstanden, was du im Zusammenhang mit Schaltjahren wissen möchtest."
         )
 
 
-def get_year(text):
+def get_year(text: str):
     year = -1
     text = text.split(" ")
     for item in text:
@@ -41,11 +43,10 @@ def get_year(text):
             year = int(item)
         except ValueError:
             pass
-
     return year
 
 
-def leap_year(y):
+def leap_year(y: int):
     is_leap_year = False
     if y % 400 == 0:
         is_leap_year = True

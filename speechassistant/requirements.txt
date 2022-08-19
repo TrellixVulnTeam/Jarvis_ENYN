@@ -33,3 +33,4 @@ parselmouth==1.1.1
 SoundCard==0.4.2
 sounddevice~=0.4.4
 toml~=0.10.2
+speedtest~=0.0.1

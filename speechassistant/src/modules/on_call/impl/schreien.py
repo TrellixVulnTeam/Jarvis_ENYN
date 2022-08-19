@@ -1,15 +1,15 @@
 import time
 
+from src.modules import ModuleWrapper
+
 
 def isValid(text: str) -> bool:
-    if "kannst" in text and "schreien" in text:
-        return True
-    return False
+    return "kannst" in text and "schreien" in text
 
 
-def handle(text, core, skills):
-    core.say("Bitte trete einen Schritt zurück.")
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    wrapper.say("Bitte trete einen Schritt zurück.")
     time.sleep(0.5)
-    core.say("Und noch einen.")
+    wrapper.say("Und noch einen.")
     time.sleep(0.5)
-    core.say("Nein.")
+    wrapper.say("Nein.")

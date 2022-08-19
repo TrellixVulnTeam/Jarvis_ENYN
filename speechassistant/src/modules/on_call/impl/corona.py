@@ -4,18 +4,19 @@ from urllib.parse import urljoin
 
 import requests
 
+from src.modules import ModuleWrapper
+
 API_URL = "https://api.corona-zahlen.org/districts/"
 DISTRICT = ""
 
 
-def isValid(text):
+# toDO: refactor
+
+def isValid(text: str) -> bool:
     text = text.lower().strip()
-    if ("corona" in text or "covid-19" in text) and (
-        "info" in text or "daten" in text or "zahlen" in text
-    ):
-        return True
-    else:
-        return False
+    return ("corona" in text or "covid-19" in text) and (
+            "info" in text or "daten" in text or "zahlen" in text
+    )
 
 
 def get_json(url):
@@ -42,14 +43,14 @@ def get_info_lines(district_key):
     return [template.format_map(dist) for dist in result.values()]
 
 
-def handle(text, core, skill):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     district_key = (
-        core.analysis["town"]
+        wrapper.analysis["town"]
         if len(sys.argv) > 1
-        else core.local_storage["home_location"]
+        else wrapper.local_storage["home_location"]
     )
     lines = get_info_lines(district_key)
     if lines:
-        core.say("Ich habe folgendes herausgefunden: " + lines)
+        wrapper.say("Ich habe folgendes herausgefunden: " + lines)
     else:
         print("Leider habe ich den Landkreis oder die Kreisstadt nicht gefunden")

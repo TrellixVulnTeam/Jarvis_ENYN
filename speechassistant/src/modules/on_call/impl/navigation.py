@@ -1,12 +1,7 @@
 import re
 import googlemaps
 
-SECURE = True
-
-# Beschreibung
-"""
-Dieses Modul fragt die Distanz und Fahrzeit zwischen zwei Orten von Google Maps ab.
-"""
+from src.modules import ModuleWrapper
 
 
 # Python Client Library: https://github.com/googlemaps/google-maps-services-python
@@ -15,17 +10,14 @@ Dieses Modul fragt die Distanz und Fahrzeit zwischen zwei Orten von Google Maps 
 # HTTP-Request: https://maps.googleapis.com/maps/api/distancematrix/json?origins=<>&destinations=<>&language=de&key=<>
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
-    if ("wie weit" in text or "wie lang" in text) and (
+    return ("wie weit" in text or "wie lang" in text) and (
         "von" in text and ("bis" in text or "nach" in text)
-    ):
-        return True
-    else:
-        return False
+    )
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     length = len(text)
 
@@ -58,7 +50,7 @@ def handle(text, core, skills):
 
         distance = float(re.sub(",", "..", distanceTxt))
 
-    core.say(
+    wrapper.say(
         "Von "
         + origin
         + " nach "
@@ -70,7 +62,7 @@ def handle(text, core, skills):
     )
 
 
-class Core:
+class wrapper:
     def __init__(self):
         pass
 
@@ -79,6 +71,6 @@ class Core:
 
 
 if __name__ == "__main__":
-    core = Core()
+    wrapper = wrapper()
     while True:
-        handle(input(), core, None)
+        handle(input(), wrapper, None)

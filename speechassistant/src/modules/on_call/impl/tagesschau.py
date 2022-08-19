@@ -7,12 +7,14 @@ from bs4 import BeautifulSoup
 # PRIORITY = 6
 from pydub import AudioSegment
 
+from src.modules import ModuleWrapper
+
 TAGESSCHAU_URL = (
     "https://www.internetradio-horen.de/podcasts/tagesschau-in-100-sekunden"
 )
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     if "was" in text and ("gibt's" in text or "gibts" in text) and "neues" in text:
         return True
@@ -22,23 +24,23 @@ def isValid(text):
         return True
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     try:
-        download_path = Path(core.path + "/modules/resources")
+        download_path = Path(wrapper.path + "/modules/resources")
         url = get_audio_url()
         path = download_audio(url, download_path)
 
         sound = AudioSegment.from_mp3(
-            core.path + "/modules/resources" + "/tagesschau_100sec.mp3"
+            wrapper.path + "/modules/resources" + "/tagesschau_100sec.mp3"
         )
         sound.export(
-            core.path + "/modules/resources/tagesschau_100sec.wav", format="wav"
+            wrapper.path + "/modules/resources/tagesschau_100sec.wav", format="wav"
         )
-        # wav = wave.open(core.path + "/modules/resources/tagesschau_100sec.wav", 'rb')
-        core.play(path=core.path + "/modules/resources/tagesschau_100sec.wav")
-        # text = core.recognize(wav)
+        # wav = wave.open(wrapper.path + "/modules/resources/tagesschau_100sec.wav", 'rb')
+        wrapper.play(path=wrapper.path + "/modules/resources/tagesschau_100sec.wav")
+        # text = wrapper.recognize(wav)
         os.remove(path)
-        # core.say(text)
+        # wrapper.say(text)
 
     except Exception as e:
         print(f"Abbruch durch Fehler: {e}")

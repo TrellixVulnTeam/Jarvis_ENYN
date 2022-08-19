@@ -1,10 +1,12 @@
 import traceback
 
 import requests
-from speedtest import Speedtest
+import speedtest as speedtest
+
+from src.modules import ModuleWrapper
 
 
-def isValid(text):
+def isValid(text: str) -> bool:
     text = text.lower()
     if (
         "speedtest" in text
@@ -18,19 +20,19 @@ def isValid(text):
         return False
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
     if (
         "speedtest" in text
         or ("geschwindigkeit" in text and "internet" in text)
         or ("schnell" in text and "verbindung" in text)
     ):
-        run_speedtest(core)
+        run_speedtest(wrapper)
     elif "besteht" in text and "verbindung" in text and "internet" in text:
-        internet_availability(core)
+        internet_availability(wrapper)
 
 
-def run_speedtest(core):
+def run_speedtest(wrapper):
     """
     Run an internet speed test. Speed test will show
     1) Download Speed
@@ -38,7 +40,7 @@ def run_speedtest(core):
     3) Ping
     """
     try:
-        core.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
+        wrapper.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
         st = speedtest.Speedtest()
 
         downlink_bps = st.download()
@@ -47,7 +49,7 @@ def run_speedtest(core):
         up_mbps = uplink_bps / 1000000
         down_mbps = downlink_bps / 1000000
 
-        core.say(
+        wrapper.say(
             "Der Ping beträgt %s ms,\n"
             "der Upload %0.2f Mbps\n"
             "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
@@ -55,20 +57,20 @@ def run_speedtest(core):
 
     except Exception:
         traceback.print_exc()
-        core.say(
+        wrapper.say(
             "Es gab ein Problem beim Starten des Speedtests. Bitte versuche es zu einem späteren Zeitpunkt "
             "erneut oder melde den Fehler."
         )
 
 
-def internet_availability(core):
+def internet_availability(wrapper):
     """
     Tells to the user is the internet is available or not.
     """
     if internet_connectivity_check():
-        core.say("Es besteht eine Verbindung zum Internet.")
+        wrapper.say("Es besteht eine Verbindung zum Internet.")
     else:
-        core.say("Derzeit besteht keine Verbingung zum Internet.")
+        wrapper.say("Derzeit besteht keine Verbingung zum Internet.")
 
 
 def internet_connectivity_check(url="https://www.google.com/", timeout=2):
@@ -82,7 +84,7 @@ def internet_connectivity_check(url="https://www.google.com/", timeout=2):
         return False
 
 
-class Core:
+class wrapper:
     def __init__(self):
         pass
 
@@ -91,4 +93,4 @@ class Core:
 
 
 if __name__ == "__main__":
-    handle("starte Speedtest", Core(), None)
+    handle("starte Speedtest", wrapper(), None)

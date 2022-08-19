@@ -1,16 +1,19 @@
-def isValid(text):
+from src.modules import ModuleWrapper, skills
+
+
+def isValid(text: str) -> bool:
     text = text.lower()
     if "übersetz" in text:
         return True
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     # toDo: was heißt auf
-    traslation_text = skills.get_text_between(
+    translation_text = skills.get_text_between(
         "übersetz", text, end_word="ins", output="String"
     )
     targetLang = skills.get_text_between("ins", output="String")
-    core.translate(traslation_text, targetLang=targetLang)
+    wrapper.translate(translation_text, targetLang=targetLang)
 
 
 def get_text_beetween(start_word, text, end_word="", output="array"):

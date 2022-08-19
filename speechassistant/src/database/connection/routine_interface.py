@@ -27,6 +27,16 @@ class RoutineInterface(AbstractDataBaseConnection[Routine, RoutineSchema]):
             model_schema = session.execute(stmt).scalars().first()
             return self._schema_to_model(model_schema)
 
+    def get_all_after_alarm(self) -> list[Routine]:
+        with Session(self.engine) as session:
+            stmt = select(RoutineSchema).where(RoutineSchema.retakes.times.after_alarm)
+            return [self.schema_to_model(a) for a in session.execute(stmt).scalars().all()]
+
+    def get_by_attribute(self, attribute: str, value: any) -> list[Routine]:
+        with Session(self.engine) as session:
+            stmt = select(self.get_schema_type()).where(RoutineSchema.__getattribute__(attribute) == value)
+            return [self.schema_to_model(a) for a in session.execute(stmt).scalars().all()]
+
     @staticmethod
     def _get_model_id(model: Model) -> int:
         return -1

@@ -2,14 +2,15 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from src.core import ModuleWrapper
 from src.enums import OutputTypes
-from src.resources import Skills
+from src.modules import ModuleWrapper, skills
 
 PRIORITY = 2  # Conflicts with module "wie_lange_noch"
 
 
-def isValid(text):
+# toDo: refactor and using database
+
+def isValid(text: str) -> bool:
     text = text.lower()
     if "timer" in text:
         if "stell" in text or "beginn" in text:
@@ -21,18 +22,18 @@ def isValid(text):
     return False
 
 
-def handle(text, core, skills):
+def handle(text: str, core: ModuleWrapper):
     timer_interface = core.data_base.timer_interface
     if "stell" in text or "beginn" in text:
-        create_timer(core, skills, timer_interface, text)
+        create_timer(core, text)
     elif "wie" in text and "lange" in text:
-        core.say(get_remain_duration(timer_interface, skills))
+        core.say(get_remain_duration())
     elif "lösch" in text or "beend" in text or "stopp" in text:
         delete_timer(core)
 
 
 def create_timer(
-        core: ModuleWrapper, skills: Skills, timer_interface, text: str
+        core: ModuleWrapper, text: str
 ) -> None:
     # replace "auf" zu "in", damit die Analyze-Funktion funktioniert
     text = text.replace(" auf ", " in ")
@@ -66,7 +67,7 @@ def get_duration(core, skills, text: str) -> str | None:
     return duration
 
 
-def get_remain_duration(timer_interface, skills: Skills) -> str:
+def get_remain_duration() -> str:
     timer_interface.delete_passed_timer()
     # Just query timer from user
     # user_timer = self.timer_interface.get_timer_of_user(self.core.user['id'])

@@ -3,6 +3,9 @@ import re
 import subprocess
 import tempfile
 
+
+# toDo: refactor
+
 TEXT_EDITOR = "xdotool"
 
 DELETE = re.compile(

@@ -3,6 +3,11 @@ import json
 import re
 from urllib.request import urlopen, Request
 
+from src.modules import ModuleWrapper, skills
+
+# toDo: refactor
+
+
 # Wir brauchen mindestens 3, weil hanoi 2 hat und bereits auf das Wort platz reagiert.
 PRIORITY = 3
 
@@ -16,7 +21,7 @@ platzX2Pattern = re.compile(
 )
 vereinPattern = re.compile(
     r"auf (welchem platz|welchem rang|welcher platzierung|welcher position) ist (.+?) in (.+)",
-    re.I,
+    re.I
 )
 
 
@@ -228,19 +233,13 @@ def isValid(text):
         "bundesliga" in text
         or (
             ("fussball" in text or "fußball" in text)
-            and (
-                "weltmeisterschaft" in text
-                or " wm " in text
-                or "europameisterschaft" in text
-                or "europa meisterschaft" in text
-                or " em " in text
-            )
+            and skills.match_any(text, "weltmeisterschaft", " wm ", "europameisterschaft", " em ")
         )
         or "champions league" in text
     )
 
 
-def handle(text, core, skill):
+def handle(text: str, core: ModuleWrapper):
     rang, liga, verein = getMatch(text)
 
     if liga is None:

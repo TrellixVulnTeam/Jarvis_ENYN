@@ -1,10 +1,15 @@
-def isValid(text):
+from src.modules import ModuleWrapper, skills
+
+
+# toDo: refactor
+
+def isValid(text: str) -> bool:
     text = text.lower()
     if "transkribier" in text or "schreib mit" in text:
         return True
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     start_word = "transkribiere" if "transkribier" in text else "mit"
     text = skills.get_text_between(start_word, text, output="String")
-    core.say(text, output="messenger")
+    wrapper.say(text, output="messenger")

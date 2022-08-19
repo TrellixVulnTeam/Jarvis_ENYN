@@ -1,20 +1,17 @@
-def isValid(text):
+from src.modules import skills, ModuleWrapper
+
+
+def isValid(text: str) -> bool:
     text = text.lower()
-    if "module" in text and "fehlerhaft" in text:
-        return True
-    elif "module" in text and "funktionieren" in text and "nicht" in text:
-        return True
+    # funktionier = ["funktionieren", "funktioniert"]
+    return "fehlerhaft" in text or skills.match_all(text, "funktionier", "nicht")
 
 
-def handle(text, core, skills):
-    faulty_list = []
-    for module in core.local_storage["modules"].values():
-        if module["status"] == "error":
-            faulty_list.append(module["name"])
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    faulty_list = [module for module in wrapper.local_storage["modules"] if module["status"] == "error"]
     if len(faulty_list) == 0:
-        core.say("Alle Module konnten korrekt geladen werden.")
+        wrapper.say("Alle Module konnten korrekt geladen werden.")
     else:
-        core.say(
-            "Folgende Module konnten nicht geladen werden: "
-            + skills.get_enumerate(faulty_list)
+        wrapper.say(
+            f"Folgende Module konnten nicht geladen werden: {skills.get_enumerate(faulty_list)}"
         )

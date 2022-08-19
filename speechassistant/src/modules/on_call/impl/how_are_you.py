@@ -1,41 +1,22 @@
 import random
 
+from src.modules import ModuleWrapper, skills
+
 
 def isValid(text: str) -> bool:
-    if "wie" in text and "geht" in text and "dir" in text:
-        return True
-    return False
+    return "wie" in text and "geht" in text and "dir" in text
 
 
-def handle(text, core, skills):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     answers = [
         "Danke, gut!",
-        "Mir gehts gut, {}.".format(core.user["name"]),
-        "Alles gut, {}.".format(core.user["name"]),
+        "Mir gehts gut, {}.".format(wrapper.user["name"]),
+        "Alles gut, {}.".format(wrapper.user["name"]),
     ]
-    reply = core.listen(text=random.choice(answers) + "Und wie geht es dir?").lower()
-    if (
-        "nicht so" in reply
-        or "schlecht" in reply
-        or "müde" in reply
-        or "mies" in reply
-        or "suboptimal" in reply
-    ):
-        answer = [
-            "Das ist blöd, aber denk immer daran: Alles hat ein Ende nur die Wurst hat zwei!"
-        ]
-    elif (
-        "gut" in reply
-        or "besser" in reply
-        or "bestens" in reply
-        or "super" in reply
-        or "wundervoll" in reply
-        or "glücklich" in reply
-        or "froh" in reply
-    ):
-        answer = ["Das freut mich!"]
+    reply = wrapper.listen(text=random.choice(answers) + "Und wie geht es dir?").lower()
+    if skills.match_any(reply, "schlecht", "müde", "mies", "suboptimal") or "nicht" in text and not "schlecht" in text:
+        wrapper.say("Das ist blöd, aber denk immer daran: Alles hat ein Ende nur die Wurst hat zwei!")
+    elif skills.match_any(reply, "gut", "besser", "bestens", "super", "wundervoll", "glücklich", "froh"):
+        wrapper.say("Das freut mich!")
     else:
-        answer = [
-            "Ich fürchte, ich konnte dich nicht verstehen. Geht es dir so schlecht?"
-        ]
-    core.say(answer)
+        wrapper.say("Ich fürchte, ich konnte dich nicht verstehen. Geht es dir so schlecht?")

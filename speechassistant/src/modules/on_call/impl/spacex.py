@@ -2,10 +2,7 @@
 
 from spacex_py import launches
 
-from src.core import ModuleWrapper
-from src.resources import Skills
-
-SECURE = True
+from src.modules import ModuleWrapper, skills
 
 
 def isValid(text):
@@ -16,24 +13,19 @@ def isValid(text):
         return False
 
 
-def handle(text, core: ModuleWrapper, skills: Skills):
-    ################################################################################
-    # Wann (nächster Start)
-    ################################################################################
-
-    # Define hits
+def handle(text: str, wrapper: ModuleWrapper) -> None:
     hit_list = ["wann", "when"]
 
     if any((hit for hit in hit_list if hit in text.lower())) is True:
         # Get the launches launch
         got_launches, header = launches.get_launches()
 
-        if core.messenger_call is True:
+        if wrapper.messenger_call is True:
             return_string = ""
             return_string += (
                     f"Time (UTC): " + got_launches[-1]["launch_date_utc"] + "\n"
             )
-            core.say(return_string)
+            wrapper.say(return_string)
             return
 
         else:
@@ -43,16 +35,11 @@ def handle(text, core: ModuleWrapper, skills: Skills):
             hour = got_launches[-1]["launch_date_utc"][11:13]
 
             return_string = ""
-            return_string += f"Der nächste Start ist am {skills.statics.numb_to_day_numb[day]} {skills.statics.numb_to_day_numb[month]} "
-            return_string += f"um {skills.statics.numb_to_hour[hour]} Uhr {skills.statics.numb_to_minute[minute]} U T C\n"
-            core.say(return_string)
+            return_string += f"Der nächste Start ist am {skills.Statics.numb_to_day_numb[day]} {skills.Statics.numb_to_day_numb[month]} "
+            return_string += f"um {skills.Statics.numb_to_hour[hour]} Uhr {skills.Statics.numb_to_minute[minute]} U T C\n"
+            wrapper.say(return_string)
             return
 
-    ################################################################################
-    # Infos zum nächstem Start
-    ################################################################################
-
-    # Define hits
     hit_list1 = ["info", "info", "information"]
     hit1 = any((hit for hit in hit_list1 if hit in text.lower()))
 
@@ -60,10 +47,9 @@ def handle(text, core: ModuleWrapper, skills: Skills):
     hit2 = any((hit for hit in hit_list2 if hit in text.lower()))
 
     if hit1 and hit2:
-        # Get the launches
         got_launches, header = launches.get_launches()
 
-        if core.messenger_call:
+        if wrapper.messenger_call:
 
             return_string = ""
 
@@ -88,19 +74,14 @@ def handle(text, core: ModuleWrapper, skills: Skills):
             return_string += "\n\nLinks:\n"
             return_string += got_launches[-1]["links"]["wikipedia"] + "\n"
 
-            core.say(return_string)
+            wrapper.say(return_string)
             return
         else:
-            core.say(
-                core.translate(got_launches[-1]["details"])
-            )  # Weil sich englisch mit der LUNA stimme nicht gut anhört
+            wrapper.say(
+                wrapper.translate(got_launches[-1]["details"])
+            )
             return
 
-    ################################################################################
-    # Links zum nächsten Start
-    ################################################################################
-
-    # Define hits
     hit_list = ["link", "links", "artikel"]
     hit1 = any((hit for hit in hit_list1 if hit in text.lower()))
 
@@ -108,16 +89,13 @@ def handle(text, core: ModuleWrapper, skills: Skills):
     hit2 = any((hit for hit in hit_list2 if hit in text.lower()))
 
     if hit1 is True and hit2 is True:
-        # Get the launches launch
         got_launches, header = launches.get_launches()
 
-        # Get the dict containing the links
         links = got_launches[-1]["links"]
 
-        # Iterate over all the items in the dict appending the links to the return string
         return_string = ""
         for key, value in links.items():
             return_string += f"{value}\n"
 
-        core.say(return_string)
+        wrapper.say(return_string)
         return

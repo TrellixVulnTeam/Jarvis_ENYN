@@ -12,7 +12,6 @@ from .audio import AudioOutput, AudioInput
 from .database.connection import *
 from .models.user import User
 # from .resources.intent.Wrapper import IntentWrapper as AIWrapper
-from .modules.module_skills import Skills
 from .modules.modules import Modules
 from .resources.analyze import Sentence_Analyzer
 from .services import ServiceWrapper
@@ -41,7 +40,6 @@ class Core:
         self.path: Path = Path(__file__).parent
         self.modules: Modules = None
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
-        self.skills: Skills = Skills()
         self.services: ServiceWrapper = ServiceWrapper(self, self.config_data)
         self.messenger = None
         self.messenger_queued_users: list = []
