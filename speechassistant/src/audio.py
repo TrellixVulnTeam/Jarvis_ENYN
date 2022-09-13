@@ -1,11 +1,11 @@
 import pathlib
-import struct
 import time
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from threading import Thread
 from typing import Any
+from typing import TYPE_CHECKING
 
 import pvporcupine
 import speech_recognition as sr
@@ -21,6 +21,9 @@ from .models.audio.queue_item import (
     MusicQueueItem,
 )
 from .resources.tts import TTS
+
+if TYPE_CHECKING:
+    from .core import Core
 
 
 def __load_configuration() -> dict[str, Any]:
@@ -67,8 +70,6 @@ def __create_pyaudio_stream(item):
 
 
 class AudioInput:
-    from .core import Core
-
     def __init__(self, core: Core) -> None:
         self.__core = core
         self.speech_engine: sr.Recognizer = sr.Recognizer()
@@ -105,19 +106,20 @@ class AudioInput:
             pa: PyAudio = PyAudio()
             audio_stream: Stream = self.__create_pyaudio_instance(pa, porcupine)
             self.__wait_for_calls(porcupine, audio_stream, keywords)
-        except MemoryError as e:
+        except MemoryError:
             log.warning("Memory is full!")
             log.action("Restart porcupine...")
             porcupine.delete()
             self.start()
 
-    def __wait_for_calls(self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]) -> None:
+    def __wait_for_calls(
+        self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]
+    ) -> None:
         log.info("\nListening {%s}" % keywords)
 
         while self.running:
             input_bytes: bytes = audio_stream.read(porcupine.frame_length)
-            pcm: tuple = struct.unpack_from("h" * porcupine.frame_length, input_bytes)
-            keyword_index: int = porcupine.process(pcm)
+            keyword_index: int = porcupine.process(input_bytes)
             if keyword_index >= 0 and not self.recording:
                 self.recording = True
                 log.info(
@@ -174,7 +176,9 @@ class AudioInput:
 
     def __signalize_to_listen(self, play_bling_before_listen: bool = None) -> None:
         # toDo change name
-        if play_bling_before_listen or (not play_bling_before_listen and self.config.get("play_bling_before_listen")):
+        if play_bling_before_listen or (
+            not play_bling_before_listen and self.config.get("play_bling_before_listen")
+        ):
             self.play_bling_sound()
 
     def play_bling_sound(self) -> None:
@@ -206,7 +210,7 @@ class AudioInput:
 
     @staticmethod
     def __create_pyaudio_instance(
-            pyaudio_object: PyAudio, porcupine: Porcupine
+        pyaudio_object: PyAudio, porcupine: Porcupine
     ) -> Stream:
         return pyaudio_object.open(
             rate=44100,
@@ -226,7 +230,9 @@ class PlayBlingSound:
 
     @staticmethod
     def play() -> None:
-        item: QueueItem = QueueItem(value=PlayBlingSound.bling_sound.read(), type=QueueType.EFFECT)
+        item: QueueItem = QueueItem(
+            value=PlayBlingSound.bling_sound.read(), type=QueueType.EFFECT
+        )
         play_audio_bytes(item)
 
     @staticmethod
@@ -295,20 +301,35 @@ class AudioOutput:
         )
         self.__insert_to_priority_queue(model)
 
-    def play_music_from_name(self, name: str, as_next: bool = False, announce: bool = False) -> None:
+    def play_music_from_name(
+        self, name: str, as_next: bool = False, announce: bool = False
+    ) -> None:
         pass
 
-    def play_music_from_url(self, url: str, as_next: bool = False, announce: bool = False) -> None:
+    def play_music_from_url(
+        self, url: str, as_next: bool = False, announce: bool = False
+    ) -> None:
         pass
 
-    def play_music_from_bytes(self, buff: BytesIO, as_next: bool = False, sample_rate: int = 44100,
-                              announce: bool = False) -> None:
+    def play_music_from_bytes(
+        self,
+        buff: BytesIO,
+        as_next: bool = False,
+        sample_rate: int = 44100,
+        announce: bool = False,
+    ) -> None:
         pass
 
     def play(
-            self, queue_type: QueueType, buff: BytesIO, as_next: bool, sample_rate: int = 44100
+        self,
+        queue_type: QueueType,
+        buff: BytesIO,
+        as_next: bool,
+        sample_rate: int = 44100,
     ) -> None:
-        model: QueueItem = build_queue_item(self.priority_queue, QueueType.AUDIO, buff, as_next, sample_rate)
+        model: QueueItem = build_queue_item(
+            self.priority_queue, QueueType.AUDIO, buff, as_next, sample_rate
+        )
 
         match queue_type:
             case QueueType.EFFECT:
@@ -343,11 +364,11 @@ class AudioOutput:
         return sorted(queue, key=lambda x: (-x.queue_type.value, x.PRIORITY))
 
     def __build_music_queue_item(
-            self,
-            query_type: AudioQueryType,
-            value: str | BytesIO,
-            as_next: bool,
-            sample_rate: int = None,
+        self,
+        query_type: AudioQueryType,
+        value: str | BytesIO,
+        as_next: bool,
+        sample_rate: int = None,
     ) -> MusicQueueItem:
         if not sample_rate:
             sample_rate = 44100
@@ -360,13 +381,12 @@ class AudioOutput:
 
 
 def build_queue_item(
-
-        queue,
-        queue_type: QueueType,
-        value: str | BytesIO,
-        as_next: bool,
-        sample_rate: int = None,
-        wait_until_done: bool = False,
+    queue,
+    queue_type: QueueType,
+    value: str | BytesIO,
+    as_next: bool,
+    sample_rate: int = None,
+    wait_until_done: bool = False,
 ) -> QueueItem:
     if not sample_rate:
         sample_rate = 44100

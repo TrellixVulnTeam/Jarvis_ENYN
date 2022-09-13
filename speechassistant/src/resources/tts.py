@@ -1,4 +1,4 @@
-import pathlib
+from io import BytesIO
 from typing import Callable
 
 from gtts import gTTS
@@ -18,16 +18,22 @@ class TTS:
 
     def say(self, text):
         log.action(f"saying '{text}'")
-        path = str(pathlib.Path(__file__).parent.joinpath("tmp.mp3"))
+        # path = str(pathlib.Path(__file__).parent.joinpath("tmp.mp3"))
+        #
+        # tts = gTTS(text=text, lang=self.language, slow=False)
+        # tts.save(str(path))
+        #
+        # MyMediaPlayer().play_tts(str(path))
+        b = BytesIO()
 
         tts = gTTS(text=text, lang=self.language, slow=False)
-        tts.save(str(path))
-
-        MyMediaPlayer().play_tts(str(path))
+        tts.write_to_fp(b)
+        MyMediaPlayer().play_tts(b.read())
 
         # model: QueueItem = QueueItem(value=audio_bytes, type=QueueType.TTS, wait_until_done=False,
         #                              sample_rate=self.framerate)
         # self.play_function(model)
+
 
 # from src import log
 # import time
