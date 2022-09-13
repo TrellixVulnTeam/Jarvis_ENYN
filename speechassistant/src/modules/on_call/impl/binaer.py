@@ -16,7 +16,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
         wrapper.say("Ich konnte die Zahl leider nicht herausfiltern.")
 
 
-def __calculate_binary(number: int):
+def __calculate_binary(number: int) -> str:
     output = ""
     while number > 0:
         output = f"{number % 2}{output}"
@@ -24,7 +24,7 @@ def __calculate_binary(number: int):
     return str(output)
 
 
-def getNumber(text):
+def getNumber(text: str):
     answer = "UNDO"
     hotWord = ["wandle", "wandel", "gib", "ist"]
     sentence = text.split(" ")

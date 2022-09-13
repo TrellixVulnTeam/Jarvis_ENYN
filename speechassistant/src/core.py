@@ -180,12 +180,12 @@ class Core:
                         )
         else:
             if not self.modules.start_module(text=str(text), user=user) and self.use_ai:
-                # if isValid() functions does not found a matching module and the user wants to try with AI (use_ai),
+                # if is_valid() functions does not found a matching module and the user wants to try with AI (use_ai),
                 # start AI
 
                 # response: str | dict = self.ai.proceed_with_user_input(text)
                 # if response is None:
-                #     # if the AI has not found a matching module, try to find one via isValid()
+                #     # if the AI has not found a matching module, try to find one via is_valid()
                 #     self.modules.start_module(text=str(text), user=user)
                 # elif type(response) is str:
                 #     self.audio_output.say(response)

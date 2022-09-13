@@ -4,22 +4,22 @@ import traceback
 PRIORITY = 2
 
 
-def isValid(text):
+def is_valid(text):
     text = text.lower()
     if "to" in text and "do" in text and "liste" in text:
         return False
     if "einkaufsliste" in text:
         if (
-            "setz" in text
-            or "setzte" in text
-            or "schreib" in text
-            or "schreibe" in text
-            or "füg" in text
-            or "füge" in text
+                "setz" in text
+                or "setzte" in text
+                or "schreib" in text
+                or "schreibe" in text
+                or "füg" in text
+                or "füge" in text
         ):
             return True
         elif ("was" in text and "steht" in text and "auf" in text) or (
-            "gib" in text and "aus" in text
+                "gib" in text and "aus" in text
         ):
             return True
         elif ("lösch" in text or "leere" in text) and "einkaufsliste" in text:
@@ -62,10 +62,10 @@ def get_item(core, skills):
         i = 0
         for i, item in enumerate(text):
             if (
-                text[i - 1] == "setz"
-                or text[i - 1] == "setzte"
-                or text[i - 1] == "schreib"
-                or text[i - 1] == "schreibe"
+                    text[i - 1] == "setz"
+                    or text[i - 1] == "setzte"
+                    or text[i - 1] == "schreib"
+                    or text[i - 1] == "schreibe"
             ):
                 index = i + 1
                 break
@@ -128,11 +128,11 @@ def get_item(core, skills):
         stop = False
         while stop == False:
             if (
-                text[position] == "auf"
-                or text[position] == "zu"
-                or text[position] == "zur"
-                or text[position] == "aus"
-                or text[position] == "von"
+                    text[position] == "auf"
+                    or text[position] == "zu"
+                    or text[position] == "zur"
+                    or text[position] == "aus"
+                    or text[position] == "von"
             ):
 
                 item.append(aussage_item.strip())
@@ -256,10 +256,10 @@ def handle(text, core, skills):
             core.say(ausgabe)
 
     elif (
-        "schick" in text
-        and "einkaufsliste" in text
-        and "und" in text
-        and ("lösch" in text or "leer" in text)
+            "schick" in text
+            and "einkaufsliste" in text
+            and "und" in text
+            and ("lösch" in text or "leer" in text)
     ):
         # das elif beschreibt diesen Teil eigentlich schon sehr genau
         i = ""
@@ -274,7 +274,7 @@ def handle(text, core, skills):
         handle(text, core, skills)
 
     elif (
-        "lösch" in text and ("aus" in text or "von" in text) and "einkaufsliste" in text
+            "lösch" in text and ("aus" in text or "von" in text) and "einkaufsliste" in text
     ):
         # einzelne items sollen auch gelöscht werden können
         items = get_item(core, skills)
@@ -313,9 +313,9 @@ def handle(text, core, skills):
             )
 
     elif (
-        ("lösch" in text or "leer" in text)
-        and "einkaufsliste" in text
-        and not "aus" in text
+            ("lösch" in text or "leer" in text)
+            and "einkaufsliste" in text
+            and not "aus" in text
     ):
         # Hier ist die ganze Einkaufsliste gemeint, daher ist das "and not 'aus'" sehr wichtig.
         # Man könnte sich überlegen, ob dieser Teil vlt in das letzte elif gehört

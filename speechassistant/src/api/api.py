@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 
-from src.api.routers import audioFile, module, reminder, routine
 from src.api.routers import alarm
+from src.api.routers import audioFile, module, reminder, routine
 
 description: str = """
 

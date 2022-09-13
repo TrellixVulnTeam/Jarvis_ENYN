@@ -1,6 +1,11 @@
 from datetime import datetime
 
+from src.database.connection import ReminderInterface
+from src.exceptions import NoMatchingEntry
+from src.models import Reminder
 from src.modules import skills, ModuleWrapper
+
+_data_base: ReminderInterface = ReminderInterface()
 
 
 def is_valid(text: str) -> bool:
@@ -8,20 +13,29 @@ def is_valid(text: str) -> bool:
     return skills.match_all(text, "erinner", "mich")
 
 
-# toDo: rework get_text
-def get_text(text: str):
+def handle(text: str, wrapper: ModuleWrapper) -> None:
+    # toDo: database access
+
+    if "lösch" in text:
+        __delete_reminder(wrapper)
+    else:
+        __create_new_reminder(text, wrapper)
+
+
+# toDo: rework __get_reminder_text
+def __get_reminder_text(text: str):
     remembrall = ""
     e_ind = 0
     text = text.lower()
 
     if " zu " not in text:
-        remembrall = text.replace("zu", (""))
-        remembrall = remembrall.replace(" ans ", (" "))
+        remembrall = text.replace("zu", "")
+        remembrall = remembrall.replace(" ans ", " ")
     else:
-        remembrall = text.replace(" ans ", (" "))
+        remembrall = text.replace(" ans ", " ")
     if " in " in text and " minuten" in text:
-        remembrall = remembrall.replace(" minuten ", (" "))
-        remembrall = remembrall.replace(" in ", (" "))
+        remembrall = remembrall.replace(" minuten ", " ")
+        remembrall = remembrall.replace(" in ", " ")
         s = str.split(remembrall)
         for t in s:
             try:
@@ -110,86 +124,51 @@ def get_text(text: str):
     return ausgabe
 
 
-def get_reply_time(wrapper: ModuleWrapper, dicanalyse: dict):
-    time = dicanalyse.get("time")
-    jahr = str(time["year"])
-    monat = str(time["month"])
-    tag = str(time["day"])
-    stunde = str(time["hour"])
-    minute = str(time["minute"])
-    if int(minute) <= 9:
-        minute = "0" + minute
-    if int(monat) <= 9:
-        monat = "0" + monat
+def __convert_time_to_output(time: datetime) -> str:
+    year, month, day, hour, minute = __get_time_units(time)
 
-    if minute[0] == "0":
-        mine = minute[1]
-        if mine == "0":
-            mine = ""
-        else:
-            mine = mine
+    day = skills.Statics.numb_to_day_numb.get(day)
+    month = skills.Statics.numb_to_month.get(str(month))
+    hour = skills.Statics.numb_to_hour.get(str(hour))
+
+    return f"{str(day)} {str(month)} um {str(hour)} Uhr {str(minute)}"
+
+
+def __get_time_units(time: datetime) -> tuple[int, int, int, int, int]:
+    return time.year, time.month, time.day, time.hour, time.minute
+
+
+def __create_new_reminder(text, wrapper) -> None:
+    reminder_text: str = __get_reminder_text(text)
+    reminder_time: datetime = wrapper.analysis["datetime"]
+    new_reminder: Reminder = Reminder(text=reminder_text, time=reminder_time, user_id=wrapper.user.uid)
+
+    _data_base.create(new_reminder)
+    time_for_output: str = __convert_time_to_output(reminder_time)
+    __give_feedback_after_create(reminder_text, time_for_output, text, wrapper)
+
+
+def __give_feedback_after_create(reminder_text, rep, text, wrapper) -> None:
+    if "dass " in reminder_text:
+        wrapper.say(f"Alles klar, ich sage dir am {rep} bescheid, {reminder_text}.")
+    elif "ans " in text:
+        wrapper.say(f"Alles klar, ich erinnere dich am {rep} ans {reminder_text}.")
     else:
-        mine = minute
-    day = wrapper.skills.Statics.numb_to_day_numb.get(tag)
-    month = wrapper.skills.Statics.numb_to_month.get(str(monat))
-    hour = wrapper.skills.Statics.numb_to_hour.get(str(stunde))
-    zeit_der_erinnerung = (
-            str(day) + " " + str(month) + " um " + str(hour) + " Uhr " + str(mine)
-    )
-    reply = zeit_der_erinnerung
-    return reply
+        wrapper.say(f"Alles klar, ich sage dir am {rep} bescheid, dass du {reminder_text} musst.")
 
 
-def handle(text: str, wrapper: ModuleWrapper) -> None:
-    # toDo: database access
+def __delete_reminder(wrapper) -> None:
+    time: datetime = wrapper.analysis["datetime"]
+    try:
+        counter: int = _data_base.delete_by_datetime(time)
+        __give_feedback_after_delete(counter, time, wrapper)
+    except NoMatchingEntry:
+        wrapper.say(f"Du hast keine Erinnerungen am {time.day}.{time.month} um {skills.get_time(time)}.")
 
-    if "lösch" in text:
-        time: datetime = wrapper.analysis["datetime"]
-        erinnerungen = wrapper.local_storage["Erinnerungen"]
 
-        counter: int = wrapper.data_base.reminder_interface.delete_reminder()
-        if counter == 0:
-            wrapper.say(
-                f"Du hast keine Erinnerungen am {time.day}.{time.month} um {skills.get_time(time)}."
-            )
-        elif counter == 1:
-            wrapper.say(
-                "Ich habe eine Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht."
-            )
-        else:
-            wrapper.say(
-                f"Ich habe {counter} Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht."
-            )
-
+def __give_feedback_after_delete(counter, time, wrapper) -> None:
+    if counter == 1:
+        wrapper.say("Ich habe eine Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht.")
     else:
-        reminder_text: str = get_text(wrapper, text)
-        wrapper.data_base.reminder_interface.add_reminder(
-            reminder_text, wrapper.analysis["datetime"], wrapper.user
-        )
-
-        rep = get_reply_time(wrapper, wrapper.analysis)
-        if "dass " in reminder_text:
-            antwort = (
-                    "Alles klar, ich sage dir am "
-                    + rep
-                    + " bescheid, "
-                    + reminder_text
-                    + "."
-            )
-        elif "ans " in text:
-            antwort = (
-                    "Alles klar, ich erinnere dich am "
-                    + rep
-                    + " ans "
-                    + reminder_text
-                    + "."
-            )
-        else:
-            antwort = (
-                    "Alles klar, ich sage dir am "
-                    + rep
-                    + " bescheid, dass du "
-                    + reminder_text
-                    + " musst."
-            )
-        wrapper.say(antwort)
+        wrapper.say(
+            f"Ich habe {counter} Erinnerung am {time.day}.{time.month} um {skills.get_time(time)} gelöscht.")

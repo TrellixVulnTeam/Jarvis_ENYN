@@ -36,9 +36,9 @@ class IntentWrapper:
 
     def test_module(self, user_input: str) -> dict | str:
         response: dict | str = self.ai.test_request(user_input)
-        if type(response) is type(""):
+        if type(response) is str:
             return response
-        elif type(response) is type({}):
+        elif type(response) is dict:
             return response["intent"]
 
     def train_model(self) -> None:

@@ -13,10 +13,6 @@ Schema = TypeVar("Schema")
 
 
 class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
-    # Model == model
-    # Schema == schema
-
-    # typing maybe with typevar
 
     def __init__(self):
         self.meta = MetaData()

@@ -9,34 +9,32 @@ import requests
 from geopy import Location, Nominatim
 
 from src import log
+from src.core import Core
 
 geo_location = Nominatim(user_agent="my_app")
 
-""" Returns geological data of a city
-    Args:
-        city    (str): name of the city from which the data are required
-    Returns:
-        dict: Dictionary with the values of the city
-"""
-
 
 def get_data_of_city(city: str) -> dict:
+    """ Returns geological data of a city
+        Args:
+            city    (str): name of the city from which the data are required
+        Returns:
+            dict: Dictionary with the values of the city
+    """
     location: Location = geo_location.geocode(city)
     return __location_to_json(location.raw)
 
 
-""" Returns geological data of a city
-    Args:
-        lat    (int): latutude of the city from which the data are required
-        lon    (int): longitude of the city from which the data are required
-    Returns:
-        dict: Dictionary with the values of the city
-"""
-
-
-def get_data_of_lat_lon(self, lat: float, lon: float) -> dict:
-    location = self.geo_location.reverse(f"{lat}, {lon}")
-    return self.__location_to_json(location.raw)
+def get_data_of_lat_lon(lat: float, lon: float) -> dict:
+    """ Returns geological data of a city
+        Args:
+            lat    (int): latitude of the city from which the data are required
+            lon    (int): longitude of the city from which the data are required
+        Returns:
+            dict: Dictionary with the values of the city
+    """
+    location = geo_location.reverse(f"{lat}, {lon}")
+    return __location_to_json(location.raw)
 
 
 def __location_to_json(location: dict) -> dict:
@@ -53,16 +51,10 @@ def __location_to_json(location: dict) -> dict:
 class Weather:
     __instance = None
 
-    @staticmethod
-    def get_instance():
-        if Weather.__instance is None:
-            Weather()
-        return Weather.__instance
-
-    def __init__(self):
+    def __init__(self, core: Core):
         if Weather.__instance is not None:
-            raise Exception("Singleton cannot be instantiated more than once!")
-
+            raise Exception("This module may only be instantiated once by the ServiceWrapper!")
+        self.__core = core
         self.__api_key: str = ""
         self.__minutely_forecast = None
         self.__hourly_forecast = None
@@ -80,10 +72,9 @@ class Weather:
         Weather.__instance = self
 
     def __fill_data(self) -> None:
-        # from core import Core
-        # core: Core = Core.get_instance()
-        self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.config_data["api"]["open_weather_map"]
-        self.city = "Würzburg"  # core.local_storage["actual_location"]
+        self.__api_key = self.__core.config_data["api"]["open_weather_map"]
+        self.city = self.__core.local_storage["actual_location"]
+        log.debug(f"Setting up Weather Service with the api-key '{self.__api_key}' and the city '{self.city}...")
 
     def start(self) -> None:
         log.action("Starting weather module...")
@@ -97,20 +88,6 @@ class Weather:
             self.__update_all()
             time.sleep(3600)
 
-    """Returns sunrise and sunset of a city as datetime objects 
-        Args:
-            city_name   (string): name of searched city
-            lat         (int)   : lat of searched city
-            lon         (int)   : lon of searched city
-            day_offset  (int)   : offset of day
-
-        Returns:
-            set                 : sunrise and sunset as each datetime.datetime() objects
-
-        Exceptions:
-            ValueError()        : raises if just one of lat and lon is given
-    """
-
     def get_sunrise_sunset(
             self,
             city_name: str = None,
@@ -118,6 +95,19 @@ class Weather:
             lon: int = None,
             day_offset: int = 0,
     ) -> set[datetime, datetime]:
+        """Returns sunrise and sunset of a city as datetime objects
+                Args:
+                    city_name   (string): name of searched city
+                    lat         (int)   : lat of searched city
+                    lon         (int)   : lon of searched city
+                    day_offset  (int)   : offset of day
+
+                Returns:
+                    set                 : sunrise and sunset as each datetime.datetime() objects
+
+                Exceptions:
+                    ValueError()        : raises if just one of lat and lon is given
+            """
         if city_name is None and lat is None and lon is None:
             # user has not specified any geo data, so use the position of the system
             data = self.__daily_forcast[day_offset]
@@ -134,22 +124,21 @@ class Weather:
             datetime.fromtimestamp(data["sunset"]),
         }
 
-    """Returns current weather data
-        Args:
-            city_name   (string): name of searched city
-            lat         (int)   : lat of searched city
-            lon         (int)   : lon of searched city
-
-        Returns:
-            dict                : returns dict with current weather data
-
-        Exceptions:
-            ValueError()        : raises if just one of lat and lon is given
-    """
-
     def get_current_weather(
             self, city_name: str = None, lat: int = None, lon: int = None
     ) -> dict:
+        """Returns current weather data
+                Args:
+                    city_name   (string): name of searched city
+                    lat         (int)   : lat of searched city
+                    lon         (int)   : lon of searched city
+
+                Returns:
+                    dict                : returns dict with current weather data
+
+                Exceptions:
+                    ValueError()        : raises if just one of lat and lon is given
+            """
         if city_name is None and lat is None and lon is None:
             self.__update_all()
             return self.current_weather
@@ -161,23 +150,22 @@ class Weather:
         else:
             raise ValueError("Got just one of lat and lon, but both are necessary!")
 
-    """Returns forecast of one day
-        Args:
-            day_offset  (int)   : offset of day
-            city_name   (string): name of searched city
-            lat         (int)   : lat of searched city
-            lon         (int)   : lon of searched city
-
-        Returns:
-            dict                 : forecast of day with offset
-
-        Exceptions:
-            None
-    """
-
     def get_forcast_of_one_day(
             self, day_offset, city_name=None, lat=None, lon=None
     ) -> dict:
+        """Returns forecast of one day
+                Args:
+                    day_offset  (int)   : offset of day
+                    city_name   (string): name of searched city
+                    lat         (int)   : lat of searched city
+                    lon         (int)   : lon of searched city
+
+                Returns:
+                    dict                 : forecast of day with offset
+
+                Exceptions:
+                    None
+            """
         if day_offset > 7:
             raise ValueError("Day offset was higher than 7.")
         if city_name is None and lat is None and lon is None:
@@ -197,20 +185,19 @@ class Weather:
     def get_forcast_of_range(self, from_offset, until_offset, lat=None, lon=None):
         pass
 
-    """Returns current weather data as a string in german speech
-        Args:
-            city   (string): name of searched city
-            lat         (int)   : lat of searched city
-            lon         (int)   : lon of searched city
-
-        Returns:
-            str                 : current weather data in german speech
-
-        Exceptions:
-            None
-    """
-
     def get_current_weather_string(self, city=None, lat=None, lon=None):
+        """Returns current weather data as a string in german speech
+                Args:
+                    city   (string): name of searched city
+                    lat         (int)   : lat of searched city
+                    lon         (int)   : lon of searched city
+
+                Returns:
+                    str                 : current weather data in german speech
+
+                Exceptions:
+                    None
+            """
         _current_weather = self.get_current_weather(city, lat, lon)
         weather_id = _current_weather["weather"][0]["id"]
         weather_description = (
@@ -228,23 +215,25 @@ class Weather:
             weather_description = f"In {city} ist es {self.Statics.will_description_map.get(weather_id)} {temp_inf}."
         return weather_description
 
-    """Returns forecast of one hour in <offset> hours
-        Args:
-            city        (string): name of searched city
-            lat         (int)   : lat of searched city
-            lon         (int)   : lon of searched city
-            offset      (int)   : offset of hours
-
-        Returns:
-            str                 : forecast of one hour in german speech
-
-        Exceptions:
-            ValueError()        : raises if just one of lat and lon is given
-    """
-
     def get_hourly_forecast_string(
             self, city: str = None, lat: float = None, lon: float = None, offset: int = 1
     ) -> str:
+        """Returns forecast of one hour in <offset> hours
+                Args:
+                    city        (string): name of searched city
+                    lat         (int)   : lat of searched city
+                    lon         (int)   : lon of searched city
+                    offset      (int)   : offset of hours
+
+                Returns:
+                    str                 : forecast of one hour in german speech
+
+                Exceptions:
+                    ValueError()        : raises if just one of lat and lon is given
+            """
+        if offset == 0:
+            return self.get_current_weather_string(city, lat, lon)
+
         if city is None and lat is None and lon is None:
             data_offset: int = offset + round(self.get_offset_hours())
             if data_offset > 47:
@@ -272,23 +261,22 @@ class Weather:
             raise ValueError()
         return self.__get_weather_string(_forecast, city, hours_offset=offset)
 
-    """Returns forecast of one day in <offset> days
-        Args:
-            city        (string): name of searched city
-            lat         (int)   : lat of searched city
-            lon         (int)   : lon of searched city
-            offset      (int)   : offset of days
-
-        Returns:
-            str                 : forecast of one day in german speech
-
-        Exceptions:
-            ValueError()        : raises if just one of lat and lon is given
-    """
-
     def get_daily_forecast_string(
             self, city: str = None, lat: float = None, lon: float = None, offset: int = 1
     ):
+        """Returns forecast of one day in <offset> days
+                Args:
+                    city        (string): name of searched city
+                    lat         (int)   : lat of searched city
+                    lon         (int)   : lon of searched city
+                    offset      (int)   : offset of days
+
+                Returns:
+                    str                 : forecast of one day in german speech
+
+                Exceptions:
+                    ValueError()        : raises if just one of lat and lon is given
+            """
         if offset > 7:
             raise ValueError("Invalid offset input")
 
@@ -333,16 +321,15 @@ class Weather:
             city = self.city
         return self.__get_weather_string(_forecast, city, days_offset=offset)
 
-    """Returns indications of future weather development
-        Args:
-            None
-        Returns:
-            str:   indications of future weather development
-        Exceptions:
-            None
-    """
-
-    def get_weather_conditions(self) -> str:
+    def get_weather_conditions(self) -> str | None:
+        """Returns indications of future weather development
+                Args:
+                    None
+                Returns:
+                    str:   indications of future weather development
+                Exceptions:
+                    None
+            """
         self.__update_all()
         now: datetime = datetime.now()
         output: str = ""
@@ -413,51 +400,48 @@ class Weather:
                         output += f"Pass auf, in etwa {['einer', 'zwei', 'drei'][i]} Stunden wird es Gewittern!"
                     break
 
-        return output
-
-    """Returns the time since the last update of the data in minutes
-        Args:
-            None
-        Returns:
-            int:    time in minutes
-        Exceptions:
-            None
-    """
+        return output if output != "" else None
 
     def get_offset_minutes(self) -> int:
+        """Returns the time since the last update of the data in minutes
+                Args:
+                    None
+                Returns:
+                    int:    time in minutes
+                Exceptions:
+                    None
+            """
         delta: timedelta = datetime.now() - self.__last_updated
         return round(delta.seconds / 60)
 
-    """Returns the time since the last update of the data in hours
-        Args:
-            None
-        Returns:
-            int:    time in hours
-        Exceptions:
-            None
-    """
-
     def get_offset_hours(self) -> int:
+        """Returns the time since the last update of the data in hours
+                Args:
+                    None
+                Returns:
+                    int:    time in hours
+                Exceptions:
+                    None
+            """
         delta = datetime.now() - self.__last_updated
         offset: float = delta.seconds / 3600
         if delta.seconds % 3600 > 2700:
             offset += 1
         return round(offset)
 
-    """Updates the current weather
-        Args:
-            city        (str)   : name of city, from which the prediction is
-            lat         (int)   : lat of searched city
-            lon         (int)   : lon of searched city
-        Returns:
-            dict                : current weather data              
-        Exceptions:
-            ValueError()        : raises if just one of lat and lon is given
-    """
-
     def __get_current_weather(
             self, city: str = None, lat: int = None, lon: int = None
     ) -> dict:
+        """Updates the current weather
+                Args:
+                    city        (str)   : name of city, from which the prediction is
+                    lat         (int)   : lat of searched city
+                    lon         (int)   : lon of searched city
+                Returns:
+                    dict                : current weather data
+                Exceptions:
+                    ValueError()        : raises if just one of lat and lon is given
+            """
         if city is None and lat is None and lon is None:
             url = (
                 f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}"
@@ -466,18 +450,6 @@ class Weather:
             self.current_weather = requests.get(url).json()
             return self.current_weather
 
-    """Returns the time since the last update of the data in minutes
-        Args:
-            _forecast   (dict): forecast, which is to be translated into a string
-            city        (str) : name of city, from which the prediction is
-            days_offset (int) : offset of days from the _forecast
-            hours_offset(int) : offset of days from the _forecast
-        Returns:
-            str               : forecast in german speech                
-        Exceptions:
-            None
-    """
-
     def __get_weather_string(
             self,
             _forecast: dict,
@@ -485,6 +457,17 @@ class Weather:
             days_offset: int = None,
             hours_offset: int = None,
     ) -> str:
+        """Returns the time since the last update of the data in minutes
+                Args:
+                    _forecast   (dict): forecast, which is to be translated into a string
+                    city        (str) : name of city, from which the prediction is
+                    days_offset (int) : offset of days from the _forecast
+                    hours_offset(int) : offset of days from the _forecast
+                Returns:
+                    str               : forecast in german speech
+                Exceptions:
+                    None
+            """
         weather_id = _forecast["weather"][0]["id"]
         weather_description = (
             "Es gab leider ein Problem in der Analyse der Wetterdaten. Bitte versuche es zu einem "
@@ -516,21 +499,20 @@ class Weather:
             )
         return weather_description
 
-    """Converts an offset (days, hours, minutes) into a time specification
-            Args:
-                days_offset     (int):      Number of days of the offset
-                hours_offset    (int):      Number of hours of the offset
-                minutes_offset  (int):      Number of minutes of the offset
-            Returns:
-                str:   indications of future weather development
-            Exceptions:
-                None
-        """
-
     @staticmethod
     def __get_time_string(
             days_offset: int = None, hours_offset: int = None, minutes_offset: int = None
     ):
+        """Converts an offset (days, hours, minutes) into a time specification
+                    Args:
+                        days_offset     (int):      Number of days of the offset
+                        hours_offset    (int):      Number of hours of the offset
+                        minutes_offset  (int):      Number of minutes of the offset
+                    Returns:
+                        str:   indications of future weather development
+                    Exceptions:
+                        None
+                """
         is_days_offset_none: bool = days_offset is None
         is_hours_offset_none: bool = hours_offset is None
 
@@ -579,16 +561,15 @@ class Weather:
 
         return time_string
 
-    """Update all weather data
-        Args:
-            None
-        Returns:
-            None
-        Exceptions:
-            None
-    """
-
     def __update_current_weather(self):
+        """Update all weather data
+                Args:
+                    None
+                Returns:
+                    None
+                Exceptions:
+                    None
+            """
         url = (
             f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}"
             f"&lang=de"
@@ -597,16 +578,15 @@ class Weather:
         self.__last_updated = datetime.now()
         return self.current_weather
 
-    """Update forecast data
-        Args:
-            None
-        Returns:
-            int:    time in minutes
-        Exceptions:
-            None
-    """
-
     def __update_weather_forcast(self) -> dict:
+        """Update forecast data
+                Args:
+                    None
+                Returns:
+                    int:    time in minutes
+                Exceptions:
+                    None
+            """
         lat = self.__geo_data["lat"]
         lon = self.__geo_data["lon"]
         url = (
@@ -617,16 +597,16 @@ class Weather:
 
         return _forecast
 
-    """Updates all data from the API and stores the old ones into old_weather_inf
-        Args:
-            None
-        Returns:
-            None
-        Exceptions:
-            None
-    """
-
     def __update_all(self):
+        """Updates all data from the API and stores the old ones into old_weather_inf
+                Args:
+                    None
+                Returns:
+                    None
+                Exceptions:
+                    None
+            """
+        log.debug("Updating weather data...")
         lat = self.__geo_data["lat"]
         lon = self.__geo_data["lon"]
         url = (
@@ -648,7 +628,7 @@ class Weather:
             self.__last_updated = datetime.now()
         except Exception as e:
             log.exception(e)
-            log.warning(f"Problem when querying new data from Open-Weather-API")
+            log.warning("Problem when querying new data from Open-Weather-API")
 
     class Statics:
         def __init__(self):

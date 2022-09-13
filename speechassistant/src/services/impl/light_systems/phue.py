@@ -92,7 +92,7 @@ class PhilipsWrapper:
         return "Leider habe ich nicht verstanden, was ich mit dem Licht machen soll."
 
     def set_light_powerstate(self, lights, powerstate):
-        if powerstate is None and (type(lights) is type("") or len(lights) <= 1):
+        if powerstate is None and (type(lights) is str or len(lights) <= 1):
             if self.bridge.get_light(lights, "on"):
                 powerstate = "off"
             else:
@@ -110,9 +110,9 @@ class PhilipsWrapper:
         return self.bridge.get_light(light, "on")
 
     def light_on(self, lights, change_brightness=True):
-        if type(lights) != type([]) and type(lights) != type("") and type(lights) != 1:
+        if type(lights) != list and type(lights) != str and type(lights) != int:
             lights = self.bridge.get_light(lights)
-            # toDO: possibility that lights is an array of Objects
+            # toDo: possibility that lights is an array of Objects
         self.bridge.set_light(lights, "on", True)
         if change_brightness:
             self.bridge.set_light(lights, "bri", 254)
@@ -149,7 +149,7 @@ class PhilipsWrapper:
         self.bridge.set_light(lights, "bri", int(value))
 
     def inc_dec_brightness(self, lights, value):
-        if type(lights[0]) is not type("") and type(lights[0]) is not type(1):
+        if type(lights[0]) is not str and type(lights[0]) is not int:
             for item in lights:
                 item = item.id
         for light in lights:
@@ -253,9 +253,9 @@ class PhilipsWrapper:
                     for light in group.lights:
                         lights.append(light.lower())
             if (
-                ("alle" in text or "überall" in text)
-                and "außer" in text
-                and lights != []
+                    ("alle" in text or "überall" in text)
+                    and "außer" in text
+                    and lights != []
             ):
                 temp_lights = []
                 for item in wrapper.light_names:

@@ -6,6 +6,8 @@ from src.models.user import User
 
 
 class UserInterface(AbstractDataBaseConnection[User, UserSchema]):
+    # toDo: load_by_name
+
     @staticmethod
     def _schema_to_model(model_schema: Schema) -> Model:
         return schema_to_user(model_schema)
