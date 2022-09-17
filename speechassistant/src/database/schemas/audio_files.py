@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, LargeBinary, Integer
 from sqlalchemy.ext.declarative import declarative_base
 
-from src.models.audio_file import AudioFile
+from src.models.audio.audio_file import AudioFile
 
 Base = declarative_base()
 

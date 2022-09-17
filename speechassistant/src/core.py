@@ -10,6 +10,7 @@ import toml
 from src import log
 from .audio import AudioOutput, AudioInput
 from .database.connection import *
+from .models import Routine
 from .models.user import User
 # from .resources.intent.Wrapper import IntentWrapper as AIWrapper
 from .modules.modules import Modules
@@ -135,10 +136,8 @@ class Core:
 
     @staticmethod
     def __log_message_from_unknown_user(msg):
-        try:
-            log.warning(f"Message from unknown Telegram user {msg['from']['first_name']}. Access denied.")
-        except KeyError:
-            log.warning(f"Message from unknown Telegram user {msg['from']['id']}. Access denied.")
+        user_identification: str = msg['from']['first_name'] if "first_name" in msg['from'] else msg['from']['id']
+        log.warning(f"Message from unknown Telegram user {user_identification}. Access denied.")
 
     def messenger_listen(self, user: str):
         # Tell the Telegram thread that you are waiting for a reply,
@@ -169,8 +168,9 @@ class Core:
     def hotword_detected(self, text: str) -> None:
         user: User = self.users.get_user_by_name(self.config_data["default_user"])
 
-        matching_routines: list[dict] = RoutineInterface.get_routines(on_command=text)
+        matching_routines: list[Routine] = RoutineInterface.get_all_on_command(text)
         if matching_routines:
+            # TODO
             # if there are matching routines of this command, start the matching modules
             for routine in matching_routines:
                 for command in routine["actions"]["commands"]:

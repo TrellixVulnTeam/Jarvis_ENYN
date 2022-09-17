@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 from src import log
 from src.models.audio.queue_item import QueueType
 from src.models.user import User
-from src.modules.AbstractWrapper import AbstractWrapper
+from src.modules.wrapper.AbstractWrapper import AbstractWrapper
 
 if TYPE_CHECKING:
     from src.core import Core

@@ -1,3 +1,3 @@
 from . import skills
-from .module_wrapper import ModuleWrapper, ModuleWrapperContinuous
-from .modules import Modules, ModuleWrapper
+from .wrapper.ModuleWrapper import *
+from .wrapper.AbstractWrapper import *

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 from src.modules import ModuleWrapper, skills
-from src.modules.batches import batchMatch
+from src.modules.on_call.utils.batches import batchMatch
 import wikipedia
 
 PRIORITY = -1

@@ -1,5 +1,5 @@
 from src.modules import ModuleWrapper
-from src.modules.batches import batchMatch
+from src.modules.on_call.utils.batches import batchMatch
 
 
 def is_valid(text: str) -> bool:

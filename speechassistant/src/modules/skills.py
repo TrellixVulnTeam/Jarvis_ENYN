@@ -394,7 +394,8 @@ def get_time_difference(start_time: datetime, time: datetime = datetime.now()) -
     """ Returns the difference between 2 timestamps as string
     Args:
         start_time  (datetime.time): Timestamp from which the difference is to start
-        time    (datetime.time): optional timestamp up to which the time difference should go. If not specified, then it is the current time
+        time    (datetime.time): optional timestamp up to which the time difference should go. If not specified, then
+        it is the current time
 
     Returns:
         str: time difference
@@ -404,8 +405,7 @@ def get_time_difference(start_time: datetime, time: datetime = datetime.now()) -
     return get_enumerate(output)
 
 
-def __translate_time_units_to_text(years: int, days: int, hours: int, minutes: int, seconds: int) -> list[
-    str]:
+def __translate_time_units_to_text(years: int, days: int, hours: int, minutes: int, seconds: int) -> list[str]:
     output: list[str] = []
 
     __handle_singular_and_plural(output, years, "einem Jahr", "Jahren")
@@ -505,8 +505,7 @@ def get_data_of_lat_lon(lat: float, lon: float) -> dict:
 def __location_to_json(location: dict) -> dict:
     """ Returns geological data of a city
     Args:
-        lat    (int): latutude of the city from which the data are required
-        lon    (int): longitude of the city from which the data are required
+        location    (dict)
     Returns:
         dict: Dictionary with the values of the city
     """

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.models.audio_file import AudioFile
+    from src.models.audio.audio_file import AudioFile
     from fastapi.responses import StreamingResponse
 
 from backup.database_connection import DataBase

@@ -2,7 +2,7 @@ from typing import Type
 
 from src.database.connection.abstract_database_connection import Schema, Model, AbstractDataBaseConnection
 from src.database.schemas.audio_files import audio_file_to_schema, AudioFileSchema, schema_to_audio_file
-from src.models.audio_file import AudioFile
+from src.models.audio.audio_file import AudioFile
 
 
 class AudioFileInterface(AbstractDataBaseConnection[AudioFile, AudioFileSchema]):

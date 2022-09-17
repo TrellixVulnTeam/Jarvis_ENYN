@@ -10,7 +10,7 @@ import traceback
 import requests
 from bs4 import BeautifulSoup  # needs html5lib
 
-from src.modules.batches import batchMatch
+from src.modules.on_call.utils.batches import batchMatch
 
 
 def speechVariation(input):

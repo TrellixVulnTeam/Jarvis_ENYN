@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 
 from src.exceptions.critical_exception import UnsolvableException
 from src.exceptions.sql_exception import *
-import src.modules.skills
 
 if TYPE_CHECKING:
     from src.models.shopping_list import ShoppingListItem
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
     from src.models.user import User
 
     from src.models.alarm import Alarm, AlarmRepeating
-    from src.models.audio_file import AudioFile
+    from src.models.audio.audio_file import AudioFile
     from src.models.birthday import Birthday
     from src.models.reminder import Reminder
     from src.models.routine import (

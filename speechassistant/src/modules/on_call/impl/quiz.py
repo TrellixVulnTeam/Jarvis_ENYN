@@ -55,7 +55,7 @@ def is_valid(text: str) -> bool:
 
 def handle(text: str, wrapper: ModuleWrapper) -> None:
     text = text.lower()
-    AUDIO_PATH = wrapper.path + "/modules/resources/Quiz/audio"
+    audio_files_folder = wrapper.path + "/modules/resources/Quiz/audio"
     with open(
             wrapper.path + "/modules/resources/Quiz/questions.json", "r"
     ) as question_file:
@@ -102,7 +102,7 @@ def handle(text: str, wrapper: ModuleWrapper) -> None:
                     # wir arbeiten aber leider mit der 3.4, bzw. 3.5. Vlt. sollte man
                     # irgendwann mal über ein Update nachdenken
                     try:
-                        path = AUDIO_PATH + item["Audio"]
+                        path = audio_files_folder + item["Audio"]
                         wrapper.play(pfad=path)
                     except:
                         # WICHTIG: Wenn die Audio wichtig für die Frage ist, aber nicht im Ordner

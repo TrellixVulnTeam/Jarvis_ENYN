@@ -5,6 +5,7 @@ import speedtest as speedtest
 
 from src.modules import ModuleWrapper
 
+ON_ERROR_MESSAGE = "Es gab ein Problem beim Starten des Speedtests. Bitte versuche es zu einem späteren Zeitpunkt erneut oder melde den Fehler."
 
 def is_valid(text: str) -> bool:
     text = text.lower()
@@ -39,28 +40,20 @@ def run_speedtest(wrapper):
     2) Upload Speed
     3) Ping
     """
-    try:
-        wrapper.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
-        st = speedtest.Speedtest()
+    wrapper.say("Bitte warte einen Moment. Der Speedtest wird gestartet")
+    st = speedtest.Speedtest()
 
-        downlink_bps = st.download()
-        uplink_bps = st.upload()
-        ping = st.ping() / 1000
-        up_mbps = uplink_bps / 1000000
-        down_mbps = downlink_bps / 1000000
+    downlink_bps = st.download()
+    uplink_bps = st.upload()
+    ping = st.ping() / 1000
+    up_mbps = uplink_bps / 1000000
+    down_mbps = downlink_bps / 1000000
 
-        wrapper.say(
-            "Der Ping beträgt %s ms,\n"
-            "der Upload %0.2f Mbps\n"
-            "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
-        )
-
-    except Exception:
-        traceback.print_exc()
-        wrapper.say(
-            "Es gab ein Problem beim Starten des Speedtests. Bitte versuche es zu einem späteren Zeitpunkt "
-            "erneut oder melde den Fehler."
-        )
+    wrapper.say(
+        "Der Ping beträgt %s ms,\n"
+        "der Upload %0.2f Mbps\n"
+        "un der Download %0.2f Mbps" % (ping, up_mbps, down_mbps)
+    )
 
 
 def internet_availability(wrapper):

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from src import log
 from src.models import User, ContinuousModule
-from src.modules import Skills, ModuleWrapper, ModuleWrapperContinuous
+from src.modules import ModuleWrapper, ModuleWrapperContinuous
 from src.modules.continuous import ContinuousModuleHandler
 
 if TYPE_CHECKING:
@@ -110,14 +110,12 @@ class Modules:
         return str(path.joinpath("impl"))
 
     def query_threaded(self, name: str, text: str, user: User, messenger: bool = False) -> bool:
-        mod_skill: Skills = self.core.skills
-
         analysis = self.__get_text_analysis(text)
 
         if name is not None:
-            return self.__start_module(analysis, messenger, mod_skill, name, text, user)
+            return self.__start_module(analysis, messenger, name, text, user)
         elif text is not None:
-            return self.__find_matching_module(analysis, messenger, mod_skill, text, user) is not None
+            return self.__find_matching_module(analysis, messenger, text, user) is not None
 
         return False
 
@@ -171,21 +169,20 @@ class Modules:
             name: str = None,
             messenger: bool = False,
     ) -> bool:
-        mod_skill: Skills = self.core.skills
         analysis: dict = self.__get_text_analysis(text)
 
         if name is not None:
-            if not self.__start_module(analysis, messenger, mod_skill, name, text, user):
+            if not self.__start_module(analysis, messenger, name, text, user):
                 return False
             log.info(f"--Modul {name} was called directly (Parameter: {text})--")
         else:
-            thread: Thread = self.__find_matching_module(analysis, messenger, mod_skill, text, user)
+            thread: Thread = self.__find_matching_module(analysis, messenger, text, user)
             if not thread:
                 return False
             self.start_module(user=user, name="wartende_benachrichtigung")
             return True
 
-    def run_threaded_module(self, text: str, module, mod_skill: Skills) -> None:
+    def run_threaded_module(self, text: str, module) -> None:
         try:
             module.handle(text, self.core.active_modules[str(text)])
         except Exception:
@@ -196,7 +193,7 @@ class Modules:
         finally:
             del self.core.active_modules[str(text)]
 
-    def run_module(self, text: str, module_wrapper: ModuleWrapper, mod_skill: Skills) -> None:
+    def run_module(self, text: str, module_wrapper: ModuleWrapper) -> None:
         for module in self.modules:
             if module.is_valid(text):
                 module.handle(text, module_wrapper)
