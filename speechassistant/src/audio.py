@@ -70,7 +70,7 @@ def __create_pyaudio_stream(item):
 
 
 class AudioInput:
-    def __init__(self, core: Core) -> None:
+    def __init__(self, core: "Core") -> None:
         self.__core = core
         self.speech_engine: sr.Recognizer = sr.Recognizer()
 

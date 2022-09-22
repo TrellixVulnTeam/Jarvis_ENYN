@@ -1,7 +1,7 @@
 import os
 import time
 
-import vlc
+# import vlc
 
 
 class MyMediaPlayer:

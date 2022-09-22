@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import json
 import time
 from datetime import datetime, timedelta
@@ -7,12 +9,15 @@ from threading import Thread
 
 import requests
 from geopy import Location, Nominatim
+from geopy.exc import GeocoderUnavailable
 
 from src import log
-from src.core import Core
+
+if TYPE_CHECKING:
+    from src.core import Core
+
 
 geo_location = Nominatim(user_agent="my_app")
-
 
 def get_data_of_city(city: str) -> dict:
     """ Returns geological data of a city
@@ -21,8 +26,12 @@ def get_data_of_city(city: str) -> dict:
         Returns:
             dict: Dictionary with the values of the city
     """
-    location: Location = geo_location.geocode(city)
-    return __location_to_json(location.raw)
+    try:
+        # todo: something without try and catch
+        location: Location = geo_location.geocode(city)
+        return __location_to_json(location.raw)
+    except GeocoderUnavailable:
+        pass
 
 
 def get_data_of_lat_lon(lat: float, lon: float) -> dict:
@@ -51,7 +60,7 @@ def __location_to_json(location: dict) -> dict:
 class Weather:
     __instance = None
 
-    def __init__(self, core: Core):
+    def __init__(self, core: "Core"):
         if Weather.__instance is not None:
             raise Exception("This module may only be instantiated once by the ServiceWrapper!")
         self.__core = core

@@ -1,6 +1,6 @@
 import datetime
 
-from src.modules import skills, ModuleWrapper
+from src.modules import ModuleWrapper
 
 
 def is_valid(text: str) -> bool:

@@ -1,19 +1,23 @@
+from typing import TYPE_CHECKING
+
 import time
 import traceback
 from threading import Thread
 
 from src import log
-from src.models import ContinuousModule
-from src.modules import Modules
-from src.modules.continuous import ContinuousModuleHandler
+
+if TYPE_CHECKING:
+    from src.modules import Modules
+    from src.models import ContinuousModule
+    from src.modules.continuous import ContinuousModuleHandler
 
 
 class ObserverItem:
-    def __init__(self, handler: ContinuousModuleHandler, timeout_in_seconds: int):
-        self.module_list: list[ContinuousModule] = []
-        self.__handler: ContinuousModuleHandler = handler
+    def __init__(self, handler: "ContinuousModuleHandler", timeout_in_seconds: int):
+        self.module_list: list["ContinuousModule"] = []
+        self.__handler: "ContinuousModuleHandler" = handler
         self.__timeout = timeout_in_seconds
-        self.__modules: Modules = handler.modules
+        self.__modules: "Modules" = handler.modules
         self.__core = self.__modules.core
         self.__start()
 
@@ -47,6 +51,6 @@ class ObserverItem:
         del self.__core.continuous_modules[module.name]
         self.__modules.continuous_modules.remove(module)
 
-    def __create_module_wrapper(self, module: ContinuousModule):
+    def __create_module_wrapper(self, module: "ContinuousModule"):
         self.__core.continuous_modules[module.name] = self.__modules.module_wrapper_continuous(
             self.__core, module.intervall_in_seconds, self.__modules)

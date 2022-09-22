@@ -5,21 +5,19 @@ from typing import TYPE_CHECKING
 from src import log
 from src.audio import AudioOutput, AudioInput
 from src.models import User
-from src.modules import Skills
-from src.modules.analyze import Sentence_Analyzer
 from src.services import ServiceWrapper
+from ..analyze import Sentence_Analyzer
 
 if TYPE_CHECKING:
     from src.core import Core
 
 
 class AbstractWrapper(ABC):
-    def __init__(self, core: Core):
+    def __init__(self, core: "Core"):
         self.core = core
         self.messenger = self.core.messenger
         self.audio_output: AudioOutput = self.core.audio_output
         self.audio_input: AudioInput = self.core.audio_input
-        self.skills: Skills = Skills()
         self.system_name: str = core.system_name
         self.path: Path = core.path
         self.local_storage: dict = core.local_storage

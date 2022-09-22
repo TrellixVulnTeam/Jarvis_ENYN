@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 
 from src import log
 from src.models import User, ContinuousModule
-from src.modules import ModuleWrapper, ModuleWrapperContinuous
-from src.modules.continuous import ContinuousModuleHandler
+from .wrapper import ModuleWrapper
+from .continuous import ContinuousModuleHandler
 
 if TYPE_CHECKING:
     from src.core import Core
@@ -34,12 +34,9 @@ class Modules:
         self.modules: list = []
         self.continuous_modules: list = []
 
-        self.module_wrapper = ModuleWrapper
-        self.module_wrapper_continuous = ModuleWrapperContinuous
-
         self.continuous_stopped: bool = False
         self.continuous_threads_counter: int = 0
-        self.continuous_handler: ContinuousModuleHandler = ContinuousModuleHandler()
+        self.continuous_handler: ContinuousModuleHandler = ContinuousModuleHandler(self)
         self.module_threads_counter: int = 0
 
         Modules.__instance = self
@@ -73,8 +70,9 @@ class Modules:
         for finder, name, ispkg in pkgutil.walk_packages(self.__path_with_impl(directory)):
             try:
                 mod = self.__load_one_module(finder, name)
-            except Exception:
-                # catch only exceptions, that are thrown from loader and finder
+            except Exception as e:
+                log.exception(e)
+                # TODO: catch only exceptions, that are thrown from loader and finder
                 self.__handle_loading_error(name)
                 continue
             else:
@@ -119,25 +117,26 @@ class Modules:
 
         return False
 
-    def __find_matching_module(self, analysis, messenger, mod_skill, text, user) -> Thread | None:
+    def __find_matching_module(self, analysis, messenger, text, user) -> Thread | None:
         for module in self.modules:
             try:
                 if module.is_valid(str(text).lower()):
-                    self.core.active_modules[str(text)] = self.module_wrapper(text, analysis, messenger, user)
-                    return self.__start_module_in_new_thread(mod_skill, module, text)
+                    self.core.active_modules[str(text)] = ModuleWrapper(
+                        text, analysis, messenger, user, self.core)
+                    return self.__start_module_in_new_thread(module, text)
             except AttributeError:
                 log.warning(f"Module {module.__name__} has no is_valid() function!")
             except Exception as e:
                 log.exception(e)
                 log.warning(f"Module {module.__name__} could not be queried!")
 
-    def __start_module(self, analysis, messenger, mod_skill, name, text, user):
+    def __start_module(self, analysis, messenger, name, text, user):
         module = next((x for x in self.modules if x.__name__ == name), None)
         if not module:
             log.error(f"Modul {name} could not be found!")
             return False
-        self.core.active_modules[str(text)] = self.module_wrapper(text, analysis, messenger, user)
-        self.__start_module_in_new_thread(mod_skill, module, text)
+        self.core.active_modules[str(text)] = ModuleWrapper(text, analysis, messenger, user, self.core)
+        self.__start_module_in_new_thread(module, text)
         return True
 
     def __get_text_analysis(self, text) -> dict:
@@ -149,8 +148,8 @@ class Modules:
                 log.warning("Sentence analysis failed!")
         return {}
 
-    def __start_module_in_new_thread(self, mod_skill, module, text) -> Thread:
-        mt: Thread = Thread(target=self.run_threaded_module, args=(text, module, mod_skill))
+    def __start_module_in_new_thread(self, module, text) -> Thread:
+        mt: Thread = Thread(target=self.run_threaded_module, args=(text, module))
         mt.daemon = True
         mt.start()
         log.debug(f"Module {module.__name__} started...")
@@ -185,9 +184,9 @@ class Modules:
     def run_threaded_module(self, text: str, module) -> None:
         try:
             module.handle(text, self.core.active_modules[str(text)])
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
             log.error(f"Runtime error in module {module.__name__}. The module was terminated.\n")
+            log.exception(e)
             self.core.active_modules[str(text)].say(
                 f"Entschuldige, es gab ein Problem mit dem Modul {module.__name__}.")
         finally:

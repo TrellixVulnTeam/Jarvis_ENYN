@@ -1,5 +1,7 @@
 from __future__ import annotations  # compatibility for < 3.10
 
+from typing import TYPE_CHECKING
+
 import time
 from pathlib import Path
 from threading import Thread
@@ -8,15 +10,16 @@ import requests
 import toml
 
 from src import log
-from .audio import AudioOutput, AudioInput
-from .database.connection import *
-from .models import Routine
-from .models.user import User
+from src.audio import AudioOutput, AudioInput
+from src.database.connection import *
+from src.models import User
 # from .resources.intent.Wrapper import IntentWrapper as AIWrapper
-from .modules.modules import Modules
+from src.modules.modules import Modules
 from src.modules.analyze import Sentence_Analyzer
-from .services import ServiceWrapper
-from .users import Users
+from src.services import ServiceWrapper
+
+if TYPE_CHECKING:
+    from src.models import Routine
 
 
 class Core:
@@ -45,8 +48,6 @@ class Core:
         self.messenger = None
         self.messenger_queued_users: list = []
         self.messenger_queue_output: dict = {}
-
-        self.users: Users = Users()
 
         self.audio_output: AudioOutput = AudioOutput()
         self.audio_input: AudioInput = AudioInput(self)
@@ -89,14 +90,10 @@ class Core:
             self.local_storage = self.config_data["local_storage"]
 
     def messenger_thread(self) -> None:
-        # Verarbeitet eingehende Telegram-Nachrichten, weist ihnen Nutzer zu etc.
         while True:
             for msg in self.messenger.messages.copy():
-                try:
-                    user: User = self.users.get_user_by_name(
-                        msg["from"]["first_name"].lower()
-                    )
-                except KeyError:
+                user: User = UserInterface().get_user_by_alias(msg["from"]["first_name"].lower())
+                if not user:
                     self.__reject_message(msg)
                     continue
 
@@ -118,8 +115,6 @@ class Core:
                     )
                     th.daemon = True
                     th.start()
-                """if response == False: self.messenger.say('Das habe ich leider nicht verstanden.', 
-                self.users.get_user_by_name(user)['messenger_id']) """
                 self.messenger.messages.remove(msg)
             time.sleep(0.5)
 
@@ -162,13 +157,12 @@ class Core:
             return "err"
 
     def reload_system(self) -> None:
-        # reload(self)
-        pass
+        raise NotImplementedError()
 
     def hotword_detected(self, text: str) -> None:
-        user: User = self.users.get_user_by_name(self.config_data["default_user"])
+        user: User = UserInterface().get_user_by_alias(self.config_data["default_user"])
 
-        matching_routines: list[Routine] = RoutineInterface.get_all_on_command(text)
+        matching_routines: list["Routine"] = RoutineInterface().get_all_on_command(text)
         if matching_routines:
             # TODO
             # if there are matching routines of this command, start the matching modules
@@ -180,6 +174,7 @@ class Core:
                         )
         else:
             if not self.modules.start_module(text=str(text), user=user) and self.use_ai:
+                # TODO: fix AI
                 # if is_valid() functions does not found a matching module and the user wants to try with AI (use_ai),
                 # start AI
 
@@ -193,13 +188,13 @@ class Core:
                 #     self.start_module(text, response["module"], user=user)
                 # else:
                 #     raise ValueError('Invalid type of attribute "text"!')
-                print("AI not working at the moment!")
+                log.warning("AI not working at the moment!")
 
     def start_module(self, text: str, name: str, user: dict = None) -> bool:
         # user prediction is not implemented yet, therefore here the workaround
         if user is None:
-            user: dict = self.local_storage["user"]
-        return self.modules.query_threaded(name, text, user)
+            user: str = self.local_storage["user"]
+        return self.modules.query_threaded(name, text, User(alias=user))
 
 
 # def start() -> None:

@@ -3,7 +3,7 @@ from datetime import datetime
 from src.database.connection import ReminderInterface
 from src.exceptions import NoMatchingEntry
 from src.models import Reminder
-from src.modules import skills, ModuleWrapper
+from src.modules import ModuleWrapper
 
 _data_base: ReminderInterface = ReminderInterface()
 

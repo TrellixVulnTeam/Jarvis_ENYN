@@ -1,13 +1,17 @@
+from typing import TYPE_CHECKING
+
 import time
 
 from src import log
 from src.models import ContinuousModule
-from src.modules import Modules
 from src.modules.continuous.observer import ObserverItem
+
+if TYPE_CHECKING:
+    from src.modules.modules import Modules
 
 
 class ContinuousModuleHandler:
-    def __init__(self, modules: Modules) -> None:
+    def __init__(self, modules: "Modules") -> None:
         self.observer: dict[int, ObserverItem] = {}
         self.modules = modules
         self.counter: int = 0

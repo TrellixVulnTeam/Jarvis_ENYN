@@ -1,1 +1,1 @@
-from handler import ContinuousModuleHandler
+from .handler import *

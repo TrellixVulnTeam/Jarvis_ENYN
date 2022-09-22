@@ -1,8 +1,6 @@
 # !!! When a color is added, it is essential that it is also added to Intents.json !!!
 from phue import Bridge
 
-from src.modules import Skills
-
 colors = [
     "blau",
     "rot",
@@ -36,8 +34,6 @@ class PhilipsWrapper:
         bridge_ip = ip
         self.bridge = Bridge(bridge_ip)
         self.bridge.connect()
-
-        self.skills = Skills()
 
         self.lights = self.bridge.lights
         self.light_names = self.bridge.get_light_objects("name")

@@ -8,6 +8,7 @@ from datetime import datetime, time
 from sqlite3 import Connection, Cursor
 from typing import TYPE_CHECKING
 
+import pathlib
 from src.exceptions.critical_exception import UnsolvableException
 from src.exceptions.sql_exception import *
 
@@ -41,8 +42,10 @@ class DataBase:
         log.basicConfig(level=log.DEBUG)
         log.action("Initialize DataBase...\n")
 
+        path = "C:\\Users\\Jakob\\PycharmProjects\\Jarvis\\speechassistant\\src\\database\\db.sqlite"
+
         self.db: Connection = sqlite3.connect(
-            os.path.dirname(os.path.realpath(__file__)).join("db.sqlite"),
+            path,
             check_same_thread=False,
         )
         self.error_counter: int = 0
@@ -466,7 +469,6 @@ class DataBase:
     class _AlarmInterface:
         def __init__(self, _db: Connection) -> None:
             self.db: Connection = _db
-            self.skills = Skills()
             log.info("AlarmInterface initialized.")
 
         def get_alarm_by_id(self, aid: int) -> Alarm:
