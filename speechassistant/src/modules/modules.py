@@ -68,6 +68,7 @@ class Modules:
 
     def __load_all_modules(self, continuous, directory, modules):
         for finder, name, ispkg in pkgutil.walk_packages(self.__path_with_impl(directory)):
+            log.debug(f"Processing Module with name \"{name}\"")
             try:
                 mod = self.__load_one_module(finder, name)
             except Exception as e:
@@ -223,3 +224,7 @@ class Modules:
     @staticmethod
     def __get_continuous_impl_path() -> Path:
         return Path(__file__).parent.joinpath("continuous")
+
+    def __repr__(self) -> str:
+        # todo
+        return str.join(",", [module.__name__ for module in self.modules])
