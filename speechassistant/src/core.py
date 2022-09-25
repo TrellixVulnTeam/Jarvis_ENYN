@@ -1,5 +1,6 @@
 from __future__ import annotations  # compatibility for < 3.10
 
+import datetime
 from typing import TYPE_CHECKING
 
 import time
@@ -42,7 +43,7 @@ class Core:
         self.__load_config_data()
         self.use_ai = self.config_data["services"]["activation"]["ai"]
         self.path: Path = Path(__file__).parent
-        self.modules: Modules = None
+        self.modules: Modules = None # todo
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.services: ServiceWrapper = ServiceWrapper(self, self.config_data)
         self.messenger = None
@@ -68,10 +69,8 @@ class Core:
 
     def __prepare_local_storage(self):
         self.local_storage["modules"] = {}
-        if self.local_storage["home_location"] == "":
-            self.local_storage["home_location"] = requests.get(
-                "https://ipinfo.io"
-            ).json()["city"]
+        if self.local_storage["home_location"] == "" and self.local_storage["HasInternetConnection"]:
+            self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
 
     def __configure_logger(self) -> None:
         pass
@@ -81,13 +80,12 @@ class Core:
         self.audio_output.start()
 
     def __load_config_data(self):
-        with open(
-                Path(__file__).parent.parent.absolute().joinpath("config.toml").absolute(),
-                "r",
-        ) as config_file:
+        with open(Path(__file__).parent.parent.absolute().joinpath("config.toml").absolute(), "r") as config_file:
             log.info("loading configs...")
             self.config_data = toml.load(config_file)
             self.local_storage = self.config_data["local_storage"]
+
+        self.local_storage["HasInternetConnection"] = False # todo
 
     def messenger_thread(self) -> None:
         while True:
@@ -188,152 +186,13 @@ class Core:
                 #     self.start_module(text, response["module"], user=user)
                 # else:
                 #     raise ValueError('Invalid type of attribute "text"!')
-                log.warning("AI not working at the moment!")
+                log.warning("AI is not working at the moment!")
 
     def start_module(self, text: str, name: str, user: dict = None) -> bool:
         # user prediction is not implemented yet, therefore here the workaround
         if user is None:
             user: str = self.local_storage["user"]
-        return self.modules.query_threaded(name, text, User(alias=user))
-
-
-# def start() -> None:
-# """with open(relPath + "config.json", "r") as config_file:
-#    config_data = json.load(config_file)
-# if not config_data["established"]:
-#    from setup.setup_wizard import FirstStart
-#    print('[WARNING] System not yet set up. Setup is started...')
-#    try:
-#        setup_wizard = FirstStart()
-#        setup_done = config_data = setup_wizard.run()
-#        config_data["established"] = True
-#        with open(relPath + 'config.json', 'w') as file:
-#            json.dump(config_data, file)
-#    except:
-#        print("[WARNING] There was a problem with the Setup-Wizard!")
-#        traceback.print_exc()"""
-
-# log.info('--------- Start System ---------\n\n')
-
-# system_name: str = config_data['System_name']
-# config_data['Local_storage']['CORE_PATH']: AnyStr = os.path.dirname(os.path.abspath(__file__))
-## clear unnecessary warnings
-# modules: Modules
-# analyzer: Sentence_Analyzer = Sentence_Analyzer()
-# audio_output: AudioOutput = AudioOutput(voice=config_data["voice"])
-## os.system('clear')
-# audio_input: AudioInput = AudioInput(audio_output.adjust_after_hot_word)
-# core: Core = Core(config_data, analyzer, audio_input, audio_output, system_name)
-# modules: Modules = Modules(core, core.local_storage)
-# core.modules = modules
-# core.local_storage['CORE_starttime']: float = time.time()
-# time.sleep(1)
-## -----------Starting-----------#
-# modules.start_continuous()
-# audio_input.start(config_data['wakeword_sentensivity'], core.hotword_detected)
-# audio_output.start()
-# core.routers.weather.start()
-# time.sleep(0.75)
-
-# start_telegram(core)
-
-# web_thr: Thread = Thread(target=ws.Webserver, args=[core, ModuleWrapper(core, "", {}, False, {})])
-# web_thr.daemon = True
-# web_thr.start()
-
-# log.info('--------- DONE ---------\n\n')
-# core.audio_output.say("Jarvis wurde erfolgreich gestartet!")
-
-## Starting the main-loop
-## main_loop(Local_storage)
-# """memory_control = Thread(target=clear_momory())
-# memory_control.daemon = True
-# memory_control.start()"""
-
-# while True:
-#    try:
-#        time.sleep(10)
-#    except Exception:
-#        traceback.print_exc()
-#        break
-
-# stop(core)
-
-
-# def start_telegram(core: Core) -> None:
-# if config_data['messenger']:
-#    log.info('[ACTION] Start Telegram...')
-#    if config_data['messenger_key'] == '':
-#        log.error('No Telegram-Bot-Token entered!')
-#    else:
-#        from resources.messenger import TelegramInterface
-
-# core.messenger = TelegramInterface(config_data['messenger_key'], core)
-# core.messenger.start()
-# tgt: Thread = Thread(target=core.messenger_thread)
-# tgt.daemon = True
-# tgt.start()
-
-
-# def reload(core: Core) -> None:
-# log.info('[ACTION] Reload System...\n')
-# time.sleep(0.3)
-# with open(relPath + "config.json", "r") as config_file:
-#    log.info('loading configs...')
-#    core.config_data = json.load(config_file)
-#    core.local_storage = core.config_data["Local_storage"]
-
-# with open(relPath + "resources/alias/correct_output.json") as correct_output:
-#    # dont log loading file, because it is a config too
-#    core.config_data["correct_output"]: dict = json.load(correct_output)
-
-# time.sleep(0.3)
-# if core.messenger is None:
-# log.info('Load Telegram-API')
-# start_telegram(core)
-
-# time.sleep(0.3)
-# log.info('[ACTION] Reload modules')
-# core.modules.load_modules()
-
-# """log.info('Stop Audio-Devices')
-# core.Audio_Input.stop()
-# core.Audio_Output.stop()"""
-
-# """time.sleep(1)
-# log.info('Start Audio-Devices')
-# core.Audio_Input.start()
-# core.Audio_Output.start()"""
-
-# time.sleep(0.3)
-# log.info('[ACTION] Reload Analyzer')
-# core.analyzer = Sentence_Analyzer()
-
-# time.sleep(0.9)
-# log.info('System reloaded successfully!')
-# """if webThr is not None:
-#    if not webThr.is_alive():
-#        webThr = Thread(target=ws.Webserver, args=[core])
-#        webThr.daemon = True
-#        webThr.start()"""
-
-# """stop(core)
-# with open(relPath + "config.json", "r") as reload_file:
-#    reload_dat = json.load(reload_file)
-# start(reload_dat)"""
-
-
-# def stop(core: Core) -> None:
-# log.info('[ACTION] Stop System...')
-# core.local_storage["users"]: dict = {}
-# config_data["Local_storage"]: dict = core.local_storage
-# core.modules.stop_continuous()
-# core.audio_input.stop()
-# core.audio_output.stop()
-# log.info('\n[{}] Goodbye!\n'.format(config_data['System_name'].upper()))
-
-## with open(str(Path(__file__).parent) + '/config.json', 'w') as file:
-##    json.dump(config_data, file, indent=4)
+        return self.modules.query_threaded(name, text, User(alias=user, first_name="", last_name="", birthday=datetime.date(2020, 1, 1), messenger_id=1, song_name="standard.wav", waiting_notifications=[]))
 
 
 global config_data
