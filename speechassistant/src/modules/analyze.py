@@ -278,11 +278,11 @@ class Sentence_Analyzer:
             text = text[:-1]
         return text
 
-    def to_number(self, word: str) -> float | int:
+    def to_number(self, word: str) -> float | int | None:
         # Wandelt so ziemlich alles in eine Zahl um oder gibt 'None' aus, wenn nicht möglich
         if word is None:
             return None
-        number: float = None
+        number: float = -1
 
         try:
             return float(word)
@@ -298,7 +298,7 @@ class Sentence_Analyzer:
             elif word in self.weekdays:
                 return self.weekdays.index(word)
             elif word in self.number_words_other:
-                self.number_words_other[word]
+                return self.number_words_other[word]
             elif word in self.number_words_one:
                 return 1
             else:

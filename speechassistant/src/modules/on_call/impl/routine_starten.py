@@ -21,6 +21,7 @@ def handle(text: Module, wrapper: ModuleWrapper):
                     name=action["module_name"], text=action["text"], user=wrapper.user
                 )
     except Exception:
+        # todo: specify exceptions
         log.warning(
             f'Routine with action {text["description"]} doesnt works. It is removed from the List!'
         )

@@ -41,13 +41,12 @@ class ObserverItem:
                                     self.__core.local_storage, )
                 self.__handler.running_counter -= 1
                 log.info(f"Module {module.name} started")
-            except Exception:
-                self.__handle_error(module)
+            except Exception as e:
+                self.__handle_error(module, e)
 
-    def __handle_error(self, module):
-        log.debug(traceback.print_exc())
-        log.error(
-            f"Runtime-Error in Continuous-Module {module.name}. The module is no longer executed.\n")
+    def __handle_error(self, module: ContinuousModule, exception: Exception):
+        log.exception(exception)
+        log.error(f"Runtime-Error in Continuous-Module {module.name}. The module is no longer executed.")
         del self.__core.continuous_modules[module.name]
         self.__modules.continuous_modules.remove(module)
 

@@ -4,6 +4,7 @@ INTERVALL = 2
 
 
 def run(core, profile):
+    # todo: use dbms
     now = datetime.datetime.now()
     if "Timer" in core.local_storage.keys():
         timer = core.local_storage.get("Timer")

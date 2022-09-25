@@ -29,9 +29,9 @@ class AbstractWrapper(ABC):
         if module_name is None:
             return module_storage
         else:
-            try:
+            if module_name in module_storage:
                 return module_storage[module_name]
-            except IndexError:
+            else:
                 log.warning(f"Asked for module_storage with wrong module-name ('{module_name}')")
 
     def start_module(
