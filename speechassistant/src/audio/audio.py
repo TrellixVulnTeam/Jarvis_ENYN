@@ -8,22 +8,22 @@ from typing import Any
 from typing import TYPE_CHECKING
 
 import pvporcupine
-import speech_recognition as sr
+#import speech_recognition as sr
 import toml
 from pvporcupine import Porcupine
 from pyaudio import PyAudio, Stream, paInt8
 
 from src import log
-from .models.audio.queue_item import (
+from src.models.audio.queue_item import (
     QueueItem,
     QueueType,
     AudioQueryType,
     MusicQueueItem,
 )
-from .resources.tts import TTS
+from src.resources.TTS import TTS
 
 if TYPE_CHECKING:
-    from .core import Core
+    from src.core import Core
 
 
 def __load_configuration() -> dict[str, Any]:
@@ -36,7 +36,7 @@ def __get_path_of_config_file() -> Path:
 
 
 config: dict[str, Any] = __load_configuration()
-audio_config: dict[str, Any] = config.get("audio")
+audio_config: dict[str, Any] = config.get("")
 
 
 def play_audio_bytes(item: QueueItem) -> None:
