@@ -1,8 +1,6 @@
-from typing import TYPE_CHECKING
-
 import time
-import traceback
 from threading import Thread
+from typing import TYPE_CHECKING
 
 from src import log
 
@@ -37,19 +35,26 @@ class ObserverItem:
                 self.__create_module_wrapper(module)
             try:
                 self.__handler.running_counter += 1
-                module.run_function(self.__core.continuous_modules[module.name],
-                                    self.__core.local_storage, )
+                module.run_function(
+                    self.__core.continuous_modules[module.name],
+                    self.__core.local_storage,
+                )
                 self.__handler.running_counter -= 1
                 log.info(f"Module {module.name} started")
             except Exception as e:
                 self.__handle_error(module, e)
 
-    def __handle_error(self, module: ContinuousModule, exception: Exception):
+    def __handle_error(self, module: "ContinuousModule", exception: Exception):
         log.exception(exception)
-        log.error(f"Runtime-Error in Continuous-Module {module.name}. The module is no longer executed.")
+        log.error(
+            f"Runtime-Error in Continuous-Module {module.name}. The module is no longer executed."
+        )
         del self.__core.continuous_modules[module.name]
         self.__modules.continuous_modules.remove(module)
 
     def __create_module_wrapper(self, module: "ContinuousModule"):
-        self.__core.continuous_modules[module.name] = self.__modules.module_wrapper_continuous(
-            self.__core, module.intervall_in_seconds, self.__modules)
+        self.__core.continuous_modules[
+            module.name
+        ] = self.__modules.module_wrapper_continuous(
+            self.__core, module.intervall_in_seconds, self.__modules
+        )

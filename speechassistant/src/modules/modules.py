@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pkgutil
 import time
 import traceback
@@ -7,8 +9,8 @@ from typing import TYPE_CHECKING
 
 from src import log
 from src.models import User, ContinuousModule
-from .wrapper import ModuleWrapper
 from .continuous import ContinuousModuleHandler
+from .wrapper import ModuleWrapper
 
 if TYPE_CHECKING:
     from src.core import Core
@@ -51,7 +53,9 @@ class Modules:
         if self.modules is []:
             log.info("-- (None present)")
         log.info("\n----- Continuous MODULES... -----")
-        self.continuous_modules: list = self.get_modules(self.__get_continuous_impl_path(), continuous=True)
+        self.continuous_modules: list = self.get_modules(
+            self.__get_continuous_impl_path(), continuous=True
+        )
         if self.continuous_modules is []:
             log.info("-- (None present)")
 
@@ -67,8 +71,10 @@ class Modules:
         return modules
 
     def __load_all_modules(self, continuous, directory, modules):
-        for finder, name, ispkg in pkgutil.walk_packages(self.__path_with_impl(directory)):
-            log.debug(f"Processing Module with name \"{name}\"")
+        for finder, name, ispkg in pkgutil.walk_packages(
+            self.__path_with_impl(directory)
+        ):
+            log.debug(f'Processing Module with name "{name}"')
             try:
                 mod = self.__load_one_module(finder, name)
             except Exception as e:
@@ -108,13 +114,17 @@ class Modules:
     def __path_with_impl(path: Path) -> str:
         return str(path.joinpath("impl"))
 
-    def query_threaded(self, name: str, text: str, user: User, messenger: bool = False) -> bool:
+    def query_threaded(
+        self, name: str, text: str, user: User, messenger: bool = False
+    ) -> bool:
         analysis = self.__get_text_analysis(text)
 
         if name is not None:
             return self.__start_module(analysis, messenger, name, text, user)
         elif text is not None:
-            return self.__find_matching_module(analysis, messenger, text, user) is not None
+            return (
+                self.__find_matching_module(analysis, messenger, text, user) is not None
+            )
 
         return False
 
@@ -123,7 +133,8 @@ class Modules:
             try:
                 if module.is_valid(str(text).lower()):
                     self.core.active_modules[str(text)] = ModuleWrapper(
-                        text, analysis, messenger, user, self.core)
+                        text, analysis, messenger, user, self.core
+                    )
                     return self.__start_module_in_new_thread(module, text)
             except AttributeError:
                 log.warning(f"Module {module.__name__} has no is_valid() function!")
@@ -136,7 +147,9 @@ class Modules:
         if not module:
             log.error(f"Modul {name} could not be found!")
             return False
-        self.core.active_modules[str(text)] = ModuleWrapper(text, analysis, messenger, user, self.core)
+        self.core.active_modules[str(text)] = ModuleWrapper(
+            text, analysis, messenger, user, self.core
+        )
         self.__start_module_in_new_thread(module, text)
         return True
 
@@ -163,11 +176,11 @@ class Modules:
             log.info("-- (None present)")
 
     def start_module(
-            self,
-            user: User = None,
-            text: str = None,
-            name: str = None,
-            messenger: bool = False,
+        self,
+        user: User = None,
+        text: str = None,
+        name: str = None,
+        messenger: bool = False,
     ) -> bool:
         analysis: dict = self.__get_text_analysis(text)
 
@@ -176,7 +189,9 @@ class Modules:
                 return False
             log.info(f"--Modul {name} was called directly (Parameter: {text})--")
         else:
-            thread: Thread = self.__find_matching_module(analysis, messenger, text, user)
+            thread: Thread = self.__find_matching_module(
+                analysis, messenger, text, user
+            )
             if not thread:
                 return False
             self.start_module(user=user, name="wartende_benachrichtigung")
@@ -186,10 +201,13 @@ class Modules:
         try:
             module.handle(text, self.core.active_modules[str(text)])
         except Exception as e:
-            log.error(f"Runtime error in module {module.__name__}. The module was terminated.\n")
+            log.error(
+                f"Runtime error in module {module.__name__}. The module was terminated.\n"
+            )
             log.exception(e)
             self.core.active_modules[str(text)].say(
-                f"Entschuldige, es gab ein Problem mit dem Modul {module.__name__}.")
+                f"Entschuldige, es gab ein Problem mit dem Modul {module.__name__}."
+            )
         finally:
             del self.core.active_modules[str(text)]
 
@@ -210,7 +228,7 @@ class Modules:
             continuous_module: ContinuousModule = ContinuousModule(
                 name=module.__name__,
                 interval_time=module.INTERVALL if hasattr(module, "INTERVAL") else 0,
-                run_function=module.handle
+                run_function=module.handle,
             )
             self.continuous_handler.subscribe(continuous_module)
 
