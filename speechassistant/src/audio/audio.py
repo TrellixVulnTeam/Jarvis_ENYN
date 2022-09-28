@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import pathlib
+import struct
 import time
 from datetime import datetime
 from io import BytesIO
@@ -8,10 +11,10 @@ from typing import Any
 from typing import TYPE_CHECKING
 
 import pvporcupine
-#import speech_recognition as sr
+import speech_recognition as sr
 import toml
 from pvporcupine import Porcupine
-from pyaudio import PyAudio, Stream, paInt8
+from pyaudio import PyAudio, Stream, paInt16
 
 from src import log
 from src.models.audio.queue_item import (
@@ -36,7 +39,7 @@ def __get_path_of_config_file() -> Path:
 
 
 config: dict[str, Any] = __load_configuration()
-audio_config: dict[str, Any] = config.get("")
+audio_config: dict[str, Any] = config["audio"]
 
 
 def play_audio_bytes(item: QueueItem) -> None:
@@ -61,7 +64,7 @@ def __create_pyaudio_stream(item):
     stream = stream.open(
         rate=item.sample_rate,
         channels=1,
-        format=paInt8,
+        format=paInt16,
         output=True,
         frames_per_buffer=1024,
     )
@@ -115,10 +118,11 @@ class AudioInput:
     def __wait_for_calls(
         self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]
     ) -> None:
-        log.info("\nListening {%s}" % keywords)
+        log.info("Listening {%s}" % keywords)
 
         while self.running:
             input_bytes: bytes = audio_stream.read(porcupine.frame_length)
+            tmp = struct.unpack()
             keyword_index: int = porcupine.process(input_bytes)
             if keyword_index >= 0 and not self.recording:
                 self.recording = True
@@ -213,9 +217,9 @@ class AudioInput:
         pyaudio_object: PyAudio, porcupine: Porcupine
     ) -> Stream:
         return pyaudio_object.open(
-            rate=44100,
+            rate=porcupine.sample_rate,
             channels=1,
-            format=paInt8,
+            format=paInt16,
             input=True,
             frames_per_buffer=porcupine.frame_length,
         )
@@ -274,19 +278,18 @@ class AudioOutput:
         audio_output_thread.start()
 
         log.info("Audio Output started!")
-
         return self
 
     def run(self) -> None:
         while self.running:
-            try:
-                item: QueueItem = self.__get_next_item()
+            item: QueueItem = self.__get_next_item()
+            if item is not None:
                 print(f"-------->Next Item: {item}<-------")
                 self.__choose_output_method(item)
-            except IndexError:
+            else:
                 time.sleep(0.25)
 
-    def __choose_output_method(self, item):
+    def __choose_output_method(self, item) -> None:
         match type(item.value).__class__:
             case str.__class__:
                 self.tts.say(item.value)
@@ -345,11 +348,13 @@ class AudioOutput:
     def stop() -> None:
         pass
 
-    def __get_next_item(self) -> QueueItem:
-        try:
+    def __get_next_item(self) -> QueueItem | None:
+        if len(self.priority_queue) > 0:
             return self.priority_queue.pop(0)
-        except IndexError:
+        elif len(self.queue) > 0:
             return self.queue.pop(0)
+        else:
+            return None
 
     def __insert_to_queue(self, model: QueueItem) -> None:
         self.queue = self.__insert_to_given_queue(model, self.queue)
@@ -391,7 +396,7 @@ def build_queue_item(
     if not sample_rate:
         sample_rate = 44100
     model: QueueItem = QueueItem(
-        type=queue_type,
+        queue_type=queue_type,
         value=value,
         wait_until_done=wait_until_done,
         sample_rate=sample_rate,

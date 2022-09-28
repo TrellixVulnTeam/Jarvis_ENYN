@@ -26,7 +26,7 @@ class QueueItem(BaseModel):
     queue_type: QueueType
     value: str | BytesIO
     wait_until_done: bool
-    sample_rate: int = 44100
+    sample_rate: int | None = None
 
     class Config:
         arbitrary_types_allowed = True

@@ -68,6 +68,10 @@ class Modules:
             key=lambda module: module.PRIORITY if hasattr(module, "PRIORITY") else 0,
             reverse=True,
         )
+        try:
+            print("")
+        except AttributeError and SyntaxError:
+            print("")
         return modules
 
     def __load_all_modules(self, continuous, directory, modules):
