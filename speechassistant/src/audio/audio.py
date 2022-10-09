@@ -8,7 +8,7 @@ from typing import Any
 from typing import TYPE_CHECKING
 
 import pvporcupine
-#import speech_recognition as sr
+import speech_recognition as sr
 import toml
 from pvporcupine import Porcupine
 from pyaudio import PyAudio, Stream, paInt8
@@ -36,7 +36,7 @@ def __get_path_of_config_file() -> Path:
 
 
 config: dict[str, Any] = __load_configuration()
-audio_config: dict[str, Any] = config.get("")
+audio_config: dict[str, Any] = config.get("audio")
 
 
 def play_audio_bytes(item: QueueItem) -> None:
@@ -213,7 +213,7 @@ class AudioInput:
         pyaudio_object: PyAudio, porcupine: Porcupine
     ) -> Stream:
         return pyaudio_object.open(
-            rate=44100,
+            rate=porcupine.sample_rate,
             channels=1,
             format=paInt8,
             input=True,
@@ -269,15 +269,17 @@ class AudioOutput:
 
         self.running = True
 
-        audio_output_thread: Thread = Thread(target=self.run, args=())
-        audio_output_thread.daemon = True
-        audio_output_thread.start()
+        self.run()
+
+        # audio_output_thread: Thread = Thread(target=self.run, args=())
+        # audio_output_thread.daemon = True
+        # audio_output_thread.start()
 
         log.info("Audio Output started!")
 
         return self
 
-    def run(self) -> None:
+    async def run(self) -> None:
         while self.running:
             try:
                 item: QueueItem = self.__get_next_item()
@@ -391,7 +393,7 @@ def build_queue_item(
     if not sample_rate:
         sample_rate = 44100
     model: QueueItem = QueueItem(
-        type=queue_type,
+        queue_type=queue_type,
         value=value,
         wait_until_done=wait_until_done,
         sample_rate=sample_rate,
