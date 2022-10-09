@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 import pvporcupine
 import speech_recognition as sr
 import toml
-from pvporcupine import Porcupine
+from pvrecorder import PvRecorder
 from pyaudio import PyAudio, Stream, paInt16
 
 from src import log
@@ -99,16 +99,20 @@ class AudioInput:
 
     def run(self) -> None:
         keywords: list[str] = self.config.get("keywords")
-        porcupine: Porcupine = pvporcupine.create(
+        porcupine: pvporcupine.Porcupine = pvporcupine.create(
             keywords=keywords,
             sensitivities=[self.sensitivity],
             access_key=config["api"]["porcupine"],
         )
 
         try:
-            pa: PyAudio = PyAudio()
-            audio_stream: Stream = self.__create_pyaudio_instance(pa, porcupine)
-            self.__wait_for_calls(porcupine, audio_stream, keywords)
+            # pa: PyAudio = PyAudio()
+            # audio_stream: Stream = self.__create_pyaudio_instance(pa, porcupine)
+            recorder = PvRecorder(
+                device_index=self.config["device_index"],
+                frame_length=porcupine.frame_length,
+            )
+            self.__wait_for_calls(porcupine, recorder, keywords)
         except MemoryError:
             log.warning("Memory is full!")
             log.action("Restart porcupine...")
@@ -116,14 +120,20 @@ class AudioInput:
             self.start()
 
     def __wait_for_calls(
-        self, porcupine: Porcupine, audio_stream: Stream, keywords: list[str]
+        self,
+        porcupine: pvporcupine.Porcupine,
+        recorder: PvRecorder,
+        keywords: list[str],
     ) -> None:
         log.info("Listening {%s}" % keywords)
 
+        recorder.start()
+
         while self.running:
-            input_bytes: bytes = audio_stream.read(porcupine.frame_length)
-            tmp = struct.unpack()
-            keyword_index: int = porcupine.process(input_bytes)
+            # input_bytes: bytes = audio_stream.read(round(porcupine.frame_length / 2))
+            pcm = recorder.read()
+            sp = struct.pack("h" * len(pcm), *pcm)
+            keyword_index: int = porcupine.process(sp)
             if keyword_index >= 0 and not self.recording:
                 self.recording = True
                 log.info(
@@ -214,7 +224,7 @@ class AudioInput:
 
     @staticmethod
     def __create_pyaudio_instance(
-        pyaudio_object: PyAudio, porcupine: Porcupine
+        pyaudio_object: PyAudio, porcupine: pvporcupine.Porcupine
     ) -> Stream:
         return pyaudio_object.open(
             rate=porcupine.sample_rate,

@@ -13,7 +13,6 @@ beautifulsoup4==4.11.1
 matplotlib==3.5.1
 numpy==1.22.2
 Pillow==9.0.1
-qrcode==7.3.1
 wikipedia==1.4.0
 googlemaps==4.6.0
 pydub==0.25.1
@@ -27,3 +26,5 @@ fritzconnection==1.9.1
 nltk==3.7
 tensorflow==2.9.1
 gTTS==2.2.4
+converter==1.0.0
+pvrecorder==1.1.1

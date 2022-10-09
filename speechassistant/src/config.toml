@@ -28,6 +28,7 @@ host = ""
 [audio]
 
 [audio.input]
+device_index = -1
 sensitivity = 0.5
 pause_threshold = 0.8
 energy_threshold = 300
