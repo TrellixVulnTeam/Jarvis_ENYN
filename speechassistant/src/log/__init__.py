@@ -34,7 +34,7 @@ exception = logger.exception
 
 
 def __fmt_filter(record):
-    record.levelname = ('[%s]' % record.levelname).ljust(12, ' ')
+    record.levelname = f"[{record.levelname.center(9, ' ')}]"
     return True
 
 
@@ -49,7 +49,7 @@ def configure_log():
     stream_logger_formatting: Formatter = StreamHandlerFormatter("%(asctime)-20s %(levelname)s %(message)s",
                                                                  datefmt=date_format)
     file_logger_formatting: Formatter = Formatter(
-        "%(asctime)-20s %(levelname)s %(threadName)-40s line %(lineno)-6d %(message)s", datefmt=date_format)
+        "%(asctime)-20s %(levelname)s [%(filename)-20s:%(lineno)d] %(message)s", datefmt=date_format)
 
     stream_handler = StreamHandler()
     stream_handler.setLevel(INFO)

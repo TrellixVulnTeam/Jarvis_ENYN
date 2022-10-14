@@ -34,7 +34,7 @@ class ReminderLogic:
 
     @staticmethod
     def update_reminder(reminder: Reminder) -> Reminder:
-        return None
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     @staticmethod
     def delete_reminder(reminder_id: int) -> None:

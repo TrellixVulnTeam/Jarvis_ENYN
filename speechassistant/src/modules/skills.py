@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from geopy.exc import GeocoderUnavailable
+
 from src import log
 import re
 from datetime import datetime, timedelta
@@ -486,7 +488,14 @@ def get_data_of_city(city: str) -> dict:
     Returns:
         dict: Dictionary with the values of the city
     """
+    if not city:
+        raise ValueError
+
     location: Location = geo_location.geocode(city)
+
+    if not location:
+        raise GeocoderUnavailable
+
     return __location_to_json(location.raw)
 
 

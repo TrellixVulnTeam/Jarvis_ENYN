@@ -2,8 +2,11 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 
-from src.api.routers import alarm
-from src.api.routers import audioFile, module, reminder, routine
+from src.api.Alarms.V1.Controller import alarm
+from src.api.AudioFiles.V1.Controller import audioFile
+from src.api.Modules.V1.Controller import module
+from src.api.Reminder.V1.Controller import reminder
+from src.api.Routines.V1.Controller import routine
 
 description: str = """
 
@@ -20,7 +23,7 @@ app = FastAPI(
 @app.get("/app")
 def read_main(request: Request):
     return {
-        "message": "Hello from speechassistant app",
+        "message": "Hello from speech assistant app",
         "root_path": request.scope.get("root_path"),
     }
 
@@ -35,15 +38,10 @@ def start() -> None:
 
     v1: FastAPI = FastAPI()
     v1.include_router(alarm.router, prefix="/alarms", tags=["Wecker"], dependencies=[])
+    v1.include_router(reminder.router, prefix="/reminder", tags=["reminder"], dependencies=[])
+    v1.include_router(module.router, prefix="/modules", tags=["modules"], dependencies=[])
     v1.include_router(
-        reminder.router, prefix="/reminder", tags=["reminder"], dependencies=[]
-    )
-    v1.include_router(
-        module.router, prefix="/modules", tags=["modules"], dependencies=[]
-    )
-    v1.include_router(
-        audioFile.router, prefix="/audioFiles", tags=["audioFiles"], dependencies=[]
-    )
+        audioFile.router, prefix="/audio-files", tags=["audioFiles"], dependencies=[])
     v1.include_router(
         routine.router, prefix="/routines", tags=["routines"], dependencies=[]
     )
@@ -53,7 +51,9 @@ def start() -> None:
 
     app.mount(app=api, path="/api", name="api")
 
+    uvicorn.run(app, host="0.0.0.0", port=8080)
+
 
 if __name__ == "__main__":
     start()
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+

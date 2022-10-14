@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Response
 
-from src.api.logic.alarm import AlarmLogic
+from src.api.Alarms.V1.Logic.alarm import AlarmLogic
 from src.models.alarm import Alarm
 
 router: APIRouter = APIRouter()

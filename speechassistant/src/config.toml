@@ -5,8 +5,8 @@ system_name = "JARVIS"
 default_user = ""
 
 [local_storage]
-home_location = ""
-actual_location = ""
+home_location = "Coburg"
+current_location = ""
 
 [keys]
 messenger = ""

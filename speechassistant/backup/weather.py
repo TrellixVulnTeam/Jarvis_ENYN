@@ -82,7 +82,7 @@ class Weather:
         # from core import Core
         # core: Core = Core.get_instance()
         self.__api_key = "bd4d17c6eedcff6efc70b9cefda99082"  # core.data["api_keys"]["open_weather_map"]
-        self.city = "Würzburg"  # core.local_storage["actual_location"]
+        self.city = "Würzburg"  # core.local_storage["current_location"]
 
     def start(self) -> None:
         log.action("Starting weather module...")

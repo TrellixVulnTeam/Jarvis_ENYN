@@ -12,27 +12,13 @@ from geopy import Location, Nominatim
 from geopy.exc import GeocoderUnavailable
 
 from src import log
+from src.modules.skills import get_data_of_city
 
 if TYPE_CHECKING:
     from src.core import Core
 
 
 geo_location = Nominatim(user_agent="my_app")
-
-def get_data_of_city(city: str) -> dict:
-    """ Returns geological data of a city
-        Args:
-            city    (str): name of the city from which the data are required
-        Returns:
-            dict: Dictionary with the values of the city
-    """
-    try:
-        # todo: something without try and catch
-        location: Location = geo_location.geocode(city)
-        return __location_to_json(location.raw)
-    except GeocoderUnavailable:
-        pass
-
 
 def get_data_of_lat_lon(lat: float, lon: float) -> dict:
     """ Returns geological data of a city
@@ -69,9 +55,9 @@ class Weather:
         self.__hourly_forecast = None
         self.__daily_forcast = None
         self.__sunrise_sunset = None
-        self.city = "Würzburg"
+        self.location = "Würzburg"
         self.__fill_data()
-        self.__geo_data = get_data_of_city(self.city)
+        self.__geo_data = get_data_of_city(self.location)
         self.__last_updated = datetime.now()
         self.old_weather_inf = []
         self.current_weather = None
@@ -81,9 +67,10 @@ class Weather:
         Weather.__instance = self
 
     def __fill_data(self) -> None:
+        current_location = self.__core.local_storage["current_location"]
         self.__api_key = self.__core.config_data["api"]["open_weather_map"]
-        self.city = self.__core.local_storage["actual_location"]
-        log.debug(f"Setting up Weather Service with the api-key '{self.__api_key}' and the city '{self.city}...")
+        self.location = current_location if current_location else self.__core.local_storage["home_location"]
+        log.debug(f"Setting up Weather Service with the api-key '{self.__api_key}' and the city '{self.location}...")
 
     def start(self) -> None:
         log.action("Starting weather module...")
@@ -181,7 +168,7 @@ class Weather:
             return self.__daily_forcast[day_offset]
         else:
             if city_name is not None:
-                geo_data = get_data_of_city(self.city)
+                geo_data = get_data_of_city(self.location)
                 lat = geo_data["lat"]
                 lon = geo_data["lon"]
             url = (
@@ -215,7 +202,7 @@ class Weather:
         )
         temp_inf = f'bei {int(_current_weather["temp"])}°C'
         if city is None:
-            city = self.city
+            city = self.location
         if weather_id in self.Statics.will_be_description_map.keys():
             weather_description = f"In {city} gibt es {self.Statics.will_be_description_map.get(weather_id)} {temp_inf}."
         elif weather_id in self.Statics.give_description_map.keys():
@@ -249,7 +236,7 @@ class Weather:
                 self.__update_all()
                 data_offset = offset
             _forecast = self.__hourly_forecast[data_offset]
-        elif city is not None and city is not self.city:
+        elif city is not None and city is not self.location:
             # since the data is retrieved anew, there is no "delay" of the data and
             # self.get_offset_hours() does not have to be observed
             if offset > 47:
@@ -304,7 +291,7 @@ class Weather:
                 self.__update_all()
                 data_offset = offset
             _forecast = self.__daily_forcast[data_offset]
-        elif city is not None and city is not self.city:
+        elif city is not None and city is not self.location:
             # since the data is retrieved anew, there is no "delay" of the data and
             # self.get_offset_ does not have to be observed
             if offset > 7:
@@ -327,7 +314,7 @@ class Weather:
         else:
             raise ValueError()
         if city is None:
-            city = self.city
+            city = self.location
         return self.__get_weather_string(_forecast, city, days_offset=offset)
 
     def get_weather_conditions(self) -> str | None:
@@ -453,7 +440,7 @@ class Weather:
             """
         if city is None and lat is None and lon is None:
             url = (
-                f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}"
+                f"https://api.openweathermap.org/data/2.5/weather?q={self.location}&units=metric&appid={self.__api_key}"
                 f"&lang=de"
             )
             self.current_weather = requests.get(url).json()
@@ -487,7 +474,7 @@ class Weather:
         else:
             temp_inf = f'bei {round(_forecast["temp"])}°C'
         if city is None:
-            city = self.city
+            city = self.location
         if weather_id in self.Statics.will_be_description_map.keys():
             weather_description = (
                 f"In {city} wird es "
@@ -580,7 +567,7 @@ class Weather:
                     None
             """
         url = (
-            f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&units=metric&appid={self.__api_key}"
+            f"https://api.openweathermap.org/data/2.5/weather?q={self.location}&units=metric&appid={self.__api_key}"
             f"&lang=de"
         )
         self.current_weather = requests.get(url).json()

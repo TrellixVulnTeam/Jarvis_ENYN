@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from src.api.logic.reminder import ReminderLogic
+from src.api.Reminder.V1.Logic.reminder import ReminderLogic
 from src.models.reminder import Reminder
 
 router: APIRouter = APIRouter()

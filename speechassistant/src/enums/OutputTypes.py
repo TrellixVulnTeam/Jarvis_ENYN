@@ -8,11 +8,3 @@ class OutputTypes(Enum):
     ARRAY = 4
     DICT = 5
     TUPLE = 6
-
-
-class Measures(Enum):
-    mg: 1
-    g: 2
-    kg: 3
-    ml: 4
-    l: 5
