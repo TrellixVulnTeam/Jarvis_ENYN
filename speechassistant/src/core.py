@@ -1,11 +1,10 @@
 from __future__ import annotations  # compatibility for < 3.10
 
 import datetime
-from typing import TYPE_CHECKING
-
 import time
 from pathlib import Path
 from threading import Thread
+from typing import TYPE_CHECKING
 
 import requests
 import toml
@@ -14,9 +13,10 @@ from src import log
 from src.audio import AudioOutput, AudioInput
 from src.database.connection import *
 from src.models import User
+from src.modules.analyze import Sentence_Analyzer
+
 # from .resources.intent.Wrapper import IntentWrapper as AIWrapper
 from src.modules.modules import Modules
-from src.modules.analyze import Sentence_Analyzer
 from src.services import ServiceWrapper
 
 if TYPE_CHECKING:
@@ -43,7 +43,7 @@ class Core:
         self.__load_config_data()
         self.use_ai = self.config_data["services"]["activation"]["ai"]
         self.path: Path = Path(__file__).parent
-        self.modules: Modules = None # todo
+        self.modules: Modules = None  # todo
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.services: ServiceWrapper = ServiceWrapper(self, self.config_data)
         self.messenger = None
@@ -69,8 +69,13 @@ class Core:
 
     def __prepare_local_storage(self):
         self.local_storage["modules"] = {}
-        if self.local_storage["home_location"] == "" and self.local_storage["HasInternetConnection"]:
-            self.local_storage["home_location"] = requests.get("https://ipinfo.io").json()["city"]
+        if (
+            self.local_storage["home_location"] == ""
+            and self.local_storage["HasInternetConnection"]
+        ):
+            self.local_storage["home_location"] = requests.get(
+                "https://ipinfo.io"
+            ).json()["city"]
 
     def __configure_logger(self) -> None:
         pass
@@ -80,17 +85,21 @@ class Core:
         self.audio_output.start()
 
     def __load_config_data(self):
-        with open(Path(__file__).parent.parent.absolute().joinpath("config.toml").absolute(), "r") as config_file:
+        with open(
+            Path(__file__).parent.absolute().joinpath("config.toml").absolute(), "r"
+        ) as config_file:
             log.info("loading configs...")
             self.config_data = toml.load(config_file)
             self.local_storage = self.config_data["local_storage"]
 
-        self.local_storage["HasInternetConnection"] = False # todo
+        self.local_storage["HasInternetConnection"] = False  # todo
 
     def messenger_thread(self) -> None:
         while True:
             for msg in self.messenger.messages.copy():
-                user: User = UserInterface().get_user_by_alias(msg["from"]["first_name"].lower())
+                user: User = UserInterface().get_user_by_alias(
+                    msg["from"]["first_name"].lower()
+                )
                 if not user:
                     self.__reject_message(msg)
                     continue
@@ -129,8 +138,14 @@ class Core:
 
     @staticmethod
     def __log_message_from_unknown_user(msg):
-        user_identification: str = msg['from']['first_name'] if "first_name" in msg['from'] else msg['from']['id']
-        log.warning(f"Message from unknown Telegram user {user_identification}. Access denied.")
+        user_identification: str = (
+            msg["from"]["first_name"]
+            if "first_name" in msg["from"]
+            else msg["from"]["id"]
+        )
+        log.warning(
+            f"Message from unknown Telegram user {user_identification}. Access denied."
+        )
 
     def messenger_listen(self, user: str):
         # Tell the Telegram thread that you are waiting for a reply,
@@ -192,7 +207,19 @@ class Core:
         # user prediction is not implemented yet, therefore here the workaround
         if user is None:
             user: str = self.local_storage["user"]
-        return self.modules.query_threaded(name, text, User(alias=user, first_name="", last_name="", birthday=datetime.date(2020, 1, 1), messenger_id=1, song_name="standard.wav", waiting_notifications=[]))
+        return self.modules.query_threaded(
+            name,
+            text,
+            User(
+                alias=user,
+                first_name="",
+                last_name="",
+                birthday=datetime.date(2020, 1, 1),
+                messenger_id=1,
+                song_name="standard.wav",
+                waiting_notifications=[],
+            ),
+        )
 
 
 global config_data
