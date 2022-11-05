@@ -12,6 +12,7 @@ from src.database.schemas.routines import (
     RoutineSchema,
     routine_to_schema,
     schema_to_routine,
+    CallingCommandSchema,
 )
 from src.models.routine import Routine
 
@@ -32,7 +33,7 @@ class RoutineInterface(AbstractDataBaseConnection[Routine, RoutineSchema]):
         model_schema: Schema
         with Session(self.db_persistancy.engine) as session:
             stmt = select(self._get_schema_type()).where(
-                self._get_schema_type().name == model_name
+                RoutineSchema.name == model_name
             )
             model_schema = session.execute(stmt).scalars().first()
             return self._schema_to_model(model_schema)
@@ -46,8 +47,10 @@ class RoutineInterface(AbstractDataBaseConnection[Routine, RoutineSchema]):
 
     def get_all_on_command(self, text: str) -> list[Routine]:
         with Session(self.db_persistancy.engine) as session:
-            stmt = select(RoutineSchema).where(
-                RoutineSchema.calling_commands.command == text
+            stmt = (
+                select(RoutineSchema)
+                .join(RoutineSchema.calling_commands)
+                .where(CallingCommandSchema.command == text)
             )
             return [
                 self._schema_to_model(a) for a in session.execute(stmt).scalars().all()
