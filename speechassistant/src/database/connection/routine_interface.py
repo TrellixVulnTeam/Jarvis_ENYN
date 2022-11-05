@@ -3,8 +3,16 @@ from typing import Type
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.database.connection.abstract_database_connection import Schema, Model, AbstractDataBaseConnection
-from src.database.schemas.routines import RoutineSchema, routine_to_schema, schema_to_routine
+from src.database.connection.abstract_database_connection import (
+    Schema,
+    Model,
+    AbstractDataBaseConnection,
+)
+from src.database.schemas.routines import (
+    RoutineSchema,
+    routine_to_schema,
+    schema_to_routine,
+)
 from src.models.routine import Routine
 
 
@@ -22,25 +30,37 @@ class RoutineInterface(AbstractDataBaseConnection[Routine, RoutineSchema]):
 
     def get_by_name(self, model_name: str) -> Routine:
         model_schema: Schema
-        with Session(self.engine) as session:
-            stmt = select(self._get_schema_type()).where(self._get_schema_type().name == model_name)
+        with Session(self.db_persistancy.engine) as session:
+            stmt = select(self._get_schema_type()).where(
+                self._get_schema_type().name == model_name
+            )
             model_schema = session.execute(stmt).scalars().first()
             return self._schema_to_model(model_schema)
 
     def get_all_after_alarm(self) -> list[Routine]:
-        with Session(self.engine) as session:
+        with Session(self.db_persistancy.engine) as session:
             stmt = select(RoutineSchema).where(RoutineSchema.retakes.times.after_alarm)
-            return [self._schema_to_model(a) for a in session.execute(stmt).scalars().all()]
+            return [
+                self._schema_to_model(a) for a in session.execute(stmt).scalars().all()
+            ]
 
     def get_all_on_command(self, text: str) -> list[Routine]:
-        with Session(self.engine) as session:
-            stmt = select(RoutineSchema).where(RoutineSchema.calling_commands.command == text)
-            return [self._schema_to_model(a) for a in session.execute(stmt).scalars().all()]
+        with Session(self.db_persistancy.engine) as session:
+            stmt = select(RoutineSchema).where(
+                RoutineSchema.calling_commands.command == text
+            )
+            return [
+                self._schema_to_model(a) for a in session.execute(stmt).scalars().all()
+            ]
 
     def get_by_attribute(self, attribute: str, value: any) -> list[Routine]:
-        with Session(self.engine) as session:
-            stmt = select(self._get_schema_type()).where(RoutineSchema.__getattribute__(attribute) == value)
-            return [self._schema_to_model(a) for a in session.execute(stmt).scalars().all()]
+        with Session(self.db_persistancy.engine) as session:
+            stmt = select(self._get_schema_type()).where(
+                RoutineSchema.__getattribute__(attribute) == value
+            )
+            return [
+                self._schema_to_model(a) for a in session.execute(stmt).scalars().all()
+            ]
 
     @staticmethod
     def _get_model_id(model: Model) -> int:
@@ -56,5 +76,3 @@ class RoutineInterface(AbstractDataBaseConnection[Routine, RoutineSchema]):
 
     def __int__(self) -> None:
         super().__init__()
-        from src.database.tables.routines import create_tables
-        create_tables(self.engine)

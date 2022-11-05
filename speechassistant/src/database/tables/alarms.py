@@ -1,14 +1,15 @@
-from sqlalchemy import Table, Column, Integer, String, DateTime, Time, Boolean, MetaData
-from sqlalchemy.future import Engine
+from sqlalchemy import Table, Column, Integer, String, DateTime, Time, Boolean
 
-meta = MetaData()
+from src.database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 ALARM_TABLE_NAME = "alarms"
 ALARM_REPEATING_TABLE_NAME = "alarm_repeatings"
 
 alarmTable = Table(
     ALARM_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer, primary_key=True),
     Column("text", String),
     Column("alarm_time", Time),
@@ -21,7 +22,7 @@ alarmTable = Table(
 
 alarmRepeatingTable = Table(
     ALARM_REPEATING_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("alarm_id", Integer, primary_key=True),
     Column("monday", Boolean),
     Column("tuesday", Boolean),
@@ -32,7 +33,3 @@ alarmRepeatingTable = Table(
     Column("sunday", Boolean),
     Column("regular", Boolean),
 )
-
-
-def create_tables(engine: Engine):
-    meta.create_all(engine)

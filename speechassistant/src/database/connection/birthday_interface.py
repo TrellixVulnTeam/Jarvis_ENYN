@@ -1,7 +1,15 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import AbstractDataBaseConnection, Schema, Model
-from src.database.schemas.birthdays import schema_to_birthday, birthday_to_schema, BirthdaySchema
+from src.database.connection.abstract_database_connection import (
+    AbstractDataBaseConnection,
+    Schema,
+    Model,
+)
+from src.database.schemas.birthdays import (
+    schema_to_birthday,
+    birthday_to_schema,
+    BirthdaySchema,
+)
 from src.models.birthday import Birthday
 
 
@@ -28,5 +36,3 @@ class BirthdayInterface(AbstractDataBaseConnection[Birthday, BirthdaySchema]):
 
     def __int__(self) -> None:
         super().__init__()
-        from src.database.tables.birthdays import create_tables
-        create_tables(self.engine)

@@ -1,18 +1,15 @@
-from sqlalchemy import Table, String, DateTime, Column, MetaData
-from sqlalchemy.future import Engine
+from sqlalchemy import Table, String, DateTime, Column
 
-meta = MetaData()
+from database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 BIRTHDAY_TABLE_NAME = "birthdays"
 
 birthdayTableName = Table(
     BIRTHDAY_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("first_name", String),
     Column("last_name", String),
     Column("date", DateTime),
 )
-
-
-def create_tables(engine: Engine):
-    meta.create_all(engine)

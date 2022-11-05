@@ -3,7 +3,11 @@ from typing import Type
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
-from src.database.connection.abstract_database_connection import Schema, Model, AbstractDataBaseConnection
+from src.database.connection.abstract_database_connection import (
+    Schema,
+    Model,
+    AbstractDataBaseConnection,
+)
 from src.database.schemas.users import UserSchema, user_to_schema, schema_to_user
 from src.models.user import User
 
@@ -12,7 +16,7 @@ class UserInterface(AbstractDataBaseConnection[User, UserSchema]):
     # toDo: load_by_name
 
     def get_user_by_alias(self, user_name: str) -> User:
-        with Session(self.engine) as session:
+        with Session(self.db_persistancy.engine) as session:
             stmt = select(UserSchema).where(UserSchema.alias == user_name)
             return self._schema_to_model(session.execute(stmt).scalars().first())
 
@@ -38,5 +42,3 @@ class UserInterface(AbstractDataBaseConnection[User, UserSchema]):
 
     def __int__(self) -> None:
         super().__init__()
-        from src.database.tables.users import create_tables
-        create_tables(self.engine)

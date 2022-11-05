@@ -1,7 +1,8 @@
-from sqlalchemy import Table, Column, String, Integer, Boolean, Time, MetaData
-from sqlalchemy.future import Engine
+from sqlalchemy import Table, Column, String, Integer, Boolean, Time
 
-meta = MetaData()
+from database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 ROUTINE_TABLE_NAME = "routines"
 ROUTINE_DAYS_TABLE_NAME = "routinedays"
@@ -13,10 +14,9 @@ ROUTINE_COMMAND_TABLE_NAME = "routinecommands"
 ROUTINE_COMMAND_TEXT_TABLE_NAME = "routinecommandtext"
 CALLING_COMMAND_TABLE_NAME = "callingcommands"
 
-
 routineCallingCommandTable = Table(
     CALLING_COMMAND_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("routine_name", Integer),
     Column("command", String),
@@ -24,14 +24,14 @@ routineCallingCommandTable = Table(
 
 routineCommandTextTable = Table(
     ROUTINE_COMMAND_TEXT_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("text", String),
     Column("routine_command_id", Integer),
 )
 
 routineCommandTable = Table(
     ROUTINE_COMMAND_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("module_name", String),
     Column("routine_name", Integer),
@@ -39,14 +39,14 @@ routineCommandTable = Table(
 
 routineRetakesTable = Table(
     ROUTINE_RETAKES_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("routine_name", Integer),
 )
 
 routineClockTimeTable = Table(
     ROUTINE_CLOCK_TIME_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("clock_time", Time),
     Column("clock_time_id", Integer),
@@ -54,7 +54,7 @@ routineClockTimeTable = Table(
 
 routineTimeTable = Table(
     ROUTINE_TIMES_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("after_alarm", Boolean),
     Column("after_sunrise", Boolean),
@@ -65,14 +65,14 @@ routineTimeTable = Table(
 
 specificDatesTable = Table(
     SPECIFIC_DATES_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("routine_days_id", Integer),
 )
 
 routineDaysTable = Table(
     ROUTINE_DAYS_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("routine_day_id", Integer),
     Column("monday", Boolean),
     Column("tuesday", Boolean),
@@ -85,9 +85,8 @@ routineDaysTable = Table(
 )
 
 routineTable = Table(
-    ROUTINE_TABLE_NAME, meta, Column("name", String), Column("description", String)
+    ROUTINE_TABLE_NAME,
+    DB_PERSISTENCY.meta,
+    Column("name", String),
+    Column("description", String),
 )
-
-
-def create_tables(engine: Engine):
-    meta.create_all(engine)

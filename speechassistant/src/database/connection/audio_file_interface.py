@@ -1,7 +1,15 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import Schema, Model, AbstractDataBaseConnection
-from src.database.schemas.audio_files import audio_file_to_schema, AudioFileSchema, schema_to_audio_file
+from src.database.connection.abstract_database_connection import (
+    Schema,
+    Model,
+    AbstractDataBaseConnection,
+)
+from src.database.schemas.audio_files import (
+    audio_file_to_schema,
+    AudioFileSchema,
+    schema_to_audio_file,
+)
 from src.models.audio.audio_file import AudioFile
 
 
@@ -28,5 +36,3 @@ class AudioFileInterface(AbstractDataBaseConnection[AudioFile, AudioFileSchema])
 
     def __int__(self) -> None:
         super().__init__()
-        from src.database.tables.audiofiles import create_tables
-        create_tables(self.engine)

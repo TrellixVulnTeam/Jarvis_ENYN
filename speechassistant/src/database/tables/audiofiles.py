@@ -1,14 +1,14 @@
-from sqlalchemy import Table, String, LargeBinary, Column, MetaData
-from sqlalchemy.future import Engine
+from sqlalchemy import Table, String, LargeBinary, Column
 
-meta = MetaData()
+from database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 AUDIO_FILE_TABLE_NAME = "audiofiles"
 
 audioFileTable = Table(
-    AUDIO_FILE_TABLE_NAME, meta, Column("name", String), Column("data", LargeBinary)
+    AUDIO_FILE_TABLE_NAME,
+    DB_PERSISTENCY.meta,
+    Column("name", String),
+    Column("data", LargeBinary),
 )
-
-
-def create_tables(engine: Engine):
-    meta.create_all(engine)

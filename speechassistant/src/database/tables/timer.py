@@ -1,19 +1,16 @@
-from sqlalchemy import Table, Column, Integer, String, Time, MetaData, BigInteger
-from sqlalchemy.future import Engine
+from sqlalchemy import Table, Column, Integer, String, Time, BigInteger
 
-meta = MetaData()
+from database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 TIMER_TABLE_NAME = "timer"
 
 timerTable = Table(
     TIMER_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("duration", BigInteger),
     Column("start_time", Time),
     Column("text", String),
 )
-
-
-def create_tables(engine: Engine):
-    meta.create_all(engine)

@@ -1,6 +1,10 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import Model, Schema, AbstractDataBaseConnection
+from src.database.connection.abstract_database_connection import (
+    Model,
+    Schema,
+    AbstractDataBaseConnection,
+)
 from src.database.schemas.alarms import alarm_to_schema, AlarmSchema, schema_to_alarm
 from src.models.alarm import Alarm
 
@@ -28,6 +32,3 @@ class AlarmInterface(AbstractDataBaseConnection[Alarm, AlarmSchema]):
 
     def __init__(self):
         super().__init__()
-
-        from src.database.tables.alarms import create_tables
-        create_tables(self.engine)

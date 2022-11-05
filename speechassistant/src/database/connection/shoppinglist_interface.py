@@ -1,11 +1,21 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import Schema, Model, AbstractDataBaseConnection
-from src.database.schemas.shopping_list import ShoppingListSchema, shopping_list_to_schema, schema_to_shopping_list
+from src.database.connection.abstract_database_connection import (
+    Schema,
+    Model,
+    AbstractDataBaseConnection,
+)
+from src.database.schemas.shopping_list import (
+    ShoppingListSchema,
+    shopping_list_to_schema,
+    schema_to_shopping_list,
+)
 from src.models.shopping_list import ShoppingListItem
 
 
-class ShoppingListInterface(AbstractDataBaseConnection[ShoppingListItem, ShoppingListSchema]):
+class ShoppingListInterface(
+    AbstractDataBaseConnection[ShoppingListItem, ShoppingListSchema]
+):
     @staticmethod
     def _schema_to_model(model_schema: Schema) -> Model:
         return schema_to_shopping_list(model_schema)
@@ -28,5 +38,3 @@ class ShoppingListInterface(AbstractDataBaseConnection[ShoppingListItem, Shoppin
 
     def __int__(self) -> None:
         super().__init__()
-        from src.database.tables.shoppinglist import create_tables
-        create_tables(self.engine)

@@ -6,3 +6,5 @@ from .routines import *
 from .shoppinglist import SHOPPING_LIST_TABLE_NAME
 from .timer import TIMER_TABLE_NAME
 from .users import USER_TABLE_NAME
+
+DBPersistency.get_instance().meta.create_all()

@@ -6,9 +6,9 @@ if TYPE_CHECKING:
     from src.models.audio.audio_file import AudioFile
     from fastapi.responses import StreamingResponse
 
-from backup.database_connection import DataBase
+from src.database.connection import AudioFileInterface
 
-audio_file_interface: any = DataBase().audio_interface
+audio_file_interface: any = AudioFileInterface()
 
 
 class AudioFileLogic:

@@ -1,13 +1,15 @@
-from sqlalchemy import Table, Column, Integer, DateTime, String, MetaData
+from sqlalchemy import Table, Column, Integer, DateTime, String
 from sqlalchemy.future import Engine
 
-meta = MetaData()
+from database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 REMINDER_TABLE_NAME = "reminder"
 
 reminderTable = Table(
     REMINDER_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("time", DateTime),
     Column("text", String),
@@ -16,4 +18,4 @@ reminderTable = Table(
 
 
 def create_tables(engine: Engine):
-    meta.create_all(engine)
+    DBPersistency.meta.create_all(engine)

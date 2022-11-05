@@ -1,19 +1,16 @@
-from sqlalchemy import Table, Integer, Column, String, Float, MetaData
-from sqlalchemy.future import Engine
+from sqlalchemy import Table, Integer, Column, String, Float
 
-meta = MetaData()
+from database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 SHOPPING_LIST_TABLE_NAME = "shoppinglist"
 
 shoppingListTable = Table(
     SHOPPING_LIST_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("id", Integer),
     Column("name", String),
     Column("measure", String),
     Column("quantity", Float),
 )
-
-
-def create_tables(engine: Engine):
-    meta.create_all(engine)

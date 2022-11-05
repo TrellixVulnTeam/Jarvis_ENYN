@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic, Optional, Type, TypeVar
 
-from sqlalchemy import create_engine, select, MetaData
+from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 
 from src.database.database_persistency import DBPersistency
 from src.exceptions import NoMatchingEntry
@@ -13,22 +12,15 @@ Schema = TypeVar("Schema")
 
 
 class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
-
     def __init__(self):
-        self.meta = MetaData()
-        self.engine = create_engine(
-            DBPersistency.DATABASE_URL,
-            echo=False,
-            future=True,
-            connect_args={"check_same_thread": False},
-            poolclass=StaticPool,
+        self.db_persistancy = DBPersistency.get_instance()
+        self.Session = sessionmaker(
+            autocommit=True, autoflush=True, bind=self.db_persistancy.engine
         )
-
-        self.Session = sessionmaker(autocommit=True, autoflush=True, bind=self.engine)
 
     def create(self, model: Model) -> Model:
         result_model: Model
-        with Session(self.engine, future=True) as session:
+        with Session(DBPersistency.get_instance().engine, future=True) as session:
             model_schema: Schema = self._model_to_schema(model)
             session.add(model_schema)
             session.flush()
@@ -38,21 +30,21 @@ class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
 
     def get_by_id(self, model_id: int) -> Model:
         model_schema: Schema
-        with Session(self.engine) as session:
+        with Session(self.db_persistancy.engine) as session:
             stmt = select(self._get_schema_type()).where(
                 self._get_schema_type().id == model_id
             )
-            model_schema = session.execute(stmt).scalars().first()
+            model_schema = session.scalars(stmt).first()
             if model_schema is None:
                 raise NoMatchingEntry()
             return self._schema_to_model(model_schema)
 
     def get_all(self) -> list[Model]:
         result_models: list[Model]
-        with Session(self.engine) as session:
+        with Session(self.db_persistancy.engine) as session:
             stmt = select(self._get_schema_type())
             result_models = [
-                self._schema_to_model(a) for a in session.execute(stmt).scalars().all()
+                self._schema_to_model(a) for a in session.scalars(stmt).all()
             ]
         return result_models
 
@@ -61,7 +53,7 @@ class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
 
     def update_by_id(self, model_id: int, model: Model) -> Optional[Model]:
         result_model: Optional[Model]
-        with Session(self.engine) as session:
+        with Session(self.db_persistancy.engine) as session:
             model_in_db: Schema = session.get(self._get_schema_type(), model_id)
             model_in_db = self._model_to_schema(model)
             session.flush()
@@ -70,7 +62,7 @@ class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
         return result_model
 
     def delete_by_id(self, model_id: int) -> None:
-        with Session(self.engine) as session:
+        with Session(self.db_persistancy.engine) as session:
             model_in_db = session.get(self._get_schema_type(), model_id)
             if model_in_db is None:
                 raise NoMatchingEntry()

@@ -1,6 +1,10 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import Schema, Model, AbstractDataBaseConnection
+from src.database.connection.abstract_database_connection import (
+    Schema,
+    Model,
+    AbstractDataBaseConnection,
+)
 from src.database.schemas.timer import TimerSchema, timer_to_schema, schema_to_timer
 from src.models.timer import Timer
 
@@ -28,5 +32,3 @@ class TimerInterface(AbstractDataBaseConnection[Timer, TimerSchema]):
 
     def __int__(self) -> None:
         super().__init__()
-        from src.database.tables.timer import create_tables
-        create_tables(self.engine)

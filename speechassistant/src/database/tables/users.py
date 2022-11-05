@@ -1,22 +1,23 @@
-from sqlalchemy import Table, Column, Integer, String, DateTime, MetaData
-from sqlalchemy.future import Engine
+from sqlalchemy import Table, Column, Integer, String, DateTime
 
-meta = MetaData()
+from database.database_persistency import DBPersistency
+
+DB_PERSISTENCY = DBPersistency.get_instance()
 
 USER_TABLE_NAME = "users"
 WAITING_NOTIFICATIONS_TABLE_NAME = "waitingnotifications"
 
 waitingNotificationsTable = Table(
     WAITING_NOTIFICATIONS_TABLE_NAME,
-    meta,
+    DB_PERSISTENCY.meta,
     Column("text", String),
     Column("user_id", Integer),
 )
 
 userTable = Table(
     USER_TABLE_NAME,
-    meta,
-    Column("id", Integer),
+    DB_PERSISTENCY.meta,
+    Column("id", Integer, primary_key=True),
     Column("alias", String),
     Column("first_name", String),
     Column("last_name", String),
@@ -24,7 +25,3 @@ userTable = Table(
     Column("messenger_id", Integer),
     Column("song_name", String),
 )
-
-
-def create_tables(engine: Engine):
-    meta.create_all(engine)
