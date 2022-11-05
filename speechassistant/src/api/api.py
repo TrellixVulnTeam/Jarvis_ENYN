@@ -1,12 +1,15 @@
+from typing import TYPE_CHECKING
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 
-from src.api.Alarms.V1.Controller import alarm
-from src.api.AudioFiles.V1.Controller import audioFile
-from src.api.Modules.V1.Controller import module
-from src.api.Reminder.V1.Controller import reminder
-from src.api.Routines.V1.Controller import routine
+if TYPE_CHECKING:
+    from src.api.Alarms.V1.Controller import alarm
+    from src.api.AudioFiles.V1.Controller import audioFile
+    from src.api.Modules.V1.Controller import module
+    from src.api.Reminder.V1.Controller import reminder
+    from src.api.Routines.V1.Controller import routine
 
 description: str = """
 
@@ -38,10 +41,15 @@ def start() -> None:
 
     v1: FastAPI = FastAPI()
     v1.include_router(alarm.router, prefix="/alarms", tags=["Wecker"], dependencies=[])
-    v1.include_router(reminder.router, prefix="/reminder", tags=["reminder"], dependencies=[])
-    v1.include_router(module.router, prefix="/modules", tags=["modules"], dependencies=[])
     v1.include_router(
-        audioFile.router, prefix="/audio-files", tags=["audioFiles"], dependencies=[])
+        reminder.router, prefix="/reminder", tags=["reminder"], dependencies=[]
+    )
+    v1.include_router(
+        module.router, prefix="/modules", tags=["modules"], dependencies=[]
+    )
+    v1.include_router(
+        audioFile.router, prefix="/audio-files", tags=["audioFiles"], dependencies=[]
+    )
     v1.include_router(
         routine.router, prefix="/routines", tags=["routines"], dependencies=[]
     )
@@ -56,4 +64,3 @@ def start() -> None:
 
 if __name__ == "__main__":
     start()
-

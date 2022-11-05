@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-import struct
 import time
 from datetime import datetime
 from io import BytesIO
@@ -112,11 +111,13 @@ class AudioInput:
                 device_index=self.config["device_index"],
                 frame_length=porcupine.frame_length,
             )
+            recorder.start()
             self.__wait_for_calls(porcupine, recorder, keywords)
         except MemoryError:
             log.warning("Memory is full!")
             log.action("Restart porcupine...")
             porcupine.delete()
+            # TODO: what is with alsa
             self.start()
 
     def __wait_for_calls(
@@ -132,15 +133,17 @@ class AudioInput:
         while self.running:
             # input_bytes: bytes = audio_stream.read(round(porcupine.frame_length / 2))
             pcm = recorder.read()
-            sp = struct.pack("h" * len(pcm), *pcm)
-            keyword_index: int = porcupine.process(sp)
+            keyword_index: int = porcupine.process(pcm)
             if keyword_index >= 0 and not self.recording:
                 self.recording = True
                 log.info(
                     f"Detected {keywords[keyword_index]} at "
-                    f"{datetime.now().hour}:{datetime.now().minute}"
+                    f"{datetime.now().strftime('HH:MM:SS')}"
                 )
-                self.__core.hotword_detected(self.recognize_input())
+                Thread(target=self.on_wake_word, args=()).start()
+
+    def on_wake_word(self):
+        self.__core.hotword_detected(self.recognize_input())
 
     def recognize_file(self, audio_file: any) -> str:
         with audio_file as source:
@@ -164,7 +167,7 @@ class AudioInput:
             self.recording = False
 
     def record_input_and_recognize(self):
-        with sr.Microphone(device_index=None) as source:
+        with sr.Microphone(device_index=self.config["device_index"]) as source:
             audio = self.speech_engine.listen(source)
             return self.__recognize_input_from_audio_data(audio)
 

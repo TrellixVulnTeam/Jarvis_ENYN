@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import json
-from src import log
 
 from fastapi import status
 from fastapi.responses import JSONResponse
 from flask import Response
 
-from backup.database_connection import DataBase
+from backup.database_connection import DataBaseBackup
+from src import log
 from src.exceptions.critical_exception import UnsolvableException
 from src.models.alarm import Alarm
 
-database: DataBase = DataBase()
+database: DataBaseBackup = DataBaseBackup()
 
 
 def create_alarm(data: dict) -> JSONResponse:

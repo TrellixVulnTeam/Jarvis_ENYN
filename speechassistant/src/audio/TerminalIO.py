@@ -2,10 +2,10 @@ from io import BytesIO
 from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING
-from src import log
-from .utils import get_highest_priority_plus_one, build_queue_item
-from src.models import AudioQueryType, MusicQueueItem, QueueType, QueueItem
 
+from src import log
+from src.models import AudioQueryType, MusicQueueItem, QueueType, QueueItem
+from .utils import get_highest_priority_plus_one, build_queue_item
 
 if TYPE_CHECKING:
     from src.core import Core
@@ -49,7 +49,7 @@ class AudioInput:
             self.start()
 
     def __wait_for_calls(self) -> None:
-        log.info("\nListening...")
+        log.info("Listening...")
         # self.__core.hotword_detected(input("Please enter something: "))
 
     def py_error_handler(self, filename, line, function, err, fmt) -> None:
@@ -89,6 +89,7 @@ class AudioOutput:
                 self.__choose_output_method(item)
             except IndexError:
                 import time
+
                 time.sleep(0.25)
 
     @staticmethod
