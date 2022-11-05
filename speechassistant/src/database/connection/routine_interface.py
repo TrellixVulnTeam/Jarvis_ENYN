@@ -32,10 +32,8 @@ class RoutineInterface(AbstractDataBaseConnection[Routine, RoutineSchema]):
     def get_by_name(self, model_name: str) -> Routine:
         model_schema: Schema
         with Session(self.db_persistancy.engine) as session:
-            stmt = select(self._get_schema_type()).where(
-                RoutineSchema.name == model_name
-            )
-            model_schema = session.execute(stmt).scalars().first()
+            stmt = select(RoutineSchema).where(RoutineSchema.name == model_name)
+            model_schema = session.scalars(stmt).first()
             return self._schema_to_model(model_schema)
 
     def get_all_after_alarm(self) -> list[Routine]:
