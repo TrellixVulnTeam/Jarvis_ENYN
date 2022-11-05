@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, String, Integer, Boolean, Time
 
-from database.database_persistency import DBPersistency
+from src.database.database_persistency import DBPersistency
 
 DB_PERSISTENCY = DBPersistency.get_instance()
 

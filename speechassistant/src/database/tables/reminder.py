@@ -1,7 +1,7 @@
 from sqlalchemy import Table, Column, Integer, DateTime, String
 from sqlalchemy.future import Engine
 
-from database.database_persistency import DBPersistency
+from src.database.database_persistency import DBPersistency
 
 DB_PERSISTENCY = DBPersistency.get_instance()
 
