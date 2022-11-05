@@ -4,10 +4,10 @@ import json
 
 from flask import Response
 
-from backup.database_connection import DataBase
+from backup.database_connection import DataBaseBackup
 from src.exceptions.sql_exception import NoMatchingEntry
 
-database: DataBase = DataBase()
+database: DataBaseBackup = DataBaseBackup()
 
 
 def create_routine(data: dict) -> Response:
