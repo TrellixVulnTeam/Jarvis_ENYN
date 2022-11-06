@@ -20,18 +20,18 @@ class Modules:
     __instance = None
 
     @staticmethod
-    def get_instance():
+    def get_instance(core: "Core"):
         if Modules.__instance is None:
-            Modules()
+            Modules(core)
         return Modules.__instance
 
-    def __init__(self) -> None:
+    def __init__(self, core: "Core") -> None:
         if Modules.__instance is not None:
             raise Exception("Singleton cannot be instantiated more than once!")
 
         log.getLogger().setLevel(log.INFO)
 
-        self.core: Core = Core.get_instance()
+        self.core: Core = core  # Core.get_instance()
         self.local_storage: dict = self.core.local_storage
         self.modules: list = []
         self.continuous_modules: list = []
@@ -76,7 +76,7 @@ class Modules:
 
     def __load_all_modules(self, continuous, directory, modules):
         for finder, name, ispkg in pkgutil.walk_packages(
-            self.__path_with_impl(directory)
+            [self.__path_with_impl(directory)]
         ):
             log.debug(f'Processing Module with name "{name}"')
             try:

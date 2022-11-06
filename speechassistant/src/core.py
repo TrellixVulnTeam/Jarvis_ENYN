@@ -43,7 +43,7 @@ class Core:
         self.__load_config_data()
         self.use_ai = self.config_data["services"]["activation"]["ai"]
         self.path: Path = Path(__file__).parent
-        self.modules: Modules = None  # todo
+        self.modules: Modules = Modules.get_instance(self)  # todo
         self.analyzer: Sentence_Analyzer = Sentence_Analyzer()
         self.services: ServiceWrapper = ServiceWrapper(self, self.config_data)
         self.messenger = None
