@@ -7,17 +7,17 @@ from sqlalchemy.pool import StaticPool
 from src import log
 
 
-class DBPersistency:
+class OrmPersistency:
     _INSTANCE = None
 
     @staticmethod
     def get_instance():
-        if not DBPersistency._INSTANCE:
-            DBPersistency._INSTANCE = DBPersistency()
-        return DBPersistency._INSTANCE
+        if not OrmPersistency._INSTANCE:
+            OrmPersistency._INSTANCE = OrmPersistency()
+        return OrmPersistency._INSTANCE
 
     def __init__(self):
-        if DBPersistency._INSTANCE:
+        if OrmPersistency._INSTANCE:
             raise RuntimeError
 
         self.FOLDER_PATH = pathlib.Path(__file__).parent.resolve()
