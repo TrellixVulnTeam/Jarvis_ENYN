@@ -1,8 +1,8 @@
 from sqlalchemy import Table, Integer, Column, String, Float
 
-from src.database.database_persistency import DBPersistency
+from src.database.orm.database_persistency import OrmPersistency
 
-DB_PERSISTENCY = DBPersistency.get_instance()
+DB_PERSISTENCY = OrmPersistency.get_instance()
 
 SHOPPING_LIST_TABLE_NAME = "shoppinglist"
 

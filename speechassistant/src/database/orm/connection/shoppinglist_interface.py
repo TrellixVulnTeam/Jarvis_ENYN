@@ -1,11 +1,11 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     Schema,
     Model,
     AbstractDataBaseConnection,
 )
-from src.database.schemas.shopping_list import (
+from src.database.orm.schemas.shopping_list import (
     ShoppingListSchema,
     shopping_list_to_schema,
     schema_to_shopping_list,

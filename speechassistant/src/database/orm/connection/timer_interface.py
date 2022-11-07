@@ -1,11 +1,11 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     Schema,
     Model,
     AbstractDataBaseConnection,
 )
-from src.database.schemas.timer import TimerSchema, timer_to_schema, schema_to_timer
+from src.database.orm.schemas.timer import TimerSchema, timer_to_schema, schema_to_timer
 from src.models.timer import Timer
 
 

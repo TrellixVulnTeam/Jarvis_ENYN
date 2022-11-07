@@ -1,11 +1,11 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     Schema,
     Model,
     AbstractDataBaseConnection,
 )
-from src.database.schemas.audio_files import (
+from src.database.orm.schemas.audio_files import (
     audio_file_to_schema,
     AudioFileSchema,
     schema_to_audio_file,

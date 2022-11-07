@@ -3,12 +3,12 @@ from typing import Type
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     Schema,
     Model,
     AbstractDataBaseConnection,
 )
-from src.database.schemas.users import UserSchema, user_to_schema, schema_to_user
+from src.database.orm.schemas.users import UserSchema, user_to_schema, schema_to_user
 from src.models.user import User
 
 

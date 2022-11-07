@@ -1,11 +1,15 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     Model,
     Schema,
     AbstractDataBaseConnection,
 )
-from src.database.schemas.alarms import alarm_to_schema, AlarmSchema, schema_to_alarm
+from src.database.orm.schemas.alarms import (
+    alarm_to_schema,
+    AlarmSchema,
+    schema_to_alarm,
+)
 from src.models.alarm import Alarm
 
 

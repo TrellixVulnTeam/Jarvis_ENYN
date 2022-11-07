@@ -1,9 +1,9 @@
 from sqlalchemy import Table, Column, Integer, DateTime, String
 from sqlalchemy.future import Engine
 
-from src.database.database_persistency import DBPersistency
+from src.database.orm.database_persistency import OrmPersistency
 
-DB_PERSISTENCY = DBPersistency.get_instance()
+DB_PERSISTENCY = OrmPersistency.get_instance()
 
 REMINDER_TABLE_NAME = "reminder"
 
@@ -18,4 +18,4 @@ reminderTable = Table(
 
 
 def create_tables(engine: Engine):
-    DBPersistency.meta.create_all(engine)
+    DB_PERSISTENCY.meta.create_all(engine)

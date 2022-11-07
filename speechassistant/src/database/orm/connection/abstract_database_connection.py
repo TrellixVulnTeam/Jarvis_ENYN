@@ -4,7 +4,7 @@ from typing import Generic, Optional, Type, TypeVar
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker, Session
 
-from src.database.database_persistency import DBPersistency
+from src.database.orm.database_persistency import OrmPersistency
 from src.exceptions import NoMatchingEntry
 
 Model = TypeVar("Model")
@@ -13,14 +13,14 @@ Schema = TypeVar("Schema")
 
 class AbstractDataBaseConnection(ABC, Generic[Model, Schema]):
     def __init__(self):
-        self.db_persistancy = DBPersistency.get_instance()
+        self.db_persistancy = OrmPersistency.get_instance()
         self.Session = sessionmaker(
             autocommit=True, autoflush=True, bind=self.db_persistancy.engine
         )
 
     def create(self, model: Model) -> Model:
         result_model: Model
-        with Session(DBPersistency.get_instance().engine, future=True) as session:
+        with Session(self.db_persistancy.engine, future=True) as session:
             model_schema: Schema = self._model_to_schema(model)
             session.add(model_schema)
             session.flush()

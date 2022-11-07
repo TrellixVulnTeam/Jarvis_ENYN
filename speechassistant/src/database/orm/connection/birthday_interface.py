@@ -1,11 +1,11 @@
 from typing import Type
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     AbstractDataBaseConnection,
     Schema,
     Model,
 )
-from src.database.schemas.birthdays import (
+from src.database.orm.schemas.birthdays import (
     schema_to_birthday,
     birthday_to_schema,
     BirthdaySchema,

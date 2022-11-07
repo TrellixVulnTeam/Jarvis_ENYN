@@ -1,8 +1,8 @@
 from sqlalchemy import Table, Column, String, Integer, Boolean, Time
 
-from src.database.database_persistency import DBPersistency
+from src.database.orm.database_persistency import OrmPersistency
 
-DB_PERSISTENCY = DBPersistency.get_instance()
+DB_PERSISTENCY = OrmPersistency.get_instance()
 
 ROUTINE_TABLE_NAME = "routines"
 ROUTINE_DAYS_TABLE_NAME = "routinedays"

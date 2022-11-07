@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Time, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.database.schemas.users import UserSchema
+from src.database.orm.schemas.users import UserSchema
 from src.models.timer import Timer
 
 Base = declarative_base()
@@ -26,7 +26,7 @@ def timer_to_schema(model: Timer) -> TimerSchema:
         duration=int(model.duration.total_seconds()),
         start_time=model.start_time,
         text=model.text,
-        user=model.user
+        user=model.user,
     )
 
 
@@ -36,5 +36,5 @@ def schema_to_timer(schema: TimerSchema) -> Timer:
         duration=timedelta(seconds=schema.duration),
         start_time=schema.start_time,
         text=schema.text,
-        user=schema.user
+        user=schema.user,
     )

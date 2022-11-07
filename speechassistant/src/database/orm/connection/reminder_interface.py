@@ -3,12 +3,12 @@ from typing import Type
 
 from sqlalchemy.orm import Session
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     Schema,
     Model,
     AbstractDataBaseConnection,
 )
-from src.database.schemas.reminder import (
+from src.database.orm.schemas.reminder import (
     ReminderSchema,
     reminder_to_schema,
     schema_to_reminder,

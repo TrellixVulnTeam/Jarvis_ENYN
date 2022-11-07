@@ -3,12 +3,12 @@ from typing import Type
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.database.connection.abstract_database_connection import (
+from src.database.orm.connection.abstract_database_connection import (
     Schema,
     Model,
     AbstractDataBaseConnection,
 )
-from src.database.schemas.routines import (
+from src.database.orm.schemas.routines import (
     RoutineSchema,
     routine_to_schema,
     schema_to_routine,
