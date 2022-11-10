@@ -65,5 +65,5 @@ class AbstractDriver(metaclass=ABCMeta, Generic[DriverType]):
         self.create_table(RoutineSpecificDatesTable)
         self.create_table(RoutineClockTimeTable)
         self.create_table(RoutineCommandTextTable)
-        self.create_table(RoutineCommand)
+        self.create_table(RoutineCommandTable)
         self.create_table(RoutineTable)

@@ -11,7 +11,7 @@ import toml
 
 from src import log
 from src.audio import AudioOutput, AudioInput
-from src.database.connection import *
+from src.database import operations
 from src.models import User
 from src.modules.analyze import Sentence_Analyzer
 
@@ -97,7 +97,7 @@ class Core:
     def messenger_thread(self) -> None:
         while True:
             for msg in self.messenger.messages.copy():
-                user: User = UserInterface().get_user_by_alias(
+                user: User = operations.UserInterface().get_user_by_alias(
                     msg["from"]["first_name"].lower()
                 )
                 if not user:
@@ -173,9 +173,13 @@ class Core:
         raise NotImplementedError()
 
     def hotword_detected(self, text: str) -> None:
-        user: User = UserInterface().get_user_by_alias(self.config_data["default_user"])
+        user: User = operations.UserInterface().get_user_by_alias(
+            self.config_data["default_user"]
+        )
 
-        matching_routines: list["Routine"] = RoutineInterface().get_all_on_command(text)
+        matching_routines: list[
+            "Routine"
+        ] = operations.RoutineInterface().get_all_on_command(text)
         if matching_routines:
             # TODO
             # if there are matching routines of this command, start the matching modules

@@ -3,7 +3,8 @@ from src.database.sql.tables.AbstractTable import AbstractTable
 
 class RoutineTable(AbstractTable):
     table_name = "Routines"
-    col_id = "Name"
+    col_id = "Id"
+    col_name = "Name"
     col_description = "Description"
     col_monday = "Monday"
     col_tuesday = "Tuesday"
@@ -18,6 +19,7 @@ class RoutineTable(AbstractTable):
     col_after_call = "AfterCall"
     all_columns = [
         col_id,
+        col_name,
         col_description,
         col_monday,
         col_tuesday,
@@ -29,7 +31,7 @@ class RoutineTable(AbstractTable):
         col_after_alarm,
         col_after_sunrise,
         col_after_sunset,
-        col_after_call
+        col_after_call,
     ]
 
     @staticmethod

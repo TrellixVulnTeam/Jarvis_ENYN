@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="a43d72f2-d7e1-4139-a4c8-29a6174134d0" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../identifier.sqlite" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../install.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/AbstractInterfaces/AbstractUserInterface.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/AbstractInterfaces/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/schemas/AudioFileSchema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/schemas/BirthdaySchema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/schemas/ReminderSchema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/schemas/UserSchema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/WaitingNotificationTable.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/driver/AbstractDriver.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/driver/AbstractDriver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/AbstractInterface.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/AbstractInterface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/AlarmInterface.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/AlarmInterface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/RoutineInterface.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/RoutineInterface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/UserInterface.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/operations/UserInterface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/schemas/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/schemas/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/AudioFilesTable.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/AudioFilesTable.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/BirthdayTable.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/BirthdayTable.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/RoutineCommand.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/RoutineCommandTable.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/database/sql/tables/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../speechassistant/src/models/birthday.py" beforeDir="false" afterPath="$PROJECT_DIR$/../speechassistant/src/models/birthday.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="2H84fYSEjajEegDdTn4MSUyiTFT" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a43d72f2-d7e1-4139-a4c8-29a6174134d0" name="Changes" comment="" />
+      <created>1667653483633</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1667653483633</updated>
+      <workItem from="1667653484832" duration="3000" />
+      <workItem from="1667660201367" duration="35000" />
+      <workItem from="1667937962729" duration="600000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

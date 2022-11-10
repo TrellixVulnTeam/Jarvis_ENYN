@@ -6,7 +6,7 @@ from .BirthdayTable import BirthdayTable
 from .ReminderTable import ReminderTable
 from .RoutineCallingCommandTable import RoutineCallingCommandTable
 from .RoutineClockTimeTable import RoutineClockTimeTable
-from .RoutineCommand import RoutineCommand
+from .RoutineCommandTable import RoutineCommandTable
 from .RoutineCommandTextTable import RoutineCommandTextTable
 from .RoutineSpecificDatesTable import RoutineSpecificDatesTable
 from .RoutineTable import RoutineTable

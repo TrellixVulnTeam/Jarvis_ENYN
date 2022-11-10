@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date
 
 
 @dataclass
 class Birthday:
     first_name: str
     last_name: str
-    date: datetime
+    date: date
 
     def to_json(self) -> dict:
         return {
