@@ -39,6 +39,16 @@ class AlarmLogic:
             )
 
     @staticmethod
+    def update_satus_of_alarm(alarm_id: int, alarm_status: bool) -> Alarm:
+        try:
+            return alarm_interface.update_satus_of_alarm(alarm_id, alarm_status)
+        except (OperationalError, NoMatchingEntry):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"There is no Alarm with the ID {alarm_id} in the database!",
+            )
+
+    @staticmethod
     def delete_alarm(alarm_id: int) -> None:
         try:
             alarm_interface.delete_by_id(alarm_id)

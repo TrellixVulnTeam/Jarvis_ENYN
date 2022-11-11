@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException, Response
 
 from src.api.Alarms.V1.Logic.alarm import AlarmLogic
+from src.api.Alarms.V1.Payloads.alarmStatus import AlarmStatus
 from src.models.alarm import Alarm
 
 router: APIRouter = APIRouter()
@@ -27,14 +28,19 @@ async def read_alarm_by_id(alarm_id: int):
     return AlarmLogic.read_alarm_by_id(alarm_id)
 
 
-@router.put("/{alarm_id}", response_model=Alarm, status_code=status.HTTP_200_OK)
+@router.put("/{alarm_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_alarm(alarm_id: int, alarm: Alarm):
     if alarm_id != alarm.alarm_id:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Ids doesn't match!",
         )
-    return AlarmLogic.update_alarm(alarm)
+    AlarmLogic.update_alarm(alarm)
+
+
+@router.put("/{alarm_id}/status", status_code=status.HTTP_204_NO_CONTENT)
+async def update_status_of_alarm(alarm_id: int, status: AlarmStatus):
+    raise HTTPException(404)
 
 
 @router.delete("/{alarm_id}", status_code=status.HTTP_204_NO_CONTENT)
